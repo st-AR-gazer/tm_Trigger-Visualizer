@@ -29,9 +29,79 @@ namespace OffzoneVisualizer {
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline", OnOff(UI::S_ShowOutline)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill", OnOff(UI::S_ShowFill)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Labels", OnOff(UI::S_ShowLabels)));
-                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Max Distance", Text::Format("%.0f m", UI::S_MaxRenderDistance)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Render Distance", UI::GetRenderDistanceWorld().ToString() + " m"));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fade Band", UI::GetRenderFadeBandWorld().ToString() + " m"));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Color Mode", UI::GetColorModeLabel(UI::S_ColorMode)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Base Color", UI::S_BaseOffzoneColor.ToString()));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Distance Color", UI::S_DistanceFadeColor.ToString()));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Split Color", UI::S_DenseLineSplitColor.ToString()));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Alpha", Text::Format("%.2f", UI::S_OutlineAlpha)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Alpha", Text::Format("%.2f", UI::S_FillAlpha)));
+                    if (ctx.IsPlayableMap) {
+                        vec3 cameraPos = Camera::GetCurrentPosition();
+                        uint visibleCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesInRenderRange(
+                            snapshot.WorldBoxes,
+                            cameraPos
+                        );
+                        uint fadingCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesInFadeBand(
+                            snapshot.WorldBoxes,
+                            cameraPos
+                        );
+                        uint culledCount = snapshot.WorldBoxes.Length - visibleCount;
+                        uint outlineSegmentCount = 0;
+                        uint maxEdgeSegments = 0;
+                        for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
+                            auto box = snapshot.WorldBoxes[i];
+                            if (!OffzoneVisualizer::Offzone::Render::IsWorldBoxInRenderRange(box, cameraPos)) continue;
+
+                            outlineSegmentCount += OffzoneVisualizer::Offzone::Render::CountWorldBoxOutlineSegments(
+                                box,
+                                cameraPos
+                            );
+                            uint edgeSegments = OffzoneVisualizer::Offzone::Render::GetMaxWorldBoxOutlineEdgeSegments(
+                                box,
+                                cameraPos
+                            );
+                            if (edgeSegments > maxEdgeSegments) {
+                                maxEdgeSegments = edgeSegments;
+                            }
+                        }
+
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Camera Pos", cameraPos.ToString()));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Visible Boxes", tostring(visibleCount)));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fading Boxes", tostring(fadingCount)));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Culled Boxes", tostring(culledCount)));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Adaptive Splitting", OnOff(UI::S_AdaptiveLineSplitting)));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Segments", tostring(outlineSegmentCount)));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Max Edge Segments", tostring(maxEdgeSegments)));
+
+                        if (snapshot.WorldBoxes.Length > 0 && UI::TreeNode("Per-Box Fade##offzone-render-fade")) {
+                            for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
+                                float fade = OffzoneVisualizer::Offzone::Render::GetWorldBoxFadeFactor(
+                                    snapshot.WorldBoxes[i],
+                                    cameraPos
+                                );
+                                UI::Text("#" + i + ": " + Text::Format("%.3f", fade));
+                            }
+                            UI::TreePop();
+                        }
+
+                        if (snapshot.WorldBoxes.Length > 0 && UI::TreeNode("Per-Box Outline Segments##offzone-render-segments")) {
+                            for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
+                                auto box = snapshot.WorldBoxes[i];
+                                uint boxSegments = OffzoneVisualizer::Offzone::Render::CountWorldBoxOutlineSegments(
+                                    box,
+                                    cameraPos
+                                );
+                                uint boxMaxEdgeSegments = OffzoneVisualizer::Offzone::Render::GetMaxWorldBoxOutlineEdgeSegments(
+                                    box,
+                                    cameraPos
+                                );
+                                UI::Text("#" + i + ": total " + boxSegments + " | max edge " + boxMaxEdgeSegments);
+                            }
+                            UI::TreePop();
+                        }
+                    }
 
                     UI::Separator();
                     UI::Text("Raw Map Data");
@@ -65,7 +135,7 @@ namespace OffzoneVisualizer {
                     }
 
                     UI::Separator();
-                    UI::TextDisabled("Offzone data gathering and rendering will be added in later steps.");
+                    UI::TextDisabled("Outline rendering is live. Fill, labels, and player-aware highlighting come in later steps.");
                 }
             }
         }

@@ -13,6 +13,22 @@ namespace OffzoneVisualizer {
             UI::EndChild();
         }
 
+        void RenderLineSplittingSettingsUI() {
+            bool open = UI::BeginChild("##offzone-visualizer-settings-line-splitting", vec2(0, 0), false);
+            if (open) {
+                OffzoneVisualizer::Offzone::UI::RenderLineSplittingSettingsUI();
+            }
+            UI::EndChild();
+        }
+
+        void RenderColorSettingsUI() {
+            bool open = UI::BeginChild("##offzone-visualizer-settings-color", vec2(0, 0), false);
+            if (open) {
+                OffzoneVisualizer::Offzone::UI::RenderColorSettingsUI();
+            }
+            UI::EndChild();
+        }
+
         void RenderLoggingSettingsUI() {
             bool open = UI::BeginChild("##offzone-visualizer-settings-logging", vec2(0, 0), false);
             if (open) {

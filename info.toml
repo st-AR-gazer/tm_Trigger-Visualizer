@@ -5,5 +5,5 @@ version = "0.1.0"
 category = "Utilities"
 
 [script]
-dependencies = []
+dependencies = [ "Camera" ]
 optional_dependencies = []
