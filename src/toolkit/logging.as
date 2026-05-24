@@ -29,40 +29,40 @@ enum LogLevel {
 }
 
 namespace logging {
-    [Setting category = "z~DEV" name = "Write a copy of each log line to file" hidden]
+    [Setting category="z~DEV" name="Write a copy of each log line to file" hidden]
     bool S_writeLogToFile = false;
 
-    [Setting category = "z~DEV" name = "Show default OP logs" hidden]
+    [Setting category="z~DEV" name="Show default OP logs" hidden]
     bool S_showDefaultLogs = true;
 
-    [Setting category = "z~DEV" name = "Show Custom logs" hidden]
+    [Setting category="z~DEV" name="Show Custom logs" hidden]
     bool DEV_S_sCustom = true;
 
-    [Setting category = "z~DEV" name = "Show Debug logs" hidden]
+    [Setting category="z~DEV" name="Show Debug logs" hidden]
     bool DEV_S_sDebug = true;
 
-    [Setting category = "z~DEV" name = "Show Info logs" hidden]
+    [Setting category="z~DEV" name="Show Info logs" hidden]
     bool DEV_S_sInfo = true;
 
-    [Setting category = "z~DEV" name = "Show Notice logs" hidden]
+    [Setting category="z~DEV" name="Show Notice logs" hidden]
     bool DEV_S_sNotice = true;
 
-    [Setting category = "z~DEV" name = "Show Warning logs" hidden]
+    [Setting category="z~DEV" name="Show Warning logs" hidden]
     bool DEV_S_sWarning = true;
 
-    [Setting category = "z~DEV" name = "Show Error logs" hidden]
+    [Setting category="z~DEV" name="Show Error logs" hidden]
     bool DEV_S_sError = true;
 
-    [Setting category = "z~DEV" name = "Show Critical logs" hidden]
+    [Setting category="z~DEV" name="Show Critical logs" hidden]
     bool DEV_S_sCritical = true;
 
-    [Setting category = "z~DEV" name = "Set log level" min = 0 max = 5 hidden]
+    [Setting category="z~DEV" name="Set log level" min=0 max=5 hidden]
     int DEV_S_sLogLevelSlider = 0;
 
-    [Setting category = "z~DEV" name = "Show function name in logs" hidden]
+    [Setting category="z~DEV" name="Show function name in logs" hidden]
     bool S_showFunctionNameInLogs = true;
 
-    [Setting category = "z~DEV" name = "Set max function name length in logs" min = 0 max = 50 hidden]
+    [Setting category="z~DEV" name="Set max function name length in logs" min=0 max=50 hidden]
     int S_maxFunctionNameLength = 15;
 
     const string kLogsFolder = "Logs/";
@@ -229,7 +229,8 @@ void log(
 
     if (_fnName.Length > logging::S_maxFunctionNameLength) {
         _fnName = _fnName.SubStr(0, logging::S_maxFunctionNameLength);
-    } while (_fnName.Length<logging::S_maxFunctionNameLength) _fnName += " ";
+    }
+    while (_fnName.Length < logging::S_maxFunctionNameLength) _fnName += " ";
     if (!logging::S_showFunctionNameInLogs) _fnName = "";
 
     array<string> tags = {

@@ -8,7 +8,7 @@ namespace OffzoneVisualizer {
                 S_HideWithOP = UI::Checkbox("Hide with Openplanet UI", S_HideWithOP);
 
                 UI::Separator();
-                OffzoneVisualizer::Offzone::RenderSettingsUI();
+                OffzoneVisualizer::Offzone::UI::RenderSettingsUI();
             }
             UI::EndChild();
         }
