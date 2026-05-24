@@ -48,6 +48,10 @@ namespace OffzoneVisualizer {
                             cameraPos
                         );
                         uint culledCount = snapshot.WorldBoxes.Length - visibleCount;
+                        uint fillFaceCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesCameraFacingFaces(
+                            snapshot.WorldBoxes,
+                            cameraPos
+                        );
                         uint outlineSegmentCount = 0;
                         uint maxEdgeSegments = 0;
                         for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
@@ -71,6 +75,7 @@ namespace OffzoneVisualizer {
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Visible Boxes", tostring(visibleCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fading Boxes", tostring(fadingCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Culled Boxes", tostring(culledCount)));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Faces", tostring(fillFaceCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Adaptive Splitting", OnOff(UI::S_AdaptiveLineSplitting)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Segments", tostring(outlineSegmentCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Max Edge Segments", tostring(maxEdgeSegments)));

@@ -188,7 +188,7 @@ namespace _IO {
                 if (verbose) log(
                     "Destination file already exists: " + destination,
                     LogLevel::Error,
-                    183,
+                    188,
                     "_IO::File::CopyFileTo"
                 );
                 return;
@@ -200,9 +200,9 @@ namespace _IO {
 
         // Rename file
         void RenameFile(const string &in filePath, const string &in newFileName, bool verbose = false) {
-            if (verbose) log("Attempting to rename file: " + filePath, LogLevel::Info, 193, "_IO::File::RenameFile");
+            if (verbose) log("Attempting to rename file: " + filePath, LogLevel::Info, 203, "_IO::File::RenameFile");
             if (!IO::FileExists(filePath)) {
-                log("File does not exist: " + filePath, LogLevel::Error, 195, "_IO::File::RenameFile");
+                log("File does not exist: " + filePath, LogLevel::Error, 205, "_IO::File::RenameFile");
                 return;
             }
 
@@ -232,7 +232,7 @@ namespace _IO {
         if (IO::FolderExists(path)) {
             OpenExplorerPath(path);
         } else {
-            if (verbose) log("Folder does not exist: " + path, LogLevel::Info, 225, "_IO::OpenFolder");
+            if (verbose) log("Folder does not exist: " + path, LogLevel::Info, 235, "_IO::OpenFolder");
         }
     }
 }

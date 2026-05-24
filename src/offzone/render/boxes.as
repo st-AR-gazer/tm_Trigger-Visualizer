@@ -9,6 +9,15 @@ namespace OffzoneVisualizer {
                 {0, 4}, {1, 5}, {2, 6}, {3, 7}
             };
 
+            const uint[][] BOX_FACE_INDICES = {
+                {0, 4, 7, 3},
+                {1, 2, 6, 5},
+                {0, 1, 5, 4},
+                {3, 7, 6, 2},
+                {0, 3, 2, 1},
+                {4, 5, 6, 7}
+            };
+
             vec4 LerpColor(const vec4 &in from, const vec4 &in to, float factor) {
                 factor = Math::Clamp(factor, 0.0f, 1.0f);
                 return Math::Lerp(from, to, factor);
@@ -28,7 +37,7 @@ namespace OffzoneVisualizer {
                 );
             }
 
-            vec4 GetOutlineColor(const WorldAabb@ box, const vec3 &in cameraPos, float fade) {
+            vec4 GetColorModeColor(const WorldAabb@ box, const vec3 &in cameraPos, float fade) {
                 int colorMode = OffzoneVisualizer::Offzone::UI::S_ColorMode;
                 vec4 color = OffzoneVisualizer::Offzone::UI::S_BaseOffzoneColor;
 
@@ -46,7 +55,18 @@ namespace OffzoneVisualizer {
                     );
                 }
 
+                return color;
+            }
+
+            vec4 GetOutlineColor(const WorldAabb@ box, const vec3 &in cameraPos, float fade) {
+                vec4 color = GetColorModeColor(box, cameraPos, fade);
                 color.w *= OffzoneVisualizer::Offzone::UI::S_OutlineAlpha * Math::Clamp(fade, 0.0f, 1.0f);
+                return color;
+            }
+
+            vec4 GetFillColor(const WorldAabb@ box, const vec3 &in cameraPos, float fade) {
+                vec4 color = GetColorModeColor(box, cameraPos, fade);
+                color.w *= OffzoneVisualizer::Offzone::UI::S_FillAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return color;
             }
 
@@ -218,6 +238,15 @@ namespace OffzoneVisualizer {
                 return maxSegments;
             }
 
+            vec3 GetBoxFaceNormal(uint faceIndex) {
+                if (faceIndex == 0) return vec3(-1.0f, 0.0f, 0.0f);
+                if (faceIndex == 1) return vec3(1.0f, 0.0f, 0.0f);
+                if (faceIndex == 2) return vec3(0.0f, -1.0f, 0.0f);
+                if (faceIndex == 3) return vec3(0.0f, 1.0f, 0.0f);
+                if (faceIndex == 4) return vec3(0.0f, 0.0f, -1.0f);
+                return vec3(0.0f, 0.0f, 1.0f);
+            }
+
             array<vec3> @GetWorldBoxCorners(const WorldAabb@ box) {
                 auto corners = array<vec3>();
                 if (box is null) return corners;
@@ -247,6 +276,67 @@ namespace OffzoneVisualizer {
                 return true;
             }
 
+            bool DrawProjectedFace(const array<vec3> @corners, const uint[]@ face) {
+                if (corners is null || face is null || face.Length != 4) return false;
+
+                array<vec3> screenPositions;
+                screenPositions.Resize(4);
+                for (uint i = 0; i < face.Length; i++) {
+                    screenPositions[i] = Camera::ToScreen(corners[face[i]]);
+                    if (screenPositions[i].z >= 0) return false;
+                }
+
+                nvg::BeginPath();
+                nvg::MoveTo(screenPositions[0].xy);
+                for (uint i = 1; i < screenPositions.Length; i++) {
+                    nvg::LineTo(screenPositions[i].xy);
+                }
+                nvg::ClosePath();
+                nvg::Fill();
+                return true;
+            }
+
+            bool IsBoxFaceCameraFacing(
+                const array<vec3> @corners,
+                const uint[]@ face,
+                uint faceIndex,
+                const vec3 &in cameraPos
+            ) {
+                if (corners is null || face is null || face.Length != 4) return false;
+
+                vec3 center = vec3();
+                for (uint i = 0; i < face.Length; i++) {
+                    center += corners[face[i]];
+                }
+                center *= 0.25f;
+
+                return Math::Dot(GetBoxFaceNormal(faceIndex), cameraPos - center) > 0.0f;
+            }
+
+            uint CountWorldBoxCameraFacingFaces(const WorldAabb@ box, const vec3 &in cameraPos) {
+                auto corners = GetWorldBoxCorners(box);
+                if (corners.Length != 8) return 0;
+
+                uint count = 0;
+                for (uint i = 0; i < BOX_FACE_INDICES.Length; i++) {
+                    if (IsBoxFaceCameraFacing(corners, BOX_FACE_INDICES[i], i, cameraPos)) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+
+            uint CountWorldBoxesCameraFacingFaces(const array<WorldAabb@> @boxes, const vec3 &in cameraPos) {
+                if (boxes is null) return 0;
+
+                uint count = 0;
+                for (uint i = 0; i < boxes.Length; i++) {
+                    if (!IsWorldBoxInRenderRange(boxes[i], cameraPos)) continue;
+                    count += CountWorldBoxCameraFacingFaces(boxes[i], cameraPos);
+                }
+                return count;
+            }
+
             void DrawWorldLineAdaptive(const vec3 &in start, const vec3 &in end, const vec3 &in cameraPos) {
                 uint segmentCount = GetAdaptiveLineSegmentCount(start, end, cameraPos);
                 if (segmentCount <= 1) {
@@ -259,6 +349,21 @@ namespace OffzoneVisualizer {
                     float t0 = float(i) * invSegments;
                     float t1 = float(i + 1) * invSegments;
                     DrawProjectedLineSegment(Math::Lerp(start, end, t0), Math::Lerp(start, end, t1));
+                }
+            }
+
+            void DrawWorldBoxFill(const WorldAabb@ box, const vec3 &in cameraPos, const vec4 &in color) {
+                auto corners = GetWorldBoxCorners(box);
+                if (corners.Length != 8) return;
+                if (color.w <= 0.001f) return;
+
+                nvg::Reset();
+                nvg::FillColor(color);
+
+                for (uint i = 0; i < BOX_FACE_INDICES.Length; i++) {
+                    auto face = BOX_FACE_INDICES[i];
+                    if (!IsBoxFaceCameraFacing(corners, face, i, cameraPos)) continue;
+                    DrawProjectedFace(corners, face);
                 }
             }
 

@@ -3,7 +3,7 @@ namespace OffzoneVisualizer {
         namespace Render {
             void RenderWorld() {
                 if (!OffzoneVisualizer::Offzone::UI::S_RenderWorld) return;
-                if (!OffzoneVisualizer::Offzone::UI::S_ShowOutline) return;
+                if (!OffzoneVisualizer::Offzone::UI::S_ShowOutline && !OffzoneVisualizer::Offzone::UI::S_ShowFill) return;
 
                 auto ctx = GetCurrentRuntimeContext();
                 auto snapshot = GetCurrentMapSnapshot();
@@ -16,8 +16,21 @@ namespace OffzoneVisualizer {
                     float fade = GetWorldBoxFadeFactor(snapshot.WorldBoxes[i], cameraPos);
                     if (!IsVisibleFadeFactor(fade)) continue;
 
-                    vec4 outlineColor = GetOutlineColor(snapshot.WorldBoxes[i], cameraPos, fade);
-                    DrawWorldBoxOutline(snapshot.WorldBoxes[i], cameraPos, outlineColor);
+                    if (OffzoneVisualizer::Offzone::UI::S_ShowFill) {
+                        DrawWorldBoxFill(
+                            snapshot.WorldBoxes[i],
+                            cameraPos,
+                            GetFillColor(snapshot.WorldBoxes[i], cameraPos, fade)
+                        );
+                    }
+
+                    if (OffzoneVisualizer::Offzone::UI::S_ShowOutline) {
+                        DrawWorldBoxOutline(
+                            snapshot.WorldBoxes[i],
+                            cameraPos,
+                            GetOutlineColor(snapshot.WorldBoxes[i], cameraPos, fade)
+                        );
+                    }
                 }
             }
         }
