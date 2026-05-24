@@ -3,7 +3,7 @@ namespace OffzoneVisualizer {
         namespace Render {
             void RenderWorld() {
                 if (!OffzoneVisualizer::Offzone::UI::S_RenderWorld) return;
-                if (!OffzoneVisualizer::Offzone::UI::S_ShowOutline && !OffzoneVisualizer::Offzone::UI::S_ShowFill && !OffzoneVisualizer::Offzone::UI::S_ShowLabels) return;
+                if (!OffzoneVisualizer::Offzone::UI::S_ShowOutline && !OffzoneVisualizer::Offzone::UI::S_ShowFill && !OffzoneVisualizer::Offzone::UI::S_ShowLabels && !OffzoneVisualizer::Offzone::UI::S_ShowSkullTileIcons) return;
 
                 auto ctx = GetCurrentRuntimeContext();
                 auto snapshot = GetCurrentMapSnapshot();
@@ -13,18 +13,24 @@ namespace OffzoneVisualizer {
 
                 vec3 cameraPos = Camera::GetCurrentPosition();
                 auto playerState = OffzoneVisualizer::Offzone::Data::GetPlayerPositionState();
+
+                auto fillTileItems = array<WorldFillTileDrawItem@>();
                 for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
                     float fade = GetWorldBoxRenderFadeFactor(snapshot.WorldBoxes[i], cameraPos, playerState);
                     if (!IsVisibleFadeFactor(fade)) continue;
 
-                    if (OffzoneVisualizer::Offzone::UI::S_ShowFill) {
-                        DrawWorldBoxFill(
-                            snapshot.WorldBoxes[i],
-                            cameraPos,
-                            GetFillColor(snapshot.WorldBoxes[i], cameraPos, fade),
-                            i
-                        );
+                    if (OffzoneVisualizer::Offzone::UI::S_ShowFill || OffzoneVisualizer::Offzone::UI::S_ShowSkullTileIcons) {
+                        vec4 fillColor = OffzoneVisualizer::Offzone::UI::S_ShowFill ?
+                        GetFillColor(snapshot.WorldBoxes[i], cameraPos, fade) : vec4();
+                        CollectWorldBoxFillDrawItems(snapshot.WorldBoxes[i], cameraPos, fillColor, i, fillTileItems);
                     }
+                }
+
+                DrawWorldFillTileDrawItems(fillTileItems);
+
+                for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
+                    float fade = GetWorldBoxRenderFadeFactor(snapshot.WorldBoxes[i], cameraPos, playerState);
+                    if (!IsVisibleFadeFactor(fade)) continue;
 
                     if (OffzoneVisualizer::Offzone::UI::S_ShowOutline) {
                         DrawWorldBoxOutline(

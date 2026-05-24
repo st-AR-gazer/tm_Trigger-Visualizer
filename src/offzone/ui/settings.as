@@ -116,6 +116,21 @@ namespace OffzoneVisualizer {
             [Setting hidden name="Offzone: Random fill tile colors"]
             bool S_RandomFillTileColors = false;
 
+            [Setting hidden name="Offzone: Show skull tile icons"]
+            bool S_ShowSkullTileIcons = false;
+
+            [Setting hidden name="Offzone: Skull tile icon scale" min=0.05 max=1]
+            float S_SkullTileIconScale = 0.45f;
+
+            [Setting hidden name="Offzone: Skull tile icon alpha" min=0 max=1]
+            float S_SkullTileIconAlpha = 0.85f;
+
+            [Setting hidden name="Offzone: Custom tile icon storage path"]
+            string S_CustomTileIconStoragePath = "";
+
+            string G_PendingTileIconSourcePath = "";
+            string G_TileIconImportStatus = "";
+
             vec3 GetRenderDistanceWorld() {
                 return vec3(S_RenderDistanceXZ, S_RenderDistanceY, S_RenderDistanceXZ);
             }
@@ -168,6 +183,8 @@ namespace OffzoneVisualizer {
                 S_BaseOffzoneColor = ClampColor(S_BaseOffzoneColor);
                 S_DistanceFadeColor = ClampColor(S_DistanceFadeColor);
                 S_DenseLineSplitColor = ClampColor(S_DenseLineSplitColor);
+                S_SkullTileIconScale = Math::Clamp(S_SkullTileIconScale, 0.05f, 1.0f);
+                S_SkullTileIconAlpha = Math::Clamp(S_SkullTileIconAlpha, 0.0f, 1.0f);
             }
 
             void ClampLabelSettings() {
@@ -210,6 +227,13 @@ namespace OffzoneVisualizer {
                 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
                 S_RandomOutlineSegmentColors = false;
                 S_RandomFillTileColors = false;
+                S_ShowSkullTileIcons = false;
+                S_SkullTileIconScale = 0.45f;
+                S_SkullTileIconAlpha = 0.85f;
+                S_CustomTileIconStoragePath = "";
+                G_PendingTileIconSourcePath = "";
+                G_TileIconImportStatus = "";
+                OffzoneVisualizer::Offzone::Render::Assets::InvalidateSkullTileIconTexture();
 
                 ClampWorldRenderingSettings();
                 ClampLineSplittingSettings();
@@ -405,6 +429,73 @@ namespace OffzoneVisualizer {
                 ClampLineSplittingSettings();
             }
 
+            void AddPendingTileIconImage() {
+                if (G_PendingTileIconSourcePath.Length == 0) return;
+
+                string storagePath = OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage(G_PendingTileIconSourcePath);
+
+                if (storagePath.Length == 0) {
+                    G_TileIconImportStatus = "Could not add image. Make sure it is a supported image file.";
+                    NotifyWarning(G_TileIconImportStatus, OffzoneVisualizer::PluginMeta.Name, 6000);
+                    return;
+                }
+
+                S_CustomTileIconStoragePath = storagePath;
+                G_PendingTileIconSourcePath = "";
+                G_TileIconImportStatus = "Added image: " + IO::FromStorageFolder(storagePath);
+                OffzoneVisualizer::Offzone::Render::Assets::InvalidateSkullTileIconTexture();
+                NotifyInfo("Tile icon image added.", OffzoneVisualizer::PluginMeta.Name, 5000);
+            }
+
+            void RenderTileIconImagePickerUI() {
+                UI::Text("Image");
+                UI::TextDisabled("Images are copied into plugin storage under assets/ so they keep working later.");
+                UI::TextDisabled("Paste or type a local image path, then click Add this image.");
+
+                UI::PushItemWidth(520.0f);
+                G_PendingTileIconSourcePath = UI::InputText(
+                    "Image path##offzone-visualizer-tile-icon-manual-path",
+                    G_PendingTileIconSourcePath
+                );
+                UI::PopItemWidth();
+
+                UI::Text("Current image:");
+                UI::PushItemWidth(520.0f);
+                UI::InputText(
+                    "##offzone-visualizer-current-tile-icon-path",
+                    OffzoneVisualizer::Offzone::Render::Assets::GetCurrentTileIconDisplayPath(),
+                    UI::InputTextFlags::ReadOnly
+                );
+                UI::PopItemWidth();
+
+                if (S_CustomTileIconStoragePath.Length > 0) {
+                    if (UI::Button("Use default image##offzone-visualizer-tile-icon-use-default")) {
+                        S_CustomTileIconStoragePath = "";
+                        OffzoneVisualizer::Offzone::Render::Assets::InvalidateSkullTileIconTexture();
+                        G_TileIconImportStatus = "Using default image.";
+                    }
+                }
+
+                if (G_PendingTileIconSourcePath.Length > 0) {
+                    UI::Separator();
+                    if (!OffzoneVisualizer::Offzone::Render::Assets::IsSupportedTileIconImagePath(G_PendingTileIconSourcePath)) {
+                        UI::TextDisabled("Supported file types: png, jpg, jpeg, webp, bmp.");
+                    } else if (UI::Button("Add this image##offzone-visualizer-tile-icon-add-selected")) {
+                        AddPendingTileIconImage();
+                    }
+
+                    UI::SameLine();
+                    if (UI::Button("Clear selection##offzone-visualizer-tile-icon-clear-selected")) {
+                        G_PendingTileIconSourcePath = "";
+                        G_TileIconImportStatus = "";
+                    }
+                }
+
+                if (G_TileIconImportStatus.Length > 0) {
+                    UI::TextWrapped(G_TileIconImportStatus);
+                }
+            }
+
             void RenderColorSettingsUI() {
                 UI::Text("Offzone Color");
                 if (UI::BeginCombo("Color mode##offzone-visualizer-color", GetColorModeLabel(S_ColorMode))) {
@@ -413,7 +504,6 @@ namespace OffzoneVisualizer {
                     RenderColorModeOption(COLOR_MODE_LINE_SPLIT_DENSITY);
                     UI::EndCombo();
                 }
-
 
                 UI::Separator();
                 S_BaseOffzoneColor = UI::InputColor4("Base color##offzone-visualizer-color", S_BaseOffzoneColor);
@@ -429,20 +519,10 @@ namespace OffzoneVisualizer {
                 UI::Separator();
                 UI::Text("Appearance");
                 UI::SetNextItemWidth(220.0f);
-                S_OutlineAlpha = UI::SliderFloat(
-                    "Outline alpha##offzone-visualizer-color",
-                    S_OutlineAlpha,
-                    0.0f,
-                    1.0f
-                );
+                S_OutlineAlpha = UI::SliderFloat("Outline alpha##offzone-visualizer-color", S_OutlineAlpha, 0.0f, 1.0f);
 
                 UI::SetNextItemWidth(220.0f);
-                S_FillAlpha = UI::SliderFloat(
-                    "Fill alpha##offzone-visualizer-color",
-                    S_FillAlpha,
-                    0.0f,
-                    1.0f
-                );
+                S_FillAlpha = UI::SliderFloat("Fill alpha##offzone-visualizer-color", S_FillAlpha, 0.0f, 1.0f);
 
                 UI::SetNextItemWidth(220.0f);
                 S_OutlineWidth = UI::SliderFloat(
@@ -463,6 +543,33 @@ namespace OffzoneVisualizer {
                     "Random color per fill section/tile##offzone-visualizer-color",
                     S_RandomFillTileColors
                 );
+
+                UI::Separator();
+                UI::Text("Tile Icons");
+                S_ShowSkullTileIcons = UI::Checkbox(
+                    "Show tile icon at tile centers##offzone-visualizer-color",
+                    S_ShowSkullTileIcons
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_SkullTileIconScale = UI::SliderFloat(
+                    "Tile icon scale##offzone-visualizer-color",
+                    S_SkullTileIconScale,
+                    0.05f,
+                    1.0f
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_SkullTileIconAlpha = UI::SliderFloat(
+                    "Tile icon alpha##offzone-visualizer-color",
+                    S_SkullTileIconAlpha,
+                    0.0f,
+                    1.0f
+                );
+
+                RenderTileIconImagePickerUI();
+
+                UI::TextDisabled("Anchors a plane-projected PNG at the center of each adaptive fill tile.");
 
                 ClampWorldRenderingSettings();
                 ClampColorSettings();

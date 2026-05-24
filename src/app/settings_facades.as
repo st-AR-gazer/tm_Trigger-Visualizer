@@ -38,10 +38,7 @@ namespace OffzoneVisualizer {
 
                 UI::Separator();
                 UI::Text("Developer Tools");
-                S_DevPanelOpen = UI::Checkbox(
-                    "Show dev panel##offzone-visualizer-settings-general",
-                    S_DevPanelOpen
-                );
+                S_DevPanelOpen = UI::Checkbox("Show dev panel##offzone-visualizer-settings-general", S_DevPanelOpen);
 
                 UI::Separator();
                 UI::Text("Defaults");

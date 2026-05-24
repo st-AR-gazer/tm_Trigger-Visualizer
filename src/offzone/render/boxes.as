@@ -6,6 +6,37 @@ namespace OffzoneVisualizer {
             const float FILL_TILE_SPLIT_DISTANCE_FACTOR = 0.75f;
             const uint FILL_TILE_MAX_DEPTH = 10;
             const uint FILL_TILE_MAX_TILES_PER_FACE = 2048;
+            const float SKULL_TILE_ICON_MIN_SCREEN_SIZE = 2.0f;
+            const float SKULL_TILE_ICON_TARGET_PATCH_SCREEN_SIZE = 40.0f;
+            const float SKULL_TILE_ICON_TARGET_PATCH_PERSPECTIVE_ERROR = 2.0f;
+            const uint SKULL_TILE_ICON_MAX_SUBDIVISIONS = 12;
+
+            class WorldFillTileDrawItem {
+                vec3 Origin;
+                vec3 UEdge;
+                vec3 VEdge;
+                vec4 Color;
+                float TileSeed = 0.0f;
+                float SortDistanceSq = 0.0f;
+
+                WorldFillTileDrawItem() { }
+
+                WorldFillTileDrawItem(
+                    const vec3 &in origin,
+                    const vec3 &in uEdge,
+                    const vec3 &in vEdge,
+                    const vec4 &in color,
+                    float tileSeed,
+                    float sortDistanceSq
+                ) {
+                    Origin = origin;
+                    UEdge = uEdge;
+                    VEdge = vEdge;
+                    Color = color;
+                    TileSeed = tileSeed;
+                    SortDistanceSq = sortDistanceSq;
+                }
+            }
 
             const uint[][] BOX_EDGE_INDICES = {
                 {0, 1}, {1, 2}, {2, 3}, {3, 0},
@@ -58,12 +89,7 @@ namespace OffzoneVisualizer {
                 return 503.0f + float(boxIndex) * 1009.0f + float(faceIndex) * 97.0f;
             }
 
-            vec4 GetOutlineSegmentColor(
-                const vec4 &in baseColor,
-                uint boxIndex,
-                uint edgeIndex,
-                uint segmentIndex
-            ) {
+            vec4 GetOutlineSegmentColor(const vec4 &in baseColor, uint boxIndex, uint edgeIndex, uint segmentIndex) {
                 if (!OffzoneVisualizer::Offzone::UI::S_RandomOutlineSegmentColors) return baseColor;
                 return StableRandomColor(GetOutlineSegmentColorSeed(boxIndex, edgeIndex, segmentIndex), baseColor.w);
             }
@@ -398,6 +424,220 @@ namespace OffzoneVisualizer {
                 return true;
             }
 
+            float GetScreenDistance(const vec2 &in start, const vec2 &in end) {
+                vec2 delta = end - start;
+                return Math::Sqrt(delta.x * delta.x + delta.y * delta.y);
+            }
+
+            vec2 NormalizeScreenVector(const vec2 &in value) {
+                float length = Math::Sqrt(value.x * value.x + value.y * value.y);
+                if (length <= 0.001f) return vec2();
+                return value * (1.0f / length);
+            }
+
+            float DotScreen(const vec2 &in a, const vec2 &in b) {
+                return a.x * b.x + a.y * b.y;
+            }
+
+            float GetProjectedQuadMaxScreenEdge(
+                const vec3 &in s0,
+                const vec3 &in s1,
+                const vec3 &in s2,
+                const vec3 &in s3
+            ) {
+                return Math::Max(
+                    Math::Max(GetScreenDistance(s0.xy, s1.xy), GetScreenDistance(s1.xy, s2.xy)),
+                    Math::Max(GetScreenDistance(s2.xy, s3.xy), GetScreenDistance(s3.xy, s0.xy))
+                );
+            }
+
+            float GetProjectedQuadPerspectiveError(
+                const vec3 &in s0,
+                const vec3 &in s1,
+                const vec3 &in s2,
+                const vec3 &in s3
+            ) {
+                return GetScreenDistance(s2.xy, s1.xy + (s3.xy - s0.xy));
+            }
+
+            uint GetTexturedWorldQuadSubdivisionCount(
+                const vec3 &in p0,
+                const vec3 &in p1,
+                const vec3 &in p2,
+                const vec3 &in p3
+            ) {
+                vec3 s0 = Camera::ToScreen(p0);
+                vec3 s1 = Camera::ToScreen(p1);
+                vec3 s2 = Camera::ToScreen(p2);
+                vec3 s3 = Camera::ToScreen(p3);
+                if (s0.z >= 0 || s1.z >= 0 || s2.z >= 0 || s3.z >= 0) return 0;
+
+                int screenSizeSplits = int(Math::Ceil(GetProjectedQuadMaxScreenEdge(s0, s1, s2, s3) / SKULL_TILE_ICON_TARGET_PATCH_SCREEN_SIZE));
+                int perspectiveSplits = int(Math::Ceil(GetProjectedQuadPerspectiveError(s0, s1, s2, s3) / SKULL_TILE_ICON_TARGET_PATCH_PERSPECTIVE_ERROR));
+                int subdivisions = Math::Max(1, Math::Max(screenSizeSplits, perspectiveSplits));
+                return uint(Math::Clamp(subdivisions, 1, int(SKULL_TILE_ICON_MAX_SUBDIVISIONS)));
+            }
+
+            bool DrawAffineTexturedWorldQuadPatch(
+                const vec3 &in p0,
+                const vec3 &in p1,
+                const vec3 &in p2,
+                const vec3 &in p3,
+                nvg::Texture@ texture,
+                float alpha,
+                const vec2 &in uvMin,
+                const vec2 &in uvMax
+            ) {
+                if (texture is null) return false;
+
+                vec2 uvSize = uvMax - uvMin;
+                if (uvSize.x <= 0.0001f || uvSize.y <= 0.0001f) return false;
+
+                vec3 s0 = Camera::ToScreen(p0);
+                vec3 s1 = Camera::ToScreen(p1);
+                vec3 s2 = Camera::ToScreen(p2);
+                vec3 s3 = Camera::ToScreen(p3);
+                if (s0.z >= 0 || s1.z >= 0 || s2.z >= 0 || s3.z >= 0) return false;
+
+                vec2 xEdge = s1.xy - s0.xy;
+                vec2 yEdge = s3.xy - s0.xy;
+                vec2 xAxis = NormalizeScreenVector(xEdge);
+                if (xAxis.x == 0.0f && xAxis.y == 0.0f) return false;
+
+                float xLen = GetScreenDistance(s0.xy, s1.xy);
+                if (xLen < SKULL_TILE_ICON_MIN_SCREEN_SIZE) return false;
+
+                vec2 yAxis = vec2(-xAxis.y, xAxis.x);
+                float yParallel = DotScreen(yEdge, xAxis);
+                float yPerpendicular = DotScreen(yEdge, yAxis);
+                if (Math::Abs(yPerpendicular) < SKULL_TILE_ICON_MIN_SCREEN_SIZE) return false;
+
+                vec2 p2Delta = s2.xy - s0.xy;
+                float p2LocalY = DotScreen(p2Delta, yAxis) / yPerpendicular;
+                float p2LocalX = (DotScreen(p2Delta, xAxis) - yParallel * p2LocalY) / xLen;
+
+                vec2 patternOrigin = vec2(-uvMin.x / uvSize.x, -uvMin.y / uvSize.y);
+                vec2 patternSize = vec2(1.0f / uvSize.x, 1.0f / uvSize.y);
+
+                nvg::Save();
+                nvg::Translate(s0.xy);
+                nvg::Rotate(Math::Atan2(xAxis.y, xAxis.x));
+                nvg::SkewX(Math::Atan2(yParallel, yPerpendicular));
+                nvg::Scale(xLen, yPerpendicular);
+                nvg::BeginPath();
+                nvg::MoveTo(vec2(0.0f, 0.0f));
+                nvg::LineTo(vec2(1.0f, 0.0f));
+                nvg::LineTo(vec2(p2LocalX, p2LocalY));
+                nvg::LineTo(vec2(0.0f, 1.0f));
+                nvg::ClosePath();
+                nvg::FillPaint(nvg::TexturePattern(patternOrigin, patternSize, 0.0f, texture, alpha));
+                nvg::Fill();
+                nvg::Restore();
+                return true;
+            }
+
+            bool DrawSubdividedTexturedWorldQuad(
+                const vec3 &in p0,
+                const vec3 &in p1,
+                const vec3 &in p2,
+                const vec3 &in p3,
+                nvg::Texture@ texture,
+                float alpha
+            ) {
+                if (texture is null) return false;
+
+                uint subdivisions = GetTexturedWorldQuadSubdivisionCount(p0, p1, p2, p3);
+                if (subdivisions == 0) return false;
+
+                bool drewAny = false;
+                vec3 rightEdge = p1 - p0;
+                vec3 downEdge = p3 - p0;
+                float step = 1.0f / float(subdivisions);
+
+                for (uint y = 0; y < subdivisions; y++) {
+                    float v0 = float(y) * step;
+                    float v1 = float(y + 1) * step;
+
+                    for (uint x = 0; x < subdivisions; x++) {
+                        float u0 = float(x) * step;
+                        float u1 = float(x + 1) * step;
+
+                        vec3 q0 = p0 + rightEdge * u0 + downEdge * v0;
+                        vec3 q1 = p0 + rightEdge * u1 + downEdge * v0;
+                        vec3 q2 = p0 + rightEdge * u1 + downEdge * v1;
+                        vec3 q3 = p0 + rightEdge * u0 + downEdge * v1;
+
+                        drewAny = DrawAffineTexturedWorldQuadPatch(
+                            q0,
+                            q1,
+                            q2,
+                            q3,
+                            texture,
+                            alpha,
+                            vec2(u0, v0),
+                            vec2(u1, v1)
+                        ) || drewAny;
+                    }
+                }
+
+                return drewAny;
+            }
+
+            vec3 NormalizeWorldVector(const vec3 &in value) {
+                float length = Math::Sqrt(Math::Dot(value, value));
+                if (length <= 0.0001f) return vec3();
+                return value * (1.0f / length);
+            }
+
+            vec3 GetPositiveWorldDirection(const vec3 &in direction) {
+                vec3 normalized = NormalizeWorldVector(direction);
+                if (normalized.x < -0.001f) return normalized * -1.0f;
+                if (Math::Abs(normalized.x) <= 0.001f && normalized.z < -0.001f) return normalized * -1.0f;
+                return normalized;
+            }
+
+            bool DrawSkullTileIconOnWorldTile(const vec3 &in origin, const vec3 &in uEdge, const vec3 &in vEdge) {
+                if (!OffzoneVisualizer::Offzone::UI::S_ShowSkullTileIcons) return false;
+
+                nvg::Texture@ texture = Assets::GetSkullTileIconTexture();
+                if (texture is null) return false;
+
+                float uLen = Math::Distance(origin, origin + uEdge);
+                float vLen = Math::Distance(origin, origin + vEdge);
+                float iconSize = Math::Min(uLen, vLen) * OffzoneVisualizer::Offzone::UI::S_SkullTileIconScale;
+                if (iconSize <= 0.001f) return false;
+
+                vec3 center = origin + (uEdge + vEdge) * 0.5f;
+                vec3 uDir = NormalizeWorldVector(uEdge);
+                vec3 vDir = NormalizeWorldVector(vEdge);
+                if (uDir == vec3() || vDir == vec3()) return false;
+
+                vec3 rightDir = uDir;
+                vec3 downDir = vDir;
+
+                bool uIsVertical = Math::Abs(uDir.y) > Math::Abs(vDir.y) && Math::Abs(uDir.y) > 0.5f;
+                bool vIsVertical = Math::Abs(vDir.y) >= Math::Abs(uDir.y) && Math::Abs(vDir.y) > 0.5f;
+                if (uIsVertical || vIsVertical) {
+                    vec3 upDir = uIsVertical ? uDir : vDir;
+                    if (upDir.y < 0.0f) upDir *= -1.0f;
+
+                    rightDir = GetPositiveWorldDirection(uIsVertical ? vDir : uDir);
+                    downDir = upDir * -1.0f;
+                }
+
+                vec3 halfRight = rightDir * iconSize * 0.5f;
+                vec3 halfDown = downDir * iconSize * 0.5f;
+
+                return DrawSubdividedTexturedWorldQuad(
+                    center - halfRight - halfDown,
+                    center + halfRight - halfDown,
+                    center + halfRight + halfDown,
+                    center - halfRight + halfDown,
+                    texture,
+                    OffzoneVisualizer::Offzone::UI::S_SkullTileIconAlpha
+                );
+            }
+
             bool DrawProjectedQuad(
                 const vec3 &in p0,
                 const vec3 &in p1,
@@ -411,15 +651,20 @@ namespace OffzoneVisualizer {
                 vec3 s3 = Camera::ToScreen(p3);
                 if (s0.z >= 0 || s1.z >= 0 || s2.z >= 0 || s3.z >= 0) return false;
 
-                nvg::BeginPath();
-                nvg::FillColor(color);
-                nvg::MoveTo(s0.xy);
-                nvg::LineTo(s1.xy);
-                nvg::LineTo(s2.xy);
-                nvg::LineTo(s3.xy);
-                nvg::ClosePath();
-                nvg::Fill();
-                return true;
+                bool drewFill = false;
+                if (color.w > 0.001f) {
+                    nvg::BeginPath();
+                    nvg::FillColor(color);
+                    nvg::MoveTo(s0.xy);
+                    nvg::LineTo(s1.xy);
+                    nvg::LineTo(s2.xy);
+                    nvg::LineTo(s3.xy);
+                    nvg::ClosePath();
+                    nvg::Fill();
+                    drewFill = true;
+                }
+
+                return drewFill;
             }
 
             float GetDistanceToWorldQuad(
@@ -452,14 +697,22 @@ namespace OffzoneVisualizer {
 
                 float longestEdge = Math::Max(uLen, vLen);
                 float cameraDistance = GetDistanceToWorldQuad(cameraPos, origin, uEdge, vEdge);
-                float splitDistance = Math::Max(
-                    longestEdge * FILL_TILE_SPLIT_DISTANCE_FACTOR,
-                    FILL_TILE_MIN_SIZE
-                );
+                float splitDistance = Math::Max(longestEdge * FILL_TILE_SPLIT_DISTANCE_FACTOR, FILL_TILE_MIN_SIZE);
                 return cameraDistance <= splitDistance;
             }
 
-            uint DrawAdaptiveWorldFaceTile(
+            float GetWorldFillTileSortDistanceSq(
+                const vec3 &in origin,
+                const vec3 &in uEdge,
+                const vec3 &in vEdge,
+                const vec3 &in cameraPos
+            ) {
+                vec3 center = origin + (uEdge + vEdge) * 0.5f;
+                return Math::Distance2(cameraPos, center);
+            }
+
+            uint CollectAdaptiveWorldFaceTileDrawItems(
+                array<WorldFillTileDrawItem@> @items,
                 const vec3 &in origin,
                 const vec3 &in uEdge,
                 const vec3 &in vEdge,
@@ -469,6 +722,7 @@ namespace OffzoneVisualizer {
                 uint depth,
                 uint budget
             ) {
+                if (items is null) return 0;
                 if (budget == 0) return 0;
 
                 float uLen = Math::Distance(origin, origin + uEdge);
@@ -476,13 +730,8 @@ namespace OffzoneVisualizer {
                 bool splitU = uLen > FILL_TILE_MIN_SIZE;
                 bool splitV = vLen > FILL_TILE_MIN_SIZE;
                 if (!ShouldSplitWorldFaceTile(origin, uEdge, vEdge, cameraPos, depth) || (!splitU && !splitV)) {
-                    return DrawProjectedQuad(
-                        origin,
-                        origin + uEdge,
-                        origin + uEdge + vEdge,
-                        origin + vEdge,
-                        GetFillTileColor(baseColor, tileSeed)
-                    ) ? 1 : 0;
+                    items.InsertLast(WorldFillTileDrawItem(origin, uEdge, vEdge, GetFillTileColor(baseColor, tileSeed), tileSeed, GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos)));
+                    return 1;
                 }
 
                 uint drawn = 0;
@@ -490,27 +739,152 @@ namespace OffzoneVisualizer {
                 vec3 halfV = vEdge * 0.5f;
 
                 if (splitU && splitV) {
-                    drawn += DrawAdaptiveWorldFaceTile(origin, halfU, halfV, cameraPos, baseColor, tileSeed * 4.0f + 1.0f, depth + 1, budget - drawn);
+                    drawn += CollectAdaptiveWorldFaceTileDrawItems(
+                        items,
+                        origin,
+                        halfU,
+                        halfV,
+                        cameraPos,
+                        baseColor,
+                        tileSeed * 4.0f + 1.0f,
+                        depth + 1,
+                        budget - drawn
+                    );
                     if (drawn >= budget) return drawn;
-                    drawn += DrawAdaptiveWorldFaceTile(origin + halfU, halfU, halfV, cameraPos, baseColor, tileSeed * 4.0f + 2.0f, depth + 1, budget - drawn);
+                    drawn += CollectAdaptiveWorldFaceTileDrawItems(
+                        items,
+                        origin + halfU,
+                        halfU,
+                        halfV,
+                        cameraPos,
+                        baseColor,
+                        tileSeed * 4.0f + 2.0f,
+                        depth + 1,
+                        budget - drawn
+                    );
                     if (drawn >= budget) return drawn;
-                    drawn += DrawAdaptiveWorldFaceTile(origin + halfV, halfU, halfV, cameraPos, baseColor, tileSeed * 4.0f + 3.0f, depth + 1, budget - drawn);
+                    drawn += CollectAdaptiveWorldFaceTileDrawItems(
+                        items,
+                        origin + halfV,
+                        halfU,
+                        halfV,
+                        cameraPos,
+                        baseColor,
+                        tileSeed * 4.0f + 3.0f,
+                        depth + 1,
+                        budget - drawn
+                    );
                     if (drawn >= budget) return drawn;
-                    drawn += DrawAdaptiveWorldFaceTile(origin + halfU + halfV, halfU, halfV, cameraPos, baseColor, tileSeed * 4.0f + 4.0f, depth + 1, budget - drawn);
+                    drawn += CollectAdaptiveWorldFaceTileDrawItems(
+                        items,
+                        origin + halfU + halfV,
+                        halfU,
+                        halfV,
+                        cameraPos,
+                        baseColor,
+                        tileSeed * 4.0f + 4.0f,
+                        depth + 1,
+                        budget - drawn
+                    );
                     return drawn;
                 }
 
                 if (splitU) {
-                    drawn += DrawAdaptiveWorldFaceTile(origin, halfU, vEdge, cameraPos, baseColor, tileSeed * 2.0f + 1.0f, depth + 1, budget - drawn);
+                    drawn += CollectAdaptiveWorldFaceTileDrawItems(
+                        items,
+                        origin,
+                        halfU,
+                        vEdge,
+                        cameraPos,
+                        baseColor,
+                        tileSeed * 2.0f + 1.0f,
+                        depth + 1,
+                        budget - drawn
+                    );
                     if (drawn >= budget) return drawn;
-                    drawn += DrawAdaptiveWorldFaceTile(origin + halfU, halfU, vEdge, cameraPos, baseColor, tileSeed * 2.0f + 2.0f, depth + 1, budget - drawn);
+                    drawn += CollectAdaptiveWorldFaceTileDrawItems(
+                        items,
+                        origin + halfU,
+                        halfU,
+                        vEdge,
+                        cameraPos,
+                        baseColor,
+                        tileSeed * 2.0f + 2.0f,
+                        depth + 1,
+                        budget - drawn
+                    );
                     return drawn;
                 }
 
-                drawn += DrawAdaptiveWorldFaceTile(origin, uEdge, halfV, cameraPos, baseColor, tileSeed * 2.0f + 1.0f, depth + 1, budget - drawn);
+                drawn += CollectAdaptiveWorldFaceTileDrawItems(
+                    items,
+                    origin,
+                    uEdge,
+                    halfV,
+                    cameraPos,
+                    baseColor,
+                    tileSeed * 2.0f + 1.0f,
+                    depth + 1,
+                    budget - drawn
+                );
                 if (drawn >= budget) return drawn;
-                drawn += DrawAdaptiveWorldFaceTile(origin + halfV, uEdge, halfV, cameraPos, baseColor, tileSeed * 2.0f + 2.0f, depth + 1, budget - drawn);
+                drawn += CollectAdaptiveWorldFaceTileDrawItems(
+                    items,
+                    origin + halfV,
+                    uEdge,
+                    halfV,
+                    cameraPos,
+                    baseColor,
+                    tileSeed * 2.0f + 2.0f,
+                    depth + 1,
+                    budget - drawn
+                );
                 return drawn;
+            }
+
+            bool DrawWorldFillTileDrawItem(const WorldFillTileDrawItem@ item) {
+                if (item is null) return false;
+
+                bool drewFill = DrawProjectedQuad(
+                    item.Origin,
+                    item.Origin + item.UEdge,
+                    item.Origin + item.UEdge + item.VEdge,
+                    item.Origin + item.VEdge,
+                    item.Color
+                );
+                bool drewIcon = DrawSkullTileIconOnWorldTile(item.Origin, item.UEdge, item.VEdge);
+                return drewFill || drewIcon;
+            }
+
+            void SortWorldFillTileDrawItemsBackToFront(array<WorldFillTileDrawItem@> @items) {
+                if (items is null || items.Length <= 1) return;
+
+                uint gap = items.Length / 2;
+                while (gap > 0) {
+                    for (uint i = gap; i < items.Length; i++) {
+                        WorldFillTileDrawItem@ item = items[i];
+                        uint j = i;
+
+                        while (j >= gap && items[j - gap].SortDistanceSq < item.SortDistanceSq) {
+                            @items[j] = items[j - gap];
+                            j -= gap;
+                        }
+
+                        @items[j] = item;
+                    }
+
+                    gap /= 2;
+                }
+            }
+
+            void DrawWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
+                if (items is null || items.Length == 0) return;
+
+                SortWorldFillTileDrawItemsBackToFront(items);
+                nvg::Reset();
+                for (uint i = 0; i < items.Length; i++) {
+                    DrawWorldFillTileDrawItem(items[i]);
+                }
             }
 
             uint CountAdaptiveWorldFaceTiles(
@@ -538,28 +912,64 @@ namespace OffzoneVisualizer {
                 if (splitU && splitV) {
                     count += CountAdaptiveWorldFaceTiles(origin, halfU, halfV, cameraPos, depth + 1, budget - count);
                     if (count >= budget) return count;
-                    count += CountAdaptiveWorldFaceTiles(origin + halfU, halfU, halfV, cameraPos, depth + 1, budget - count);
+                    count += CountAdaptiveWorldFaceTiles(
+                        origin + halfU,
+                        halfU,
+                        halfV,
+                        cameraPos,
+                        depth + 1,
+                        budget - count
+                    );
                     if (count >= budget) return count;
-                    count += CountAdaptiveWorldFaceTiles(origin + halfV, halfU, halfV, cameraPos, depth + 1, budget - count);
+                    count += CountAdaptiveWorldFaceTiles(
+                        origin + halfV,
+                        halfU,
+                        halfV,
+                        cameraPos,
+                        depth + 1,
+                        budget - count
+                    );
                     if (count >= budget) return count;
-                    count += CountAdaptiveWorldFaceTiles(origin + halfU + halfV, halfU, halfV, cameraPos, depth + 1, budget - count);
+                    count += CountAdaptiveWorldFaceTiles(
+                        origin + halfU + halfV,
+                        halfU,
+                        halfV,
+                        cameraPos,
+                        depth + 1,
+                        budget - count
+                    );
                     return count;
                 }
 
                 if (splitU) {
                     count += CountAdaptiveWorldFaceTiles(origin, halfU, vEdge, cameraPos, depth + 1, budget - count);
                     if (count >= budget) return count;
-                    count += CountAdaptiveWorldFaceTiles(origin + halfU, halfU, vEdge, cameraPos, depth + 1, budget - count);
+                    count += CountAdaptiveWorldFaceTiles(
+                        origin + halfU,
+                        halfU,
+                        vEdge,
+                        cameraPos,
+                        depth + 1,
+                        budget - count
+                    );
                     return count;
                 }
 
                 count += CountAdaptiveWorldFaceTiles(origin, uEdge, halfV, cameraPos, depth + 1, budget - count);
                 if (count >= budget) return count;
-                count += CountAdaptiveWorldFaceTiles(origin + halfV, uEdge, halfV, cameraPos, depth + 1, budget - count);
+                count += CountAdaptiveWorldFaceTiles(
+                    origin + halfV,
+                    uEdge,
+                    halfV,
+                    cameraPos,
+                    depth + 1,
+                    budget - count
+                );
                 return count;
             }
 
-            uint DrawAdaptiveWorldFaceFill(
+            uint CollectAdaptiveWorldFaceFillDrawItems(
+                array<WorldFillTileDrawItem@> @items,
                 const array<vec3> @corners,
                 const uint[]@ face,
                 const vec3 &in cameraPos,
@@ -567,12 +977,14 @@ namespace OffzoneVisualizer {
                 uint boxIndex,
                 uint faceIndex
             ) {
+                if (items is null) return 0;
                 if (corners is null || face is null || face.Length != 4) return 0;
 
                 vec3 origin = corners[face[0]];
                 vec3 uEdge = corners[face[1]] - origin;
                 vec3 vEdge = corners[face[3]] - origin;
-                return DrawAdaptiveWorldFaceTile(
+                return CollectAdaptiveWorldFaceTileDrawItems(
+                    items,
                     origin,
                     uEdge,
                     vEdge,
@@ -594,14 +1006,7 @@ namespace OffzoneVisualizer {
                 vec3 origin = corners[face[0]];
                 vec3 uEdge = corners[face[1]] - origin;
                 vec3 vEdge = corners[face[3]] - origin;
-                return CountAdaptiveWorldFaceTiles(
-                    origin,
-                    uEdge,
-                    vEdge,
-                    cameraPos,
-                    0,
-                    FILL_TILE_MAX_TILES_PER_FACE
-                );
+                return CountAdaptiveWorldFaceTiles(origin, uEdge, vEdge, cameraPos, 0, FILL_TILE_MAX_TILES_PER_FACE);
             }
 
             bool IsBoxFaceCameraFacing(
@@ -703,11 +1108,7 @@ namespace OffzoneVisualizer {
                 }
             }
 
-            void DrawWorldLineSegmentImmediate(
-                const vec3 &in start,
-                const vec3 &in end,
-                const vec4 &in color
-            ) {
+            void DrawWorldLineSegmentImmediate(const vec3 &in start, const vec3 &in end, const vec4 &in color) {
                 nvg::BeginPath();
                 nvg::StrokeColor(color);
                 if (DrawProjectedLineSegment(start, end)) {
@@ -746,22 +1147,28 @@ namespace OffzoneVisualizer {
                 }
             }
 
-            void DrawWorldBoxFill(
+            void DrawWorldBoxFill(const WorldAabb@ box, const vec3 &in cameraPos, const vec4 &in color, uint boxIndex) {
+                auto items = array<WorldFillTileDrawItem@>();
+                CollectWorldBoxFillDrawItems(box, cameraPos, color, boxIndex, items);
+                DrawWorldFillTileDrawItems(items);
+            }
+
+            void CollectWorldBoxFillDrawItems(
                 const WorldAabb@ box,
                 const vec3 &in cameraPos,
                 const vec4 &in color,
-                uint boxIndex
+                uint boxIndex,
+                array<WorldFillTileDrawItem@> @items
             ) {
+                if (items is null) return;
                 auto corners = GetWorldBoxCorners(box);
                 if (corners.Length != 8) return;
-                if (color.w <= 0.001f) return;
-
-                nvg::Reset();
+                if (color.w <= 0.001f && !OffzoneVisualizer::Offzone::UI::S_ShowSkullTileIcons) return;
 
                 for (uint i = 0; i < BOX_FACE_INDICES.Length; i++) {
                     auto face = BOX_FACE_INDICES[i];
                     if (!IsBoxFaceCameraFacing(corners, face, i, cameraPos)) continue;
-                    DrawAdaptiveWorldFaceFill(corners, face, cameraPos, color, boxIndex, i);
+                    CollectAdaptiveWorldFaceFillDrawItems(items, corners, face, cameraPos, color, boxIndex, i);
                 }
             }
 
