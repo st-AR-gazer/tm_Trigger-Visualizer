@@ -6,7 +6,6 @@ namespace OffzoneVisualizer {
             if (UI::BeginPopupModal(RESTORE_DEFAULTS_POPUP_ID, UI::WindowFlags::AlwaysAutoResize)) {
                 UI::Text("Restore Offzone Visualizer defaults?");
                 UI::TextDisabled("This resets General, World Rendering, Line Splitting, Color, Proximity, and Labels settings.");
-                UI::TextDisabled("Logging settings will not be changed.");
 
                 UI::Separator();
                 if (UI::Button("Restore defaults##offzone-visualizer-confirm-restore-defaults")) {
@@ -29,7 +28,6 @@ namespace OffzoneVisualizer {
             if (open) {
                 S_HideWithGame = UI::Checkbox("Hide with game UI", S_HideWithGame);
                 S_HideWithOP = UI::Checkbox("Hide with Openplanet UI", S_HideWithOP);
-                UI::TextDisabled("Hide options affect world rendering. The dev panel follows Openplanet's normal UI visibility.");
 
                 UI::Separator();
                 UI::Text("Rendering");
@@ -37,7 +35,6 @@ namespace OffzoneVisualizer {
                     "Enable all rendering##offzone-visualizer-settings-general",
                     OffzoneVisualizer::Offzone::UI::S_RenderWorld
                 );
-                UI::TextDisabled("This is the same master toggle as World Rendering > Enable world render.");
 
                 UI::Separator();
                 UI::Text("Developer Tools");
@@ -48,7 +45,6 @@ namespace OffzoneVisualizer {
 
                 UI::Separator();
                 UI::Text("Defaults");
-                UI::TextDisabled("Restores visualization settings only. Logging settings are left alone.");
                 if (UI::Button("Restore defaults##offzone-visualizer-open-restore-defaults")) {
                     UI::OpenPopup(RESTORE_DEFAULTS_POPUP_ID);
                 }

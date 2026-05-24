@@ -21,7 +21,8 @@ namespace OffzoneVisualizer {
                         DrawWorldBoxFill(
                             snapshot.WorldBoxes[i],
                             cameraPos,
-                            GetFillColor(snapshot.WorldBoxes[i], cameraPos, fade)
+                            GetFillColor(snapshot.WorldBoxes[i], cameraPos, fade),
+                            i
                         );
                     }
 
@@ -30,7 +31,8 @@ namespace OffzoneVisualizer {
                             snapshot.WorldBoxes[i],
                             cameraPos,
                             GetOutlineColor(snapshot.WorldBoxes[i], cameraPos, fade),
-                            OffzoneVisualizer::Offzone::UI::S_OutlineWidth
+                            OffzoneVisualizer::Offzone::UI::S_OutlineWidth,
+                            i
                         );
                     }
 

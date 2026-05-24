@@ -110,6 +110,12 @@ namespace OffzoneVisualizer {
             [Setting hidden name="Offzone: Dense line split color"]
             vec4 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
 
+            [Setting hidden name="Offzone: Random outline segment colors"]
+            bool S_RandomOutlineSegmentColors = false;
+
+            [Setting hidden name="Offzone: Random fill tile colors"]
+            bool S_RandomFillTileColors = false;
+
             vec3 GetRenderDistanceWorld() {
                 return vec3(S_RenderDistanceXZ, S_RenderDistanceY, S_RenderDistanceXZ);
             }
@@ -202,6 +208,8 @@ namespace OffzoneVisualizer {
                 S_BaseOffzoneColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
                 S_DistanceFadeColor = vec4(1.0f, 0.90f, 0.20f, 1.0f);
                 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
+                S_RandomOutlineSegmentColors = false;
+                S_RandomFillTileColors = false;
 
                 ClampWorldRenderingSettings();
                 ClampLineSplittingSettings();
@@ -295,8 +303,6 @@ namespace OffzoneVisualizer {
 
                 UI::Separator();
                 UI::Text("Distance");
-                UI::TextDisabled("Distance sliders cover 48 X/Z blocks and 40 Y blocks. Fade sliders cover 5 blocks.");
-                UI::TextDisabled("Ctrl-click can enter larger values.");
                 S_RenderDistanceXZ = RenderWorldDistanceSlider(
                     "Render distance X/Z",
                     "offzone-visualizer-settings-render-distance-xz",
@@ -330,29 +336,6 @@ namespace OffzoneVisualizer {
                     WORLD_BLOCK_SIZE_Y
                 );
 
-                UI::Separator();
-                UI::Text("Appearance");
-                UI::SetNextItemWidth(220.0f);
-                S_OutlineAlpha = UI::SliderFloat(
-                    "Outline alpha##offzone-visualizer-settings",
-                    S_OutlineAlpha,
-                    0.0f,
-                    1.0f
-                );
-
-                UI::SetNextItemWidth(220.0f);
-                S_FillAlpha = UI::SliderFloat("Fill alpha##offzone-visualizer-settings", S_FillAlpha, 0.0f, 1.0f);
-
-                UI::SetNextItemWidth(220.0f);
-                S_OutlineWidth = UI::SliderFloat(
-                    "Outline width##offzone-visualizer-settings",
-                    S_OutlineWidth,
-                    0.5f,
-                    16.0f,
-                    "%.1f px"
-                );
-
-                UI::TextDisabled("World rendering uses axis-aware distance culling with a soft fade band.");
                 ClampWorldRenderingSettings();
             }
 
@@ -431,7 +414,6 @@ namespace OffzoneVisualizer {
                     UI::EndCombo();
                 }
 
-                UI::TextDisabled("Distance fade blends by render fade. Line split density blends by the heaviest edge segment count.");
 
                 UI::Separator();
                 S_BaseOffzoneColor = UI::InputColor4("Base color##offzone-visualizer-color", S_BaseOffzoneColor);
@@ -445,8 +427,44 @@ namespace OffzoneVisualizer {
                 );
 
                 UI::Separator();
-                UI::TextDisabled("Color alpha is multiplied by the outline alpha and distance fade.");
+                UI::Text("Appearance");
+                UI::SetNextItemWidth(220.0f);
+                S_OutlineAlpha = UI::SliderFloat(
+                    "Outline alpha##offzone-visualizer-color",
+                    S_OutlineAlpha,
+                    0.0f,
+                    1.0f
+                );
 
+                UI::SetNextItemWidth(220.0f);
+                S_FillAlpha = UI::SliderFloat(
+                    "Fill alpha##offzone-visualizer-color",
+                    S_FillAlpha,
+                    0.0f,
+                    1.0f
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_OutlineWidth = UI::SliderFloat(
+                    "Outline width##offzone-visualizer-color",
+                    S_OutlineWidth,
+                    0.5f,
+                    16.0f,
+                    "%.1f px"
+                );
+
+                UI::Separator();
+                UI::Text("Stable Random Colors");
+                S_RandomOutlineSegmentColors = UI::Checkbox(
+                    "Random color per outline segment##offzone-visualizer-color",
+                    S_RandomOutlineSegmentColors
+                );
+                S_RandomFillTileColors = UI::Checkbox(
+                    "Random color per fill section/tile##offzone-visualizer-color",
+                    S_RandomFillTileColors
+                );
+
+                ClampWorldRenderingSettings();
                 ClampColorSettings();
             }
 
@@ -458,9 +476,6 @@ namespace OffzoneVisualizer {
                     RenderProximityModeOption(PROXIMITY_MODE_CAMERA_AND_PLAYER);
                     UI::EndCombo();
                 }
-
-                UI::TextDisabled("Projection and line splitting still use the camera. This setting controls distance culling and fade.");
-                UI::TextDisabled("Car only requires VehicleState to find the currently viewed vehicle.");
 
                 S_RenderProximityMode = Math::Clamp(
                     S_RenderProximityMode,
@@ -478,7 +493,6 @@ namespace OffzoneVisualizer {
                 S_LabelShowIndex = UI::Checkbox("Show index##offzone-visualizer-labels", S_LabelShowIndex);
                 S_LabelShowRawRange = UI::Checkbox("Show raw range##offzone-visualizer-labels", S_LabelShowRawRange);
                 S_LabelShowWorldSize = UI::Checkbox("Show world size##offzone-visualizer-labels", S_LabelShowWorldSize);
-                UI::TextDisabled("If all content options are off, labels fall back to the zone index.");
 
                 UI::Separator();
                 UI::Text("Appearance");

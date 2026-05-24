@@ -31,6 +31,8 @@ namespace OffzoneVisualizer {
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Base Color", UI::S_BaseOffzoneColor.ToString()));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Distance Color", UI::S_DistanceFadeColor.ToString()));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Split Color", UI::S_DenseLineSplitColor.ToString()));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Random Segment Colors", OnOff(UI::S_RandomOutlineSegmentColors)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Random Tile Colors", OnOff(UI::S_RandomFillTileColors)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Alpha", Text::Format("%.2f", UI::S_OutlineAlpha)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Alpha", Text::Format("%.2f", UI::S_FillAlpha)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Width", Text::Format("%.1f px", UI::S_OutlineWidth)));
@@ -53,6 +55,11 @@ namespace OffzoneVisualizer {
                         );
                         uint culledCount = snapshot.WorldBoxes.Length - visibleCount;
                         uint fillFaceCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesCameraFacingFacesForProximity(
+                            snapshot.WorldBoxes,
+                            cameraPos,
+                            playerState
+                        );
+                        uint fillTileCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesFillTilesForProximity(
                             snapshot.WorldBoxes,
                             cameraPos,
                             playerState
@@ -88,6 +95,7 @@ namespace OffzoneVisualizer {
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fading Boxes", tostring(fadingCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Culled Boxes", tostring(culledCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Faces", tostring(fillFaceCount)));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Tiles", tostring(fillTileCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Visible Labels", tostring(labelCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Adaptive Splitting", OnOff(UI::S_AdaptiveLineSplitting)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Segments", tostring(outlineSegmentCount)));
@@ -117,6 +125,18 @@ namespace OffzoneVisualizer {
                                     cameraPos
                                 );
                                 UI::Text("#" + i + ": total " + boxSegments + " | max edge " + boxMaxEdgeSegments);
+                            }
+                            UI::TreePop();
+                        }
+
+                        if (snapshot.WorldBoxes.Length > 0 && UI::TreeNode("Per-Box Fill Tiles##offzone-fill-tiles")) {
+                            for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
+                                auto box = snapshot.WorldBoxes[i];
+                                uint boxFillTiles = OffzoneVisualizer::Offzone::Render::CountWorldBoxFillTiles(
+                                    box,
+                                    cameraPos
+                                );
+                                UI::Text("#" + i + ": " + boxFillTiles + " fill tiles");
                             }
                             UI::TreePop();
                         }
@@ -152,9 +172,6 @@ namespace OffzoneVisualizer {
                         }
                         UI::TreePop();
                     }
-
-                    UI::Separator();
-                    UI::TextDisabled("Outline rendering is live. Fill, labels, and player-aware highlighting come in later steps.");
                 }
             }
         }
