@@ -1,11 +1,15 @@
 void Main() {
-    PluginTemplate::App::Main();
+    OffzoneVisualizer::App::Main();
+}
+
+void Render() {
+    OffzoneVisualizer::App::Render();
 }
 
 void RenderInterface() {
-    PluginTemplate::App::RenderInterface();
+    OffzoneVisualizer::App::RenderInterface();
 }
 
 void RenderMenu() {
-    PluginTemplate::App::RenderMenu();
+    OffzoneVisualizer::App::RenderMenu();
 }

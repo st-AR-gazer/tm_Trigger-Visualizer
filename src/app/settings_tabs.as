@@ -1,9 +1,9 @@
 [SettingsTab name = "General" icon = "Cog" order = 1]
-void RenderPluginTemplateGeneralSettingsTab() {
-    PluginTemplate::App::RenderGeneralSettingsUI();
+void RenderOffzoneVisualizerGeneralSettingsTab() {
+    OffzoneVisualizer::App::RenderGeneralSettingsUI();
 }
 
 [SettingsTab name = "Logging" icon = "ListAlt" order = 99]
-void RenderPluginTemplateLoggingSettingsTab() {
-    PluginTemplate::App::RenderLoggingSettingsUI();
+void RenderOffzoneVisualizerLoggingSettingsTab() {
+    OffzoneVisualizer::App::RenderLoggingSettingsUI();
 }

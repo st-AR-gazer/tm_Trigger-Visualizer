@@ -1,0 +1,4 @@
+namespace OffzoneVisualizer {
+    namespace Offzone {
+    }
+}

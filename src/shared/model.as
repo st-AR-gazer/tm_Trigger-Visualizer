@@ -1,4 +1,4 @@
-namespace PluginTemplate {
+namespace OffzoneVisualizer {
     namespace Shared {
         string FormatStatusLine(const string &in label, const string &in value) {
             return label + ": " + value;

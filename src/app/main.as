@@ -1,12 +1,17 @@
-namespace PluginTemplate {
+namespace OffzoneVisualizer {
     namespace App {
         void Main() {
             log(
-                "Loaded " + PluginTemplate::PluginMeta.Name + " v" + PluginTemplate::PluginMeta.Version,
+                "Loaded " + OffzoneVisualizer::PluginMeta.Name + " v" + OffzoneVisualizer::PluginMeta.Version,
                 LogLevel::Debug,
                 4,
-                "PluginTemplate::App::Main"
+                "OffzoneVisualizer::App::Main"
             );
+            OffzoneVisualizer::Offzone::Main();
+        }
+
+        void Render() {
+            OffzoneVisualizer::Offzone::RenderWorld();
         }
 
         bool ShouldRenderWindow() {
@@ -19,7 +24,7 @@ namespace PluginTemplate {
         void RenderInterface() {
             if (!ShouldRenderWindow()) return;
 
-            if (UI::Begin(MenuTitle() + "###main-" + PluginTemplate::PluginMeta.ID, S_WindowOpen, UI::WindowFlags::None)) {
+            if (UI::Begin(MenuTitle() + "###main-" + OffzoneVisualizer::PluginMeta.ID, S_WindowOpen, UI::WindowFlags::None)) {
                 RenderWindow();
             }
             UI::End();
@@ -32,9 +37,9 @@ namespace PluginTemplate {
         }
 
         void RenderWindow() {
-            UI::Text(PluginTemplate::PluginMeta.Name + " " + PluginTemplate::PluginMeta.Version);
+            UI::Text(OffzoneVisualizer::PluginMeta.Name + " " + OffzoneVisualizer::PluginMeta.Version);
             UI::Separator();
-            PluginTemplate::Example::RenderPanel();
+            OffzoneVisualizer::Offzone::RenderPanel();
         }
     }
 }
