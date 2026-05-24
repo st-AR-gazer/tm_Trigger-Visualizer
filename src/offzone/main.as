@@ -12,9 +12,9 @@ namespace OffzoneVisualizer {
             OffzoneVisualizer::Offzone::Render::RenderWorld();
         }
 
-        void RenderPanel() {
+        void RenderDevPanel() {
             RefreshCurrentState();
-            OffzoneVisualizer::Offzone::UI::Dev::RenderPanelContent();
+            OffzoneVisualizer::Offzone::UI::Dev::RenderDevPanelContent();
         }
 
         void RefreshCurrentState() {

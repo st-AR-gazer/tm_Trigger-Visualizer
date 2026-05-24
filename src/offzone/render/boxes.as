@@ -85,12 +85,16 @@ namespace OffzoneVisualizer {
             }
 
             float GetAxisFadeFactor(float axisDistance, float renderDistance, float fadeBand) {
-                renderDistance = Math::Max(renderDistance, 0.001f);
-                fadeBand = Math::Clamp(fadeBand, 0.001f, renderDistance);
+                renderDistance = Math::Max(renderDistance, 0.0f);
+                fadeBand = Math::Max(fadeBand, 0.0f);
+                if (renderDistance <= 0.0f) return axisDistance <= 0.0f ? 1.0f : 0.0f;
+                if (axisDistance >= renderDistance) return 0.0f;
+                if (fadeBand <= 0.0f) return 1.0f;
+
+                fadeBand = Math::Min(fadeBand, renderDistance);
                 float fadeStart = Math::Max(renderDistance - fadeBand, 0.0f);
 
                 if (axisDistance <= fadeStart) return 1.0f;
-                if (axisDistance >= renderDistance) return 0.0f;
                 return 1.0f - ((axisDistance - fadeStart) / fadeBand);
             }
 
@@ -113,6 +117,41 @@ namespace OffzoneVisualizer {
                 return IsVisibleFadeFactor(GetWorldBoxFadeFactor(box, cameraPos));
             }
 
+            float GetPlayerWorldBoxFadeFactor(
+                const WorldAabb@ box,
+                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+            ) {
+                if (playerState is null || !playerState.HasVehicle) return 0.0f;
+                return GetWorldBoxFadeFactor(box, playerState.Position);
+            }
+
+            float GetWorldBoxRenderFadeFactor(
+                const WorldAabb@ box,
+                const vec3 &in cameraPos,
+                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+            ) {
+                int proximityMode = OffzoneVisualizer::Offzone::UI::S_RenderProximityMode;
+                float cameraFade = GetWorldBoxFadeFactor(box, cameraPos);
+
+                if (proximityMode == OffzoneVisualizer::Offzone::UI::PROXIMITY_MODE_PLAYER_ONLY) {
+                    return GetPlayerWorldBoxFadeFactor(box, playerState);
+                }
+
+                if (proximityMode == OffzoneVisualizer::Offzone::UI::PROXIMITY_MODE_CAMERA_AND_PLAYER) {
+                    return Math::Max(cameraFade, GetPlayerWorldBoxFadeFactor(box, playerState));
+                }
+
+                return cameraFade;
+            }
+
+            bool IsWorldBoxInRenderRangeForProximity(
+                const WorldAabb@ box,
+                const vec3 &in cameraPos,
+                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+            ) {
+                return IsVisibleFadeFactor(GetWorldBoxRenderFadeFactor(box, cameraPos, playerState));
+            }
+
             uint CountWorldBoxesInRenderRange(const array<WorldAabb@> @boxes, const vec3 &in cameraPos) {
                 if (boxes is null) return 0;
 
@@ -125,12 +164,44 @@ namespace OffzoneVisualizer {
                 return count;
             }
 
+            uint CountWorldBoxesInRenderRangeForProximity(
+                const array<WorldAabb@> @boxes,
+                const vec3 &in cameraPos,
+                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+            ) {
+                if (boxes is null) return 0;
+
+                uint count = 0;
+                for (uint i = 0; i < boxes.Length; i++) {
+                    if (IsWorldBoxInRenderRangeForProximity(boxes[i], cameraPos, playerState)) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+
             uint CountWorldBoxesInFadeBand(const array<WorldAabb@> @boxes, const vec3 &in cameraPos) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
                     float fade = GetWorldBoxFadeFactor(boxes[i], cameraPos);
+                    if (fade >= 1.0f || !IsVisibleFadeFactor(fade)) continue;
+                    count++;
+                }
+                return count;
+            }
+
+            uint CountWorldBoxesInFadeBandForProximity(
+                const array<WorldAabb@> @boxes,
+                const vec3 &in cameraPos,
+                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+            ) {
+                if (boxes is null) return 0;
+
+                uint count = 0;
+                for (uint i = 0; i < boxes.Length; i++) {
+                    float fade = GetWorldBoxRenderFadeFactor(boxes[i], cameraPos, playerState);
                     if (fade >= 1.0f || !IsVisibleFadeFactor(fade)) continue;
                     count++;
                 }
@@ -158,12 +229,13 @@ namespace OffzoneVisualizer {
                 float lineLength = Math::Distance(start, end);
                 if (lineLength <= 0.001f) return 1;
 
-                float targetSegmentLength = Math::Max(
-                    Math::Min(OffzoneVisualizer::Offzone::UI::S_LineSplitTargetSegmentLength, 4.0f),
-                    0.25f
+                float minSegmentLength = Math::Clamp(
+                    OffzoneVisualizer::Offzone::UI::S_LineSplitTargetSegmentLength,
+                    4.0f,
+                    512.0f
                 );
                 int maxSegments = Math::Clamp(
-                    int(Math::Ceil(lineLength / targetSegmentLength)),
+                    int(Math::Floor(lineLength / minSegmentLength)),
                     1,
                     OffzoneVisualizer::Offzone::UI::S_LineSplitMaxSegmentsPerEdge
                 );
@@ -337,6 +409,21 @@ namespace OffzoneVisualizer {
                 return count;
             }
 
+            uint CountWorldBoxesCameraFacingFacesForProximity(
+                const array<WorldAabb@> @boxes,
+                const vec3 &in cameraPos,
+                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+            ) {
+                if (boxes is null) return 0;
+
+                uint count = 0;
+                for (uint i = 0; i < boxes.Length; i++) {
+                    if (!IsWorldBoxInRenderRangeForProximity(boxes[i], cameraPos, playerState)) continue;
+                    count += CountWorldBoxCameraFacingFaces(boxes[i], cameraPos);
+                }
+                return count;
+            }
+
             void DrawWorldLineAdaptive(const vec3 &in start, const vec3 &in end, const vec3 &in cameraPos) {
                 uint segmentCount = GetAdaptiveLineSegmentCount(start, end, cameraPos);
                 if (segmentCount <= 1) {
@@ -379,7 +466,7 @@ namespace OffzoneVisualizer {
                 nvg::Reset();
                 nvg::BeginPath();
                 nvg::StrokeColor(color);
-                nvg::StrokeWidth(strokeWidth);
+                nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
                 for (uint i = 0; i < BOX_EDGE_INDICES.Length; i++) {
                     auto edge = BOX_EDGE_INDICES[i];

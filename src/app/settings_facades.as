@@ -1,14 +1,66 @@
 namespace OffzoneVisualizer {
     namespace App {
+        const string RESTORE_DEFAULTS_POPUP_ID = "Restore defaults?##offzone-visualizer-restore-defaults";
+
+        void RenderRestoreDefaultsModal() {
+            if (UI::BeginPopupModal(RESTORE_DEFAULTS_POPUP_ID, UI::WindowFlags::AlwaysAutoResize)) {
+                UI::Text("Restore Offzone Visualizer defaults?");
+                UI::TextDisabled("This resets General, World Rendering, Line Splitting, Color, Proximity, and Labels settings.");
+                UI::TextDisabled("Logging settings will not be changed.");
+
+                UI::Separator();
+                if (UI::Button("Restore defaults##offzone-visualizer-confirm-restore-defaults")) {
+                    ResetSettingsToDefaults();
+                    OffzoneVisualizer::Offzone::UI::ResetSettingsToDefaults();
+                    UI::CloseCurrentPopup();
+                }
+
+                UI::SameLine();
+                if (UI::Button("Cancel##offzone-visualizer-cancel-restore-defaults")) {
+                    UI::CloseCurrentPopup();
+                }
+
+                UI::EndPopup();
+            }
+        }
+
         void RenderGeneralSettingsUI() {
             bool open = UI::BeginChild("##offzone-visualizer-settings-general", vec2(0, 0), false);
             if (open) {
-                S_WindowOpen = UI::Checkbox("Show main window", S_WindowOpen);
                 S_HideWithGame = UI::Checkbox("Hide with game UI", S_HideWithGame);
                 S_HideWithOP = UI::Checkbox("Hide with Openplanet UI", S_HideWithOP);
+                UI::TextDisabled("Hide options affect world rendering. The dev panel follows Openplanet's normal UI visibility.");
 
                 UI::Separator();
-                OffzoneVisualizer::Offzone::UI::RenderSettingsUI();
+                UI::Text("Rendering");
+                OffzoneVisualizer::Offzone::UI::S_RenderWorld = UI::Checkbox(
+                    "Enable all rendering##offzone-visualizer-settings-general",
+                    OffzoneVisualizer::Offzone::UI::S_RenderWorld
+                );
+                UI::TextDisabled("This is the same master toggle as World Rendering > Enable world render.");
+
+                UI::Separator();
+                UI::Text("Developer Tools");
+                S_DevPanelOpen = UI::Checkbox(
+                    "Show dev panel##offzone-visualizer-settings-general",
+                    S_DevPanelOpen
+                );
+
+                UI::Separator();
+                UI::Text("Defaults");
+                UI::TextDisabled("Restores visualization settings only. Logging settings are left alone.");
+                if (UI::Button("Restore defaults##offzone-visualizer-open-restore-defaults")) {
+                    UI::OpenPopup(RESTORE_DEFAULTS_POPUP_ID);
+                }
+                RenderRestoreDefaultsModal();
+            }
+            UI::EndChild();
+        }
+
+        void RenderWorldRenderingSettingsUI() {
+            bool open = UI::BeginChild("##offzone-visualizer-settings-world-rendering", vec2(0, 0), false);
+            if (open) {
+                OffzoneVisualizer::Offzone::UI::RenderWorldRenderingSettingsUI();
             }
             UI::EndChild();
         }
@@ -25,6 +77,22 @@ namespace OffzoneVisualizer {
             bool open = UI::BeginChild("##offzone-visualizer-settings-color", vec2(0, 0), false);
             if (open) {
                 OffzoneVisualizer::Offzone::UI::RenderColorSettingsUI();
+            }
+            UI::EndChild();
+        }
+
+        void RenderProximitySettingsUI() {
+            bool open = UI::BeginChild("##offzone-visualizer-settings-proximity", vec2(0, 0), false);
+            if (open) {
+                OffzoneVisualizer::Offzone::UI::RenderProximitySettingsUI();
+            }
+            UI::EndChild();
+        }
+
+        void RenderLabelsSettingsUI() {
+            bool open = UI::BeginChild("##offzone-visualizer-settings-labels", vec2(0, 0), false);
+            if (open) {
+                OffzoneVisualizer::Offzone::UI::RenderLabelsSettingsUI();
             }
             UI::EndChild();
         }

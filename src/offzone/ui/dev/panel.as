@@ -6,14 +6,9 @@ namespace OffzoneVisualizer {
                     return value ? "On" : "Off";
                 }
 
-                void RenderPanelContent() {
+                void RenderDevPanelContent() {
                     auto ctx = GetCurrentRuntimeContext();
                     auto snapshot = GetCurrentMapSnapshot();
-
-                    if (!UI::S_ShowPanel) {
-                        UI::TextDisabled("Offzone panel contents are disabled in settings.");
-                        return;
-                    }
 
                     UI::Text("Runtime");
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("State", ctx.StateLabel()));
@@ -31,32 +26,47 @@ namespace OffzoneVisualizer {
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Labels", OnOff(UI::S_ShowLabels)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Render Distance", UI::GetRenderDistanceWorld().ToString() + " m"));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fade Band", UI::GetRenderFadeBandWorld().ToString() + " m"));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Proximity Source", UI::GetRenderProximityModeLabel(UI::S_RenderProximityMode)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Color Mode", UI::GetColorModeLabel(UI::S_ColorMode)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Base Color", UI::S_BaseOffzoneColor.ToString()));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Distance Color", UI::S_DistanceFadeColor.ToString()));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Split Color", UI::S_DenseLineSplitColor.ToString()));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Alpha", Text::Format("%.2f", UI::S_OutlineAlpha)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Alpha", Text::Format("%.2f", UI::S_FillAlpha)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Width", Text::Format("%.1f px", UI::S_OutlineWidth)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Label Index", OnOff(UI::S_LabelShowIndex)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Label Raw Range", OnOff(UI::S_LabelShowRawRange)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Label World Size", OnOff(UI::S_LabelShowWorldSize)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Label Font Size", Text::Format("%.1f", UI::S_LabelFontSize)));
                     if (ctx.IsPlayableMap) {
                         vec3 cameraPos = Camera::GetCurrentPosition();
-                        uint visibleCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesInRenderRange(
+                        auto playerState = OffzoneVisualizer::Offzone::Data::GetPlayerPositionState();
+                        uint visibleCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesInRenderRangeForProximity(
                             snapshot.WorldBoxes,
-                            cameraPos
+                            cameraPos,
+                            playerState
                         );
-                        uint fadingCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesInFadeBand(
+                        uint fadingCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesInFadeBandForProximity(
                             snapshot.WorldBoxes,
-                            cameraPos
+                            cameraPos,
+                            playerState
                         );
                         uint culledCount = snapshot.WorldBoxes.Length - visibleCount;
-                        uint fillFaceCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesCameraFacingFaces(
+                        uint fillFaceCount = OffzoneVisualizer::Offzone::Render::CountWorldBoxesCameraFacingFacesForProximity(
                             snapshot.WorldBoxes,
-                            cameraPos
+                            cameraPos,
+                            playerState
+                        );
+                        uint labelCount = OffzoneVisualizer::Offzone::Render::CountVisibleWorldBoxLabels(
+                            snapshot.WorldBoxes,
+                            cameraPos,
+                            playerState
                         );
                         uint outlineSegmentCount = 0;
                         uint maxEdgeSegments = 0;
                         for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
                             auto box = snapshot.WorldBoxes[i];
-                            if (!OffzoneVisualizer::Offzone::Render::IsWorldBoxInRenderRange(box, cameraPos)) continue;
+                            if (!OffzoneVisualizer::Offzone::Render::IsWorldBoxInRenderRangeForProximity(box, cameraPos, playerState)) continue;
 
                             outlineSegmentCount += OffzoneVisualizer::Offzone::Render::CountWorldBoxOutlineSegments(
                                 box,
@@ -72,19 +82,23 @@ namespace OffzoneVisualizer {
                         }
 
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Camera Pos", cameraPos.ToString()));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Vehicle State", playerState.StateLabel()));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Vehicle Pos", playerState.HasVehicle ? playerState.Position.ToString() : "<none>"));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Visible Boxes", tostring(visibleCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fading Boxes", tostring(fadingCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Culled Boxes", tostring(culledCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Faces", tostring(fillFaceCount)));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Visible Labels", tostring(labelCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Adaptive Splitting", OnOff(UI::S_AdaptiveLineSplitting)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Segments", tostring(outlineSegmentCount)));
                         UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Max Edge Segments", tostring(maxEdgeSegments)));
 
-                        if (snapshot.WorldBoxes.Length > 0 && UI::TreeNode("Per-Box Fade##offzone-render-fade")) {
+                        if (snapshot.WorldBoxes.Length > 0 && UI::TreeNode("Per-Box Render Fade##offzone-render-fade")) {
                             for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {
-                                float fade = OffzoneVisualizer::Offzone::Render::GetWorldBoxFadeFactor(
+                                float fade = OffzoneVisualizer::Offzone::Render::GetWorldBoxRenderFadeFactor(
                                     snapshot.WorldBoxes[i],
-                                    cameraPos
+                                    cameraPos,
+                                    playerState
                                 );
                                 UI::Text("#" + i + ": " + Text::Format("%.3f", fade));
                             }

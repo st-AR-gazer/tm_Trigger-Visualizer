@@ -2,8 +2,8 @@ namespace OffzoneVisualizer {
     Meta::Plugin@ PluginMeta = Meta::ExecutingPlugin();
 
     namespace App {
-        [Setting hidden name="Window open"]
-        bool S_WindowOpen = true;
+        [Setting hidden name="Dev panel open"]
+        bool S_DevPanelOpen = true;
 
         [Setting hidden name="Hide with game UI"]
         bool S_HideWithGame = true;
@@ -12,6 +12,12 @@ namespace OffzoneVisualizer {
         bool S_HideWithOP = false;
 
         string g_MenuIcon = "";
+
+        void ResetSettingsToDefaults() {
+            S_DevPanelOpen = true;
+            S_HideWithGame = true;
+            S_HideWithOP = false;
+        }
 
         string PluginNameHash() {
             return Crypto::MD5(OffzoneVisualizer::PluginMeta.Name);
