@@ -1,5 +1,5 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Data {
             class RuntimeContext {
                 CGameCtnApp@ App;

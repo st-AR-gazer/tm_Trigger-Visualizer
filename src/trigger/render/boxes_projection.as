@@ -1,5 +1,5 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
             float GetScreenDistance(const vec2 &in start, const vec2 &in end) {
                 vec2 delta = end - start;
@@ -24,7 +24,7 @@ namespace OffzoneVisualizer {
                 float margin
             ) {
                 if (s0.z >= 0 || s1.z >= 0 || s2.z >= 0 || s3.z >= 0) return false;
-                if (!OffzoneVisualizer::Offzone::UI::S_CullOffscreenWorldTiles) return true;
+                if (!TriggerVisualizer::Trigger::UI::S_CullOffscreenWorldTiles) return true;
 
                 int displayWidth = Display::GetWidth();
                 int displayHeight = Display::GetHeight();
@@ -192,7 +192,7 @@ namespace OffzoneVisualizer {
                 int perspectiveSplits = int(Math::Ceil(GetProjectedQuadPerspectiveError(s0, s1, s2, s3) / SKULL_TILE_ICON_TARGET_PATCH_PERSPECTIVE_ERROR));
                 int subdivisions = Math::Max(1, Math::Max(screenSizeSplits, perspectiveSplits));
                 int maxSubdivisions = Math::Clamp(
-                    OffzoneVisualizer::Offzone::UI::S_TileIconMaxSubdivisions,
+                    TriggerVisualizer::Trigger::UI::S_TileIconMaxSubdivisions,
                     1,
                     int(SKULL_TILE_ICON_HARD_MAX_SUBDIVISIONS)
                 );
@@ -335,12 +335,12 @@ namespace OffzoneVisualizer {
             }
 
             bool DrawSkullTileIconOnWorldTile(const vec3 &in origin, const vec3 &in uEdge, const vec3 &in vEdge) {
-                if (!OffzoneVisualizer::Offzone::UI::S_ShowSkullTileIcons) return false;
+                if (!TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return false;
                 if (G_TileIconPatchBudgetRemaining == 0) return false;
 
                 float uLen = Math::Distance(origin, origin + uEdge);
                 float vLen = Math::Distance(origin, origin + vEdge);
-                float iconSize = Math::Min(uLen, vLen) * OffzoneVisualizer::Offzone::UI::S_SkullTileIconScale;
+                float iconSize = Math::Min(uLen, vLen) * TriggerVisualizer::Trigger::UI::S_SkullTileIconScale;
                 if (iconSize <= 0.001f) return false;
 
                 vec3 center = origin + (uEdge + vEdge) * 0.5f;
@@ -379,7 +379,7 @@ namespace OffzoneVisualizer {
                     p2,
                     p3,
                     texture,
-                    OffzoneVisualizer::Offzone::UI::S_SkullTileIconAlpha
+                    TriggerVisualizer::Trigger::UI::S_SkullTileIconAlpha
                 );
             }
 

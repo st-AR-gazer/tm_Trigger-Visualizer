@@ -1,4 +1,4 @@
-namespace OffzoneVisualizer {
+namespace TriggerVisualizer {
     Meta::Plugin@ PluginMeta = Meta::ExecutingPlugin();
 
     namespace App {
@@ -20,7 +20,7 @@ namespace OffzoneVisualizer {
         }
 
         string PluginNameHash() {
-            return Crypto::MD5(OffzoneVisualizer::PluginMeta.Name);
+            return Crypto::MD5(TriggerVisualizer::PluginMeta.Name);
         }
 
         string MenuIcon() {
@@ -32,7 +32,7 @@ namespace OffzoneVisualizer {
 
         string MenuTitle() {
             string hash = PluginNameHash();
-            return "\\$" + hash.SubStr(0, 3) + MenuIcon() + "\\$z " + OffzoneVisualizer::PluginMeta.Name;
+            return "\\$" + hash.SubStr(0, 3) + MenuIcon() + "\\$z " + TriggerVisualizer::PluginMeta.Name;
         }
     }
 }

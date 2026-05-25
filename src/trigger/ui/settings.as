@@ -1,109 +1,109 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace UI {
-            [Setting hidden name="Offzone: Render world overlay"]
+            [Setting hidden name="Trigger: Render world overlay"]
             bool S_RenderWorld = true;
 
-            [Setting hidden name="Offzone: Show labels"]
+            [Setting hidden name="Trigger: Show labels"]
             bool S_ShowLabels = true;
 
-            [Setting hidden name="Offzone: Label show index"]
+            [Setting hidden name="Trigger: Label show index"]
             bool S_LabelShowIndex = true;
 
-            [Setting hidden name="Offzone: Label show raw range"]
+            [Setting hidden name="Trigger: Label show raw range"]
             bool S_LabelShowRawRange = false;
 
-            [Setting hidden name="Offzone: Label show world size"]
+            [Setting hidden name="Trigger: Label show world size"]
             bool S_LabelShowWorldSize = false;
 
-            [Setting hidden name="Offzone: Label font size" min=8 max=48]
+            [Setting hidden name="Trigger: Label font size" min=8 max=48]
             float S_LabelFontSize = 16.0f;
 
-            [Setting hidden name="Offzone: Label alpha" min=0 max=1]
+            [Setting hidden name="Trigger: Label alpha" min=0 max=1]
             float S_LabelAlpha = 0.95f;
 
-            [Setting hidden name="Offzone: Label background alpha" min=0 max=1]
+            [Setting hidden name="Trigger: Label background alpha" min=0 max=1]
             float S_LabelBackgroundAlpha = 0.20f;
 
-            [Setting hidden name="Offzone: Show face fill"]
+            [Setting hidden name="Trigger: Show face fill"]
             bool S_ShowFill = true;
 
-            [Setting hidden name="Offzone: Show outline"]
+            [Setting hidden name="Trigger: Show outline"]
             bool S_ShowOutline = true;
 
-            [Setting hidden name="Offzone: Render distance XZ" min=0 max=50000]
+            [Setting hidden name="Trigger: Render distance XZ" min=0 max=50000]
             float S_RenderDistanceXZ = 224.0f;
 
-            [Setting hidden name="Offzone: Render distance Y" min=0 max=50000]
+            [Setting hidden name="Trigger: Render distance Y" min=0 max=50000]
             float S_RenderDistanceY = 56.0f;
 
-            [Setting hidden name="Offzone: Render fade band XZ" min=0 max=50000]
+            [Setting hidden name="Trigger: Render fade band XZ" min=0 max=50000]
             float S_RenderFadeBandXZ = 32.0f;
 
-            [Setting hidden name="Offzone: Render fade band Y" min=0 max=50000]
+            [Setting hidden name="Trigger: Render fade band Y" min=0 max=50000]
             float S_RenderFadeBandY = 8.0f;
 
-            [Setting hidden name="Offzone: Use map suggested draw distance"]
+            [Setting hidden name="Trigger: Use map suggested draw distance"]
             bool S_UseMapSuggestedDrawDistance = true;
 
-            [Setting hidden name="Offzone: Respect map suggest-off"]
+            [Setting hidden name="Trigger: Respect map suggest-off"]
             bool S_RespectMapSuggestOff = true;
 
-            [Setting hidden name="Offzone: Outline alpha" min=0 max=1]
+            [Setting hidden name="Trigger: Outline alpha" min=0 max=1]
             float S_OutlineAlpha = 0.20f;
 
-            [Setting hidden name="Offzone: Fill alpha" min=0 max=1]
+            [Setting hidden name="Trigger: Fill alpha" min=0 max=1]
             float S_FillAlpha = 0.03f;
 
-            [Setting hidden name="Offzone: Outline width" min=0 max=16]
+            [Setting hidden name="Trigger: Outline width" min=0 max=16]
             float S_OutlineWidth = 2.0f;
 
-            [Setting hidden name="Offzone: Adaptive line splitting"]
+            [Setting hidden name="Trigger: Adaptive line splitting"]
             bool S_AdaptiveLineSplitting = true;
 
-            [Setting hidden name="Offzone: Line split minimum segment length"]
+            [Setting hidden name="Trigger: Line split minimum segment length"]
             float S_LineSplitTargetSegmentLength = 4.0f;
 
-            [Setting hidden name="Offzone: Line split start distance factor"]
+            [Setting hidden name="Trigger: Line split start distance factor"]
             float S_LineSplitStartDistanceFactor = 0.33f;
 
-            [Setting hidden name="Offzone: Line split full distance factor"]
+            [Setting hidden name="Trigger: Line split full distance factor"]
             float S_LineSplitFullDistanceFactor = 0.05f;
 
-            [Setting hidden name="Offzone: Line split min start distance"]
+            [Setting hidden name="Trigger: Line split min start distance"]
             float S_LineSplitMinStartDistance = 16.0f;
 
-            [Setting hidden name="Offzone: Line split max start distance"]
+            [Setting hidden name="Trigger: Line split max start distance"]
             float S_LineSplitMaxStartDistance = 50000.0f;
 
-            [Setting hidden name="Offzone: Line split min full distance"]
+            [Setting hidden name="Trigger: Line split min full distance"]
             float S_LineSplitMinFullDistance = 2.0f;
 
-            [Setting hidden name="Offzone: Line split max full distance"]
+            [Setting hidden name="Trigger: Line split max full distance"]
             float S_LineSplitMaxFullDistance = 96.0f;
 
-            [Setting hidden name="Offzone: Line split max segments per edge"]
+            [Setting hidden name="Trigger: Line split max segments per edge"]
             int S_LineSplitMaxSegmentsPerEdge = 512;
 
-            [Setting hidden name="Offzone: Cull offscreen world tiles"]
+            [Setting hidden name="Trigger: Cull offscreen world tiles"]
             bool S_CullOffscreenWorldTiles = true;
 
-            [Setting hidden name="Offzone: Experimental screen-occluded world tile culling"]
+            [Setting hidden name="Trigger: Experimental screen-occluded world tile culling"]
             bool S_CullScreenOccludedWorldTiles = false;
 
-            [Setting hidden name="Offzone: Screen occlusion cell size" min=8 max=256]
+            [Setting hidden name="Trigger: Screen occlusion cell size" min=8 max=256]
             int S_ScreenOcclusionCellSize = 32;
 
-            [Setting hidden name="Offzone: Fill tile minimum size" min=2 max=64]
+            [Setting hidden name="Trigger: Fill tile minimum size" min=2 max=64]
             float S_FillTileMinSize = 4.0f;
 
-            [Setting hidden name="Offzone: Max fill tiles per frame" min=128 max=65536]
+            [Setting hidden name="Trigger: Max fill tiles per frame" min=128 max=65536]
             int S_MaxFillTilesPerFrame = 4096;
 
-            [Setting hidden name="Offzone: Max tile icon patches per frame" min=0 max=65536]
+            [Setting hidden name="Trigger: Max tile icon patches per frame" min=0 max=65536]
             int S_MaxTileIconPatchesPerFrame = 1600;
 
-            [Setting hidden name="Offzone: Tile icon max subdivisions" min=1 max=12]
+            [Setting hidden name="Trigger: Tile icon max subdivisions" min=1 max=12]
             int S_TileIconMaxSubdivisions = 6;
 
             const int COLOR_MODE_STATIC = 0;
@@ -127,38 +127,41 @@ namespace OffzoneVisualizer {
             const float LINE_SPLIT_FULL_DISTANCE_SLIDER_MAX = 512.0f;
             const int LINE_SPLIT_SEGMENTS_SLIDER_MAX = 512;
 
-            [Setting hidden name="Offzone: Color mode" min=0 max=2]
+            [Setting hidden name="Trigger: Color mode" min=0 max=2]
             int S_ColorMode = COLOR_MODE_STATIC;
 
-            [Setting hidden name="Offzone: Render proximity mode" min=0 max=2]
+            [Setting hidden name="Trigger: Render proximity mode" min=0 max=2]
             int S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_PLAYER;
 
-            [Setting hidden name="Offzone: Base offzone color"]
-            vec4 S_BaseOffzoneColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
+            [Setting hidden name="Trigger: Base trigger color"]
+            vec4 S_BaseTriggerColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
 
-            [Setting hidden name="Offzone: Distance fade color"]
+            [Setting hidden name="Trigger: Distance fade color"]
             vec4 S_DistanceFadeColor = vec4(1.0f, 0.90f, 0.20f, 1.0f);
 
-            [Setting hidden name="Offzone: Dense line split color"]
+            [Setting hidden name="Trigger: Dense line split color"]
             vec4 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
 
-            [Setting hidden name="Offzone: Random outline segment colors"]
+            [Setting hidden name="Trigger: Random outline segment colors"]
             bool S_RandomOutlineSegmentColors = false;
 
-            [Setting hidden name="Offzone: Random fill tile colors"]
+            [Setting hidden name="Trigger: Random fill tile colors"]
             bool S_RandomFillTileColors = false;
 
-            [Setting hidden name="Offzone: Show skull tile icons"]
+            [Setting hidden name="Trigger: Show skull tile icons"]
             bool S_ShowSkullTileIcons = false;
 
-            [Setting hidden name="Offzone: Skull tile icon scale" min=0.05 max=1]
+            [Setting hidden name="Trigger: Skull tile icon scale" min=0.05 max=1]
             float S_SkullTileIconScale = 0.45f;
 
-            [Setting hidden name="Offzone: Skull tile icon alpha" min=0 max=1]
+            [Setting hidden name="Trigger: Skull tile icon alpha" min=0 max=1]
             float S_SkullTileIconAlpha = 0.85f;
 
-            [Setting hidden name="Offzone: Custom tile icon storage path"]
+            [Setting hidden name="Trigger: Custom tile icon storage path"]
             string S_CustomTileIconStoragePath = "";
+
+            [Setting hidden name="Trigger: Show offzone source"]
+            bool S_ShowOffzoneSource = true;
 
             string G_PendingTileIconSourcePath = "";
             string G_TileIconImportStatus = "";
@@ -211,7 +214,7 @@ namespace OffzoneVisualizer {
 
             void ClampColorSettings() {
                 S_ColorMode = Math::Clamp(S_ColorMode, COLOR_MODE_STATIC, COLOR_MODE_LINE_SPLIT_DENSITY);
-                S_BaseOffzoneColor = ClampColor(S_BaseOffzoneColor);
+                S_BaseTriggerColor = ClampColor(S_BaseTriggerColor);
                 S_DistanceFadeColor = ClampColor(S_DistanceFadeColor);
                 S_DenseLineSplitColor = ClampColor(S_DenseLineSplitColor);
                 S_SkullTileIconScale = Math::Clamp(S_SkullTileIconScale, 0.05f, 1.0f);
@@ -262,7 +265,7 @@ namespace OffzoneVisualizer {
                 S_TileIconMaxSubdivisions = 6;
                 S_ColorMode = COLOR_MODE_STATIC;
                 S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_PLAYER;
-                S_BaseOffzoneColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
+                S_BaseTriggerColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
                 S_DistanceFadeColor = vec4(1.0f, 0.90f, 0.20f, 1.0f);
                 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
                 S_RandomOutlineSegmentColors = false;
@@ -271,9 +274,10 @@ namespace OffzoneVisualizer {
                 S_SkullTileIconScale = 0.45f;
                 S_SkullTileIconAlpha = 0.85f;
                 S_CustomTileIconStoragePath = "";
+                S_ShowOffzoneSource = true;
                 G_PendingTileIconSourcePath = "";
                 G_TileIconImportStatus = "";
-                OffzoneVisualizer::Offzone::Render::Assets::InvalidateSkullTileIconTexture();
+                TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
 
                 ClampWorldRenderingSettings();
                 ClampLineSplittingSettings();
@@ -361,16 +365,16 @@ namespace OffzoneVisualizer {
 
             void RenderWorldRenderingSettingsUI() {
                 UI::Text("World Rendering");
-                S_RenderWorld = UI::Checkbox("Enable world render##offzone-visualizer-settings", S_RenderWorld);
-                S_ShowOutline = UI::Checkbox("Show outlines##offzone-visualizer-settings", S_ShowOutline);
-                S_ShowFill = UI::Checkbox("Show face fill##offzone-visualizer-settings", S_ShowFill);
-                S_ShowLabels = UI::Checkbox("Show labels##offzone-visualizer-settings", S_ShowLabels);
+                S_RenderWorld = UI::Checkbox("Enable world render##trigger-visualizer-settings", S_RenderWorld);
+                S_ShowOutline = UI::Checkbox("Show outlines##trigger-visualizer-settings", S_ShowOutline);
+                S_ShowFill = UI::Checkbox("Show face fill##trigger-visualizer-settings", S_ShowFill);
+                S_ShowLabels = UI::Checkbox("Show labels##trigger-visualizer-settings", S_ShowLabels);
 
                 UI::Separator();
                 UI::Text("Distance");
                 S_RenderDistanceXZ = RenderWorldDistanceSlider(
                     "Render distance X/Z",
-                    "offzone-visualizer-settings-render-distance-xz",
+                    "trigger-visualizer-settings-render-distance-xz",
                     S_RenderDistanceXZ,
                     0.0f,
                     WORLD_RENDER_SLIDER_MAX_XZ,
@@ -378,7 +382,7 @@ namespace OffzoneVisualizer {
                 );
                 S_RenderDistanceY = RenderWorldDistanceSlider(
                     "Render distance Y",
-                    "offzone-visualizer-settings-render-distance-y",
+                    "trigger-visualizer-settings-render-distance-y",
                     S_RenderDistanceY,
                     0.0f,
                     WORLD_RENDER_SLIDER_MAX_Y,
@@ -386,7 +390,7 @@ namespace OffzoneVisualizer {
                 );
                 S_RenderFadeBandXZ = RenderWorldDistanceSlider(
                     "Render fade X/Z",
-                    "offzone-visualizer-settings-render-fade-xz",
+                    "trigger-visualizer-settings-render-fade-xz",
                     S_RenderFadeBandXZ,
                     0.0f,
                     WORLD_FADE_SLIDER_MAX_XZ,
@@ -394,7 +398,7 @@ namespace OffzoneVisualizer {
                 );
                 S_RenderFadeBandY = RenderWorldDistanceSlider(
                     "Render fade Y",
-                    "offzone-visualizer-settings-render-fade-y",
+                    "trigger-visualizer-settings-render-fade-y",
                     S_RenderFadeBandY,
                     0.0f,
                     WORLD_FADE_SLIDER_MAX_Y,
@@ -404,11 +408,11 @@ namespace OffzoneVisualizer {
                 UI::Separator();
                 UI::Text("Map Authored Hints");
                 S_UseMapSuggestedDrawDistance = UI::Checkbox(
-                    "Use map-suggested draw distance##offzone-visualizer-settings",
+                    "Use map-suggested draw distance##trigger-visualizer-settings",
                     S_UseMapSuggestedDrawDistance
                 );
                 S_RespectMapSuggestOff = UI::Checkbox(
-                    "Respect map suggest-off##offzone-visualizer-settings",
+                    "Respect map suggest-off##trigger-visualizer-settings",
                     S_RespectMapSuggestOff
                 );
                 UI::TextDisabled("Map force-off commands are always respected.");
@@ -420,7 +424,7 @@ namespace OffzoneVisualizer {
             void RenderLineSplittingSettingsUI() {
                 UI::Text("Adaptive Line Splitting");
                 S_AdaptiveLineSplitting = UI::Checkbox(
-                    "Enable adaptive line splitting##offzone-visualizer-line-splitting",
+                    "Enable adaptive line splitting##trigger-visualizer-line-splitting",
                     S_AdaptiveLineSplitting
                 );
                 UI::TextDisabled("Splitting always uses camera distance, even when proximity uses the player.");
@@ -431,7 +435,7 @@ namespace OffzoneVisualizer {
                 UI::Separator();
                 UI::SetNextItemWidth(220.0f);
                 S_LineSplitTargetSegmentLength = UI::SliderFloat(
-                    "Minimum segment length##offzone-visualizer-line-splitting",
+                    "Minimum segment length##trigger-visualizer-line-splitting",
                     S_LineSplitTargetSegmentLength,
                     LINE_SPLIT_MINIMUM_SAFE_LENGTH,
                     LINE_SPLIT_TARGET_LENGTH_SLIDER_MAX,
@@ -440,7 +444,7 @@ namespace OffzoneVisualizer {
 
                 UI::SetNextItemWidth(220.0f);
                 S_LineSplitStartDistanceFactor = UI::SliderFloat(
-                    "Start distance factor##offzone-visualizer-line-splitting",
+                    "Start distance factor##trigger-visualizer-line-splitting",
                     S_LineSplitStartDistanceFactor,
                     0.01f,
                     4.0f,
@@ -449,7 +453,7 @@ namespace OffzoneVisualizer {
 
                 UI::SetNextItemWidth(220.0f);
                 S_LineSplitFullDistanceFactor = UI::SliderFloat(
-                    "Full distance factor##offzone-visualizer-line-splitting",
+                    "Full distance factor##trigger-visualizer-line-splitting",
                     S_LineSplitFullDistanceFactor,
                     0.001f,
                     1.0f,
@@ -458,7 +462,7 @@ namespace OffzoneVisualizer {
 
                 UI::SetNextItemWidth(220.0f);
                 S_LineSplitMinStartDistance = UI::SliderFloat(
-                    "Min start distance##offzone-visualizer-line-splitting",
+                    "Min start distance##trigger-visualizer-line-splitting",
                     S_LineSplitMinStartDistance,
                     0.0f,
                     LINE_SPLIT_START_DISTANCE_SLIDER_MAX,
@@ -467,7 +471,7 @@ namespace OffzoneVisualizer {
 
                 UI::SetNextItemWidth(220.0f);
                 S_LineSplitMaxStartDistance = UI::SliderFloat(
-                    "Max start distance##offzone-visualizer-line-splitting",
+                    "Max start distance##trigger-visualizer-line-splitting",
                     S_LineSplitMaxStartDistance,
                     0.0f,
                     LINE_SPLIT_START_DISTANCE_SLIDER_MAX,
@@ -476,7 +480,7 @@ namespace OffzoneVisualizer {
 
                 UI::SetNextItemWidth(220.0f);
                 S_LineSplitMinFullDistance = UI::SliderFloat(
-                    "Min full distance##offzone-visualizer-line-splitting",
+                    "Min full distance##trigger-visualizer-line-splitting",
                     S_LineSplitMinFullDistance,
                     0.0f,
                     LINE_SPLIT_FULL_DISTANCE_SLIDER_MAX,
@@ -485,7 +489,7 @@ namespace OffzoneVisualizer {
 
                 UI::SetNextItemWidth(220.0f);
                 S_LineSplitMaxFullDistance = UI::SliderFloat(
-                    "Max full distance##offzone-visualizer-line-splitting",
+                    "Max full distance##trigger-visualizer-line-splitting",
                     S_LineSplitMaxFullDistance,
                     0.0f,
                     LINE_SPLIT_FULL_DISTANCE_SLIDER_MAX,
@@ -494,7 +498,7 @@ namespace OffzoneVisualizer {
 
                 UI::SetNextItemWidth(220.0f);
                 S_LineSplitMaxSegmentsPerEdge = UI::SliderInt(
-                    "Max segments per edge##offzone-visualizer-line-splitting",
+                    "Max segments per edge##trigger-visualizer-line-splitting",
                     S_LineSplitMaxSegmentsPerEdge,
                     1,
                     LINE_SPLIT_SEGMENTS_SLIDER_MAX
@@ -507,43 +511,43 @@ namespace OffzoneVisualizer {
                 UI::Text("Performance Guardrails");
 
                 S_CullOffscreenWorldTiles = UI::Checkbox(
-                    "Cull off-screen fill/icon tiles##offzone-visualizer-performance",
+                    "Cull off-screen fill/icon tiles##trigger-visualizer-performance",
                     S_CullOffscreenWorldTiles
                 );
 
                 S_CullScreenOccludedWorldTiles = UI::Checkbox(
-                    "Experimental screen-covered tile culling##offzone-visualizer-performance",
+                    "Experimental screen-covered tile culling##trigger-visualizer-performance",
                     S_CullScreenOccludedWorldTiles
                 );
 
                 UI::SetNextItemWidth(220.0f);
                 S_ScreenOcclusionCellSize = UI::InputInt(
-                    "Occlusion cell size##offzone-visualizer-performance",
+                    "Occlusion cell size##trigger-visualizer-performance",
                     S_ScreenOcclusionCellSize
                 );
 
                 UI::Separator();
                 UI::SetNextItemWidth(220.0f);
                 S_FillTileMinSize = UI::InputFloat(
-                    "Fill tile minimum size##offzone-visualizer-performance",
+                    "Fill tile minimum size##trigger-visualizer-performance",
                     S_FillTileMinSize
                 );
 
                 UI::SetNextItemWidth(220.0f);
                 S_MaxFillTilesPerFrame = UI::InputInt(
-                    "Max fill tiles per frame##offzone-visualizer-performance",
+                    "Max fill tiles per frame##trigger-visualizer-performance",
                     S_MaxFillTilesPerFrame
                 );
 
                 UI::SetNextItemWidth(220.0f);
                 S_MaxTileIconPatchesPerFrame = UI::InputInt(
-                    "Max tile icon patches per frame##offzone-visualizer-performance",
+                    "Max tile icon patches per frame##trigger-visualizer-performance",
                     S_MaxTileIconPatchesPerFrame
                 );
 
                 UI::SetNextItemWidth(220.0f);
                 S_TileIconMaxSubdivisions = UI::InputInt(
-                    "Tile icon max subdivisions##offzone-visualizer-performance",
+                    "Tile icon max subdivisions##trigger-visualizer-performance",
                     S_TileIconMaxSubdivisions
                 );
 
@@ -553,19 +557,19 @@ namespace OffzoneVisualizer {
             void AddPendingTileIconImage() {
                 if (G_PendingTileIconSourcePath.Length == 0) return;
 
-                string storagePath = OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage(G_PendingTileIconSourcePath);
+                string storagePath = TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage(G_PendingTileIconSourcePath);
 
                 if (storagePath.Length == 0) {
                     G_TileIconImportStatus = "Could not add image. Make sure it is a supported image file.";
-                    NotifyWarning(G_TileIconImportStatus, OffzoneVisualizer::PluginMeta.Name, 6000);
+                    NotifyWarning(G_TileIconImportStatus, TriggerVisualizer::PluginMeta.Name, 6000);
                     return;
                 }
 
                 S_CustomTileIconStoragePath = storagePath;
                 G_PendingTileIconSourcePath = "";
                 G_TileIconImportStatus = "Added image: " + IO::FromStorageFolder(storagePath);
-                OffzoneVisualizer::Offzone::Render::Assets::InvalidateSkullTileIconTexture();
-                NotifyInfo("Tile icon image added.", OffzoneVisualizer::PluginMeta.Name, 5000);
+                TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
+                NotifyInfo("Tile icon image added.", TriggerVisualizer::PluginMeta.Name, 5000);
             }
 
             void RenderTileIconImagePickerUI() {
@@ -575,7 +579,7 @@ namespace OffzoneVisualizer {
 
                 UI::PushItemWidth(520.0f);
                 G_PendingTileIconSourcePath = UI::InputText(
-                    "Image path##offzone-visualizer-tile-icon-manual-path",
+                    "Image path##trigger-visualizer-tile-icon-manual-path",
                     G_PendingTileIconSourcePath
                 );
                 UI::PopItemWidth();
@@ -583,30 +587,30 @@ namespace OffzoneVisualizer {
                 UI::Text("Current image:");
                 UI::PushItemWidth(520.0f);
                 UI::InputText(
-                    "##offzone-visualizer-current-tile-icon-path",
-                    OffzoneVisualizer::Offzone::Render::Assets::GetCurrentTileIconDisplayPath(),
+                    "##trigger-visualizer-current-tile-icon-path",
+                    TriggerVisualizer::Trigger::Render::Assets::GetCurrentTileIconDisplayPath(),
                     UI::InputTextFlags::ReadOnly
                 );
                 UI::PopItemWidth();
 
                 if (S_CustomTileIconStoragePath.Length > 0) {
-                    if (UI::Button("Use default image##offzone-visualizer-tile-icon-use-default")) {
+                    if (UI::Button("Use default image##trigger-visualizer-tile-icon-use-default")) {
                         S_CustomTileIconStoragePath = "";
-                        OffzoneVisualizer::Offzone::Render::Assets::InvalidateSkullTileIconTexture();
+                        TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
                         G_TileIconImportStatus = "Using default image.";
                     }
                 }
 
                 if (G_PendingTileIconSourcePath.Length > 0) {
                     UI::Separator();
-                    if (!OffzoneVisualizer::Offzone::Render::Assets::IsSupportedTileIconImagePath(G_PendingTileIconSourcePath)) {
+                    if (!TriggerVisualizer::Trigger::Render::Assets::IsSupportedTileIconImagePath(G_PendingTileIconSourcePath)) {
                         UI::TextDisabled("Supported file types: png, jpg, jpeg, webp, bmp.");
-                    } else if (UI::Button("Add this image##offzone-visualizer-tile-icon-add-selected")) {
+                    } else if (UI::Button("Add this image##trigger-visualizer-tile-icon-add-selected")) {
                         AddPendingTileIconImage();
                     }
 
                     UI::SameLine();
-                    if (UI::Button("Clear selection##offzone-visualizer-tile-icon-clear-selected")) {
+                    if (UI::Button("Clear selection##trigger-visualizer-tile-icon-clear-selected")) {
                         G_PendingTileIconSourcePath = "";
                         G_TileIconImportStatus = "";
                     }
@@ -618,8 +622,8 @@ namespace OffzoneVisualizer {
             }
 
             void RenderColorSettingsUI() {
-                UI::Text("Offzone Color");
-                if (UI::BeginCombo("Color mode##offzone-visualizer-color", GetColorModeLabel(S_ColorMode))) {
+                UI::Text("Trigger Volume Color");
+                if (UI::BeginCombo("Color mode##trigger-visualizer-color", GetColorModeLabel(S_ColorMode))) {
                     RenderColorModeOption(COLOR_MODE_STATIC);
                     RenderColorModeOption(COLOR_MODE_DISTANCE_FADE);
                     RenderColorModeOption(COLOR_MODE_LINE_SPLIT_DENSITY);
@@ -627,27 +631,27 @@ namespace OffzoneVisualizer {
                 }
 
                 UI::Separator();
-                S_BaseOffzoneColor = UI::InputColor4("Base color##offzone-visualizer-color", S_BaseOffzoneColor);
+                S_BaseTriggerColor = UI::InputColor4("Base color##trigger-visualizer-color", S_BaseTriggerColor);
                 S_DistanceFadeColor = UI::InputColor4(
-                    "Distance fade color##offzone-visualizer-color",
+                    "Distance fade color##trigger-visualizer-color",
                     S_DistanceFadeColor
                 );
                 S_DenseLineSplitColor = UI::InputColor4(
-                    "Dense line split color##offzone-visualizer-color",
+                    "Dense line split color##trigger-visualizer-color",
                     S_DenseLineSplitColor
                 );
 
                 UI::Separator();
                 UI::Text("Appearance");
                 UI::SetNextItemWidth(220.0f);
-                S_OutlineAlpha = UI::SliderFloat("Outline alpha##offzone-visualizer-color", S_OutlineAlpha, 0.0f, 1.0f);
+                S_OutlineAlpha = UI::SliderFloat("Outline alpha##trigger-visualizer-color", S_OutlineAlpha, 0.0f, 1.0f);
 
                 UI::SetNextItemWidth(220.0f);
-                S_FillAlpha = UI::SliderFloat("Fill alpha##offzone-visualizer-color", S_FillAlpha, 0.0f, 1.0f);
+                S_FillAlpha = UI::SliderFloat("Fill alpha##trigger-visualizer-color", S_FillAlpha, 0.0f, 1.0f);
 
                 UI::SetNextItemWidth(220.0f);
                 S_OutlineWidth = UI::SliderFloat(
-                    "Outline width##offzone-visualizer-color",
+                    "Outline width##trigger-visualizer-color",
                     S_OutlineWidth,
                     0.5f,
                     16.0f,
@@ -657,24 +661,24 @@ namespace OffzoneVisualizer {
                 UI::Separator();
                 UI::Text("Stable Random Colors");
                 S_RandomOutlineSegmentColors = UI::Checkbox(
-                    "Random color per outline segment##offzone-visualizer-color",
+                    "Random color per outline segment##trigger-visualizer-color",
                     S_RandomOutlineSegmentColors
                 );
                 S_RandomFillTileColors = UI::Checkbox(
-                    "Random color per fill section/tile##offzone-visualizer-color",
+                    "Random color per fill section/tile##trigger-visualizer-color",
                     S_RandomFillTileColors
                 );
 
                 UI::Separator();
                 UI::Text("Tile Icons");
                 S_ShowSkullTileIcons = UI::Checkbox(
-                    "Show tile icon at tile centers##offzone-visualizer-color",
+                    "Show tile icon at tile centers##trigger-visualizer-color",
                     S_ShowSkullTileIcons
                 );
 
                 UI::SetNextItemWidth(220.0f);
                 S_SkullTileIconScale = UI::SliderFloat(
-                    "Tile icon scale##offzone-visualizer-color",
+                    "Tile icon scale##trigger-visualizer-color",
                     S_SkullTileIconScale,
                     0.05f,
                     1.0f
@@ -682,7 +686,7 @@ namespace OffzoneVisualizer {
 
                 UI::SetNextItemWidth(220.0f);
                 S_SkullTileIconAlpha = UI::SliderFloat(
-                    "Tile icon alpha##offzone-visualizer-color",
+                    "Tile icon alpha##trigger-visualizer-color",
                     S_SkullTileIconAlpha,
                     0.0f,
                     1.0f
@@ -698,7 +702,7 @@ namespace OffzoneVisualizer {
 
             void RenderProximitySettingsUI() {
                 UI::Text("Render Proximity Source");
-                if (UI::BeginCombo("Render based on##offzone-visualizer-proximity", GetRenderProximityModeLabel(S_RenderProximityMode))) {
+                if (UI::BeginCombo("Render based on##trigger-visualizer-proximity", GetRenderProximityModeLabel(S_RenderProximityMode))) {
                     RenderProximityModeOption(PROXIMITY_MODE_CAMERA_ONLY);
                     RenderProximityModeOption(PROXIMITY_MODE_PLAYER_ONLY);
                     RenderProximityModeOption(PROXIMITY_MODE_CAMERA_AND_PLAYER);
@@ -712,27 +716,36 @@ namespace OffzoneVisualizer {
                 );
             }
 
+            void RenderSourcesSettingsUI() {
+                UI::Text("Trigger Sources");
+                S_ShowOffzoneSource = UI::Checkbox(
+                    "Show offzone trigger source##trigger-visualizer-sources",
+                    S_ShowOffzoneSource
+                );
+                UI::TextDisabled("Offzone is currently the only implemented source. Disabling it hides all current volumes.");
+            }
+
             void RenderLabelsSettingsUI() {
                 UI::Text("Label Rendering");
-                S_ShowLabels = UI::Checkbox("Show labels##offzone-visualizer-labels", S_ShowLabels);
+                S_ShowLabels = UI::Checkbox("Show labels##trigger-visualizer-labels", S_ShowLabels);
 
                 UI::Separator();
                 UI::Text("Content");
-                S_LabelShowIndex = UI::Checkbox("Show index##offzone-visualizer-labels", S_LabelShowIndex);
-                S_LabelShowRawRange = UI::Checkbox("Show raw range##offzone-visualizer-labels", S_LabelShowRawRange);
-                S_LabelShowWorldSize = UI::Checkbox("Show world size##offzone-visualizer-labels", S_LabelShowWorldSize);
+                S_LabelShowIndex = UI::Checkbox("Show index##trigger-visualizer-labels", S_LabelShowIndex);
+                S_LabelShowRawRange = UI::Checkbox("Show raw range##trigger-visualizer-labels", S_LabelShowRawRange);
+                S_LabelShowWorldSize = UI::Checkbox("Show world size##trigger-visualizer-labels", S_LabelShowWorldSize);
 
                 UI::Separator();
                 UI::Text("Appearance");
                 UI::SetNextItemWidth(220.0f);
-                S_LabelFontSize = UI::InputFloat("Font size##offzone-visualizer-labels", S_LabelFontSize);
+                S_LabelFontSize = UI::InputFloat("Font size##trigger-visualizer-labels", S_LabelFontSize);
 
                 UI::SetNextItemWidth(220.0f);
-                S_LabelAlpha = UI::SliderFloat("Text alpha##offzone-visualizer-labels", S_LabelAlpha, 0.0f, 1.0f);
+                S_LabelAlpha = UI::SliderFloat("Text alpha##trigger-visualizer-labels", S_LabelAlpha, 0.0f, 1.0f);
 
                 UI::SetNextItemWidth(220.0f);
                 S_LabelBackgroundAlpha = UI::SliderFloat(
-                    "Background alpha##offzone-visualizer-labels",
+                    "Background alpha##trigger-visualizer-labels",
                     S_LabelBackgroundAlpha,
                     0.0f,
                     1.0f

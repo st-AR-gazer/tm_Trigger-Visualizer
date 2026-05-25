@@ -1,7 +1,7 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
-            vec3 GetBoxFaceNormal(uint faceIndex) {
+            vec3 GetTriggerVolumeFaceNormal(uint faceIndex) {
                 if (faceIndex == 0) return vec3(-1.0f, 0.0f, 0.0f);
                 if (faceIndex == 1) return vec3(1.0f, 0.0f, 0.0f);
                 if (faceIndex == 2) return vec3(0.0f, -1.0f, 0.0f);
@@ -10,7 +10,7 @@ namespace OffzoneVisualizer {
                 return vec3(0.0f, 0.0f, 1.0f);
             }
 
-            array<vec3> @GetWorldBoxCorners(const WorldAabb@ box) {
+            array<vec3> @GetTriggerVolumeCorners(const TriggerVolume@ box) {
                 auto corners = array<vec3>();
                 if (box is null) return corners;
 

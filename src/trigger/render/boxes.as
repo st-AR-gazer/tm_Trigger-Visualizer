@@ -1,5 +1,5 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
             const float MIN_VISIBLE_FADE = 0.001f;
             const float FILL_TILE_SPLIT_DISTANCE_FACTOR = 0.75f;
@@ -37,7 +37,7 @@ namespace OffzoneVisualizer {
 
             void ResetWorldRenderPerformanceBudgets() {
                 G_TileIconPatchBudgetRemaining = uint(Math::Max(
-                    OffzoneVisualizer::Offzone::UI::S_MaxTileIconPatchesPerFrame,
+                    TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame,
                     0
                 ));
                 UpdateWorldFrustumState();
@@ -76,13 +76,13 @@ namespace OffzoneVisualizer {
                 }
             }
 
-            const uint[][] BOX_EDGE_INDICES = {
+            const uint[][] TRIGGER_VOLUME_EDGE_INDICES = {
                 {0, 1}, {1, 2}, {2, 3}, {3, 0},
                 {4, 5}, {5, 6}, {6, 7}, {7, 4},
                 {0, 4}, {1, 5}, {2, 6}, {3, 7}
             };
 
-            const uint[][] BOX_FACE_INDICES = {
+            const uint[][] TRIGGER_VOLUME_FACE_INDICES = {
                 {0, 4, 7, 3},
                 {1, 2, 6, 5},
                 {0, 1, 5, 4},
@@ -128,26 +128,26 @@ namespace OffzoneVisualizer {
             }
 
             vec4 GetOutlineSegmentColor(const vec4 &in baseColor, uint boxIndex, uint edgeIndex, uint segmentIndex) {
-                if (!OffzoneVisualizer::Offzone::UI::S_RandomOutlineSegmentColors) return baseColor;
+                if (!TriggerVisualizer::Trigger::UI::S_RandomOutlineSegmentColors) return baseColor;
                 return StableRandomColor(GetOutlineSegmentColorSeed(boxIndex, edgeIndex, segmentIndex), baseColor.w);
             }
 
             vec4 GetFillTileColor(const vec4 &in baseColor, float tileSeed) {
-                if (!OffzoneVisualizer::Offzone::UI::S_RandomFillTileColors) return baseColor;
+                if (!TriggerVisualizer::Trigger::UI::S_RandomFillTileColors) return baseColor;
                 return StableRandomColor(tileSeed, baseColor.w);
             }
 
             float GetFillTileMinSize() {
-                return Math::Clamp(OffzoneVisualizer::Offzone::UI::S_FillTileMinSize, 2.0f, 64.0f);
+                return Math::Clamp(TriggerVisualizer::Trigger::UI::S_FillTileMinSize, 2.0f, 64.0f);
             }
 
-            float GetWorldBoxLineSplitDensityFactor(const WorldAabb@ box, const vec3 &in cameraPos) {
-                if (!OffzoneVisualizer::Offzone::UI::S_AdaptiveLineSplitting) return 0.0f;
+            float GetTriggerVolumeLineSplitDensityFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (!TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting) return 0.0f;
 
-                int maxAllowedSegments = Math::Max(OffzoneVisualizer::Offzone::UI::S_LineSplitMaxSegmentsPerEdge, 1);
+                int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitMaxSegmentsPerEdge, 1);
                 if (maxAllowedSegments <= 1) return 0.0f;
 
-                uint maxEdgeSegments = GetMaxWorldBoxOutlineEdgeSegments(box, cameraPos);
+                uint maxEdgeSegments = GetMaxTriggerVolumeOutlineEdgeSegments(box, cameraPos);
                 return Math::Clamp(
                     float(Math::Max(int(maxEdgeSegments), 1) - 1) / float(maxAllowedSegments - 1),
                     0.0f,
@@ -155,40 +155,40 @@ namespace OffzoneVisualizer {
                 );
             }
 
-            vec4 GetColorModeColor(const WorldAabb@ box, const vec3 &in cameraPos, float fade) {
-                int colorMode = OffzoneVisualizer::Offzone::UI::S_ColorMode;
-                vec4 color = OffzoneVisualizer::Offzone::UI::S_BaseOffzoneColor;
+            vec4 GetColorModeColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
+                int colorMode = TriggerVisualizer::Trigger::UI::S_ColorMode;
+                vec4 color = TriggerVisualizer::Trigger::UI::S_BaseTriggerColor;
 
-                if (colorMode == OffzoneVisualizer::Offzone::UI::COLOR_MODE_DISTANCE_FADE) {
+                if (colorMode == TriggerVisualizer::Trigger::UI::COLOR_MODE_DISTANCE_FADE) {
                     color = LerpColor(
                         color,
-                        OffzoneVisualizer::Offzone::UI::S_DistanceFadeColor,
+                        TriggerVisualizer::Trigger::UI::S_DistanceFadeColor,
                         1.0f - Math::Clamp(fade, 0.0f, 1.0f)
                     );
-                } else if (colorMode == OffzoneVisualizer::Offzone::UI::COLOR_MODE_LINE_SPLIT_DENSITY) {
+                } else if (colorMode == TriggerVisualizer::Trigger::UI::COLOR_MODE_LINE_SPLIT_DENSITY) {
                     color = LerpColor(
                         color,
-                        OffzoneVisualizer::Offzone::UI::S_DenseLineSplitColor,
-                        GetWorldBoxLineSplitDensityFactor(box, cameraPos)
+                        TriggerVisualizer::Trigger::UI::S_DenseLineSplitColor,
+                        GetTriggerVolumeLineSplitDensityFactor(box, cameraPos)
                     );
                 }
 
                 return color;
             }
 
-            vec4 GetOutlineColor(const WorldAabb@ box, const vec3 &in cameraPos, float fade) {
+            vec4 GetOutlineColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = GetColorModeColor(box, cameraPos, fade);
-                color.w *= OffzoneVisualizer::Offzone::UI::S_OutlineAlpha * Math::Clamp(fade, 0.0f, 1.0f);
+                color.w *= TriggerVisualizer::Trigger::UI::S_OutlineAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return color;
             }
 
-            vec4 GetFillColor(const WorldAabb@ box, const vec3 &in cameraPos, float fade) {
+            vec4 GetFillColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = GetColorModeColor(box, cameraPos, fade);
-                color.w *= OffzoneVisualizer::Offzone::UI::S_FillAlpha * Math::Clamp(fade, 0.0f, 1.0f);
+                color.w *= TriggerVisualizer::Trigger::UI::S_FillAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return color;
             }
 
-            vec3 GetDistanceOutsideBox(const WorldAabb@ box, const vec3 &in point) {
+            vec3 GetDistanceOutsideTriggerVolume(const TriggerVolume@ box, const vec3 &in point) {
                 if (box is null) return vec3(1e9f, 1e9f, 1e9f);
 
                 vec3 halfSize = box.Size() * 0.5f;
@@ -216,10 +216,10 @@ namespace OffzoneVisualizer {
                 return 1.0f - ((axisDistance - fadeStart) / fadeBand);
             }
 
-            float GetWorldBoxFadeFactor(const WorldAabb@ box, const vec3 &in cameraPos) {
+            float GetTriggerVolumeFadeFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
                 vec3 renderDistance = GetEffectiveRenderDistanceWorld();
-                vec3 fadeBand = OffzoneVisualizer::Offzone::UI::GetRenderFadeBandWorld();
-                vec3 outside = GetDistanceOutsideBox(box, cameraPos);
+                vec3 fadeBand = TriggerVisualizer::Trigger::UI::GetRenderFadeBandWorld();
+                vec3 outside = GetDistanceOutsideTriggerVolume(box, cameraPos);
 
                 float fx = GetAxisFadeFactor(outside.x, renderDistance.x, fadeBand.x);
                 float fy = GetAxisFadeFactor(outside.y, renderDistance.y, fadeBand.y);
@@ -231,141 +231,141 @@ namespace OffzoneVisualizer {
                 return fade > MIN_VISIBLE_FADE;
             }
 
-            bool IsWorldBoxInRenderRange(const WorldAabb@ box, const vec3 &in cameraPos) {
-                return IsVisibleFadeFactor(GetWorldBoxFadeFactor(box, cameraPos));
+            bool IsTriggerVolumeInRenderRange(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                return IsVisibleFadeFactor(GetTriggerVolumeFadeFactor(box, cameraPos));
             }
 
-            float GetPlayerWorldBoxFadeFactor(
-                const WorldAabb@ box,
-                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+            float GetPlayerTriggerVolumeFadeFactor(
+                const TriggerVolume@ box,
+                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
             ) {
                 if (playerState is null || !playerState.HasVehicle) return 0.0f;
-                return GetWorldBoxFadeFactor(box, playerState.Position);
+                return GetTriggerVolumeFadeFactor(box, playerState.Position);
             }
 
-            float GetWorldBoxRenderFadeFactor(
-                const WorldAabb@ box,
+            float GetTriggerVolumeRenderFadeFactor(
+                const TriggerVolume@ box,
                 const vec3 &in cameraPos,
-                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
             ) {
-                int proximityMode = OffzoneVisualizer::Offzone::UI::S_RenderProximityMode;
-                float cameraFade = GetWorldBoxFadeFactor(box, cameraPos);
+                int proximityMode = TriggerVisualizer::Trigger::UI::S_RenderProximityMode;
+                float cameraFade = GetTriggerVolumeFadeFactor(box, cameraPos);
 
-                if (proximityMode == OffzoneVisualizer::Offzone::UI::PROXIMITY_MODE_PLAYER_ONLY) {
-                    return GetPlayerWorldBoxFadeFactor(box, playerState);
+                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_PLAYER_ONLY) {
+                    return GetPlayerTriggerVolumeFadeFactor(box, playerState);
                 }
 
-                if (proximityMode == OffzoneVisualizer::Offzone::UI::PROXIMITY_MODE_CAMERA_AND_PLAYER) {
-                    return Math::Max(cameraFade, GetPlayerWorldBoxFadeFactor(box, playerState));
+                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_PLAYER) {
+                    return Math::Max(cameraFade, GetPlayerTriggerVolumeFadeFactor(box, playerState));
                 }
 
                 return cameraFade;
             }
 
-            bool IsWorldBoxInRenderRangeForProximity(
-                const WorldAabb@ box,
+            bool IsTriggerVolumeInRenderRangeForProximity(
+                const TriggerVolume@ box,
                 const vec3 &in cameraPos,
-                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
             ) {
-                return IsVisibleFadeFactor(GetWorldBoxRenderFadeFactor(box, cameraPos, playerState));
+                return IsVisibleFadeFactor(GetTriggerVolumeRenderFadeFactor(box, cameraPos, playerState));
             }
 
-            uint CountWorldBoxesInRenderRange(const array<WorldAabb@> @boxes, const vec3 &in cameraPos) {
+            uint CountTriggerVolumesInRenderRange(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    if (IsWorldBoxInRenderRange(boxes[i], cameraPos)) {
+                    if (IsTriggerVolumeInRenderRange(boxes[i], cameraPos)) {
                         count++;
                     }
                 }
                 return count;
             }
 
-            uint CountWorldBoxesInRenderRangeForProximity(
-                const array<WorldAabb@> @boxes,
+            uint CountTriggerVolumesInRenderRangeForProximity(
+                const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
             ) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    if (IsWorldBoxInRenderRangeForProximity(boxes[i], cameraPos, playerState)) {
+                    if (IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, playerState)) {
                         count++;
                     }
                 }
                 return count;
             }
 
-            uint CountWorldBoxesInFadeBand(const array<WorldAabb@> @boxes, const vec3 &in cameraPos) {
+            uint CountTriggerVolumesInFadeBand(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    float fade = GetWorldBoxFadeFactor(boxes[i], cameraPos);
+                    float fade = GetTriggerVolumeFadeFactor(boxes[i], cameraPos);
                     if (fade >= 1.0f || !IsVisibleFadeFactor(fade)) continue;
                     count++;
                 }
                 return count;
             }
 
-            uint CountWorldBoxesInFadeBandForProximity(
-                const array<WorldAabb@> @boxes,
+            uint CountTriggerVolumesInFadeBandForProximity(
+                const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
             ) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    float fade = GetWorldBoxRenderFadeFactor(boxes[i], cameraPos, playerState);
+                    float fade = GetTriggerVolumeRenderFadeFactor(boxes[i], cameraPos, playerState);
                     if (fade >= 1.0f || !IsVisibleFadeFactor(fade)) continue;
                     count++;
                 }
                 return count;
             }
 
-            void DrawWorldBoxFill(const WorldAabb@ box, const vec3 &in cameraPos, const vec4 &in color, uint boxIndex) {
+            void DrawTriggerVolumeFill(const TriggerVolume@ box, const vec3 &in cameraPos, const vec4 &in color, uint boxIndex) {
                 auto items = array<WorldFillTileDrawItem@>();
-                CollectWorldBoxFillDrawItems(box, cameraPos, color, boxIndex, items);
+                CollectTriggerVolumeFillDrawItems(box, cameraPos, color, boxIndex, items);
                 DrawWorldFillTileDrawItems(items);
             }
 
-            void CollectWorldBoxFillDrawItems(
-                const WorldAabb@ box,
+            void CollectTriggerVolumeFillDrawItems(
+                const TriggerVolume@ box,
                 const vec3 &in cameraPos,
                 const vec4 &in color,
                 uint boxIndex,
                 array<WorldFillTileDrawItem@> @items
             ) {
                 if (items is null) return;
-                auto corners = GetWorldBoxCorners(box);
+                auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
-                if (color.w <= 0.001f && !OffzoneVisualizer::Offzone::UI::S_ShowSkullTileIcons) return;
+                if (color.w <= 0.001f && !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
 
-                for (uint i = 0; i < BOX_FACE_INDICES.Length; i++) {
-                    auto face = BOX_FACE_INDICES[i];
-                    if (!IsBoxFaceCameraFacing(corners, face, i, cameraPos)) continue;
+                for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                    auto face = TRIGGER_VOLUME_FACE_INDICES[i];
+                    if (!IsTriggerVolumeFaceCameraFacing(corners, face, i, cameraPos)) continue;
                     CollectAdaptiveWorldFaceFillDrawItems(items, corners, face, cameraPos, color, boxIndex, i);
                 }
             }
 
-            void DrawWorldBoxOutline(
-                const WorldAabb@ box,
+            void DrawTriggerVolumeOutline(
+                const TriggerVolume@ box,
                 const vec3 &in cameraPos,
                 const vec4 &in color,
                 float strokeWidth,
                 uint boxIndex
             ) {
-                auto corners = GetWorldBoxCorners(box);
+                auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
 
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
-                for (uint i = 0; i < BOX_EDGE_INDICES.Length; i++) {
-                    auto edge = BOX_EDGE_INDICES[i];
+                for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
+                    auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
                     DrawWorldLineAdaptiveColored(corners[edge[0]], corners[edge[1]], cameraPos, color, boxIndex, i);
                 }
             }

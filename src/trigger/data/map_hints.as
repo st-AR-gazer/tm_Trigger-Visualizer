@@ -1,7 +1,7 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Data {
-            const string OFFZONE_VISUALIZER_MAP_COMMAND_PREFIX = "/offzone-visualizer";
+            const string TRIGGER_VISUALIZER_MAP_COMMAND_PREFIX = "/trigger-visualizer";
             const float MAP_HINT_BLOCK_SIZE_XZ = 32.0f;
             const float MAP_HINT_BLOCK_SIZE_Y = 8.0f;
 
@@ -44,11 +44,11 @@ namespace OffzoneVisualizer {
                 if (trimmed.Length == 0) return;
 
                 string lower = trimmed.ToLower();
-                if (!lower.StartsWith(OFFZONE_VISUALIZER_MAP_COMMAND_PREFIX)) return;
+                if (!lower.StartsWith(TRIGGER_VISUALIZER_MAP_COMMAND_PREFIX)) return;
 
                 auto tokens = SplitMapHintTokens(trimmed);
                 if (tokens.Length < 2) return;
-                if (tokens[0].ToLower() != OFFZONE_VISUALIZER_MAP_COMMAND_PREFIX) return;
+                if (tokens[0].ToLower() != TRIGGER_VISUALIZER_MAP_COMMAND_PREFIX) return;
 
                 string command = tokens[1].ToLower();
                 if (command == "suggest-off") {

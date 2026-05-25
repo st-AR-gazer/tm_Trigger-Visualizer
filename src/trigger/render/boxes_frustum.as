@@ -1,5 +1,5 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
             vec3 MoveLocalPoint(const iso4 &in transform, const vec3 &in delta) {
                 iso4 moved = transform;

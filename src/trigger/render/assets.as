@@ -1,5 +1,5 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
             namespace Assets {
                 const string DEFAULT_SKULL_TILE_ICON_PATH = "src/assets/skull_and_crossbones.png";
@@ -19,13 +19,13 @@ namespace OffzoneVisualizer {
                 }
 
                 string GetConfiguredSkullTileIconTexturePath() {
-                    string storagePath = OffzoneVisualizer::Offzone::UI::S_CustomTileIconStoragePath;
+                    string storagePath = TriggerVisualizer::Trigger::UI::S_CustomTileIconStoragePath;
                     if (storagePath.Length == 0) return DEFAULT_SKULL_TILE_ICON_PATH;
                     return IO::FromStorageFolder(storagePath);
                 }
 
                 string GetCurrentTileIconDisplayPath() {
-                    string storagePath = OffzoneVisualizer::Offzone::UI::S_CustomTileIconStoragePath;
+                    string storagePath = TriggerVisualizer::Trigger::UI::S_CustomTileIconStoragePath;
                     if (storagePath.Length == 0) return DEFAULT_SKULL_TILE_ICON_PATH + " (default)";
                     return IO::FromStorageFolder(storagePath);
                 }
@@ -59,7 +59,7 @@ namespace OffzoneVisualizer {
                             "Cannot import tile icon because the source file does not exist: " + sourcePath,
                             LogLevel::Warning,
                             58,
-                            "OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage"
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                         return "";
                     }
@@ -69,7 +69,7 @@ namespace OffzoneVisualizer {
                             "Cannot import tile icon because the file type is not supported: " + sourcePath,
                             LogLevel::Warning,
                             68,
-                            "OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage"
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                         return "";
                     }
@@ -89,7 +89,7 @@ namespace OffzoneVisualizer {
                             "Failed to copy tile icon image to storage: " + sourcePath + " -> " + targetPath,
                             LogLevel::Error,
                             88,
-                            "OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage"
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                         return "";
                     }
@@ -99,7 +99,7 @@ namespace OffzoneVisualizer {
                             "Tile icon copy did not create the expected storage file: " + targetPath,
                             LogLevel::Error,
                             98,
-                            "OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage"
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                         return "";
                     }
@@ -128,7 +128,7 @@ namespace OffzoneVisualizer {
                             "Failed to read tile icon image file: " + path,
                             LogLevel::Warning,
                             127,
-                            "OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage"
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                     }
 
@@ -150,7 +150,7 @@ namespace OffzoneVisualizer {
                             "Failed to load tile icon texture: " + path,
                             LogLevel::Warning,
                             149,
-                            "OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage"
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                     }
 
@@ -158,7 +158,7 @@ namespace OffzoneVisualizer {
                 }
 
                 nvg::Texture@ GetSkullTileIconTexture() {
-                    bool useCustomImage = OffzoneVisualizer::Offzone::UI::S_CustomTileIconStoragePath.Length > 0;
+                    bool useCustomImage = TriggerVisualizer::Trigger::UI::S_CustomTileIconStoragePath.Length > 0;
                     string path = GetConfiguredSkullTileIconTexturePath();
 
                     if (!g_TriedLoadSkullTileIconTexture || g_LoadedSkullTileIconPath != path) {
@@ -171,7 +171,7 @@ namespace OffzoneVisualizer {
                                 "Failed to load configured tile icon texture: " + path,
                                 LogLevel::Warning,
                                 170,
-                                "OffzoneVisualizer::Offzone::Render::Assets::CopyTileIconImageToStorage"
+                                "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                             );
 
                             if (path != DEFAULT_SKULL_TILE_ICON_PATH) {

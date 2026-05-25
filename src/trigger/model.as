@@ -1,5 +1,14 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
+        const int TRIGGER_SOURCE_OFFZONE = 0;
+        const int TRIGGER_SOURCE_MEDIATRACKER = 1;
+
+        string GetTriggerSourceName(int source) {
+            if (source == TRIGGER_SOURCE_OFFZONE) return "Offzone";
+            if (source == TRIGGER_SOURCE_MEDIATRACKER) return "MediaTracker";
+            return "Unknown";
+        }
+
         class TriggerRangeRaw {
             int3 Start;
             int3 End;
@@ -31,15 +40,32 @@ namespace OffzoneVisualizer {
             }
         }
 
-        class WorldAabb {
+        class TriggerVolume {
             vec3 Min;
             vec3 Max;
+            int Source = TRIGGER_SOURCE_OFFZONE;
+            uint SourceIndex = 0;
+            string Label;
 
-            WorldAabb() { }
+            TriggerVolume() { }
 
-            WorldAabb(const vec3 &in min, const vec3 &in max) {
+            TriggerVolume(const vec3 &in min, const vec3 &in max) {
                 Min = min;
                 Max = max;
+            }
+
+            TriggerVolume(
+                const vec3 &in min,
+                const vec3 &in max,
+                int source,
+                uint sourceIndex,
+                const string &in label = ""
+            ) {
+                Min = min;
+                Max = max;
+                Source = source;
+                SourceIndex = sourceIndex;
+                Label = label;
             }
 
             vec3 Size() const {
@@ -48,6 +74,47 @@ namespace OffzoneVisualizer {
 
             vec3 Center() const {
                 return(Min + Max) * 0.5f;
+            }
+
+            string SourceName() const {
+                return GetTriggerSourceName(Source);
+            }
+
+            string DisplayLabel() const {
+                if (Label.Length > 0) return Label;
+                return SourceName() + " #" + tostring(SourceIndex);
+            }
+        }
+
+        class TriggerSourceSnapshot {
+            int Source = TRIGGER_SOURCE_OFFZONE;
+            string Name = "Offzone";
+            bool Enabled = true;
+            nat3 RawTriggerSize;
+            uint64 RawBufferPtr = 0;
+            TriggerGridSpec@ GridSpec;
+            array<TriggerRangeRaw@> RawRanges;
+            array<TriggerVolume@> TriggerVolumes;
+
+            TriggerSourceSnapshot() {
+                RawTriggerSize = nat3(1, 1, 1);
+                @GridSpec = TriggerGridSpec();
+            }
+
+            TriggerSourceSnapshot(int source, bool enabled) {
+                Source = source;
+                Name = GetTriggerSourceName(source);
+                Enabled = enabled;
+                RawTriggerSize = nat3(1, 1, 1);
+                @GridSpec = TriggerGridSpec();
+            }
+
+            uint RawRangeCount() const {
+                return RawRanges.Length;
+            }
+
+            uint TriggerVolumeCount() const {
+                return TriggerVolumes.Length;
             }
         }
 
@@ -59,12 +126,28 @@ namespace OffzoneVisualizer {
             TriggerGridSpec@ GridSpec;
             MapRenderHints@ RenderHints;
             array<TriggerRangeRaw@> RawRanges;
-            array<WorldAabb@> WorldBoxes;
+            array<TriggerSourceSnapshot@> Sources;
+            array<TriggerVolume@> TriggerVolumes;
 
             MapSnapshot() {
                 RawTriggerSize = nat3(1, 1, 1);
                 @GridSpec = TriggerGridSpec();
                 @RenderHints = MapRenderHints();
+            }
+
+            void AddSource(TriggerSourceSnapshot@ source) {
+                if (source is null) return;
+
+                Sources.InsertLast(source);
+                if (!source.Enabled) return;
+
+                for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
+                    TriggerVolumes.InsertLast(source.TriggerVolumes[i]);
+                }
+            }
+
+            uint SourceCount() const {
+                return Sources.Length;
             }
 
             uint OffzoneCount() const {
@@ -73,6 +156,14 @@ namespace OffzoneVisualizer {
 
             bool HasOffzones() const {
                 return RawRanges.Length > 0;
+            }
+
+            uint TriggerVolumeCount() const {
+                return TriggerVolumes.Length;
+            }
+
+            bool HasTriggerVolumes() const {
+                return TriggerVolumes.Length > 0;
             }
         }
 

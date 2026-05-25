@@ -1,7 +1,7 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
-            vec3 GetWorldBoxLabelPosition(const WorldAabb@ box) {
+            vec3 GetTriggerVolumeLabelPosition(const TriggerVolume@ box) {
                 if (box is null) return vec3();
 
                 vec3 center = box.Center();
@@ -20,7 +20,7 @@ namespace OffzoneVisualizer {
                 return rawRange.Start.ToString() + " -> " + rawRange.End.ToString();
             }
 
-            string FormatWorldSizeLabel(const WorldAabb@ box) {
+            string FormatWorldSizeLabel(const TriggerVolume@ box) {
                 if (box is null) return "";
                 vec3 size = box.Size();
                 float sx = size.x;
@@ -32,18 +32,18 @@ namespace OffzoneVisualizer {
                     + " m";
             }
 
-            string BuildWorldBoxLabelText(uint index, const TriggerRangeRaw@ rawRange, const WorldAabb@ box) {
+            string BuildTriggerVolumeLabelText(uint index, const TriggerRangeRaw@ rawRange, const TriggerVolume@ box) {
                 array<string> parts;
 
-                if (OffzoneVisualizer::Offzone::UI::S_LabelShowIndex) {
+                if (TriggerVisualizer::Trigger::UI::S_LabelShowIndex) {
                     parts.InsertLast("#" + index);
                 }
 
-                if (OffzoneVisualizer::Offzone::UI::S_LabelShowRawRange && rawRange !is null) {
+                if (TriggerVisualizer::Trigger::UI::S_LabelShowRawRange && rawRange !is null) {
                     parts.InsertLast(FormatRawRangeLabel(rawRange));
                 }
 
-                if (OffzoneVisualizer::Offzone::UI::S_LabelShowWorldSize) {
+                if (TriggerVisualizer::Trigger::UI::S_LabelShowWorldSize) {
                     parts.InsertLast(FormatWorldSizeLabel(box));
                 }
 
@@ -55,20 +55,20 @@ namespace OffzoneVisualizer {
             }
 
             vec4 GetLabelTextColor(float fade) {
-                float alpha = OffzoneVisualizer::Offzone::UI::S_LabelAlpha * Math::Clamp(fade, 0.0f, 1.0f);
+                float alpha = TriggerVisualizer::Trigger::UI::S_LabelAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return vec4(1.0f, 1.0f, 1.0f, alpha);
             }
 
             vec4 GetLabelBackgroundColor(float fade) {
-                float alpha = OffzoneVisualizer::Offzone::UI::S_LabelBackgroundAlpha * Math::Clamp(fade, 0.0f, 1.0f);
+                float alpha = TriggerVisualizer::Trigger::UI::S_LabelBackgroundAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return vec4(0.0f, 0.0f, 0.0f, alpha);
             }
 
-            bool ShouldDrawWorldBoxLabel(const WorldAabb@ box, const vec3 &in cameraPos) {
-                if (!OffzoneVisualizer::Offzone::UI::S_ShowLabels) return false;
+            bool ShouldDrawTriggerVolumeLabel(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (!TriggerVisualizer::Trigger::UI::S_ShowLabels) return false;
                 if (box is null) return false;
 
-                vec3 screenPos = Camera::ToScreen(GetWorldBoxLabelPosition(box));
+                vec3 screenPos = Camera::ToScreen(GetTriggerVolumeLabelPosition(box));
                 return screenPos.z < 0 && IsScreenPositionVisible(screenPos.xy);
             }
 
@@ -76,7 +76,7 @@ namespace OffzoneVisualizer {
                 if (label.Length == 0) return;
 
                 nvg::Reset();
-                nvg::FontSize(OffzoneVisualizer::Offzone::UI::S_LabelFontSize);
+                nvg::FontSize(TriggerVisualizer::Trigger::UI::S_LabelFontSize);
                 nvg::TextAlign(nvg::Align::Left | nvg::Align::Top);
 
                 vec2 textSize = nvg::TextBounds(label);
@@ -97,32 +97,32 @@ namespace OffzoneVisualizer {
                 nvg::Text(textPos, label);
             }
 
-            void DrawWorldBoxLabel(
-                const WorldAabb@ box,
+            void DrawTriggerVolumeLabel(
+                const TriggerVolume@ box,
                 const TriggerRangeRaw@ rawRange,
                 uint index,
                 const vec3 &in cameraPos,
                 float fade
             ) {
-                if (!ShouldDrawWorldBoxLabel(box, cameraPos)) return;
+                if (!ShouldDrawTriggerVolumeLabel(box, cameraPos)) return;
                 if (!IsVisibleFadeFactor(fade)) return;
 
-                vec3 screenPos = Camera::ToScreen(GetWorldBoxLabelPosition(box));
-                DrawLabelCard(screenPos.xy, BuildWorldBoxLabelText(index, rawRange, box), fade);
+                vec3 screenPos = Camera::ToScreen(GetTriggerVolumeLabelPosition(box));
+                DrawLabelCard(screenPos.xy, BuildTriggerVolumeLabelText(index, rawRange, box), fade);
             }
 
-            uint CountVisibleWorldBoxLabels(
-                const array<WorldAabb@> @boxes,
+            uint CountVisibleTriggerVolumeLabels(
+                const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
             ) {
-                if (boxes is null || !OffzoneVisualizer::Offzone::UI::S_ShowLabels) return 0;
+                if (boxes is null || !TriggerVisualizer::Trigger::UI::S_ShowLabels) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    float fade = GetWorldBoxRenderFadeFactor(boxes[i], cameraPos, playerState);
+                    float fade = GetTriggerVolumeRenderFadeFactor(boxes[i], cameraPos, playerState);
                     if (!IsVisibleFadeFactor(fade)) continue;
-                    if (ShouldDrawWorldBoxLabel(boxes[i], cameraPos)) count++;
+                    if (ShouldDrawTriggerVolumeLabel(boxes[i], cameraPos)) count++;
                 }
                 return count;
             }

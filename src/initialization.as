@@ -1,15 +1,15 @@
 void Main() {
-    OffzoneVisualizer::App::Main();
+    TriggerVisualizer::App::Main();
 }
 
 void Render() {
-    OffzoneVisualizer::App::Render();
+    TriggerVisualizer::App::Render();
 }
 
 void RenderInterface() {
-    OffzoneVisualizer::App::RenderInterface();
+    TriggerVisualizer::App::RenderInterface();
 }
 
 void RenderMenu() {
-    OffzoneVisualizer::App::RenderMenu();
+    TriggerVisualizer::App::RenderMenu();
 }

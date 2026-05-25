@@ -1,5 +1,5 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
             float GetDistanceToWorldLineSegment(const vec3 &in point, const vec3 &in start, const vec3 &in end) {
                 vec3 line = end - start;
@@ -23,28 +23,28 @@ namespace OffzoneVisualizer {
             }
 
             uint GetAdaptiveLineSegmentCount(const vec3 &in start, const vec3 &in end, const vec3 &in cameraPos) {
-                if (!OffzoneVisualizer::Offzone::UI::S_AdaptiveLineSplitting) return 1;
+                if (!TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting) return 1;
 
                 float lineLength = Math::Distance(start, end);
                 if (lineLength <= 0.001f) return 1;
 
                 float minSegmentLength = Math::Max(
-                    OffzoneVisualizer::Offzone::UI::S_LineSplitTargetSegmentLength,
-                    OffzoneVisualizer::Offzone::UI::LINE_SPLIT_MINIMUM_SAFE_LENGTH
+                    TriggerVisualizer::Trigger::UI::S_LineSplitTargetSegmentLength,
+                    TriggerVisualizer::Trigger::UI::LINE_SPLIT_MINIMUM_SAFE_LENGTH
                 );
-                int maxAllowedSegments = Math::Max(OffzoneVisualizer::Offzone::UI::S_LineSplitMaxSegmentsPerEdge, 1);
+                int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitMaxSegmentsPerEdge, 1);
                 int maxSegments = Math::Max(1, Math::Min(int(Math::Floor(lineLength / minSegmentLength)), maxAllowedSegments));
                 if (maxSegments <= 1) return 1;
 
                 float startDistance = ClampLineSplitDistanceToUserRange(
-                    lineLength * Math::Max(OffzoneVisualizer::Offzone::UI::S_LineSplitStartDistanceFactor, 0.0f),
-                    OffzoneVisualizer::Offzone::UI::S_LineSplitMinStartDistance,
-                    OffzoneVisualizer::Offzone::UI::S_LineSplitMaxStartDistance
+                    lineLength * Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitStartDistanceFactor, 0.0f),
+                    TriggerVisualizer::Trigger::UI::S_LineSplitMinStartDistance,
+                    TriggerVisualizer::Trigger::UI::S_LineSplitMaxStartDistance
                 );
                 float fullDistance = ClampLineSplitDistanceToUserRange(
-                    lineLength * Math::Max(OffzoneVisualizer::Offzone::UI::S_LineSplitFullDistanceFactor, 0.0f),
-                    OffzoneVisualizer::Offzone::UI::S_LineSplitMinFullDistance,
-                    OffzoneVisualizer::Offzone::UI::S_LineSplitMaxFullDistance
+                    lineLength * Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitFullDistanceFactor, 0.0f),
+                    TriggerVisualizer::Trigger::UI::S_LineSplitMinFullDistance,
+                    TriggerVisualizer::Trigger::UI::S_LineSplitMaxFullDistance
                 );
                 fullDistance = Math::Min(fullDistance, Math::Max(startDistance - 0.001f, 0.0f));
 
@@ -58,35 +58,35 @@ namespace OffzoneVisualizer {
                 return uint(Math::Clamp(segmentCount, 1, maxSegments));
             }
 
-            uint CountWorldBoxOutlineSegments(const WorldAabb@ box, const vec3 &in cameraPos) {
-                auto corners = GetWorldBoxCorners(box);
+            uint CountTriggerVolumeOutlineSegments(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
                 uint count = 0;
-                for (uint i = 0; i < BOX_EDGE_INDICES.Length; i++) {
-                    auto edge = BOX_EDGE_INDICES[i];
+                for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
+                    auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
                     count += GetAdaptiveLineSegmentCount(corners[edge[0]], corners[edge[1]], cameraPos);
                 }
                 return count;
             }
 
-            uint CountWorldBoxesOutlineSegments(const array<WorldAabb@> @boxes, const vec3 &in cameraPos) {
+            uint CountTriggerVolumesOutlineSegments(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    count += CountWorldBoxOutlineSegments(boxes[i], cameraPos);
+                    count += CountTriggerVolumeOutlineSegments(boxes[i], cameraPos);
                 }
                 return count;
             }
 
-            uint GetMaxWorldBoxOutlineEdgeSegments(const WorldAabb@ box, const vec3 &in cameraPos) {
-                auto corners = GetWorldBoxCorners(box);
+            uint GetMaxTriggerVolumeOutlineEdgeSegments(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
                 uint maxSegments = 0;
-                for (uint i = 0; i < BOX_EDGE_INDICES.Length; i++) {
-                    auto edge = BOX_EDGE_INDICES[i];
+                for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
+                    auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
                     maxSegments = Math::Max(
                         maxSegments,
                         GetAdaptiveLineSegmentCount(corners[edge[0]], corners[edge[1]], cameraPos)
@@ -95,12 +95,12 @@ namespace OffzoneVisualizer {
                 return maxSegments;
             }
 
-            uint GetMaxWorldBoxesOutlineEdgeSegments(const array<WorldAabb@> @boxes, const vec3 &in cameraPos) {
+            uint GetMaxTriggerVolumesOutlineEdgeSegments(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
                 if (boxes is null) return 0;
 
                 uint maxSegments = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    maxSegments = Math::Max(maxSegments, GetMaxWorldBoxOutlineEdgeSegments(boxes[i], cameraPos));
+                    maxSegments = Math::Max(maxSegments, GetMaxTriggerVolumeOutlineEdgeSegments(boxes[i], cameraPos));
                 }
                 return maxSegments;
             }
@@ -117,8 +117,8 @@ namespace OffzoneVisualizer {
 
             float GetLineFrustumResolveMinLength() {
                 return Math::Max(
-                    OffzoneVisualizer::Offzone::UI::S_LineSplitTargetSegmentLength,
-                    OffzoneVisualizer::Offzone::UI::LINE_SPLIT_MINIMUM_SAFE_LENGTH
+                    TriggerVisualizer::Trigger::UI::S_LineSplitTargetSegmentLength,
+                    TriggerVisualizer::Trigger::UI::LINE_SPLIT_MINIMUM_SAFE_LENGTH
                 );
             }
 

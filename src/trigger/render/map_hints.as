@@ -1,15 +1,15 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
             bool IsWorldRenderingDisabledByMapHint(const MapSnapshot@ snapshot) {
                 if (snapshot is null || snapshot.RenderHints is null) return false;
                 if (snapshot.RenderHints.ForceOff) return true;
-                return snapshot.RenderHints.SuggestOff && OffzoneVisualizer::Offzone::UI::S_RespectMapSuggestOff;
+                return snapshot.RenderHints.SuggestOff && TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff;
             }
 
             vec3 GetEffectiveRenderDistanceWorld() {
-                vec3 distance = OffzoneVisualizer::Offzone::UI::GetRenderDistanceWorld();
-                if (!OffzoneVisualizer::Offzone::UI::S_UseMapSuggestedDrawDistance) return distance;
+                vec3 distance = TriggerVisualizer::Trigger::UI::GetRenderDistanceWorld();
+                if (!TriggerVisualizer::Trigger::UI::S_UseMapSuggestedDrawDistance) return distance;
 
                 auto snapshot = GetCurrentMapSnapshot();
                 if (snapshot is null || snapshot.RenderHints is null) return distance;

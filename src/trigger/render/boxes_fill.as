@@ -1,5 +1,5 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Render {
             float GetDistanceToWorldQuad(
                 const vec3 &in point,
@@ -70,7 +70,7 @@ namespace OffzoneVisualizer {
                 if (primitiveClass == WORLD_PRIMITIVE_OUTSIDE) return 0;
                 bool isMixed = primitiveClass == WORLD_PRIMITIVE_MIXED;
 
-                int maxFrameTiles = Math::Max(OffzoneVisualizer::Offzone::UI::S_MaxFillTilesPerFrame, 1);
+                int maxFrameTiles = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
                 if (int(items.Length) >= maxFrameTiles) return 0;
 
                 uint remainingFrameBudget = uint(maxFrameTiles - int(items.Length));
@@ -224,9 +224,9 @@ namespace OffzoneVisualizer {
 
             bool ShouldSortWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
                 if (items is null || items.Length <= 1) return false;
-                if (OffzoneVisualizer::Offzone::UI::S_CullScreenOccludedWorldTiles) return true;
-                if (OffzoneVisualizer::Offzone::UI::S_ShowSkullTileIcons) return true;
-                if (OffzoneVisualizer::Offzone::UI::S_RandomFillTileColors) return true;
+                if (TriggerVisualizer::Trigger::UI::S_CullScreenOccludedWorldTiles) return true;
+                if (TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return true;
+                if (TriggerVisualizer::Trigger::UI::S_RandomFillTileColors) return true;
                 return !AreAllWorldFillTileColorsEquivalent(items);
             }
 
@@ -274,7 +274,7 @@ namespace OffzoneVisualizer {
                 uint startIndex,
                 uint endIndex
             ) {
-                if (items is null || !OffzoneVisualizer::Offzone::UI::S_ShowSkullTileIcons) return;
+                if (items is null || !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
 
                 for (uint i = startIndex; i < endIndex && i < items.Length; i++) {
                     if (items[i] is null || items[i].Occluded) continue;
@@ -305,13 +305,13 @@ namespace OffzoneVisualizer {
 
             void MarkScreenOccludedWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
                 if (items is null || items.Length <= 1) return;
-                if (!OffzoneVisualizer::Offzone::UI::S_CullScreenOccludedWorldTiles) return;
+                if (!TriggerVisualizer::Trigger::UI::S_CullScreenOccludedWorldTiles) return;
 
                 int displayWidth = Display::GetWidth();
                 int displayHeight = Display::GetHeight();
                 if (displayWidth <= 0 || displayHeight <= 0) return;
 
-                int cellSize = Math::Clamp(OffzoneVisualizer::Offzone::UI::S_ScreenOcclusionCellSize, 8, 256);
+                int cellSize = Math::Clamp(TriggerVisualizer::Trigger::UI::S_ScreenOcclusionCellSize, 8, 256);
                 int columns = Math::Max(1, int(Math::Ceil(float(displayWidth) / float(cellSize))));
                 int rows = Math::Max(1, int(Math::Ceil(float(displayHeight) / float(cellSize))));
                 auto occupied = array<bool>(uint(columns * rows), false);
@@ -541,7 +541,7 @@ namespace OffzoneVisualizer {
                 return CountAdaptiveWorldFaceTiles(origin, uEdge, vEdge, cameraPos, 0, FILL_TILE_MAX_TILES_PER_FACE);
             }
 
-            bool IsBoxFaceCameraFacing(
+            bool IsTriggerVolumeFaceCameraFacing(
                 const array<vec3> @corners,
                 const uint[]@ face,
                 uint faceIndex,
@@ -555,75 +555,75 @@ namespace OffzoneVisualizer {
                 }
                 center *= 0.25f;
 
-                return Math::Dot(GetBoxFaceNormal(faceIndex), cameraPos - center) > 0.0f;
+                return Math::Dot(GetTriggerVolumeFaceNormal(faceIndex), cameraPos - center) > 0.0f;
             }
 
-            uint CountWorldBoxCameraFacingFaces(const WorldAabb@ box, const vec3 &in cameraPos) {
-                auto corners = GetWorldBoxCorners(box);
+            uint CountTriggerVolumeCameraFacingFaces(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
                 uint count = 0;
-                for (uint i = 0; i < BOX_FACE_INDICES.Length; i++) {
-                    if (IsBoxFaceCameraFacing(corners, BOX_FACE_INDICES[i], i, cameraPos)) {
+                for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                    if (IsTriggerVolumeFaceCameraFacing(corners, TRIGGER_VOLUME_FACE_INDICES[i], i, cameraPos)) {
                         count++;
                     }
                 }
                 return count;
             }
 
-            uint CountWorldBoxesCameraFacingFaces(const array<WorldAabb@> @boxes, const vec3 &in cameraPos) {
+            uint CountTriggerVolumesCameraFacingFaces(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    if (!IsWorldBoxInRenderRange(boxes[i], cameraPos)) continue;
-                    count += CountWorldBoxCameraFacingFaces(boxes[i], cameraPos);
+                    if (!IsTriggerVolumeInRenderRange(boxes[i], cameraPos)) continue;
+                    count += CountTriggerVolumeCameraFacingFaces(boxes[i], cameraPos);
                 }
                 return count;
             }
 
-            uint CountWorldBoxesCameraFacingFacesForProximity(
-                const array<WorldAabb@> @boxes,
+            uint CountTriggerVolumesCameraFacingFacesForProximity(
+                const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
             ) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    if (!IsWorldBoxInRenderRangeForProximity(boxes[i], cameraPos, playerState)) continue;
-                    count += CountWorldBoxCameraFacingFaces(boxes[i], cameraPos);
+                    if (!IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, playerState)) continue;
+                    count += CountTriggerVolumeCameraFacingFaces(boxes[i], cameraPos);
                 }
                 return count;
             }
 
-            uint CountWorldBoxFillTiles(const WorldAabb@ box, const vec3 &in cameraPos) {
-                auto corners = GetWorldBoxCorners(box);
+            uint CountTriggerVolumeFillTiles(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
                 uint count = 0;
-                for (uint i = 0; i < BOX_FACE_INDICES.Length; i++) {
-                    auto face = BOX_FACE_INDICES[i];
-                    if (!IsBoxFaceCameraFacing(corners, face, i, cameraPos)) continue;
+                for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                    auto face = TRIGGER_VOLUME_FACE_INDICES[i];
+                    if (!IsTriggerVolumeFaceCameraFacing(corners, face, i, cameraPos)) continue;
                     count += CountAdaptiveWorldFaceFillTiles(corners, face, cameraPos);
                 }
                 return count;
             }
 
-            uint CountWorldBoxesFillTilesForProximity(
-                const array<WorldAabb@> @boxes,
+            uint CountTriggerVolumesFillTilesForProximity(
+                const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const OffzoneVisualizer::Offzone::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
             ) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
-                uint maxFrameTiles = uint(Math::Max(OffzoneVisualizer::Offzone::UI::S_MaxFillTilesPerFrame, 1));
+                uint maxFrameTiles = uint(Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1));
                 for (uint i = 0; i < boxes.Length; i++) {
                     if (count >= maxFrameTiles) return count;
-                    if (!IsWorldBoxInRenderRangeForProximity(boxes[i], cameraPos, playerState)) continue;
+                    if (!IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, playerState)) continue;
                     uint remaining = maxFrameTiles - count;
-                    uint boxCount = CountWorldBoxFillTiles(boxes[i], cameraPos);
+                    uint boxCount = CountTriggerVolumeFillTiles(boxes[i], cameraPos);
                     if (boxCount > remaining) {
                         count += remaining;
                     } else {

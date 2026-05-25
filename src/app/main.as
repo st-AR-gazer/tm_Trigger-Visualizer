@@ -1,18 +1,18 @@
-namespace OffzoneVisualizer {
+namespace TriggerVisualizer {
     namespace App {
         void Main() {
             log(
-                "Loaded " + OffzoneVisualizer::PluginMeta.Name + " v" + OffzoneVisualizer::PluginMeta.Version,
+                "Loaded " + TriggerVisualizer::PluginMeta.Name + " v" + TriggerVisualizer::PluginMeta.Version,
                 LogLevel::Debug,
                 4,
-                "OffzoneVisualizer::App::Main"
+                "TriggerVisualizer::App::Main"
             );
-            OffzoneVisualizer::Offzone::Main();
+            TriggerVisualizer::Trigger::Main();
         }
 
         void Render() {
             if (!ShouldRenderWorld()) return;
-            OffzoneVisualizer::Offzone::RenderWorld();
+            TriggerVisualizer::Trigger::RenderWorld();
         }
 
         bool ShouldRenderWithUiVisibility() {
@@ -22,7 +22,7 @@ namespace OffzoneVisualizer {
         }
 
         bool ShouldRenderWorld() {
-            if (!OffzoneVisualizer::Offzone::UI::S_RenderWorld) return false;
+            if (!TriggerVisualizer::Trigger::UI::S_RenderWorld) return false;
             return ShouldRenderWithUiVisibility();
         }
 
@@ -34,7 +34,7 @@ namespace OffzoneVisualizer {
             if (!ShouldRenderWindow()) return;
 
             bool devPanelOpen = S_DevPanelOpen;
-            if (UI::Begin(MenuTitle() + "###dev-panel-" + OffzoneVisualizer::PluginMeta.ID, devPanelOpen, UI::WindowFlags::None)) {
+            if (UI::Begin(MenuTitle() + "###dev-panel-" + TriggerVisualizer::PluginMeta.ID, devPanelOpen, UI::WindowFlags::None)) {
                 RenderWindow();
             }
             S_DevPanelOpen = devPanelOpen;
@@ -48,9 +48,9 @@ namespace OffzoneVisualizer {
         }
 
         void RenderWindow() {
-            UI::Text(OffzoneVisualizer::PluginMeta.Name + " " + OffzoneVisualizer::PluginMeta.Version);
+            UI::Text(TriggerVisualizer::PluginMeta.Name + " " + TriggerVisualizer::PluginMeta.Version);
             UI::Separator();
-            OffzoneVisualizer::Offzone::RenderDevPanel();
+            TriggerVisualizer::Trigger::RenderDevPanel();
         }
     }
 }

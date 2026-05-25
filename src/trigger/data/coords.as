@@ -1,5 +1,5 @@
-namespace OffzoneVisualizer {
-    namespace Offzone {
+namespace TriggerVisualizer {
+    namespace Trigger {
         namespace Data {
             const vec3 OFFZONE_BLOCK_WORLD_SIZE = vec3(32.0f, 8.0f, 32.0f);
             const int OFFZONE_WORLD_Y_ANCHOR = 8;
@@ -31,25 +31,37 @@ namespace OffzoneVisualizer {
                 );
             }
 
-            WorldAabb@ TriggerRangeToWorldAabb(const TriggerRangeRaw@ range, const TriggerGridSpec@ spec) {
-                if (range is null || spec is null) return WorldAabb();
+            TriggerVolume@ TriggerRangeToTriggerVolume(
+                const TriggerRangeRaw@ range,
+                const TriggerGridSpec@ spec,
+                int source,
+                uint sourceIndex
+            ) {
+                if (range is null || spec is null) return TriggerVolume();
                 vec3 min = TriggerCoordToWorldPos(range.Start, spec);
                 vec3 max = TriggerCoordToWorldPos(range.End + int3(1, 1, 1), spec);
-                return WorldAabb(min, max);
+                return TriggerVolume(
+                    min,
+                    max,
+                    source,
+                    sourceIndex,
+                    GetTriggerSourceName(source) + " #" + tostring(sourceIndex)
+                );
             }
 
-            array<WorldAabb@> @TriggerRangesToWorldAabbs(
+            array<TriggerVolume@> @TriggerRangesToTriggerVolumes(
                 const array<TriggerRangeRaw@> @ranges,
-                const TriggerGridSpec@ spec
+                const TriggerGridSpec@ spec,
+                int source
             ) {
-                auto boxes = array<WorldAabb@>();
-                if (ranges is null || spec is null) return boxes;
+                auto volumes = array<TriggerVolume@>();
+                if (ranges is null || spec is null) return volumes;
 
                 for (uint i = 0; i < ranges.Length; i++) {
-                    boxes.InsertLast(TriggerRangeToWorldAabb(ranges[i], spec));
+                    volumes.InsertLast(TriggerRangeToTriggerVolume(ranges[i], spec, source, i));
                 }
 
-                return boxes;
+                return volumes;
             }
         }
     }
