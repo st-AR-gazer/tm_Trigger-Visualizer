@@ -5,7 +5,7 @@ namespace OffzoneVisualizer {
         void RenderRestoreDefaultsModal() {
             if (UI::BeginPopupModal(RESTORE_DEFAULTS_POPUP_ID, UI::WindowFlags::AlwaysAutoResize)) {
                 UI::Text("Restore Offzone Visualizer defaults?");
-                UI::TextDisabled("This resets General, World Rendering, Line Splitting, Color, Proximity, and Labels settings.");
+                UI::TextDisabled("This resets General, World Rendering, Line Splitting, Performance, Color, Proximity, and Labels settings.");
 
                 UI::Separator();
                 if (UI::Button("Restore defaults##offzone-visualizer-confirm-restore-defaults")) {
@@ -62,6 +62,14 @@ namespace OffzoneVisualizer {
             bool open = UI::BeginChild("##offzone-visualizer-settings-line-splitting", vec2(0, 0), false);
             if (open) {
                 OffzoneVisualizer::Offzone::UI::RenderLineSplittingSettingsUI();
+            }
+            UI::EndChild();
+        }
+
+        void RenderPerformanceSettingsUI() {
+            bool open = UI::BeginChild("##offzone-visualizer-settings-performance", vec2(0, 0), false);
+            if (open) {
+                OffzoneVisualizer::Offzone::UI::RenderPerformanceSettingsUI();
             }
             UI::EndChild();
         }

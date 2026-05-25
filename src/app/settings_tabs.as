@@ -13,17 +13,22 @@ void RenderOffzoneVisualizerLineSplittingSettingsTab() {
     OffzoneVisualizer::App::RenderLineSplittingSettingsUI();
 }
 
-[SettingsTab name="Color" icon="Tint" order=4]
+[SettingsTab name="Performance" icon="Tachometer" order=4]
+void RenderOffzoneVisualizerPerformanceSettingsTab() {
+    OffzoneVisualizer::App::RenderPerformanceSettingsUI();
+}
+
+[SettingsTab name="Color" icon="Tint" order=5]
 void RenderOffzoneVisualizerColorSettingsTab() {
     OffzoneVisualizer::App::RenderColorSettingsUI();
 }
 
-[SettingsTab name="Proximity" icon="Car" order=5]
+[SettingsTab name="Proximity" icon="Car" order=6]
 void RenderOffzoneVisualizerProximitySettingsTab() {
     OffzoneVisualizer::App::RenderProximitySettingsUI();
 }
 
-[SettingsTab name="Labels" icon="Tags" order=6]
+[SettingsTab name="Labels" icon="Tags" order=7]
 void RenderOffzoneVisualizerLabelsSettingsTab() {
     OffzoneVisualizer::App::RenderLabelsSettingsUI();
 }

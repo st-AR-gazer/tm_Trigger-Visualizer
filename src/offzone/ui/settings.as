@@ -55,29 +55,50 @@ namespace OffzoneVisualizer {
             [Setting hidden name="Offzone: Adaptive line splitting"]
             bool S_AdaptiveLineSplitting = true;
 
-            [Setting hidden name="Offzone: Line split minimum segment length" min=4 max=512]
+            [Setting hidden name="Offzone: Line split minimum segment length"]
             float S_LineSplitTargetSegmentLength = 4.0f;
 
-            [Setting hidden name="Offzone: Line split start distance factor" min=0.01 max=4]
+            [Setting hidden name="Offzone: Line split start distance factor"]
             float S_LineSplitStartDistanceFactor = 0.33f;
 
-            [Setting hidden name="Offzone: Line split full distance factor" min=0.001 max=1]
+            [Setting hidden name="Offzone: Line split full distance factor"]
             float S_LineSplitFullDistanceFactor = 0.05f;
 
-            [Setting hidden name="Offzone: Line split min start distance" min=0 max=50000]
+            [Setting hidden name="Offzone: Line split min start distance"]
             float S_LineSplitMinStartDistance = 16.0f;
 
-            [Setting hidden name="Offzone: Line split max start distance" min=0 max=50000]
+            [Setting hidden name="Offzone: Line split max start distance"]
             float S_LineSplitMaxStartDistance = 50000.0f;
 
-            [Setting hidden name="Offzone: Line split min full distance" min=0 max=50000]
+            [Setting hidden name="Offzone: Line split min full distance"]
             float S_LineSplitMinFullDistance = 2.0f;
 
-            [Setting hidden name="Offzone: Line split max full distance" min=0 max=50000]
+            [Setting hidden name="Offzone: Line split max full distance"]
             float S_LineSplitMaxFullDistance = 96.0f;
 
-            [Setting hidden name="Offzone: Line split max segments per edge" min=1 max=512]
+            [Setting hidden name="Offzone: Line split max segments per edge"]
             int S_LineSplitMaxSegmentsPerEdge = 512;
+
+            [Setting hidden name="Offzone: Cull offscreen world tiles"]
+            bool S_CullOffscreenWorldTiles = true;
+
+            [Setting hidden name="Offzone: Experimental screen-occluded world tile culling"]
+            bool S_CullScreenOccludedWorldTiles = false;
+
+            [Setting hidden name="Offzone: Screen occlusion cell size" min=8 max=256]
+            int S_ScreenOcclusionCellSize = 32;
+
+            [Setting hidden name="Offzone: Fill tile minimum size" min=2 max=64]
+            float S_FillTileMinSize = 4.0f;
+
+            [Setting hidden name="Offzone: Max fill tiles per frame" min=128 max=65536]
+            int S_MaxFillTilesPerFrame = 4096;
+
+            [Setting hidden name="Offzone: Max tile icon patches per frame" min=0 max=65536]
+            int S_MaxTileIconPatchesPerFrame = 1600;
+
+            [Setting hidden name="Offzone: Tile icon max subdivisions" min=1 max=12]
+            int S_TileIconMaxSubdivisions = 6;
 
             const int COLOR_MODE_STATIC = 0;
             const int COLOR_MODE_DISTANCE_FADE = 1;
@@ -94,6 +115,11 @@ namespace OffzoneVisualizer {
             const float WORLD_FADE_SLIDER_MAX_XZ = WORLD_BLOCK_SIZE_XZ * 5.0f;
             const float WORLD_FADE_SLIDER_MAX_Y = WORLD_BLOCK_SIZE_Y * 5.0f;
             const float WORLD_RENDER_SETTING_MAX = 50000.0f;
+            const float LINE_SPLIT_MINIMUM_SAFE_LENGTH = 0.001f;
+            const float LINE_SPLIT_TARGET_LENGTH_SLIDER_MAX = 64.0f;
+            const float LINE_SPLIT_START_DISTANCE_SLIDER_MAX = 2048.0f;
+            const float LINE_SPLIT_FULL_DISTANCE_SLIDER_MAX = 512.0f;
+            const int LINE_SPLIT_SEGMENTS_SLIDER_MAX = 512;
 
             [Setting hidden name="Offzone: Color mode" min=0 max=2]
             int S_ColorMode = COLOR_MODE_STATIC;
@@ -150,23 +176,22 @@ namespace OffzoneVisualizer {
             }
 
             void ClampLineSplittingSettings() {
-                S_LineSplitTargetSegmentLength = Math::Clamp(S_LineSplitTargetSegmentLength, 4.0f, 512.0f);
-                S_LineSplitStartDistanceFactor = Math::Clamp(S_LineSplitStartDistanceFactor, 0.01f, 4.0f);
-                S_LineSplitFullDistanceFactor = Math::Clamp(S_LineSplitFullDistanceFactor, 0.001f, 1.0f);
+                S_LineSplitTargetSegmentLength = Math::Max(S_LineSplitTargetSegmentLength, LINE_SPLIT_MINIMUM_SAFE_LENGTH);
+                S_LineSplitStartDistanceFactor = Math::Max(S_LineSplitStartDistanceFactor, 0.0f);
+                S_LineSplitFullDistanceFactor = Math::Max(S_LineSplitFullDistanceFactor, 0.0f);
+                S_LineSplitMinStartDistance = Math::Max(S_LineSplitMinStartDistance, 0.0f);
+                S_LineSplitMaxStartDistance = Math::Max(S_LineSplitMaxStartDistance, 0.0f);
+                S_LineSplitMinFullDistance = Math::Max(S_LineSplitMinFullDistance, 0.0f);
+                S_LineSplitMaxFullDistance = Math::Max(S_LineSplitMaxFullDistance, 0.0f);
+                S_LineSplitMaxSegmentsPerEdge = Math::Max(S_LineSplitMaxSegmentsPerEdge, 1);
+            }
 
-                S_LineSplitMinStartDistance = Math::Clamp(S_LineSplitMinStartDistance, 0.0f, 50000.0f);
-                S_LineSplitMaxStartDistance = Math::Clamp(S_LineSplitMaxStartDistance, 0.0f, 50000.0f);
-                if (S_LineSplitMinStartDistance > S_LineSplitMaxStartDistance) {
-                    S_LineSplitMaxStartDistance = S_LineSplitMinStartDistance;
-                }
-
-                S_LineSplitMinFullDistance = Math::Clamp(S_LineSplitMinFullDistance, 0.0f, 50000.0f);
-                S_LineSplitMaxFullDistance = Math::Clamp(S_LineSplitMaxFullDistance, 0.0f, 50000.0f);
-                if (S_LineSplitMinFullDistance > S_LineSplitMaxFullDistance) {
-                    S_LineSplitMaxFullDistance = S_LineSplitMinFullDistance;
-                }
-
-                S_LineSplitMaxSegmentsPerEdge = Math::Clamp(S_LineSplitMaxSegmentsPerEdge, 1, 512);
+            void ClampPerformanceSettings() {
+                S_ScreenOcclusionCellSize = Math::Clamp(S_ScreenOcclusionCellSize, 8, 256);
+                S_FillTileMinSize = Math::Clamp(S_FillTileMinSize, 2.0f, 64.0f);
+                S_MaxFillTilesPerFrame = Math::Clamp(S_MaxFillTilesPerFrame, 128, 65536);
+                S_MaxTileIconPatchesPerFrame = Math::Clamp(S_MaxTileIconPatchesPerFrame, 0, 65536);
+                S_TileIconMaxSubdivisions = Math::Clamp(S_TileIconMaxSubdivisions, 1, 12);
             }
 
             vec4 ClampColor(const vec4 &in color) {
@@ -220,6 +245,13 @@ namespace OffzoneVisualizer {
                 S_LineSplitMinFullDistance = 2.0f;
                 S_LineSplitMaxFullDistance = 96.0f;
                 S_LineSplitMaxSegmentsPerEdge = 512;
+                S_CullOffscreenWorldTiles = true;
+                S_CullScreenOccludedWorldTiles = false;
+                S_ScreenOcclusionCellSize = 32;
+                S_FillTileMinSize = 4.0f;
+                S_MaxFillTilesPerFrame = 4096;
+                S_MaxTileIconPatchesPerFrame = 1600;
+                S_TileIconMaxSubdivisions = 6;
                 S_ColorMode = COLOR_MODE_STATIC;
                 S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_PLAYER;
                 S_BaseOffzoneColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
@@ -237,6 +269,7 @@ namespace OffzoneVisualizer {
 
                 ClampWorldRenderingSettings();
                 ClampLineSplittingSettings();
+                ClampPerformanceSettings();
                 ClampColorSettings();
                 ClampLabelSettings();
             }
@@ -372,12 +405,16 @@ namespace OffzoneVisualizer {
                 UI::TextDisabled("Splitting always uses camera distance, even when proximity uses the player.");
                 UI::TextDisabled("Closest edges use the minimum segment length. The default keeps segments at least 4m long.");
                 UI::TextDisabled("Smaller segment lengths and higher segment caps cost more render work.");
+                UI::TextDisabled("Slider ranges are soft. Ctrl+click a slider to type larger custom values.");
 
                 UI::Separator();
                 UI::SetNextItemWidth(220.0f);
-                S_LineSplitTargetSegmentLength = UI::InputFloat(
+                S_LineSplitTargetSegmentLength = UI::SliderFloat(
                     "Minimum segment length##offzone-visualizer-line-splitting",
-                    S_LineSplitTargetSegmentLength
+                    S_LineSplitTargetSegmentLength,
+                    LINE_SPLIT_MINIMUM_SAFE_LENGTH,
+                    LINE_SPLIT_TARGET_LENGTH_SLIDER_MAX,
+                    "%.3f m"
                 );
 
                 UI::SetNextItemWidth(220.0f);
@@ -385,7 +422,8 @@ namespace OffzoneVisualizer {
                     "Start distance factor##offzone-visualizer-line-splitting",
                     S_LineSplitStartDistanceFactor,
                     0.01f,
-                    4.0f
+                    4.0f,
+                    "%.3f"
                 );
 
                 UI::SetNextItemWidth(220.0f);
@@ -393,40 +431,102 @@ namespace OffzoneVisualizer {
                     "Full distance factor##offzone-visualizer-line-splitting",
                     S_LineSplitFullDistanceFactor,
                     0.001f,
-                    1.0f
+                    1.0f,
+                    "%.4f"
                 );
 
                 UI::SetNextItemWidth(220.0f);
-                S_LineSplitMinStartDistance = UI::InputFloat(
+                S_LineSplitMinStartDistance = UI::SliderFloat(
                     "Min start distance##offzone-visualizer-line-splitting",
-                    S_LineSplitMinStartDistance
+                    S_LineSplitMinStartDistance,
+                    0.0f,
+                    LINE_SPLIT_START_DISTANCE_SLIDER_MAX,
+                    "%.1f m"
                 );
 
                 UI::SetNextItemWidth(220.0f);
-                S_LineSplitMaxStartDistance = UI::InputFloat(
+                S_LineSplitMaxStartDistance = UI::SliderFloat(
                     "Max start distance##offzone-visualizer-line-splitting",
-                    S_LineSplitMaxStartDistance
+                    S_LineSplitMaxStartDistance,
+                    0.0f,
+                    LINE_SPLIT_START_DISTANCE_SLIDER_MAX,
+                    "%.1f m"
                 );
 
                 UI::SetNextItemWidth(220.0f);
-                S_LineSplitMinFullDistance = UI::InputFloat(
+                S_LineSplitMinFullDistance = UI::SliderFloat(
                     "Min full distance##offzone-visualizer-line-splitting",
-                    S_LineSplitMinFullDistance
+                    S_LineSplitMinFullDistance,
+                    0.0f,
+                    LINE_SPLIT_FULL_DISTANCE_SLIDER_MAX,
+                    "%.1f m"
                 );
 
                 UI::SetNextItemWidth(220.0f);
-                S_LineSplitMaxFullDistance = UI::InputFloat(
+                S_LineSplitMaxFullDistance = UI::SliderFloat(
                     "Max full distance##offzone-visualizer-line-splitting",
-                    S_LineSplitMaxFullDistance
+                    S_LineSplitMaxFullDistance,
+                    0.0f,
+                    LINE_SPLIT_FULL_DISTANCE_SLIDER_MAX,
+                    "%.1f m"
                 );
 
                 UI::SetNextItemWidth(220.0f);
-                S_LineSplitMaxSegmentsPerEdge = UI::InputInt(
+                S_LineSplitMaxSegmentsPerEdge = UI::SliderInt(
                     "Max segments per edge##offzone-visualizer-line-splitting",
-                    S_LineSplitMaxSegmentsPerEdge
+                    S_LineSplitMaxSegmentsPerEdge,
+                    1,
+                    LINE_SPLIT_SEGMENTS_SLIDER_MAX
                 );
 
                 ClampLineSplittingSettings();
+            }
+
+            void RenderPerformanceSettingsUI() {
+                UI::Text("Performance Guardrails");
+
+                S_CullOffscreenWorldTiles = UI::Checkbox(
+                    "Cull off-screen fill/icon tiles##offzone-visualizer-performance",
+                    S_CullOffscreenWorldTiles
+                );
+
+                S_CullScreenOccludedWorldTiles = UI::Checkbox(
+                    "Experimental screen-covered tile culling##offzone-visualizer-performance",
+                    S_CullScreenOccludedWorldTiles
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_ScreenOcclusionCellSize = UI::InputInt(
+                    "Occlusion cell size##offzone-visualizer-performance",
+                    S_ScreenOcclusionCellSize
+                );
+
+                UI::Separator();
+                UI::SetNextItemWidth(220.0f);
+                S_FillTileMinSize = UI::InputFloat(
+                    "Fill tile minimum size##offzone-visualizer-performance",
+                    S_FillTileMinSize
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_MaxFillTilesPerFrame = UI::InputInt(
+                    "Max fill tiles per frame##offzone-visualizer-performance",
+                    S_MaxFillTilesPerFrame
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_MaxTileIconPatchesPerFrame = UI::InputInt(
+                    "Max tile icon patches per frame##offzone-visualizer-performance",
+                    S_MaxTileIconPatchesPerFrame
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_TileIconMaxSubdivisions = UI::InputInt(
+                    "Tile icon max subdivisions##offzone-visualizer-performance",
+                    S_TileIconMaxSubdivisions
+                );
+
+                ClampPerformanceSettings();
             }
 
             void AddPendingTileIconImage() {

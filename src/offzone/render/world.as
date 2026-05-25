@@ -13,6 +13,7 @@ namespace OffzoneVisualizer {
 
                 vec3 cameraPos = Camera::GetCurrentPosition();
                 auto playerState = OffzoneVisualizer::Offzone::Data::GetPlayerPositionState();
+                ResetWorldRenderPerformanceBudgets();
 
                 auto fillTileItems = array<WorldFillTileDrawItem@>();
                 for (uint i = 0; i < snapshot.WorldBoxes.Length; i++) {

@@ -35,6 +35,13 @@ namespace OffzoneVisualizer {
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Random Tile Colors", OnOff(UI::S_RandomFillTileColors)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Skull Tile Icons", OnOff(UI::S_ShowSkullTileIcons)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Skull Icon Scale", Text::Format("%.2f", UI::S_SkullTileIconScale)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Offscreen Tile Culling", OnOff(UI::S_CullOffscreenWorldTiles)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Screen Occlusion Culling", OnOff(UI::S_CullScreenOccludedWorldTiles)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Occlusion Cell Size", tostring(UI::S_ScreenOcclusionCellSize)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Tile Min Size", Text::Format("%.1f m", UI::S_FillTileMinSize)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Tile Budget", tostring(UI::S_MaxFillTilesPerFrame)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Icon Patch Budget", tostring(UI::S_MaxTileIconPatchesPerFrame)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Icon Max Subdivisions", tostring(UI::S_TileIconMaxSubdivisions)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Alpha", Text::Format("%.2f", UI::S_OutlineAlpha)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill Alpha", Text::Format("%.2f", UI::S_FillAlpha)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Outline Width", Text::Format("%.1f px", UI::S_OutlineWidth)));
