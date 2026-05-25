@@ -25,8 +25,11 @@ namespace OffzoneVisualizer {
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fill", OnOff(UI::S_ShowFill)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Labels", OnOff(UI::S_ShowLabels)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Render Distance", UI::GetRenderDistanceWorld().ToString() + " m"));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Effective Distance", OffzoneVisualizer::Offzone::Render::GetEffectiveRenderDistanceWorld().ToString() + " m"));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Fade Band", UI::GetRenderFadeBandWorld().ToString() + " m"));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Proximity Source", UI::GetRenderProximityModeLabel(UI::S_RenderProximityMode)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Use Map Distance", OnOff(UI::S_UseMapSuggestedDrawDistance)));
+                    UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Respect Suggest Off", OnOff(UI::S_RespectMapSuggestOff)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Color Mode", UI::GetColorModeLabel(UI::S_ColorMode)));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Base Color", UI::S_BaseOffzoneColor.ToString()));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Distance Color", UI::S_DistanceFadeColor.ToString()));
@@ -154,6 +157,18 @@ namespace OffzoneVisualizer {
                     UI::Separator();
                     UI::Text("Raw Map Data");
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Snapshot Map UID", snapshot.MapUid.Length > 0 ? snapshot.MapUid : "<none>"));
+                    if (snapshot.RenderHints is null || !snapshot.RenderHints.HasAnyCommand) {
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Map Hints", "<none>"));
+                    } else {
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Map Hints", snapshot.RenderHints.DisableSummary()));
+                        UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Hint Distances", snapshot.RenderHints.DistanceSummary()));
+                        if (UI::TreeNode("Map Hint Commands (" + snapshot.RenderHints.Commands.Length + ")##offzone-map-hint-commands")) {
+                            for (uint i = 0; i < snapshot.RenderHints.Commands.Length; i++) {
+                                UI::Text(snapshot.RenderHints.Commands[i]);
+                            }
+                            UI::TreePop();
+                        }
+                    }
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Trigger Size", snapshot.RawTriggerSize.ToString()));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Offzone Count", tostring(snapshot.OffzoneCount())));
                     UI::Text(OffzoneVisualizer::Shared::FormatStatusLine("Buffer Ptr", Text::Format("0x%08x", snapshot.RawBufferPtr)));

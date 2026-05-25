@@ -9,6 +9,7 @@ namespace OffzoneVisualizer {
                 auto snapshot = GetCurrentMapSnapshot();
                 if (ctx is null || snapshot is null) return;
                 if (!ctx.IsPlayableMap) return;
+                if (IsWorldRenderingDisabledByMapHint(snapshot)) return;
                 if (snapshot.WorldBoxes.Length == 0) return;
 
                 vec3 cameraPos = Camera::GetCurrentPosition();

@@ -39,6 +39,8 @@ namespace OffzoneVisualizer {
             snapshot.MapUid = ctx.MapUid;
             if (!ctx.HasMap) return snapshot;
 
+            snapshot.MapComments = OffzoneVisualizer::Offzone::Data::ReadMapComments(ctx.RootMap);
+            @snapshot.RenderHints = OffzoneVisualizer::Offzone::Data::ParseMapRenderHints(snapshot.MapComments);
             snapshot.RawTriggerSize = OffzoneVisualizer::Offzone::Data::ReadOffzoneTriggerSize(ctx.RootMap);
             snapshot.RawBufferPtr = OffzoneVisualizer::Offzone::Data::ReadOffzoneBufferPtr(ctx.RootMap);
             @snapshot.GridSpec = OffzoneVisualizer::Offzone::Data::BuildTriggerGridSpec(snapshot.RawTriggerSize);

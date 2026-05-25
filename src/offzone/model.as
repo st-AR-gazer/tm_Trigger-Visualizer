@@ -53,15 +53,18 @@ namespace OffzoneVisualizer {
 
         class MapSnapshot {
             string MapUid;
+            string MapComments;
             nat3 RawTriggerSize;
             uint64 RawBufferPtr = 0;
             TriggerGridSpec@ GridSpec;
+            MapRenderHints@ RenderHints;
             array<TriggerRangeRaw@> RawRanges;
             array<WorldAabb@> WorldBoxes;
 
             MapSnapshot() {
                 RawTriggerSize = nat3(1, 1, 1);
                 @GridSpec = TriggerGridSpec();
+                @RenderHints = MapRenderHints();
             }
 
             uint OffzoneCount() const {
@@ -70,6 +73,29 @@ namespace OffzoneVisualizer {
 
             bool HasOffzones() const {
                 return RawRanges.Length > 0;
+            }
+        }
+
+        class MapRenderHints {
+            bool HasAnyCommand = false;
+            bool SuggestOff = false;
+            bool ForceOff = false;
+            bool HasSuggestedDrawDistanceXZ = false;
+            bool HasSuggestedDrawDistanceY = false;
+            float SuggestedDrawDistanceXZ = 0.0f;
+            float SuggestedDrawDistanceY = 0.0f;
+            array<string> Commands;
+
+            string DisableSummary() const {
+                if (ForceOff) return "force-off";
+                if (SuggestOff) return "suggest-off";
+                return "none";
+            }
+
+            string DistanceSummary() const {
+                string xz = HasSuggestedDrawDistanceXZ ? Text::Format("%.0f", SuggestedDrawDistanceXZ) + "m X/Z" : "no X/Z";
+                string y = HasSuggestedDrawDistanceY ? Text::Format("%.0f", SuggestedDrawDistanceY) + "m Y" : "no Y";
+                return xz + ", " + y;
             }
         }
 

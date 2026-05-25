@@ -32,16 +32,22 @@ namespace OffzoneVisualizer {
             bool S_ShowOutline = true;
 
             [Setting hidden name="Offzone: Render distance XZ" min=0 max=50000]
-            float S_RenderDistanceXZ = 128.0f;
+            float S_RenderDistanceXZ = 224.0f;
 
             [Setting hidden name="Offzone: Render distance Y" min=0 max=50000]
-            float S_RenderDistanceY = 32.0f;
+            float S_RenderDistanceY = 56.0f;
 
             [Setting hidden name="Offzone: Render fade band XZ" min=0 max=50000]
             float S_RenderFadeBandXZ = 32.0f;
 
             [Setting hidden name="Offzone: Render fade band Y" min=0 max=50000]
             float S_RenderFadeBandY = 8.0f;
+
+            [Setting hidden name="Offzone: Use map suggested draw distance"]
+            bool S_UseMapSuggestedDrawDistance = true;
+
+            [Setting hidden name="Offzone: Respect map suggest-off"]
+            bool S_RespectMapSuggestOff = true;
 
             [Setting hidden name="Offzone: Outline alpha" min=0 max=1]
             float S_OutlineAlpha = 0.20f;
@@ -229,10 +235,12 @@ namespace OffzoneVisualizer {
                 S_LabelBackgroundAlpha = 0.20f;
                 S_ShowFill = true;
                 S_ShowOutline = true;
-                S_RenderDistanceXZ = 128.0f;
-                S_RenderDistanceY = 32.0f;
+                S_RenderDistanceXZ = 224.0f;
+                S_RenderDistanceY = 56.0f;
                 S_RenderFadeBandXZ = 32.0f;
                 S_RenderFadeBandY = 8.0f;
+                S_UseMapSuggestedDrawDistance = true;
+                S_RespectMapSuggestOff = true;
                 S_OutlineAlpha = 0.20f;
                 S_FillAlpha = 0.03f;
                 S_OutlineWidth = 2.0f;
@@ -392,6 +400,19 @@ namespace OffzoneVisualizer {
                     WORLD_FADE_SLIDER_MAX_Y,
                     WORLD_BLOCK_SIZE_Y
                 );
+
+                UI::Separator();
+                UI::Text("Map Authored Hints");
+                S_UseMapSuggestedDrawDistance = UI::Checkbox(
+                    "Use map-suggested draw distance##offzone-visualizer-settings",
+                    S_UseMapSuggestedDrawDistance
+                );
+                S_RespectMapSuggestOff = UI::Checkbox(
+                    "Respect map suggest-off##offzone-visualizer-settings",
+                    S_RespectMapSuggestOff
+                );
+                UI::TextDisabled("Map force-off commands are always respected.");
+                UI::TextDisabled("Suggested distances affect this map only and do not overwrite your saved sliders.");
 
                 ClampWorldRenderingSettings();
             }

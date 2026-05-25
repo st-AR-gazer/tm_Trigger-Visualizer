@@ -147,21 +147,6 @@ namespace OffzoneVisualizer {
                 return drewStart || drewEnd;
             }
 
-            void DrawWorldLineAdaptive(const vec3 &in start, const vec3 &in end, const vec3 &in cameraPos) {
-                uint segmentCount = GetAdaptiveLineSegmentCount(start, end, cameraPos);
-                if (segmentCount <= 1) {
-                    DrawProjectedLineSegmentFrustumSafe(start, end, 0);
-                    return;
-                }
-
-                float invSegments = 1.0f / float(segmentCount);
-                for (uint i = 0; i < segmentCount; i++) {
-                    float t0 = float(i) * invSegments;
-                    float t1 = float(i + 1) * invSegments;
-                    DrawProjectedLineSegmentFrustumSafe(Math::Lerp(start, end, t0), Math::Lerp(start, end, t1), 0);
-                }
-            }
-
             void DrawWorldLineSegmentImmediate(const vec3 &in start, const vec3 &in end, const vec4 &in color) {
                 nvg::BeginPath();
                 nvg::StrokeColor(color);

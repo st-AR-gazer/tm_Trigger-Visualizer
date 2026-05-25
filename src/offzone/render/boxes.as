@@ -217,7 +217,7 @@ namespace OffzoneVisualizer {
             }
 
             float GetWorldBoxFadeFactor(const WorldAabb@ box, const vec3 &in cameraPos) {
-                vec3 renderDistance = OffzoneVisualizer::Offzone::UI::GetRenderDistanceWorld();
+                vec3 renderDistance = GetEffectiveRenderDistanceWorld();
                 vec3 fadeBand = OffzoneVisualizer::Offzone::UI::GetRenderFadeBandWorld();
                 vec3 outside = GetDistanceOutsideBox(box, cameraPos);
 
@@ -364,23 +364,10 @@ namespace OffzoneVisualizer {
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
-                if (OffzoneVisualizer::Offzone::UI::S_RandomOutlineSegmentColors) {
-                    for (uint i = 0; i < BOX_EDGE_INDICES.Length; i++) {
-                        auto edge = BOX_EDGE_INDICES[i];
-                        DrawWorldLineAdaptiveColored(corners[edge[0]], corners[edge[1]], cameraPos, color, boxIndex, i);
-                    }
-                    return;
-                }
-
-                nvg::BeginPath();
-                nvg::StrokeColor(color);
                 for (uint i = 0; i < BOX_EDGE_INDICES.Length; i++) {
                     auto edge = BOX_EDGE_INDICES[i];
-                    DrawWorldLineAdaptive(corners[edge[0]], corners[edge[1]], cameraPos);
+                    DrawWorldLineAdaptiveColored(corners[edge[0]], corners[edge[1]], cameraPos, color, boxIndex, i);
                 }
-
-                nvg::Stroke();
-                nvg::ClosePath();
             }
         }
     }

@@ -259,17 +259,14 @@ namespace OffzoneVisualizer {
             ) {
                 if (items is null || startIndex >= endIndex || color.w <= 0.001f) return;
 
-                bool drewAny = false;
-                nvg::BeginPath();
                 nvg::FillColor(color);
                 for (uint i = startIndex; i < endIndex && i < items.Length; i++) {
-                    drewAny = AddWorldFillTilePath(items[i]) || drewAny;
+                    nvg::BeginPath();
+                    if (AddWorldFillTilePath(items[i])) {
+                        nvg::Fill();
+                    }
+                    nvg::ClosePath();
                 }
-
-                if (drewAny) {
-                    nvg::Fill();
-                }
-                nvg::ClosePath();
             }
 
             void DrawWorldFillTileIconBatch(
