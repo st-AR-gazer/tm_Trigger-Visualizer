@@ -24,7 +24,7 @@ namespace OffzoneVisualizer {
                 G_WorldFrustumState.ViewMatrix = mat4::Inverse(mat4(transform));
                 G_WorldFrustumState.ForwardSign = GetCameraForwardSign(transform);
                 G_WorldFrustumState.NearZ = Math::Max(camera.NearZ, FRUSTUM_EPSILON);
-                G_WorldFrustumState.FarZ = Math::Max(camera.FarZ, G_WorldFrustumState.NearZ + 1.0f);|
+                G_WorldFrustumState.FarZ = Math::Max(camera.FarZ, G_WorldFrustumState.NearZ + 1.0f);
                 G_WorldFrustumState.TanHalfY = Math::Tan(camera.Fov * Math::PI / 360.0f);
 #if TMNEXT
                 G_WorldFrustumState.Aspect = camera.Width_Height;
