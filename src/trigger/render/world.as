@@ -24,7 +24,13 @@ namespace TriggerVisualizer {
                     if (TriggerVisualizer::Trigger::UI::S_ShowFill || TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) {
                         vec4 fillColor = TriggerVisualizer::Trigger::UI::S_ShowFill ?
                         GetFillColor(snapshot.TriggerVolumes[i], cameraPos, fade) : vec4();
-                        CollectTriggerVolumeFillDrawItems(snapshot.TriggerVolumes[i], cameraPos, fillColor, i, fillTileItems);
+                        CollectTriggerVolumeFillDrawItems(
+                            snapshot.TriggerVolumes[i],
+                            cameraPos,
+                            fillColor,
+                            i,
+                            fillTileItems
+                        );
                     }
                 }
 

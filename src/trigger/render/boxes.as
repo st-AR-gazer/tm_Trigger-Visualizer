@@ -36,10 +36,7 @@ namespace TriggerVisualizer {
             WorldFrustumState G_WorldFrustumState;
 
             void ResetWorldRenderPerformanceBudgets() {
-                G_TileIconPatchBudgetRemaining = uint(Math::Max(
-                    TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame,
-                    0
-                ));
+                G_TileIconPatchBudgetRemaining = uint(Math::Max(TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame, 0));
                 UpdateWorldFrustumState();
             }
 
@@ -327,10 +324,20 @@ namespace TriggerVisualizer {
                 return count;
             }
 
-            void DrawTriggerVolumeFill(const TriggerVolume@ box, const vec3 &in cameraPos, const vec4 &in color, uint boxIndex) {
+            void DrawTriggerVolumeFill(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const vec4 &in color,
+                uint boxIndex
+            ) {
                 auto items = array<WorldFillTileDrawItem@>();
                 CollectTriggerVolumeFillDrawItems(box, cameraPos, color, boxIndex, items);
                 DrawWorldFillTileDrawItems(items);
+            }
+
+            bool ShouldRenderTriggerVolumeFillTiles(const TriggerVolume@ box) {
+                if (box is null) return false;
+                return box.Source != TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER;
             }
 
             void CollectTriggerVolumeFillDrawItems(
@@ -341,6 +348,7 @@ namespace TriggerVisualizer {
                 array<WorldFillTileDrawItem@> @items
             ) {
                 if (items is null) return;
+                if (!ShouldRenderTriggerVolumeFillTiles(box)) return;
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
                 if (color.w <= 0.001f && !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;

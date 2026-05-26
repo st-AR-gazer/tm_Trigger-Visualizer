@@ -221,7 +221,10 @@ namespace TriggerVisualizer {
             }
 
             void ClampLineSplittingSettings() {
-                S_LineSplitTargetSegmentLength = Math::Max(S_LineSplitTargetSegmentLength, LINE_SPLIT_MINIMUM_SAFE_LENGTH);
+                S_LineSplitTargetSegmentLength = Math::Max(
+                    S_LineSplitTargetSegmentLength,
+                    LINE_SPLIT_MINIMUM_SAFE_LENGTH
+                );
                 S_LineSplitStartDistanceFactor = Math::Max(S_LineSplitStartDistanceFactor, 0.0f);
                 S_LineSplitFullDistanceFactor = Math::Max(S_LineSplitFullDistanceFactor, 0.0f);
                 S_LineSplitMinStartDistance = Math::Max(S_LineSplitMinStartDistance, 0.0f);
@@ -858,11 +861,7 @@ namespace TriggerVisualizer {
                 );
             }
 
-            bool RenderSourceContextToggleUI(
-                const string &in label,
-                const string &in id,
-                bool value
-            ) {
+            bool RenderSourceContextToggleUI(const string &in label, const string &in id, bool value) {
                 return UI::Checkbox(label + "##" + id, value);
             }
 

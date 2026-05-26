@@ -33,7 +33,10 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::UI::LINE_SPLIT_MINIMUM_SAFE_LENGTH
                 );
                 int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitMaxSegmentsPerEdge, 1);
-                int maxSegments = Math::Max(1, Math::Min(int(Math::Floor(lineLength / minSegmentLength)), maxAllowedSegments));
+                int maxSegments = Math::Max(
+                    1,
+                    Math::Min(int(Math::Floor(lineLength / minSegmentLength)), maxAllowedSegments)
+                );
                 if (maxSegments <= 1) return 1;
 
                 float startDistance = ClampLineSplitDistanceToUserRange(
@@ -122,20 +125,12 @@ namespace TriggerVisualizer {
                 );
             }
 
-            bool ShouldResolveMixedWorldLineSegment(
-                const vec3 &in start,
-                const vec3 &in end,
-                uint depth
-            ) {
+            bool ShouldResolveMixedWorldLineSegment(const vec3 &in start, const vec3 &in end, uint depth) {
                 if (depth >= LINE_FRUSTUM_MAX_DEPTH) return false;
                 return Math::Distance(start, end) > GetLineFrustumResolveMinLength();
             }
 
-            bool DrawProjectedLineSegmentFrustumSafe(
-                const vec3 &in start,
-                const vec3 &in end,
-                uint depth
-            ) {
+            bool DrawProjectedLineSegmentFrustumSafe(const vec3 &in start, const vec3 &in end, uint depth) {
                 int primitiveClass = ClassifyWorldLineForFrustum(start, end);
                 if (primitiveClass == WORLD_PRIMITIVE_OUTSIDE) return false;
                 if (primitiveClass == WORLD_PRIMITIVE_FRONT) return DrawProjectedLineSegment(start, end);

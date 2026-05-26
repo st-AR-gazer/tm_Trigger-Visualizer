@@ -101,6 +101,8 @@ namespace TriggerVisualizer {
             bool CoordSamplesTruncated = false;
             bool RenderCoordsSkipped = false;
             bool RenderBoundsUsed = false;
+            bool RenderIslandsUsed = false;
+            uint RenderIslandCount = 0;
             string Warning;
             array<int3> RawCoords;
             array<int3> RawCoordSamples;

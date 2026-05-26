@@ -10,7 +10,7 @@ namespace TriggerVisualizer {
                 return string(map.Comments);
             }
 
-            array<string>@ SplitMapHintTokens(const string &in line) {
+            array<string> @SplitMapHintTokens(const string &in line) {
                 auto tokens = array<string>();
                 auto rawTokens = line.Replace("\t", " ").Split(" ");
                 for (uint i = 0; i < rawTokens.Length; i++) {
@@ -89,9 +89,10 @@ namespace TriggerVisualizer {
 
             MapRenderHints@ ParseMapRenderHints(const string &in comments) {
                 auto hints = MapRenderHints();
-                string normalized = Text::StripOpenplanetFormatCodes(comments)
-                    .Replace("\r\n", "\n")
-                    .Replace("\r", "\n");
+                string normalized = Text::StripOpenplanetFormatCodes(comments).Replace(
+                    "\r\n",
+                    "\n"
+                ).Replace("\r", "\n");
 
                 auto lines = normalized.Split("\n");
                 for (uint i = 0; i < lines.Length; i++) {

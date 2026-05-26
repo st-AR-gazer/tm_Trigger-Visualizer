@@ -49,6 +49,9 @@ namespace TriggerVisualizer {
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Count", tostring(trigger.RawCoordCount)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Capacity", tostring(trigger.RawCoordCapacity)));
                         string renderShape = trigger.RenderBoundsUsed ? "Bounding box" : (trigger.RenderCoordsSkipped ? "Skipped" : "Exact cells");
+                        if (trigger.RenderIslandsUsed) {
+                            renderShape = "Cell islands (" + tostring(trigger.RenderIslandCount) + ")";
+                        }
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Render Shape", renderShape));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Min Coord", trigger.MinCoord.ToString()));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Max Coord", trigger.MaxCoord.ToString()));

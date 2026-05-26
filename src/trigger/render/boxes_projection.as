@@ -93,11 +93,7 @@ namespace TriggerVisualizer {
                 );
             }
 
-            float GetScreenTriangleSide(
-                const vec2 &in point,
-                const vec2 &in a,
-                const vec2 &in b
-            ) {
+            float GetScreenTriangleSide(const vec2 &in point, const vec2 &in a, const vec2 &in b) {
                 vec2 ab = b - a;
                 vec2 ap = point - a;
                 return ab.x * ap.y - ab.y * ap.x;

@@ -84,7 +84,14 @@ namespace TriggerVisualizer {
                 bool splitU = uLen > minTileSize;
                 bool splitV = vLen > minTileSize;
                 if (!ShouldSplitWorldFaceTile(origin, uEdge, vEdge, cameraPos, depth, isMixed) || (!splitU && !splitV)) {
-                    WorldFillTileDrawItem@ item = WorldFillTileDrawItem(origin, uEdge, vEdge, GetFillTileColor(baseColor, tileSeed), tileSeed, GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos));
+                    WorldFillTileDrawItem@ item = WorldFillTileDrawItem(
+                        origin,
+                        uEdge,
+                        vEdge,
+                        GetFillTileColor(baseColor, tileSeed),
+                        tileSeed,
+                        GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos)
+                    );
                     if (!UpdateWorldFillTileScreenProjection(item)) return 0;
                     items.InsertLast(item);
                     return 1;
@@ -235,13 +242,7 @@ namespace TriggerVisualizer {
                 if (item.Occluded) return false;
 
                 if (!item.HasScreenProjection && !UpdateWorldFillTileScreenProjection(item)) return false;
-                if (!IsProjectedQuadPotentiallyVisible(
-                    item.Screen0,
-                    item.Screen1,
-                    item.Screen2,
-                    item.Screen3,
-                    SCREEN_QUAD_VISIBILITY_MARGIN
-                )) return false;
+                if (!IsProjectedQuadPotentiallyVisible(item.Screen0, item.Screen1, item.Screen2, item.Screen3, SCREEN_QUAD_VISIBILITY_MARGIN)) return false;
 
                 nvg::MoveTo(item.Screen0.xy);
                 nvg::LineTo(item.Screen1.xy);
@@ -269,11 +270,7 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void DrawWorldFillTileIconBatch(
-                array<WorldFillTileDrawItem@> @items,
-                uint startIndex,
-                uint endIndex
-            ) {
+            void DrawWorldFillTileIconBatch(array<WorldFillTileDrawItem@> @items, uint startIndex, uint endIndex) {
                 if (items is null || !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
 
                 for (uint i = startIndex; i < endIndex && i < items.Length; i++) {
@@ -598,6 +595,8 @@ namespace TriggerVisualizer {
             }
 
             uint CountTriggerVolumeFillTiles(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (!ShouldRenderTriggerVolumeFillTiles(box)) return 0;
+
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 

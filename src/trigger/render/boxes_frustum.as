@@ -11,7 +11,7 @@ namespace TriggerVisualizer {
                 mat4 cameraMatrix = mat4(cameraTransform);
                 mat4 viewMatrix = mat4::Inverse(cameraMatrix);
                 vec4 cameraAhead = viewMatrix * vec4(MoveLocalPoint(cameraTransform, vec3(0.0f, 0.0f, 1.0f)), 1.0f);
-                return cameraAhead.z >= 0.0f ? 1.0f : -1.0f;
+                return cameraAhead.z >= 0.0f ? 1.0f :-1.0f;
             }
 
             void UpdateWorldFrustumState() {
@@ -31,7 +31,10 @@ namespace TriggerVisualizer {
 #else
                 G_WorldFrustumState.Aspect = camera.RatioXY;
 #endif
-                G_WorldFrustumState.Valid = G_WorldFrustumState.TanHalfY > 0.0001f && G_WorldFrustumState.Aspect > 0.0001f;
+                G_WorldFrustumState
+                    .Valid = G_WorldFrustumState
+                    .TanHalfY > 0.0001f && G_WorldFrustumState
+                    .Aspect > 0.0001f;
             }
 
             vec3 WorldToFrustumCameraPoint(const vec3 &in worldPoint) {
@@ -84,13 +87,21 @@ namespace TriggerVisualizer {
                 const vec3 &in p2,
                 const vec3 &in p3
             ) {
-                bool screenFrontVisible = IsWorldQuadPotentiallyVisible(p0, p1, p2, p3, SCREEN_QUAD_VISIBILITY_MARGIN);
+                vec3 s0 = Camera::ToScreen(p0);
+                vec3 s1 = Camera::ToScreen(p1);
+                vec3 s2 = Camera::ToScreen(p2);
+                vec3 s3 = Camera::ToScreen(p3);
+
+                bool screenFrontVisible = IsProjectedQuadPotentiallyVisible(
+                    s0,
+                    s1,
+                    s2,
+                    s3,
+                    SCREEN_QUAD_VISIBILITY_MARGIN
+                );
                 if (screenFrontVisible) return WORLD_PRIMITIVE_FRONT;
 
-                bool anyScreenFront = Camera::ToScreen(p0).z < 0
-                    || Camera::ToScreen(p1).z < 0
-                    || Camera::ToScreen(p2).z < 0
-                    || Camera::ToScreen(p3).z < 0;
+                bool anyScreenFront = s0.z < 0 || s1.z < 0 || s2.z < 0 || s3.z < 0;
                 if (!G_WorldFrustumState.Valid) {
                     return anyScreenFront ? WORLD_PRIMITIVE_MIXED : WORLD_PRIMITIVE_OUTSIDE;
                 }

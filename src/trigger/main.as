@@ -6,6 +6,8 @@ namespace TriggerVisualizer {
         string g_CachedMediaTrackerMapUid = "";
         bool g_CachedMediaTrackerEnabled = false;
         bool g_CachedMediaTrackerCellRendering = false;
+        string g_CachedMediaTrackerGroupName = "";
+        uint64 g_CachedMediaTrackerGroupBufferPtr = 0;
         uint64 g_CachedMediaTrackerRefreshAt = 0;
 
         const uint64 MEDIATRACKER_SOURCE_CACHE_MS = 1500;
@@ -68,20 +70,23 @@ namespace TriggerVisualizer {
 
         TriggerSourceSnapshot@ GetMediaTrackerTriggerSource(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
             bool enabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
-            bool renderCells = false;
+            bool renderCells = true;
+            string groupName = "";
+            CGameCtnMediaClipGroup@ clipGroup = null;
+            uint64 groupBufferPtr = 0;
+            if (enabled) {
+                @clipGroup = GetRuntimeMediaTrackerClipGroup(ctx, groupName);
+                groupBufferPtr = TriggerVisualizer::Trigger::Data::Sources::ReadMediaTrackerClipGroupTriggerBufferPtr(clipGroup);
+            }
 
-            if (
-                g_CachedMediaTrackerSource !is null
-                && g_CachedMediaTrackerMapUid == ctx.MapUid
-                && g_CachedMediaTrackerEnabled == enabled
-                && g_CachedMediaTrackerCellRendering == renderCells
-                && Time::Now < g_CachedMediaTrackerRefreshAt
-            ) {
+            if (g_CachedMediaTrackerSource !is null && g_CachedMediaTrackerMapUid == ctx.MapUid && g_CachedMediaTrackerEnabled == enabled && g_CachedMediaTrackerCellRendering == renderCells && g_CachedMediaTrackerGroupName == groupName && g_CachedMediaTrackerGroupBufferPtr == groupBufferPtr && Time::Now<g_CachedMediaTrackerRefreshAt) {
                 return g_CachedMediaTrackerSource;
             }
 
             auto source = TriggerVisualizer::Trigger::Data::Sources::ReadMediaTrackerTriggerSource(
                 ctx.RootMap,
+                clipGroup,
+                groupName,
                 enabled,
                 renderCells
             );
@@ -89,9 +94,32 @@ namespace TriggerVisualizer {
             g_CachedMediaTrackerMapUid = ctx.MapUid;
             g_CachedMediaTrackerEnabled = enabled;
             g_CachedMediaTrackerCellRendering = renderCells;
+            g_CachedMediaTrackerGroupName = groupName;
+            g_CachedMediaTrackerGroupBufferPtr = groupBufferPtr;
             g_CachedMediaTrackerRefreshAt = Time::Now + MEDIATRACKER_SOURCE_CACHE_MS;
 
             return source;
+        }
+
+        CGameCtnMediaClipGroup@ GetRuntimeMediaTrackerClipGroup(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            string &out groupName
+        ) {
+            groupName = "InGame";
+            if (ctx is null || ctx.RootMap is null) return null;
+
+            if (ctx.IsEditorMediaTracker && ctx.App !is null) {
+                auto mediaTrackerEditor = cast<CGameEditorMediaTracker>(ctx.App.Editor);
+                if (mediaTrackerEditor !is null) {
+                    auto pluginApi = cast<CGameEditorMediaTrackerPluginAPI>(mediaTrackerEditor.PluginAPI);
+                    if (pluginApi !is null && pluginApi.ClipGroup !is null) {
+                        groupName = "EditorActive";
+                        return pluginApi.ClipGroup;
+                    }
+                }
+            }
+
+            return ctx.RootMap.ClipGroupInGame;
         }
     }
 }

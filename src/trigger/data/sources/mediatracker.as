@@ -20,6 +20,7 @@ namespace TriggerVisualizer {
                 const uint MAX_MEDIATRACKER_COORD_SAMPLES_PER_TRIGGER = 16;
                 const uint MAX_MEDIATRACKER_RENDER_COORDS_PER_TRIGGER = 4096;
                 const uint MAX_MEDIATRACKER_RENDER_COORDS_TOTAL = 20000;
+                const uint MAX_MEDIATRACKER_COORD_CAPACITY_HARD = 1000000;
                 const uint MEDIATRACKER_MAP_BOUNDS_MARGIN_BLOCKS = 16;
 
                 bool IsLikelyReadablePointer(uint64 ptr) {
@@ -58,6 +59,75 @@ namespace TriggerVisualizer {
 
                 int3 Nat3ToInt3(const nat3 &in coord) {
                     return int3(int(coord.x), int(coord.y), int(coord.z));
+                }
+
+                string CoordKey(const int3 &in coord) {
+                    return tostring(coord.x) + "," + tostring(coord.y) + "," + tostring(coord.z);
+                }
+
+                int3 GetCoordNeighbor(const int3 &in coord, uint neighborIndex) {
+                    if (neighborIndex == 0) return coord + int3(1, 0, 0);
+                    if (neighborIndex == 1) return coord + int3(-1, 0, 0);
+                    if (neighborIndex == 2) return coord + int3(0, 1, 0);
+                    if (neighborIndex == 3) return coord + int3(0, -1, 0);
+                    if (neighborIndex == 4) return coord + int3(0, 0, 1);
+                    return coord + int3(0, 0, -1);
+                }
+
+                int3 MinCoord(const int3 &in a, const int3 &in b) {
+                    return int3(b.x < a.x ? b.x : a.x, b.y < a.y ? b.y : a.y, b.z < a.z ? b.z : a.z);
+                }
+
+                int3 MaxCoord(const int3 &in a, const int3 &in b) {
+                    return int3(b.x > a.x ? b.x : a.x, b.y > a.y ? b.y : a.y, b.z > a.z ? b.z : a.z);
+                }
+
+                array<TriggerRangeRaw@> @MediaTrackerCoordsToConnectedRanges(const array<int3> @coords) {
+                    auto ranges = array<TriggerRangeRaw@>();
+                    if (coords is null || coords.Length == 0) return ranges;
+
+                    dictionary remaining;
+                    auto uniqueCoords = array<int3>();
+                    uniqueCoords.Reserve(coords.Length);
+                    for (uint i = 0; i < coords.Length; i++) {
+                        string key = CoordKey(coords[i]);
+                        if (remaining.Exists(key)) continue;
+
+                        remaining.Set(key, true);
+                        uniqueCoords.InsertLast(coords[i]);
+                    }
+
+                    for (uint i = 0; i < uniqueCoords.Length; i++) {
+                        string startKey = CoordKey(uniqueCoords[i]);
+                        if (!remaining.Exists(startKey)) continue;
+
+                        remaining.Delete(startKey);
+                        auto queue = array<int3>();
+                        queue.InsertLast(uniqueCoords[i]);
+
+                        int3 minCoord = uniqueCoords[i];
+                        int3 maxCoord = uniqueCoords[i];
+                        uint cursor = 0;
+                        while (cursor < queue.Length) {
+                            int3 coord = queue[cursor];
+                            cursor++;
+                            minCoord = MinCoord(minCoord, coord);
+                            maxCoord = MaxCoord(maxCoord, coord);
+
+                            for (uint neighborIndex = 0; neighborIndex < 6; neighborIndex++) {
+                                int3 neighbor = GetCoordNeighbor(coord, neighborIndex);
+                                string neighborKey = CoordKey(neighbor);
+                                if (!remaining.Exists(neighborKey)) continue;
+
+                                remaining.Delete(neighborKey);
+                                queue.InsertLast(neighbor);
+                            }
+                        }
+
+                        ranges.InsertLast(TriggerRangeRaw(minCoord, maxCoord));
+                    }
+
+                    return ranges;
                 }
 
                 bool IsOrderedCoordRange(const nat3 &in minCoord, const nat3 &in maxCoord) {
@@ -106,10 +176,7 @@ namespace TriggerVisualizer {
                     return Dev::GetOffsetUint64(clipGroup, O_MT_CLIPGROUP_TRIGGER_BUFFER);
                 }
 
-                array<int3> @ReadMediaTrackerTriggerCoords(
-                    uint64 bufferPtr,
-                    uint coordCount
-                ) {
+                array<int3> @ReadMediaTrackerTriggerCoords(uint64 bufferPtr, uint coordCount) {
                     auto coords = array<int3>();
                     if (coordCount == 0 || bufferPtr == 0) return coords;
 
@@ -125,11 +192,7 @@ namespace TriggerVisualizer {
                     return coords;
                 }
 
-                array<int3> @ReadMediaTrackerTriggerCoordSamples(
-                    uint64 bufferPtr,
-                    uint coordCount,
-                    uint maxSamples
-                ) {
+                array<int3> @ReadMediaTrackerTriggerCoordSamples(uint64 bufferPtr, uint coordCount, uint maxSamples) {
                     auto coords = array<int3>();
                     if (coordCount == 0 || bufferPtr == 0 || maxSamples == 0) return coords;
 
@@ -146,10 +209,7 @@ namespace TriggerVisualizer {
                     return coords;
                 }
 
-                array<int3> @CopyMediaTrackerTriggerCoordSamples(
-                    const array<int3> @coords,
-                    uint maxSamples
-                ) {
+                array<int3> @CopyMediaTrackerTriggerCoordSamples(const array<int3> @coords, uint maxSamples) {
                     auto samples = array<int3>();
                     if (coords is null || maxSamples == 0) return samples;
 
@@ -195,6 +255,25 @@ namespace TriggerVisualizer {
                         clipIndex,
                         "MediaTracker #" + tostring(clipIndex) + ": " + clipName
                     );
+                }
+
+                TriggerVolume@ MediaTrackerRangeToTriggerVolume(
+                    const TriggerRangeRaw@ range,
+                    const TriggerGridSpec@ spec,
+                    uint clipIndex,
+                    const string &in clipName,
+                    uint islandIndex,
+                    uint islandCount
+                ) {
+                    if (range is null) return TriggerVolume();
+
+                    vec3 min = TriggerCoordToWorldPos(range.Start, spec);
+                    vec3 max = TriggerCoordToWorldPos(range.End + int3(1, 1, 1), spec);
+                    string label = "MediaTracker #" + tostring(clipIndex) + ": " + clipName;
+                    if (islandCount > 1) {
+                        label += " island " + tostring(islandIndex + 1) + "/" + tostring(islandCount);
+                    }
+                    return TriggerVolume(min, max, TRIGGER_SOURCE_MEDIATRACKER, clipIndex, label);
                 }
 
                 MediaTrackerClipTriggerSnapshot@ ReadMediaTrackerClipTrigger(
@@ -248,7 +327,7 @@ namespace TriggerVisualizer {
                         return trigger;
                     }
 
-                    if (trigger.RawCoordCapacity > MAX_MEDIATRACKER_RENDER_COORDS_TOTAL) {
+                    if (trigger.RawCoordCapacity > MAX_MEDIATRACKER_COORD_CAPACITY_HARD) {
                         trigger.Warning = "Coordinate capacity is suspiciously large.";
                         return trigger;
                     }
@@ -297,10 +376,19 @@ namespace TriggerVisualizer {
                         return trigger;
                     }
 
-                    trigger.RawCoords = ReadMediaTrackerTriggerCoords(
-                        trigger.CoordBufferPtr,
-                        trigger.RawCoordCount
-                    );
+                    trigger.RawCoords = ReadMediaTrackerTriggerCoords(trigger.CoordBufferPtr, trigger.RawCoordCount);
+                    if (trigger.RawCoords.Length != trigger.RawCoordCount) {
+                        trigger.RenderCoordsSkipped = true;
+                        trigger.Warning = "Coordinate buffer read stopped at " + tostring(trigger.RawCoords.Length) +
+                        " of " + tostring(trigger.RawCoordCount) + " coordinates.";
+                        trigger.RawCoordSamples = CopyMediaTrackerTriggerCoordSamples(
+                            trigger.RawCoords,
+                            MAX_MEDIATRACKER_COORD_SAMPLES_PER_TRIGGER
+                        );
+                        trigger.SampledCoordCount = trigger.RawCoordSamples.Length;
+                        trigger.CoordSamplesTruncated = trigger.RawCoordCount > trigger.SampledCoordCount;
+                        return trigger;
+                    }
                     trigger.RawCoordSamples = CopyMediaTrackerTriggerCoordSamples(
                         trigger.RawCoords,
                         MAX_MEDIATRACKER_COORD_SAMPLES_PER_TRIGGER
@@ -329,32 +417,23 @@ namespace TriggerVisualizer {
                     source.RawBufferPtr = ReadMediaTrackerClipGroupTriggerBufferPtr(clipGroup);
 
                     if (source.RawTriggerCount > MAX_MEDIATRACKER_TRIGGER_CAPACITY || source.RawTriggerCapacity > MAX_MEDIATRACKER_TRIGGER_CAPACITY) {
-                        source.Diagnostics.InsertLast(
-                            groupName + " trigger count/capacity is suspiciously large; skipping MediaTracker probe."
-                        );
+                        source.Diagnostics.InsertLast(groupName + " trigger count/capacity is suspiciously large; skipping MediaTracker probe.");
                         source.BadTriggerCount = source.RawTriggerCount;
                         return;
                     }
 
                     if (source.RawTriggerCount != source.RawClipCount) {
-                        source.Diagnostics.InsertLast(
-                            groupName + " clip count (" + tostring(source.RawClipCount) +
-                            ") differs from trigger count (" + tostring(source.RawTriggerCount) + ")."
-                        );
+                        source.Diagnostics.InsertLast(groupName + " clip count (" + tostring(source.RawClipCount) + ") differs from trigger count (" + tostring(source.RawTriggerCount) + ").");
                     }
 
                     if (source.RawTriggerCount > source.RawTriggerCapacity && source.RawTriggerCapacity > 0) {
-                        source.Diagnostics.InsertLast(
-                            groupName + " trigger count exceeds trigger capacity."
-                        );
+                        source.Diagnostics.InsertLast(groupName + " trigger count exceeds trigger capacity.");
                         source.BadTriggerCount = source.RawTriggerCount;
                         return;
                     }
 
                     if (source.RawTriggerCount > 0 && source.RawTriggerCapacity == 0) {
-                        source.Diagnostics.InsertLast(
-                            groupName + " trigger capacity is zero while trigger count is non-zero."
-                        );
+                        source.Diagnostics.InsertLast(groupName + " trigger capacity is zero while trigger count is non-zero.");
                         source.BadTriggerCount = source.RawTriggerCount;
                         return;
                     }
@@ -362,24 +441,19 @@ namespace TriggerVisualizer {
                     if (source.RawTriggerCount == 0) return;
 
                     if (!CanSafelyTouchPointer(source.RawBufferPtr)) {
-                        source.Diagnostics.InsertLast(
-                            groupName + " trigger buffer pointer is not readable: " + Text::FormatPointer(source.RawBufferPtr)
-                        );
+                        source.Diagnostics.InsertLast(groupName + " trigger buffer pointer is not readable: " + Text::FormatPointer(source.RawBufferPtr));
                         source.BadTriggerCount = source.RawTriggerCount;
                         return;
                     }
 
                     uint probeCount = MinUint(source.RawTriggerCount, MAX_MEDIATRACKER_TRIGGER_PROBE_COUNT);
                     if (probeCount < source.RawTriggerCount) {
-                        source.Diagnostics.InsertLast(
-                            groupName + " trigger probe capped at " + tostring(probeCount) +
-                            " of " + tostring(source.RawTriggerCount) + " triggers."
-                        );
+                        source.Diagnostics.InsertLast(groupName + " trigger probe capped at " + tostring(probeCount) + " of " + tostring(source.RawTriggerCount) + " triggers.");
                     }
 
                     uint renderCoordCount = 0;
                     if (!renderCells) {
-                        source.Diagnostics.InsertLast(groupName + " exact cell expansion disabled; rendering cached trigger bounding boxes only.");
+                        source.Diagnostics.InsertLast(groupName + " exact cell expansion disabled; trigger bounds fallback is suppressed to avoid giant sparse boxes.");
                     }
 
                     for (uint i = 0; i < probeCount; i++) {
@@ -398,41 +472,34 @@ namespace TriggerVisualizer {
 
                         if (trigger.HasWarning()) {
                             source.BadTriggerCount++;
-                            source.Diagnostics.InsertLast(
-                                groupName + " clip #" + tostring(i) + " (" + trigger.DisplayName() + "): " + trigger.Warning
-                            );
+                            source.Diagnostics.InsertLast(groupName + " clip #" + tostring(i) + " (" + trigger.DisplayName() + "): " + trigger.Warning);
                         } else {
                             source.ReadableTriggerCount++;
                             renderCoordCount += trigger.RawCoords.Length;
                             if (!renderCells) {
-                                trigger.RenderBoundsUsed = true;
-                                auto range = TriggerRangeRaw(Nat3ToInt3(trigger.MinCoord), Nat3ToInt3(trigger.MaxCoord));
-                                source.RawRanges.InsertLast(range);
-                                source.TriggerVolumes.InsertLast(MediaTrackerBoundsToTriggerVolume(
-                                    trigger.MinCoord,
-                                    trigger.MaxCoord,
-                                    source.GridSpec,
-                                    trigger.ClipIndex,
-                                    trigger.DisplayName()
-                                ));
+                                trigger.RenderCoordsSkipped = true;
                                 continue;
                             }
 
-                            for (uint j = 0; j < trigger.RawCoords.Length; j++) {
-                                auto range = TriggerRangeRaw(trigger.RawCoords[j], trigger.RawCoords[j]);
+                            auto ranges = MediaTrackerCoordsToConnectedRanges(trigger.RawCoords);
+                            trigger.RenderIslandsUsed = true;
+                            trigger.RenderIslandCount = ranges.Length;
+                            for (uint j = 0; j < ranges.Length; j++) {
+                                auto range = ranges[j];
                                 source.RawRanges.InsertLast(range);
-                                source.TriggerVolumes.InsertLast(MediaTrackerCoordToTriggerVolume(
-                                    trigger.RawCoords[j],
-                                    source.GridSpec,
-                                    trigger.ClipIndex,
-                                    trigger.DisplayName()
-                                ));
+                                source.TriggerVolumes.InsertLast(MediaTrackerRangeToTriggerVolume(range, source.GridSpec, trigger.ClipIndex, trigger.DisplayName(), j, ranges.Length));
                             }
                         }
                     }
                 }
 
-                TriggerSourceSnapshot@ ReadMediaTrackerTriggerSource(CGameCtnChallenge@ map, bool enabled, bool renderCells) {
+                TriggerSourceSnapshot@ ReadMediaTrackerTriggerSource(
+                    CGameCtnChallenge@ map,
+                    CGameCtnMediaClipGroup@ clipGroup,
+                    const string &in groupName,
+                    bool enabled,
+                    bool renderCells
+                ) {
                     auto source = TriggerSourceSnapshot(TRIGGER_SOURCE_MEDIATRACKER, enabled);
                     source.RawTriggerSize = ReadMediaTrackerTriggerSize(map);
                     source.MapSize = map is null ? nat3() : map.Size;
@@ -449,12 +516,10 @@ namespace TriggerVisualizer {
                     }
 
                     if (!renderCells) {
-                        source.Diagnostics.InsertLast(
-                            "MediaTracker exact cell rendering is disabled for crash safety; using one bounding box per readable clip trigger."
-                        );
+                        source.Diagnostics.InsertLast("MediaTracker exact cell rendering is disabled; no bounds fallback will be drawn for sparse triggers.");
                     }
 
-                    ReadMediaTrackerClipGroupIntoSource(source, map.ClipGroupInGame, "InGame", renderCells);
+                    ReadMediaTrackerClipGroupIntoSource(source, clipGroup, groupName, renderCells);
                     return source;
                 }
             }
