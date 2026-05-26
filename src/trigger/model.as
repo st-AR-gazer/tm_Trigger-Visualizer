@@ -86,15 +86,59 @@ namespace TriggerVisualizer {
             }
         }
 
+        class MediaTrackerClipTriggerSnapshot {
+            uint ClipIndex = 0;
+            string ClipName;
+            bool HasClip = false;
+            nat3 MinCoord;
+            nat3 MaxCoord;
+            uint RawCoordCount = 0;
+            uint RawCoordCapacity = 0;
+            uint SampledCoordCount = 0;
+            uint64 TriggerStructPtr = 0;
+            uint64 CoordBufferPtr = 0;
+            bool HasReadableCoordBuffer = false;
+            bool CoordSamplesTruncated = false;
+            bool RenderCoordsSkipped = false;
+            bool RenderBoundsUsed = false;
+            string Warning;
+            array<int3> RawCoords;
+            array<int3> RawCoordSamples;
+
+            MediaTrackerClipTriggerSnapshot() {
+                ClipName = "<unknown>";
+                MinCoord = nat3();
+                MaxCoord = nat3();
+            }
+
+            bool HasWarning() const {
+                return Warning.Length > 0;
+            }
+
+            string DisplayName() const {
+                if (ClipName.Length > 0) return ClipName;
+                return "<unnamed clip>";
+            }
+        }
+
         class TriggerSourceSnapshot {
             int Source = TRIGGER_SOURCE_OFFZONE;
             string Name = "Offzone";
             bool Enabled = true;
             nat3 RawTriggerSize;
             uint64 RawBufferPtr = 0;
+            uint RawClipCount = 0;
+            uint RawTriggerCount = 0;
+            uint RawTriggerCapacity = 0;
+            uint RawCoordCount = 0;
+            uint ReadableTriggerCount = 0;
+            uint BadTriggerCount = 0;
+            nat3 MapSize;
             TriggerGridSpec@ GridSpec;
             array<TriggerRangeRaw@> RawRanges;
             array<TriggerVolume@> TriggerVolumes;
+            array<string> Diagnostics;
+            array<MediaTrackerClipTriggerSnapshot@> MediaTrackerClipTriggers;
 
             TriggerSourceSnapshot() {
                 RawTriggerSize = nat3(1, 1, 1);
@@ -115,6 +159,14 @@ namespace TriggerVisualizer {
 
             uint TriggerVolumeCount() const {
                 return TriggerVolumes.Length;
+            }
+
+            uint DiagnosticCount() const {
+                return Diagnostics.Length;
+            }
+
+            uint MediaTrackerClipTriggerCount() const {
+                return MediaTrackerClipTriggers.Length;
             }
         }
 

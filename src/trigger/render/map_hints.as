@@ -1,6 +1,8 @@
 namespace TriggerVisualizer {
     namespace Trigger {
         namespace Render {
+            const float UNLIMITED_RENDER_DISTANCE_WORLD = 1000000000.0f;
+
             bool IsWorldRenderingDisabledByMapHint(const MapSnapshot@ snapshot) {
                 if (snapshot is null || snapshot.RenderHints is null) return false;
                 if (snapshot.RenderHints.ForceOff) return true;
@@ -8,6 +10,14 @@ namespace TriggerVisualizer {
             }
 
             vec3 GetEffectiveRenderDistanceWorld() {
+                if (TriggerVisualizer::Trigger::UI::S_UnlimitedRenderDistance) {
+                    return vec3(
+                        UNLIMITED_RENDER_DISTANCE_WORLD,
+                        UNLIMITED_RENDER_DISTANCE_WORLD,
+                        UNLIMITED_RENDER_DISTANCE_WORLD
+                    );
+                }
+
                 vec3 distance = TriggerVisualizer::Trigger::UI::GetRenderDistanceWorld();
                 if (!TriggerVisualizer::Trigger::UI::S_UseMapSuggestedDrawDistance) return distance;
 

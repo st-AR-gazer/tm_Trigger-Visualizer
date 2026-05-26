@@ -6,6 +6,71 @@ namespace TriggerVisualizer {
                     return value ? "On" : "Off";
                 }
 
+                string PointerLabel(uint64 ptr) {
+                    return ptr == 0 ? "0x0" : Text::FormatPointer(ptr);
+                }
+
+                void RenderSourceDiagnostics(const TriggerSourceSnapshot@ source, uint sourceIndex) {
+                    if (source is null || source.DiagnosticCount() == 0) return;
+
+                    if (UI::TreeNode("Diagnostics (" + source.DiagnosticCount() + ")##trigger-source-diags-" + sourceIndex)) {
+                        for (uint i = 0; i < source.Diagnostics.Length; i++) {
+                            UI::TextWrapped(source.Diagnostics[i]);
+                        }
+                        UI::TreePop();
+                    }
+                }
+
+                void RenderMediaTrackerClipTriggerProbe(const TriggerSourceSnapshot@ source, uint sourceIndex) {
+                    if (source is null || source.Source != TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER) return;
+
+                    UI::Text("    clips " + source.RawClipCount + " | triggers " + source.RawTriggerCount + " / " + source.RawTriggerCapacity);
+                    UI::Text("    readable " + source.ReadableTriggerCount + " | bad " + source.BadTriggerCount + " | raw coords " + source.RawCoordCount);
+                    UI::Text("    trigger buffer " + PointerLabel(source.RawBufferPtr));
+                    UI::Text("    map size " + source.MapSize.ToString());
+                    if (source.GridSpec !is null) {
+                        UI::Text("    grid " + source.GridSpec.CellsPerBlock.ToString() + " | cell " + source.GridSpec.CellWorldSize.ToString());
+                    }
+
+                    if (source.MediaTrackerClipTriggerCount() == 0) return;
+                    if (!UI::TreeNode("MediaTracker Clip Triggers (" + source.MediaTrackerClipTriggerCount() + ")##trigger-source-mt-clips-" + sourceIndex)) return;
+
+                    for (uint i = 0; i < source.MediaTrackerClipTriggers.Length; i++) {
+                        auto trigger = source.MediaTrackerClipTriggers[i];
+                        if (trigger is null) continue;
+
+                        string label = "#" + trigger.ClipIndex + " " + trigger.DisplayName();
+                        if (trigger.HasWarning()) label += " [warning]";
+                        if (!UI::TreeNode(label + "##trigger-source-mt-clip-" + sourceIndex + "-" + i)) continue;
+
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Has Clip", OnOff(trigger.HasClip)));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Trigger Ptr", PointerLabel(trigger.TriggerStructPtr)));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Buffer", PointerLabel(trigger.CoordBufferPtr)));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Count", tostring(trigger.RawCoordCount)));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Capacity", tostring(trigger.RawCoordCapacity)));
+                        string renderShape = trigger.RenderBoundsUsed ? "Bounding box" : (trigger.RenderCoordsSkipped ? "Skipped" : "Exact cells");
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Render Shape", renderShape));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Min Coord", trigger.MinCoord.ToString()));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Max Coord", trigger.MaxCoord.ToString()));
+                        if (trigger.CoordSamplesTruncated) {
+                            UI::TextDisabled("Showing first " + tostring(trigger.SampledCoordCount) + " coordinate samples.");
+                        }
+                        if (trigger.HasWarning()) {
+                            UI::TextWrapped("Warning: " + trigger.Warning);
+                        }
+                        if (trigger.RawCoordSamples.Length > 0 && UI::TreeNode("Coordinate Samples (" + trigger.RawCoordSamples.Length + ")##trigger-source-mt-samples-" + sourceIndex + "-" + i)) {
+                            for (uint j = 0; j < trigger.RawCoordSamples.Length; j++) {
+                                UI::Text("#" + j + ": " + trigger.RawCoordSamples[j].ToString());
+                            }
+                            UI::TreePop();
+                        }
+
+                        UI::TreePop();
+                    }
+
+                    UI::TreePop();
+                }
+
                 void RenderDevPanelContent() {
                     auto ctx = GetCurrentRuntimeContext();
                     auto snapshot = GetCurrentMapSnapshot();
@@ -15,6 +80,10 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Has Map", OnOff(ctx.HasMap)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Has Playground", OnOff(ctx.HasPlayground)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("In Editor", OnOff(ctx.IsInEditor)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Map Editor", OnOff(ctx.IsMapEditor)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Editor Test Mode", OnOff(ctx.IsEditorTestMode)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Editor MediaTracker", OnOff(ctx.IsEditorMediaTracker)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Replay Editor", OnOff(ctx.IsReplayEditor)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Playable Map", OnOff(ctx.IsPlayableMap)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Map UID", ctx.HasMapUid() ? ctx.MapUid : "<none>"));
 
@@ -29,6 +98,9 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fade Band", UI::GetRenderFadeBandWorld().ToString() + " m"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Source", UI::GetRenderProximityModeLabel(UI::S_RenderProximityMode)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Source", OnOff(UI::S_ShowOffzoneSource)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Effective", OnOff(UI::IsOffzoneSourceEnabledForRuntime(ctx))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Source", OnOff(UI::S_ShowMediaTrackerSource)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Effective", OnOff(UI::IsMediaTrackerSourceEnabledForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Use Map Distance", OnOff(UI::S_UseMapSuggestedDrawDistance)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Respect Suggest Off", OnOff(UI::S_RespectMapSuggestOff)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Color Mode", UI::GetColorModeLabel(UI::S_ColorMode)));
@@ -53,7 +125,7 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Raw Range", OnOff(UI::S_LabelShowRawRange)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label World Size", OnOff(UI::S_LabelShowWorldSize)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Font Size", Text::Format("%.1f", UI::S_LabelFontSize)));
-                    if (ctx.IsPlayableMap) {
+                    if (ctx.HasMap) {
                         vec3 cameraPos = Camera::GetCurrentPosition();
                         auto playerState = TriggerVisualizer::Trigger::Data::GetPlayerPositionState();
                         uint visibleCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesInRenderRangeForProximity(
@@ -181,6 +253,8 @@ namespace TriggerVisualizer {
                             if (source is null) continue;
                             UI::Text(source.Name + ": " + OnOff(source.Enabled));
                             UI::Text("    raw ranges " + source.RawRangeCount() + " | volumes " + source.TriggerVolumeCount());
+                            RenderMediaTrackerClipTriggerProbe(source, i);
+                            RenderSourceDiagnostics(source, i);
                         }
                         UI::TreePop();
                     }

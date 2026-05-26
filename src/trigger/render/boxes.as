@@ -252,7 +252,8 @@ namespace TriggerVisualizer {
                 float cameraFade = GetTriggerVolumeFadeFactor(box, cameraPos);
 
                 if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_PLAYER_ONLY) {
-                    return GetPlayerTriggerVolumeFadeFactor(box, playerState);
+                    float playerFade = GetPlayerTriggerVolumeFadeFactor(box, playerState);
+                    return playerState !is null && playerState.HasVehicle ? playerFade : cameraFade;
                 }
 
                 if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_PLAYER) {

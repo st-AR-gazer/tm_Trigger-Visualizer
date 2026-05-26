@@ -2,6 +2,13 @@ namespace TriggerVisualizer {
     namespace Trigger {
         TriggerVisualizer::Trigger::Data::RuntimeContext@ g_RuntimeContext = null;
         MapSnapshot@ g_MapSnapshot = null;
+        TriggerSourceSnapshot@ g_CachedMediaTrackerSource = null;
+        string g_CachedMediaTrackerMapUid = "";
+        bool g_CachedMediaTrackerEnabled = false;
+        bool g_CachedMediaTrackerCellRendering = false;
+        uint64 g_CachedMediaTrackerRefreshAt = 0;
+
+        const uint64 MEDIATRACKER_SOURCE_CACHE_MS = 1500;
 
         void Main() {
             RefreshCurrentState();
@@ -42,9 +49,10 @@ namespace TriggerVisualizer {
             snapshot.MapComments = TriggerVisualizer::Trigger::Data::ReadMapComments(ctx.RootMap);
             @snapshot.RenderHints = TriggerVisualizer::Trigger::Data::ParseMapRenderHints(snapshot.MapComments);
 
+            bool offzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             auto offzoneSource = TriggerVisualizer::Trigger::Data::Sources::ReadOffzoneTriggerSource(
                 ctx.RootMap,
-                TriggerVisualizer::Trigger::UI::S_ShowOffzoneSource
+                offzoneEnabled
             );
             snapshot.RawTriggerSize = offzoneSource.RawTriggerSize;
             snapshot.RawBufferPtr = offzoneSource.RawBufferPtr;
@@ -52,7 +60,38 @@ namespace TriggerVisualizer {
             snapshot.RawRanges = offzoneSource.RawRanges;
             snapshot.AddSource(offzoneSource);
 
+            auto mediaTrackerSource = GetMediaTrackerTriggerSource(ctx);
+            snapshot.AddSource(mediaTrackerSource);
+
             return snapshot;
+        }
+
+        TriggerSourceSnapshot@ GetMediaTrackerTriggerSource(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+            bool enabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
+            bool renderCells = false;
+
+            if (
+                g_CachedMediaTrackerSource !is null
+                && g_CachedMediaTrackerMapUid == ctx.MapUid
+                && g_CachedMediaTrackerEnabled == enabled
+                && g_CachedMediaTrackerCellRendering == renderCells
+                && Time::Now < g_CachedMediaTrackerRefreshAt
+            ) {
+                return g_CachedMediaTrackerSource;
+            }
+
+            auto source = TriggerVisualizer::Trigger::Data::Sources::ReadMediaTrackerTriggerSource(
+                ctx.RootMap,
+                enabled,
+                renderCells
+            );
+            @g_CachedMediaTrackerSource = source;
+            g_CachedMediaTrackerMapUid = ctx.MapUid;
+            g_CachedMediaTrackerEnabled = enabled;
+            g_CachedMediaTrackerCellRendering = renderCells;
+            g_CachedMediaTrackerRefreshAt = Time::Now + MEDIATRACKER_SOURCE_CACHE_MS;
+
+            return source;
         }
     }
 }

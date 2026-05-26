@@ -8,7 +8,7 @@ namespace TriggerVisualizer {
                 auto ctx = GetCurrentRuntimeContext();
                 auto snapshot = GetCurrentMapSnapshot();
                 if (ctx is null || snapshot is null) return;
-                if (!ctx.IsPlayableMap) return;
+                if (!ctx.HasMap) return;
                 if (IsWorldRenderingDisabledByMapHint(snapshot)) return;
                 if (snapshot.TriggerVolumes.Length == 0) return;
 

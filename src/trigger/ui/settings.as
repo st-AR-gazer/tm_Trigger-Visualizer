@@ -43,6 +43,9 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: Render fade band Y" min=0 max=50000]
             float S_RenderFadeBandY = 8.0f;
 
+            [Setting hidden name="Trigger: Unlimited render distance"]
+            bool S_UnlimitedRenderDistance = false;
+
             [Setting hidden name="Trigger: Use map suggested draw distance"]
             bool S_UseMapSuggestedDrawDistance = true;
 
@@ -163,6 +166,39 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: Show offzone source"]
             bool S_ShowOffzoneSource = true;
 
+            [Setting hidden name="Trigger: Show offzone in playable map"]
+            bool S_ShowOffzoneInPlayableMap = true;
+
+            [Setting hidden name="Trigger: Show offzone in editor"]
+            bool S_ShowOffzoneInEditor = true;
+
+            [Setting hidden name="Trigger: Show offzone in editor test mode"]
+            bool S_ShowOffzoneInEditorTestMode = true;
+
+            [Setting hidden name="Trigger: Show offzone in editor mediatracker"]
+            bool S_ShowOffzoneInEditorMediaTracker = true;
+
+            [Setting hidden name="Trigger: Show offzone in replay editor"]
+            bool S_ShowOffzoneInReplayEditor = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker source"]
+            bool S_ShowMediaTrackerSource = false;
+
+            [Setting hidden name="Trigger: Show MediaTracker in playable map"]
+            bool S_ShowMediaTrackerInPlayableMap = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker in editor"]
+            bool S_ShowMediaTrackerInEditor = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker in editor test mode"]
+            bool S_ShowMediaTrackerInEditorTestMode = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker in editor mediatracker"]
+            bool S_ShowMediaTrackerInEditorMediaTracker = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker in replay editor"]
+            bool S_ShowMediaTrackerInReplayEditor = true;
+
             string G_PendingTileIconSourcePath = "";
             string G_TileIconImportStatus = "";
 
@@ -242,6 +278,7 @@ namespace TriggerVisualizer {
                 S_RenderDistanceY = 56.0f;
                 S_RenderFadeBandXZ = 32.0f;
                 S_RenderFadeBandY = 8.0f;
+                S_UnlimitedRenderDistance = false;
                 S_UseMapSuggestedDrawDistance = true;
                 S_RespectMapSuggestOff = true;
                 S_OutlineAlpha = 0.20f;
@@ -275,6 +312,17 @@ namespace TriggerVisualizer {
                 S_SkullTileIconAlpha = 0.85f;
                 S_CustomTileIconStoragePath = "";
                 S_ShowOffzoneSource = true;
+                S_ShowOffzoneInPlayableMap = true;
+                S_ShowOffzoneInEditor = true;
+                S_ShowOffzoneInEditorTestMode = true;
+                S_ShowOffzoneInEditorMediaTracker = true;
+                S_ShowOffzoneInReplayEditor = true;
+                S_ShowMediaTrackerSource = false;
+                S_ShowMediaTrackerInPlayableMap = true;
+                S_ShowMediaTrackerInEditor = true;
+                S_ShowMediaTrackerInEditorTestMode = true;
+                S_ShowMediaTrackerInEditorMediaTracker = true;
+                S_ShowMediaTrackerInReplayEditor = true;
                 G_PendingTileIconSourcePath = "";
                 G_TileIconImportStatus = "";
                 TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
@@ -363,15 +411,17 @@ namespace TriggerVisualizer {
                 return value;
             }
 
-            void RenderWorldRenderingSettingsUI() {
-                UI::Text("World Rendering");
-                S_RenderWorld = UI::Checkbox("Enable world render##trigger-visualizer-settings", S_RenderWorld);
-                S_ShowOutline = UI::Checkbox("Show outlines##trigger-visualizer-settings", S_ShowOutline);
-                S_ShowFill = UI::Checkbox("Show face fill##trigger-visualizer-settings", S_ShowFill);
-                S_ShowLabels = UI::Checkbox("Show labels##trigger-visualizer-settings", S_ShowLabels);
+            void RenderWorldDistanceSettingsUI() {
+                RenderProximitySettingsUI();
 
                 UI::Separator();
                 UI::Text("Distance");
+                S_UnlimitedRenderDistance = UI::Checkbox(
+                    "Unlimited distance##trigger-visualizer-settings-unlimited-distance",
+                    S_UnlimitedRenderDistance
+                );
+                UI::TextDisabled("Ignores render distance and map-suggested distance when enabled.");
+
                 S_RenderDistanceXZ = RenderWorldDistanceSlider(
                     "Render distance X/Z",
                     "trigger-visualizer-settings-render-distance-xz",
@@ -404,8 +454,10 @@ namespace TriggerVisualizer {
                     WORLD_FADE_SLIDER_MAX_Y,
                     WORLD_BLOCK_SIZE_Y
                 );
+                ClampWorldRenderingSettings();
+            }
 
-                UI::Separator();
+            void RenderMapHintsSettingsUI() {
                 UI::Text("Map Authored Hints");
                 S_UseMapSuggestedDrawDistance = UI::Checkbox(
                     "Use map-suggested draw distance##trigger-visualizer-settings",
@@ -415,10 +467,46 @@ namespace TriggerVisualizer {
                     "Respect map suggest-off##trigger-visualizer-settings",
                     S_RespectMapSuggestOff
                 );
-                UI::TextDisabled("Map force-off commands are always respected.");
-                UI::TextDisabled("Suggested distances affect this map only and do not overwrite your saved sliders.");
 
                 ClampWorldRenderingSettings();
+            }
+
+            void RenderWorldRenderingSettingsUI() {
+                UI::Text("World Rendering");
+                S_RenderWorld = UI::Checkbox("Enable world render##trigger-visualizer-settings", S_RenderWorld);
+                S_ShowOutline = UI::Checkbox("Show outlines##trigger-visualizer-settings", S_ShowOutline);
+                S_ShowFill = UI::Checkbox("Show face fill##trigger-visualizer-settings", S_ShowFill);
+                S_ShowLabels = UI::Checkbox("Show labels##trigger-visualizer-settings", S_ShowLabels);
+
+                UI::Separator();
+                UI::BeginTabBar("trigger-visualizer-world-rendering-tabs");
+
+                if (UI::BeginTabItem("Distance")) {
+                    RenderWorldDistanceSettingsUI();
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("LineSplitting")) {
+                    RenderLineSplittingSettingsUI();
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("Color")) {
+                    RenderColorSettingsUI();
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("Image/Tiles")) {
+                    RenderImageTilesSettingsUI();
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("Map Hints")) {
+                    RenderMapHintsSettingsUI();
+                    UI::EndTabItem();
+                }
+
+                UI::EndTabBar();
             }
 
             void RenderLineSplittingSettingsUI() {
@@ -427,10 +515,6 @@ namespace TriggerVisualizer {
                     "Enable adaptive line splitting##trigger-visualizer-line-splitting",
                     S_AdaptiveLineSplitting
                 );
-                UI::TextDisabled("Splitting always uses camera distance, even when proximity uses the player.");
-                UI::TextDisabled("Closest edges use the minimum segment length. The default keeps segments at least 4m long.");
-                UI::TextDisabled("Smaller segment lengths and higher segment caps cost more render work.");
-                UI::TextDisabled("Slider ranges are soft. Ctrl+click a slider to type larger custom values.");
 
                 UI::Separator();
                 UI::SetNextItemWidth(220.0f);
@@ -574,8 +658,6 @@ namespace TriggerVisualizer {
 
             void RenderTileIconImagePickerUI() {
                 UI::Text("Image");
-                UI::TextDisabled("Images are copied into plugin storage under assets/ so they keep working later.");
-                UI::TextDisabled("Paste or type a local image path, then click Add this image.");
 
                 UI::PushItemWidth(520.0f);
                 G_PendingTileIconSourcePath = UI::InputText(
@@ -619,6 +701,41 @@ namespace TriggerVisualizer {
                 if (G_TileIconImportStatus.Length > 0) {
                     UI::TextWrapped(G_TileIconImportStatus);
                 }
+            }
+
+            void RenderTileIconSettingsUI() {
+                UI::Text("Tile Icons");
+                S_ShowSkullTileIcons = UI::Checkbox(
+                    "Show tile icon at tile centers##trigger-visualizer-image-tiles",
+                    S_ShowSkullTileIcons
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_SkullTileIconScale = UI::SliderFloat(
+                    "Tile icon scale##trigger-visualizer-image-tiles",
+                    S_SkullTileIconScale,
+                    0.05f,
+                    1.0f
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_SkullTileIconAlpha = UI::SliderFloat(
+                    "Tile icon alpha##trigger-visualizer-image-tiles",
+                    S_SkullTileIconAlpha,
+                    0.0f,
+                    1.0f
+                );
+
+                RenderTileIconImagePickerUI();
+
+                ClampColorSettings();
+            }
+
+            void RenderImageTilesSettingsUI() {
+                RenderTileIconSettingsUI();
+
+                UI::Separator();
+                RenderPerformanceSettingsUI();
             }
 
             void RenderColorSettingsUI() {
@@ -669,33 +786,6 @@ namespace TriggerVisualizer {
                     S_RandomFillTileColors
                 );
 
-                UI::Separator();
-                UI::Text("Tile Icons");
-                S_ShowSkullTileIcons = UI::Checkbox(
-                    "Show tile icon at tile centers##trigger-visualizer-color",
-                    S_ShowSkullTileIcons
-                );
-
-                UI::SetNextItemWidth(220.0f);
-                S_SkullTileIconScale = UI::SliderFloat(
-                    "Tile icon scale##trigger-visualizer-color",
-                    S_SkullTileIconScale,
-                    0.05f,
-                    1.0f
-                );
-
-                UI::SetNextItemWidth(220.0f);
-                S_SkullTileIconAlpha = UI::SliderFloat(
-                    "Tile icon alpha##trigger-visualizer-color",
-                    S_SkullTileIconAlpha,
-                    0.0f,
-                    1.0f
-                );
-
-                RenderTileIconImagePickerUI();
-
-                UI::TextDisabled("Anchors a plane-projected PNG at the center of each adaptive fill tile.");
-
                 ClampWorldRenderingSettings();
                 ClampColorSettings();
             }
@@ -716,13 +806,142 @@ namespace TriggerVisualizer {
                 );
             }
 
+            string GetRuntimeSourceContextLabel(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                if (ctx is null || !ctx.HasMap) return "No RootMap";
+                if (ctx.IsReplayEditor) return "Replay Editor";
+                if (ctx.IsEditorMediaTracker) return "Editor MediaTracker";
+                if (ctx.IsEditorTestMode) return "Editor Test Mode";
+                if (ctx.IsInEditor) return "Editor";
+                if (ctx.IsPlayableMap) return "Playable Map";
+                return "Loaded RootMap";
+            }
+
+            bool IsSourceEnabledForRuntime(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                bool globalEnabled,
+                bool showInPlayableMap,
+                bool showInEditor,
+                bool showInEditorTestMode,
+                bool showInEditorMediaTracker,
+                bool showInReplayEditor
+            ) {
+                if (!globalEnabled || ctx is null || !ctx.HasMap) return false;
+                if (ctx.IsReplayEditor) return showInReplayEditor;
+                if (ctx.IsEditorMediaTracker) return showInEditorMediaTracker;
+                if (ctx.IsEditorTestMode) return showInEditorTestMode;
+                if (ctx.IsInEditor) return showInEditor;
+                if (ctx.IsPlayableMap) return showInPlayableMap;
+                return true;
+            }
+
+            bool IsOffzoneSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                return IsSourceEnabledForRuntime(
+                    ctx,
+                    S_ShowOffzoneSource,
+                    S_ShowOffzoneInPlayableMap,
+                    S_ShowOffzoneInEditor,
+                    S_ShowOffzoneInEditorTestMode,
+                    S_ShowOffzoneInEditorMediaTracker,
+                    S_ShowOffzoneInReplayEditor
+                );
+            }
+
+            bool IsMediaTrackerSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                return IsSourceEnabledForRuntime(
+                    ctx,
+                    S_ShowMediaTrackerSource,
+                    S_ShowMediaTrackerInPlayableMap,
+                    S_ShowMediaTrackerInEditor,
+                    S_ShowMediaTrackerInEditorTestMode,
+                    S_ShowMediaTrackerInEditorMediaTracker,
+                    S_ShowMediaTrackerInReplayEditor
+                );
+            }
+
+            bool RenderSourceContextToggleUI(
+                const string &in label,
+                const string &in id,
+                bool value
+            ) {
+                return UI::Checkbox(label + "##" + id, value);
+            }
+
             void RenderSourcesSettingsUI() {
                 UI::Text("Trigger Sources");
-                S_ShowOffzoneSource = UI::Checkbox(
-                    "Show offzone trigger source##trigger-visualizer-sources",
-                    S_ShowOffzoneSource
-                );
-                UI::TextDisabled("Offzone is currently the only implemented source. Disabling it hides all current volumes.");
+                auto ctx = TriggerVisualizer::Trigger::GetCurrentRuntimeContext();
+                UI::TextDisabled("Current context: " + GetRuntimeSourceContextLabel(ctx));
+
+                UI::BeginTabBar("trigger-visualizer-source-tabs");
+
+                if (UI::BeginTabItem("Offzone")) {
+                    S_ShowOffzoneSource = UI::Checkbox(
+                        "Show Offzone (global trigger)##trigger-visualizer-sources-offzone-global",
+                        S_ShowOffzoneSource
+                    );
+                    S_ShowOffzoneInPlayableMap = RenderSourceContextToggleUI(
+                        "Show in playable map",
+                        "trigger-visualizer-sources-offzone-playable-map",
+                        S_ShowOffzoneInPlayableMap
+                    );
+                    S_ShowOffzoneInEditor = RenderSourceContextToggleUI(
+                        "Show in Editor",
+                        "trigger-visualizer-sources-offzone-editor",
+                        S_ShowOffzoneInEditor
+                    );
+                    S_ShowOffzoneInEditorTestMode = RenderSourceContextToggleUI(
+                        "Show in Editor (test mode)",
+                        "trigger-visualizer-sources-offzone-editor-test-mode",
+                        S_ShowOffzoneInEditorTestMode
+                    );
+                    S_ShowOffzoneInEditorMediaTracker = RenderSourceContextToggleUI(
+                        "Show in Editor (MediaTracker)",
+                        "trigger-visualizer-sources-offzone-editor-mediatracker",
+                        S_ShowOffzoneInEditorMediaTracker
+                    );
+                    S_ShowOffzoneInReplayEditor = RenderSourceContextToggleUI(
+                        "Show in ReplayEditor",
+                        "trigger-visualizer-sources-offzone-replay-editor",
+                        S_ShowOffzoneInReplayEditor
+                    );
+                    UI::TextDisabled("Effective now: " + (IsOffzoneSourceEnabledForRuntime(ctx) ? "shown" : "hidden"));
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("MediaTracker")) {
+                    S_ShowMediaTrackerSource = UI::Checkbox(
+                        "Show MediaTracker (global trigger)##trigger-visualizer-sources-mediatracker-global",
+                        S_ShowMediaTrackerSource
+                    );
+                    S_ShowMediaTrackerInPlayableMap = RenderSourceContextToggleUI(
+                        "Show in playable map",
+                        "trigger-visualizer-sources-mediatracker-playable-map",
+                        S_ShowMediaTrackerInPlayableMap
+                    );
+                    S_ShowMediaTrackerInEditor = RenderSourceContextToggleUI(
+                        "Show in Editor",
+                        "trigger-visualizer-sources-mediatracker-editor",
+                        S_ShowMediaTrackerInEditor
+                    );
+                    S_ShowMediaTrackerInEditorTestMode = RenderSourceContextToggleUI(
+                        "Show in Editor (test mode)",
+                        "trigger-visualizer-sources-mediatracker-editor-test-mode",
+                        S_ShowMediaTrackerInEditorTestMode
+                    );
+                    S_ShowMediaTrackerInEditorMediaTracker = RenderSourceContextToggleUI(
+                        "Show in Editor (MediaTracker)",
+                        "trigger-visualizer-sources-mediatracker-editor-mediatracker",
+                        S_ShowMediaTrackerInEditorMediaTracker
+                    );
+                    S_ShowMediaTrackerInReplayEditor = RenderSourceContextToggleUI(
+                        "Show in ReplayEditor",
+                        "trigger-visualizer-sources-mediatracker-replay-editor",
+                        S_ShowMediaTrackerInReplayEditor
+                    );
+                    UI::TextDisabled("Effective now: " + (IsMediaTrackerSourceEnabledForRuntime(ctx) ? "shown" : "hidden"));
+                    UI::EndTabItem();
+                }
+
+                UI::EndTabBar();
             }
 
             void RenderLabelsSettingsUI() {

@@ -8,6 +8,10 @@ namespace TriggerVisualizer {
                 bool HasMap = false;
                 bool HasPlayground = false;
                 bool IsInEditor = false;
+                bool IsMapEditor = false;
+                bool IsEditorTestMode = false;
+                bool IsEditorMediaTracker = false;
+                bool IsReplayEditor = false;
                 bool IsPlayableMap = false;
                 bool IsInMenu = false;
                 string MapUid;
@@ -17,6 +21,9 @@ namespace TriggerVisualizer {
                 }
 
                 string StateLabel() const {
+                    if (IsReplayEditor) return "Replay Editor";
+                    if (IsEditorMediaTracker) return "Editor MediaTracker";
+                    if (IsEditorTestMode) return "Editor Test Mode";
                     if (IsPlayableMap) return "Playable Map";
                     if (IsInEditor) return "Editor";
                     if (IsInMenu) return "Menu / No Playground";
@@ -43,6 +50,15 @@ namespace TriggerVisualizer {
                 ctx.IsInEditor = app.Editor !is null;
                 ctx.MapUid = GetMapUid(ctx.RootMap);
 
+                auto mapEditor = cast<CGameCtnEditorFree>(app.Editor);
+                auto mediaTrackerEditor = cast<CGameEditorMediaTracker>(app.Editor);
+                ctx.IsMapEditor = mapEditor !is null;
+                ctx.IsEditorMediaTracker = mediaTrackerEditor !is null
+                    && ctx.RootMap !is null
+                    && ctx.RootMap.MapInfo !is null
+                    && ctx.RootMap.MapInfo.Kind == 6;
+                ctx.IsReplayEditor = mediaTrackerEditor !is null && !ctx.IsEditorMediaTracker;
+                ctx.IsEditorTestMode = ctx.IsMapEditor && ctx.HasPlayground;
                 ctx.IsPlayableMap = ctx.HasMap && ctx.HasPlayground && !ctx.IsInEditor;
                 ctx.IsInMenu = !ctx.IsInEditor && !ctx.HasPlayground;
 

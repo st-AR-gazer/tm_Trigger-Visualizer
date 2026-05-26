@@ -5,7 +5,7 @@ namespace TriggerVisualizer {
         void RenderRestoreDefaultsModal() {
             if (UI::BeginPopupModal(RESTORE_DEFAULTS_POPUP_ID, UI::WindowFlags::AlwaysAutoResize)) {
                 UI::Text("Restore Trigger Visualizer defaults?");
-                UI::TextDisabled("This resets General, World Rendering, Line Splitting, Performance, Color, Proximity, Sources, and Labels settings.");
+                UI::TextDisabled("This resets General, World Rendering, Sources, and Labels settings.");
 
                 UI::Separator();
                 if (UI::Button("Restore defaults##trigger-visualizer-confirm-restore-defaults")) {
