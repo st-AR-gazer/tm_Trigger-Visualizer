@@ -23,6 +23,11 @@ namespace TriggerVisualizer {
                 const uint MAX_MEDIATRACKER_COORD_CAPACITY_HARD = 1000000;
                 const uint MEDIATRACKER_MAP_BOUNDS_MARGIN_BLOCKS = 16;
 
+                const int MEDIATRACKER_GAME_CAM_DEFAULT = 0;
+                const int MEDIATRACKER_GAME_CAM_INTERNAL = 1;
+                const int MEDIATRACKER_GAME_CAM_EXTERNAL = 2;
+                const int MEDIATRACKER_GAME_CAM_EXTERNAL_2 = 6;
+
                 bool IsLikelyReadablePointer(uint64 ptr) {
                     if (ptr == 0) return false;
                     if (ptr < 0x10000000000) return false;
@@ -222,39 +227,52 @@ namespace TriggerVisualizer {
                     return samples;
                 }
 
-                TriggerVolume@ MediaTrackerCoordToTriggerVolume(
-                    const int3 &in coord,
-                    const TriggerGridSpec@ spec,
-                    uint clipIndex,
-                    const string &in clipName
-                ) {
-                    vec3 min = TriggerCoordToWorldPos(coord, spec);
-                    vec3 max = TriggerCoordToWorldPos(coord + int3(1, 1, 1), spec);
-                    return TriggerVolume(
-                        min,
-                        max,
-                        TRIGGER_SOURCE_MEDIATRACKER,
-                        clipIndex,
-                        "MediaTracker #" + tostring(clipIndex) + ": " + clipName
-                    );
+                string GetDetectedMediaTrackerCameraLabel(int gameCam) {
+                    if (gameCam == MEDIATRACKER_GAME_CAM_DEFAULT) return "CamDefault";
+                    if (gameCam == MEDIATRACKER_GAME_CAM_EXTERNAL) return "Cam1";
+                    if (gameCam == MEDIATRACKER_GAME_CAM_EXTERNAL_2) return "Cam2";
+                    if (gameCam == MEDIATRACKER_GAME_CAM_INTERNAL) return "Cam3";
+                    return "";
                 }
 
-                TriggerVolume@ MediaTrackerBoundsToTriggerVolume(
-                    const nat3 &in minCoord,
-                    const nat3 &in maxCoord,
-                    const TriggerGridSpec@ spec,
-                    uint clipIndex,
-                    const string &in clipName
-                ) {
-                    vec3 min = TriggerCoordToWorldPos(Nat3ToInt3(minCoord), spec);
-                    vec3 max = TriggerCoordToWorldPos(Nat3ToInt3(maxCoord) + int3(1, 1, 1), spec);
-                    return TriggerVolume(
-                        min,
-                        max,
-                        TRIGGER_SOURCE_MEDIATRACKER,
-                        clipIndex,
-                        "MediaTracker #" + tostring(clipIndex) + ": " + clipName
-                    );
+                string GetDetectedMediaTrackerCameraLabel(CGameCtnMediaBlockCameraGame@ cameraBlock) {
+                    if (cameraBlock is null) return "";
+
+                    int gameCam = int(cameraBlock.GameCam);
+                    int designGameCam = int(cameraBlock.GameCamDesign);
+                    if (designGameCam != MEDIATRACKER_GAME_CAM_DEFAULT) {
+                        gameCam = designGameCam;
+                    }
+
+                    return GetDetectedMediaTrackerCameraLabel(gameCam);
+                }
+
+                string DetectMediaTrackerClipTriggerLabel(CGameCtnMediaClip@ clip) {
+                    if (clip is null) return "";
+
+                    uint blockCount = 0;
+                    CGameCtnMediaBlockCameraGame@ onlyCameraBlock;
+
+                    for (uint trackIndex = 0; trackIndex < clip.Tracks.Length; trackIndex++) {
+                        auto track = clip.Tracks[trackIndex];
+                        if (track is null) continue;
+
+                        for (uint blockIndex = 0; blockIndex < track.Blocks.Length; blockIndex++) {
+                            auto block = track.Blocks[blockIndex];
+                            blockCount++;
+
+                            auto cameraBlock = cast<CGameCtnMediaBlockCameraGame>(block);
+                            if (cameraBlock !is null) {
+                                @onlyCameraBlock = cameraBlock;
+                            }
+                        }
+                    }
+
+                    if (blockCount == 0) return "Reset";
+                    if (blockCount == 1 && onlyCameraBlock !is null) {
+                        return GetDetectedMediaTrackerCameraLabel(onlyCameraBlock);
+                    }
+                    return "";
                 }
 
                 TriggerVolume@ MediaTrackerRangeToTriggerVolume(
@@ -262,6 +280,7 @@ namespace TriggerVisualizer {
                     const TriggerGridSpec@ spec,
                     uint clipIndex,
                     const string &in clipName,
+                    const string &in detectedLabel,
                     uint islandIndex,
                     uint islandCount
                 ) {
@@ -269,11 +288,15 @@ namespace TriggerVisualizer {
 
                     vec3 min = TriggerCoordToWorldPos(range.Start, spec);
                     vec3 max = TriggerCoordToWorldPos(range.End + int3(1, 1, 1), spec);
-                    string label = "MediaTracker #" + tostring(clipIndex) + ": " + clipName;
+                    string label = clipName;
+                    auto volume = TriggerVolume(min, max, TRIGGER_SOURCE_MEDIATRACKER, clipIndex, label);
+                    volume.DetectedLabel = detectedLabel;
                     if (islandCount > 1) {
-                        label += " island " + tostring(islandIndex + 1) + "/" + tostring(islandCount);
+                        volume.HasIslandIndex = true;
+                        volume.IslandIndex = islandIndex;
+                        volume.IslandCount = islandCount;
                     }
-                    return TriggerVolume(min, max, TRIGGER_SOURCE_MEDIATRACKER, clipIndex, label);
+                    return volume;
                 }
 
                 MediaTrackerClipTriggerSnapshot@ ReadMediaTrackerClipTrigger(
@@ -294,6 +317,7 @@ namespace TriggerVisualizer {
                         trigger.HasClip = clip !is null;
                         if (clip !is null) {
                             trigger.ClipName = string(clip.Name);
+                            trigger.DetectedLabel = DetectMediaTrackerClipTriggerLabel(clip);
                         } else {
                             trigger.ClipName = "<null clip>";
                         }
@@ -487,8 +511,17 @@ namespace TriggerVisualizer {
                             for (uint j = 0; j < ranges.Length; j++) {
                                 auto range = ranges[j];
                                 source.RawRanges.InsertLast(range);
-                                source.TriggerVolumes.InsertLast(MediaTrackerRangeToTriggerVolume(range, source.GridSpec, trigger.ClipIndex, trigger.DisplayName(), j, ranges.Length));
+                                source.TriggerVolumes.InsertLast(MediaTrackerRangeToTriggerVolume(
+                                    range,
+                                    source.GridSpec,
+                                    trigger.ClipIndex,
+                                    trigger.DisplayName(),
+                                    trigger.DetectedLabel,
+                                    j,
+                                    ranges.Length
+                                ));
                             }
+                            trigger.RawCoords.Resize(0);
                         }
                     }
                 }

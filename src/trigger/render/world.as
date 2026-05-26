@@ -16,19 +16,36 @@ namespace TriggerVisualizer {
                 auto playerState = TriggerVisualizer::Trigger::Data::GetPlayerPositionState();
                 ResetWorldRenderPerformanceBudgets();
 
-                auto fillTileItems = array<WorldFillTileDrawItem@>();
+                auto visibleVolumes = array<TriggerVolume@>();
+                auto visibleFades = array<float>();
+                auto visibleIndices = array<uint>();
+                visibleVolumes.Reserve(snapshot.TriggerVolumes.Length);
+                visibleFades.Reserve(snapshot.TriggerVolumes.Length);
+                visibleIndices.Reserve(snapshot.TriggerVolumes.Length);
+
                 for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
-                    float fade = GetTriggerVolumeRenderFadeFactor(snapshot.TriggerVolumes[i], cameraPos, playerState);
+                    auto volume = snapshot.TriggerVolumes[i];
+                    float fade = GetTriggerVolumeRenderFadeFactor(volume, cameraPos, playerState);
                     if (!IsVisibleFadeFactor(fade)) continue;
 
-                    if (TriggerVisualizer::Trigger::UI::S_ShowFill || TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) {
+                    visibleVolumes.InsertLast(volume);
+                    visibleFades.InsertLast(fade);
+                    visibleIndices.InsertLast(i);
+                }
+
+                if (visibleVolumes.Length == 0) return;
+
+                auto fillTileItems = array<WorldFillTileDrawItem@>();
+                bool shouldCollectFillItems = TriggerVisualizer::Trigger::UI::S_ShowFill || TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons;
+                if (shouldCollectFillItems) {
+                    for (uint i = 0; i < visibleVolumes.Length; i++) {
                         vec4 fillColor = TriggerVisualizer::Trigger::UI::S_ShowFill ?
-                        GetFillColor(snapshot.TriggerVolumes[i], cameraPos, fade) : vec4();
+                        GetFillColor(visibleVolumes[i], cameraPos, visibleFades[i]) : vec4();
                         CollectTriggerVolumeFillDrawItems(
-                            snapshot.TriggerVolumes[i],
+                            visibleVolumes[i],
                             cameraPos,
                             fillColor,
-                            i,
+                            visibleIndices[i],
                             fillTileItems
                         );
                     }
@@ -36,26 +53,24 @@ namespace TriggerVisualizer {
 
                 DrawWorldFillTileDrawItems(fillTileItems);
 
-                for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
-                    float fade = GetTriggerVolumeRenderFadeFactor(snapshot.TriggerVolumes[i], cameraPos, playerState);
-                    if (!IsVisibleFadeFactor(fade)) continue;
-
+                for (uint i = 0; i < visibleVolumes.Length; i++) {
                     if (TriggerVisualizer::Trigger::UI::S_ShowOutline) {
                         DrawTriggerVolumeOutline(
-                            snapshot.TriggerVolumes[i],
+                            visibleVolumes[i],
                             cameraPos,
-                            GetOutlineColor(snapshot.TriggerVolumes[i], cameraPos, fade),
+                            GetOutlineColor(visibleVolumes[i], cameraPos, visibleFades[i]),
                             TriggerVisualizer::Trigger::UI::S_OutlineWidth,
-                            i
+                            visibleIndices[i]
                         );
                     }
 
                     if (TriggerVisualizer::Trigger::UI::S_ShowLabels) {
                         TriggerRangeRaw@ rawRange = null;
-                        if (i < snapshot.RawRanges.Length) {
-                            @rawRange = snapshot.RawRanges[i];
+                        uint sourceIndex = visibleIndices[i];
+                        if (sourceIndex < snapshot.RawRanges.Length) {
+                            @rawRange = snapshot.RawRanges[sourceIndex];
                         }
-                        DrawTriggerVolumeLabel(snapshot.TriggerVolumes[i], rawRange, i, cameraPos, fade);
+                        DrawTriggerVolumeLabel(visibleVolumes[i], rawRange, visibleIndices[i], cameraPos, visibleFades[i]);
                     }
                 }
             }

@@ -16,6 +16,18 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: Label show world size"]
             bool S_LabelShowWorldSize = false;
 
+            [Setting hidden name="Trigger: Label show island index"]
+            bool S_LabelShowIslandIndex = true;
+
+            [Setting hidden name="Trigger: Label show source prefix"]
+            bool S_LabelShowSourcePrefix = true;
+
+            [Setting hidden name="Trigger: Label use detected trigger name"]
+            bool S_LabelUseDetectedTriggerName = false;
+
+            [Setting hidden name="Trigger: Label show detected trigger name"]
+            bool S_LabelShowDetectedTriggerName = false;
+
             [Setting hidden name="Trigger: Label font size" min=8 max=48]
             float S_LabelFontSize = 16.0f;
 
@@ -272,6 +284,10 @@ namespace TriggerVisualizer {
                 S_LabelShowIndex = true;
                 S_LabelShowRawRange = false;
                 S_LabelShowWorldSize = false;
+                S_LabelShowIslandIndex = true;
+                S_LabelShowSourcePrefix = true;
+                S_LabelUseDetectedTriggerName = false;
+                S_LabelShowDetectedTriggerName = false;
                 S_LabelFontSize = 16.0f;
                 S_LabelAlpha = 0.95f;
                 S_LabelBackgroundAlpha = 0.20f;
@@ -952,6 +968,25 @@ namespace TriggerVisualizer {
                 S_LabelShowIndex = UI::Checkbox("Show index##trigger-visualizer-labels", S_LabelShowIndex);
                 S_LabelShowRawRange = UI::Checkbox("Show raw range##trigger-visualizer-labels", S_LabelShowRawRange);
                 S_LabelShowWorldSize = UI::Checkbox("Show world size##trigger-visualizer-labels", S_LabelShowWorldSize);
+                S_LabelShowIslandIndex = UI::Checkbox("Show island x/n##trigger-visualizer-labels", S_LabelShowIslandIndex);
+                S_LabelShowSourcePrefix = UI::Checkbox(
+                    "Show source/type prefix##trigger-visualizer-labels",
+                    S_LabelShowSourcePrefix
+                );
+                S_LabelUseDetectedTriggerName = UI::Checkbox(
+                    "Overwrite name with detected trigger type##trigger-visualizer-labels",
+                    S_LabelUseDetectedTriggerName
+                );
+                if (S_LabelUseDetectedTriggerName) {
+                    S_LabelShowDetectedTriggerName = false;
+                }
+
+                UI::BeginDisabled(S_LabelUseDetectedTriggerName);
+                S_LabelShowDetectedTriggerName = UI::Checkbox(
+                    "Show detected trigger type with name##trigger-visualizer-labels",
+                    S_LabelShowDetectedTriggerName
+                );
+                UI::EndDisabled();
 
                 UI::Separator();
                 UI::Text("Appearance");

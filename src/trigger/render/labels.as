@@ -40,7 +40,12 @@ namespace TriggerVisualizer {
                 }
 
                 if (box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER) {
-                    parts.InsertLast(box.DisplayLabel());
+                    parts.InsertLast(box.DisplayLabelWithOptions(
+                        TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix,
+                        TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex,
+                        TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName,
+                        TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName
+                    ));
                 }
 
                 if (TriggerVisualizer::Trigger::UI::S_LabelShowRawRange && rawRange !is null) {

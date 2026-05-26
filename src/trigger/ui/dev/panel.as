@@ -44,11 +44,15 @@ namespace TriggerVisualizer {
                         if (!UI::TreeNode(label + "##trigger-source-mt-clip-" + sourceIndex + "-" + i)) continue;
 
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Has Clip", OnOff(trigger.HasClip)));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine(
+                            "Detected Label",
+                            trigger.DetectedLabel.Length > 0 ? trigger.DetectedLabel : "<none>"
+                        ));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Trigger Ptr", PointerLabel(trigger.TriggerStructPtr)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Buffer", PointerLabel(trigger.CoordBufferPtr)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Count", tostring(trigger.RawCoordCount)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Capacity", tostring(trigger.RawCoordCapacity)));
-                        string renderShape = trigger.RenderBoundsUsed ? "Bounding box" : (trigger.RenderCoordsSkipped ? "Skipped" : "Exact cells");
+                        string renderShape = trigger.RenderCoordsSkipped ? "Skipped" : "Exact cells";
                         if (trigger.RenderIslandsUsed) {
                             renderShape = "Cell islands (" + tostring(trigger.RenderIslandCount) + ")";
                         }
@@ -127,6 +131,10 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Index", OnOff(UI::S_LabelShowIndex)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Raw Range", OnOff(UI::S_LabelShowRawRange)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label World Size", OnOff(UI::S_LabelShowWorldSize)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Island", OnOff(UI::S_LabelShowIslandIndex)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Source Prefix", OnOff(UI::S_LabelShowSourcePrefix)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Detected Overwrite", OnOff(UI::S_LabelUseDetectedTriggerName)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Detected Extra", OnOff(UI::S_LabelShowDetectedTriggerName)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Font Size", Text::Format("%.1f", UI::S_LabelFontSize)));
                     if (ctx.HasMap) {
                         vec3 cameraPos = Camera::GetCurrentPosition();

@@ -274,7 +274,7 @@ namespace TriggerVisualizer {
                 if (items is null || !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
 
                 for (uint i = startIndex; i < endIndex && i < items.Length; i++) {
-                    if (items[i] is null || items[i].Occluded) continue;
+                    if (items[i] is null || items[i].Occluded || !items[i].AllowTileIcon) continue;
                     DrawSkullTileIconOnWorldTile(items[i].Origin, items[i].UEdge, items[i].VEdge);
                 }
             }
@@ -595,6 +595,7 @@ namespace TriggerVisualizer {
             }
 
             uint CountTriggerVolumeFillTiles(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (ShouldRenderTriggerVolumeSimpleFill(box)) return CountTriggerVolumeCameraFacingFaces(box, cameraPos);
                 if (!ShouldRenderTriggerVolumeFillTiles(box)) return 0;
 
                 auto corners = GetTriggerVolumeCorners(box);

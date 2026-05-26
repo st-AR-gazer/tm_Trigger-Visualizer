@@ -49,6 +49,7 @@ namespace TriggerVisualizer {
                 float SortDistanceSq = 0.0f;
                 bool Occluded = false;
                 bool HasScreenProjection = false;
+                bool AllowTileIcon = true;
                 vec3 Screen0;
                 vec3 Screen1;
                 vec3 Screen2;
@@ -340,6 +341,53 @@ namespace TriggerVisualizer {
                 return box.Source != TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER;
             }
 
+            bool ShouldRenderTriggerVolumeSimpleFill(const TriggerVolume@ box) {
+                if (box is null) return false;
+                return box.Source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER;
+            }
+
+            uint CollectSimpleTriggerVolumeFillDrawItems(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const vec4 &in color,
+                uint boxIndex,
+                array<WorldFillTileDrawItem@> @items
+            ) {
+                if (items is null || color.w <= 0.001f) return 0;
+
+                auto corners = GetTriggerVolumeCorners(box);
+                if (corners.Length != 8) return 0;
+
+                int maxFrameTiles = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
+                uint drawn = 0;
+                for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                    if (int(items.Length) >= maxFrameTiles) return drawn;
+
+                    auto face = TRIGGER_VOLUME_FACE_INDICES[i];
+                    if (!IsTriggerVolumeFaceCameraFacing(corners, face, i, cameraPos)) continue;
+
+                    vec3 origin = corners[face[0]];
+                    vec3 uEdge = corners[face[1]] - origin;
+                    vec3 vEdge = corners[face[3]] - origin;
+                    float tileSeed = GetFillTileColorSeed(boxIndex, i);
+                    WorldFillTileDrawItem@ item = WorldFillTileDrawItem(
+                        origin,
+                        uEdge,
+                        vEdge,
+                        GetFillTileColor(color, tileSeed),
+                        tileSeed,
+                        GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos)
+                    );
+                    item.AllowTileIcon = false;
+                    if (!UpdateWorldFillTileScreenProjection(item)) continue;
+
+                    items.InsertLast(item);
+                    drawn++;
+                }
+
+                return drawn;
+            }
+
             void CollectTriggerVolumeFillDrawItems(
                 const TriggerVolume@ box,
                 const vec3 &in cameraPos,
@@ -348,6 +396,10 @@ namespace TriggerVisualizer {
                 array<WorldFillTileDrawItem@> @items
             ) {
                 if (items is null) return;
+                if (ShouldRenderTriggerVolumeSimpleFill(box)) {
+                    CollectSimpleTriggerVolumeFillDrawItems(box, cameraPos, color, boxIndex, items);
+                    return;
+                }
                 if (!ShouldRenderTriggerVolumeFillTiles(box)) return;
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;

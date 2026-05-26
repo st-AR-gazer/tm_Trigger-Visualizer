@@ -46,6 +46,10 @@ namespace TriggerVisualizer {
             int Source = TRIGGER_SOURCE_OFFZONE;
             uint SourceIndex = 0;
             string Label;
+            string DetectedLabel;
+            bool HasIslandIndex = false;
+            uint IslandIndex = 0;
+            uint IslandCount = 0;
 
             TriggerVolume() { }
 
@@ -80,15 +84,51 @@ namespace TriggerVisualizer {
                 return GetTriggerSourceName(Source);
             }
 
-            string DisplayLabel() const {
-                if (Label.Length > 0) return Label;
+            string SourceIndexLabel() const {
                 return SourceName() + " #" + tostring(SourceIndex);
+            }
+
+            string DisplayLabel() const {
+                return DisplayLabelWithOptions(true, true, false, false);
+            }
+
+            string DisplayLabelWithIsland(bool includeIslandIndex) const {
+                return DisplayLabelWithOptions(true, includeIslandIndex, false, false);
+            }
+
+            string DisplayLabelWithOptions(
+                bool includeSourcePrefix,
+                bool includeIslandIndex,
+                bool useDetectedLabel,
+                bool appendDetectedLabel
+            ) const {
+                string label = SourceIndexLabel();
+                bool hasCustomLabel = Label.Length > 0;
+                bool hasDetectedLabel = DetectedLabel.Length > 0;
+
+                if (Label.Length > 0) {
+                    label = Label;
+                }
+                if (useDetectedLabel && hasDetectedLabel) {
+                    label = DetectedLabel;
+                    hasCustomLabel = true;
+                } else if (appendDetectedLabel && hasDetectedLabel && DetectedLabel != label) {
+                    label += " (" + DetectedLabel + ")";
+                }
+                if (includeSourcePrefix && hasCustomLabel) {
+                    label = SourceIndexLabel() + ": " + label;
+                }
+                if (includeIslandIndex && HasIslandIndex && IslandCount > 1) {
+                    label += " island " + tostring(IslandIndex + 1) + "/" + tostring(IslandCount);
+                }
+                return label;
             }
         }
 
         class MediaTrackerClipTriggerSnapshot {
             uint ClipIndex = 0;
             string ClipName;
+            string DetectedLabel;
             bool HasClip = false;
             nat3 MinCoord;
             nat3 MaxCoord;
@@ -100,7 +140,6 @@ namespace TriggerVisualizer {
             bool HasReadableCoordBuffer = false;
             bool CoordSamplesTruncated = false;
             bool RenderCoordsSkipped = false;
-            bool RenderBoundsUsed = false;
             bool RenderIslandsUsed = false;
             uint RenderIslandCount = 0;
             string Warning;
