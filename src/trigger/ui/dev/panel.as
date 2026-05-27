@@ -44,10 +44,9 @@ namespace TriggerVisualizer {
                         if (!UI::TreeNode(label + "##trigger-source-mt-clip-" + sourceIndex + "-" + i)) continue;
 
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Has Clip", OnOff(trigger.HasClip)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine(
-                            "Detected Label",
-                            trigger.DetectedLabel.Length > 0 ? trigger.DetectedLabel : "<none>"
-                        ));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Detected Label", trigger.DetectedLabel.Length > 0 ? trigger.DetectedLabel : "<none>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Subtype", trigger.SubtypeLabel.Length > 0 ? trigger.SubtypeLabel + " (" + trigger.SubtypeKey + ")" : "<none>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Targets", trigger.TargetKeys.Length > 0 ? trigger.TargetKeys : "<none>"));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Trigger Ptr", PointerLabel(trigger.TriggerStructPtr)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Buffer", PointerLabel(trigger.CoordBufferPtr)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Count", tostring(trigger.RawCoordCount)));
@@ -103,7 +102,8 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Render Distance", UI::GetRenderDistanceWorld().ToString() + " m"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Effective Distance", TriggerVisualizer::Trigger::Render::GetEffectiveRenderDistanceWorld().ToString() + " m"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fade Band", UI::GetRenderFadeBandWorld().ToString() + " m"));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Source", UI::GetRenderProximityModeLabel(UI::S_RenderProximityMode)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Area", UI::GetRuntimeAreaLabel(ctx)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Source", UI::GetRenderProximityModeLabel(UI::GetRenderProximityModeForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Source", OnOff(UI::S_ShowOffzoneSource)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Effective", OnOff(UI::IsOffzoneSourceEnabledForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Source", OnOff(UI::S_ShowMediaTrackerSource)));
@@ -138,38 +138,42 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Font Size", Text::Format("%.1f", UI::S_LabelFontSize)));
                     if (ctx.HasMap) {
                         vec3 cameraPos = Camera::GetCurrentPosition();
-                        auto playerState = TriggerVisualizer::Trigger::Data::GetPlayerPositionState();
+                        auto proximityState = TriggerVisualizer::Trigger::Data::GetProximityReferenceState(ctx);
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity State", proximityState.StateLabel()));
+                        if (proximityState.HasOrbitalPoint) {
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Orbital Point", proximityState.OrbitalPoint.ToString()));
+                        }
                         uint visibleCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesInRenderRangeForProximity(
                             snapshot.TriggerVolumes,
                             cameraPos,
-                            playerState
+                            proximityState
                         );
                         uint fadingCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesInFadeBandForProximity(
                             snapshot.TriggerVolumes,
                             cameraPos,
-                            playerState
+                            proximityState
                         );
                         uint culledCount = snapshot.TriggerVolumes.Length - visibleCount;
                         uint fillFaceCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesCameraFacingFacesForProximity(
                             snapshot.TriggerVolumes,
                             cameraPos,
-                            playerState
+                            proximityState
                         );
                         uint fillTileCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesFillTilesForProximity(
                             snapshot.TriggerVolumes,
                             cameraPos,
-                            playerState
+                            proximityState
                         );
                         uint labelCount = TriggerVisualizer::Trigger::Render::CountVisibleTriggerVolumeLabels(
                             snapshot.TriggerVolumes,
                             cameraPos,
-                            playerState
+                            proximityState
                         );
                         uint outlineSegmentCount = 0;
                         uint maxEdgeSegments = 0;
                         for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
                             auto box = snapshot.TriggerVolumes[i];
-                            if (!TriggerVisualizer::Trigger::Render::IsTriggerVolumeInRenderRangeForProximity(box, cameraPos, playerState)) continue;
+                            if (!TriggerVisualizer::Trigger::Render::IsTriggerVolumeInRenderRangeForProximity(box, cameraPos, proximityState)) continue;
 
                             outlineSegmentCount += TriggerVisualizer::Trigger::Render::CountTriggerVolumeOutlineSegments(
                                 box,
@@ -185,8 +189,7 @@ namespace TriggerVisualizer {
                         }
 
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Camera Pos", cameraPos.ToString()));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle State", playerState.StateLabel()));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Pos", playerState.HasVehicle ? playerState.Position.ToString() : "<none>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Pos", proximityState.HasVehiclePosition ? proximityState.VehiclePosition.ToString() : "<none>"));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Visible Volumes", tostring(visibleCount)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fading Volumes", tostring(fadingCount)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culled Volumes", tostring(culledCount)));
@@ -202,7 +205,7 @@ namespace TriggerVisualizer {
                                 float fade = TriggerVisualizer::Trigger::Render::GetTriggerVolumeRenderFadeFactor(
                                     snapshot.TriggerVolumes[i],
                                     cameraPos,
-                                    playerState
+                                    proximityState
                                 );
                                 UI::Text("#" + i + ": " + Text::Format("%.3f", fade));
                             }
@@ -245,6 +248,7 @@ namespace TriggerVisualizer {
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Map Hints", "<none>"));
                     } else {
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Map Hints", snapshot.RenderHints.DisableSummary()));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Hint Targets", snapshot.RenderHints.TargetDisableSummary()));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Hint Distances", snapshot.RenderHints.DistanceSummary()));
                         if (UI::TreeNode("Map Hint Commands (" + snapshot.RenderHints.Commands.Length + ")##trigger-map-hint-commands")) {
                             for (uint i = 0; i < snapshot.RenderHints.Commands.Length; i++) {
@@ -291,6 +295,12 @@ namespace TriggerVisualizer {
                             UI::Text("#" + i + " (" + box.DisplayLabel() + "): min " + box.Min.ToString() + " | max " + box.Max.ToString());
                             UI::Text("    size " + box.Size().ToString() + " | center " + box.Center().ToString());
                             UI::Text("    source " + box.SourceName() + " index " + tostring(box.SourceIndex));
+                            if (box.SubtypeKey.Length > 0) {
+                                UI::Text("    subtype " + box.SubtypeLabel + " (" + box.SubtypeKey + ")");
+                            }
+                            if (box.TargetKeys.Length > 0) {
+                                UI::Text("    targets " + box.TargetKeys);
+                            }
                         }
                         UI::TreePop();
                     }

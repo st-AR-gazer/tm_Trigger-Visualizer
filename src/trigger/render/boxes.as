@@ -233,29 +233,55 @@ namespace TriggerVisualizer {
                 return IsVisibleFadeFactor(GetTriggerVolumeFadeFactor(box, cameraPos));
             }
 
-            float GetPlayerTriggerVolumeFadeFactor(
+            float GetVehicleTriggerVolumeFadeFactor(
                 const TriggerVolume@ box,
-                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
-                if (playerState is null || !playerState.HasVehicle) return 0.0f;
-                return GetTriggerVolumeFadeFactor(box, playerState.Position);
+                if (proximityState is null || !proximityState.HasVehiclePosition) return 0.0f;
+                return GetTriggerVolumeFadeFactor(box, proximityState.VehiclePosition);
+            }
+
+            float GetOrbitalTriggerVolumeFadeFactor(
+                const TriggerVolume@ box,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
+            ) {
+                if (proximityState is null || !proximityState.HasOrbitalPoint) return 0.0f;
+                return GetTriggerVolumeFadeFactor(box, proximityState.OrbitalPoint);
             }
 
             float GetTriggerVolumeRenderFadeFactor(
                 const TriggerVolume@ box,
                 const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
-                int proximityMode = TriggerVisualizer::Trigger::UI::S_RenderProximityMode;
+                int proximityMode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
                 float cameraFade = GetTriggerVolumeFadeFactor(box, cameraPos);
+                float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
+                float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
 
-                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_PLAYER_ONLY) {
-                    float playerFade = GetPlayerTriggerVolumeFadeFactor(box, playerState);
-                    return playerState !is null && playerState.HasVehicle ? playerFade : cameraFade;
+                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_ONLY) {
+                    return proximityState !is null && proximityState.HasVehiclePosition ? vehicleFade : cameraFade;
                 }
 
-                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_PLAYER) {
-                    return Math::Max(cameraFade, GetPlayerTriggerVolumeFadeFactor(box, playerState));
+                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_VEHICLE) {
+                    return Math::Max(cameraFade, vehicleFade);
+                }
+
+                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_ORBITAL_ONLY) {
+                    return proximityState !is null && proximityState.HasOrbitalPoint ? orbitalFade : cameraFade;
+                }
+
+                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_ORBITAL) {
+                    return Math::Max(cameraFade, orbitalFade);
+                }
+
+                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_AND_ORBITAL) {
+                    float combinedFade = Math::Max(vehicleFade, orbitalFade);
+                    return(proximityState !is null && (proximityState.HasVehiclePosition || proximityState.HasOrbitalPoint)) ? combinedFade : cameraFade;
+                }
+
+                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL) {
+                    return Math::Max(cameraFade, Math::Max(vehicleFade, orbitalFade));
                 }
 
                 return cameraFade;
@@ -264,9 +290,9 @@ namespace TriggerVisualizer {
             bool IsTriggerVolumeInRenderRangeForProximity(
                 const TriggerVolume@ box,
                 const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
-                return IsVisibleFadeFactor(GetTriggerVolumeRenderFadeFactor(box, cameraPos, playerState));
+                return IsVisibleFadeFactor(GetTriggerVolumeRenderFadeFactor(box, cameraPos, proximityState));
             }
 
             uint CountTriggerVolumesInRenderRange(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
@@ -284,13 +310,13 @@ namespace TriggerVisualizer {
             uint CountTriggerVolumesInRenderRangeForProximity(
                 const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    if (IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, playerState)) {
+                    if (IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, proximityState)) {
                         count++;
                     }
                 }
@@ -312,13 +338,13 @@ namespace TriggerVisualizer {
             uint CountTriggerVolumesInFadeBandForProximity(
                 const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    float fade = GetTriggerVolumeRenderFadeFactor(boxes[i], cameraPos, playerState);
+                    float fade = GetTriggerVolumeRenderFadeFactor(boxes[i], cameraPos, proximityState);
                     if (fade >= 1.0f || !IsVisibleFadeFactor(fade)) continue;
                     count++;
                 }

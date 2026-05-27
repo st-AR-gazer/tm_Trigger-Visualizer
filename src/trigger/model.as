@@ -3,9 +3,208 @@ namespace TriggerVisualizer {
         const int TRIGGER_SOURCE_OFFZONE = 0;
         const int TRIGGER_SOURCE_MEDIATRACKER = 1;
 
+        const string TRIGGER_TARGET_OFFZONE = "offzone";
+        const string TRIGGER_TARGET_MEDIATRACKER = "mediatracker";
+
+        const string MT_SUBTYPE_CAMERA = "camera";
+        const string MT_SUBTYPE_CAM_CUSTOM = "camcustom";
+        const string MT_SUBTYPE_CAM_ORBITAL = "camorbital";
+        const string MT_SUBTYPE_CAM_PATH = "campath";
+        const string MT_SUBTYPE_CAM_PLAYER = "camplayer";
+        const string MT_SUBTYPE_CAM_DEFAULT = "camdefault";
+        const string MT_SUBTYPE_CAM_1 = "cam1";
+        const string MT_SUBTYPE_CAM_2 = "cam2";
+        const string MT_SUBTYPE_CAM_3 = "cam3";
+        const string MT_SUBTYPE_TRIANGLES_2D = "2dtriangles";
+        const string MT_SUBTYPE_TRIANGLES_3D = "3dtriangles";
+        const string MT_SUBTYPE_CAR_TRAIL = "cartrail";
+        const string MT_SUBTYPE_COLORS_FX = "colorsfx";
+        const string MT_SUBTYPE_COLOR_GRADING = "colorgrading";
+        const string MT_SUBTYPE_DEPTH_OF_FIELD = "depthoffield";
+        const string MT_SUBTYPE_DIRTY_LENS = "dirtylens";
+        const string MT_SUBTYPE_EDITING_CUT = "editingcut";
+        const string MT_SUBTYPE_FADING_TRANSITION = "fadingtransition";
+        const string MT_SUBTYPE_FOG = "fog";
+        const string MT_SUBTYPE_GHOST = "ghost";
+        const string MT_SUBTYPE_AMBIANCE = "ambiance";
+        const string MT_SUBTYPE_HDR_BLOOM = "hdrbloom";
+        const string MT_SUBTYPE_IMAGE = "image";
+        const string MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX = "inertialtrackingcamfx";
+        const string MT_SUBTYPE_MANIALINK_UI = "manialinkui";
+        const string MT_SUBTYPE_MANIALINK_URL = "manialinkurl";
+        const string MT_SUBTYPE_MUSIC_VOLUME = "musicvolume";
+        const string MT_SUBTYPE_OPPONENT_VISIBILITY = "opponentvisibility";
+        const string MT_SUBTYPE_SHAKE_CAM_FX = "shakecamfx";
+        const string MT_SUBTYPE_STEREO_3D = "stereo3d";
+        const string MT_SUBTYPE_SOUND_FX = "soundfx";
+        const string MT_SUBTYPE_SPECTATORS = "spectators";
+        const string MT_SUBTYPE_TEXT = "text";
+        const string MT_SUBTYPE_TIME = "time";
+        const string MT_SUBTYPE_TIME_SPEED = "timespeed";
+        const string MT_SUBTYPE_TONE_MAPPING = "tonemapping";
+        const string MT_SUBTYPE_VEHICLE_LIGHTS = "vehiclelights";
+        const string MT_SUBTYPE_RESET = "reset";
+        const string MT_SUBTYPE_MIXED = "mixed";
+        const string MT_SUBTYPE_UNKNOWN = "unknown";
+
         string GetTriggerSourceName(int source) {
             if (source == TRIGGER_SOURCE_OFFZONE) return "Offzone";
             if (source == TRIGGER_SOURCE_MEDIATRACKER) return "MediaTracker";
+            return "Unknown";
+        }
+
+        string NormalizeTriggerTargetKey(const string &in rawKey) {
+            string key = rawKey.ToLower().Trim();
+            key = key.Replace(" ", "").Replace("-", "").Replace("_", "").Replace("/", "");
+
+            if (key == "media" || key == "mt" || key == "mediatracker") return TRIGGER_TARGET_MEDIATRACKER;
+            if (key == "offzone" || key == "offzones") return TRIGGER_TARGET_OFFZONE;
+
+            if (key == "cameras" || key == "camera") return MT_SUBTYPE_CAMERA;
+            if (key == "customcamera" || key == "customcam" || key == "camcustom") return MT_SUBTYPE_CAM_CUSTOM;
+            if (key == "orbitalcamera" || key == "orbitalcam" || key == "camorbital") return MT_SUBTYPE_CAM_ORBITAL;
+            if (key == "pathcamera" || key == "pathcam" || key == "campath") return MT_SUBTYPE_CAM_PATH;
+            if (key == "playercamera" || key == "playercam" || key == "camplayer" || key == "gamecamera") return MT_SUBTYPE_CAM_PLAYER;
+            if (key == "defaultcamera" || key == "camdefault") return MT_SUBTYPE_CAM_DEFAULT;
+            if (key == "externalcamera" || key == "external1camera" || key == "cam1") return MT_SUBTYPE_CAM_1;
+            if (key == "external2camera" || key == "cam2") return MT_SUBTYPE_CAM_2;
+            if (key == "internalcamera" || key == "cam3") return MT_SUBTYPE_CAM_3;
+
+            if (key == "2dtriangle" || key == "2dtriangles") return MT_SUBTYPE_TRIANGLES_2D;
+            if (key == "3dtriangle" || key == "3dtriangles") return MT_SUBTYPE_TRIANGLES_3D;
+            if (key == "cartrail" || key == "cartrails" || key == "trail" || key == "trails") return MT_SUBTYPE_CAR_TRAIL;
+            if (key == "colorsfx" || key == "colorfx") return MT_SUBTYPE_COLORS_FX;
+            if (key == "colorgrading" || key == "grading") return MT_SUBTYPE_COLOR_GRADING;
+            if (key == "dof" || key == "depthoffield") return MT_SUBTYPE_DEPTH_OF_FIELD;
+            if (key == "dirtylens") return MT_SUBTYPE_DIRTY_LENS;
+            if (key == "editingcut" || key == "cut") return MT_SUBTYPE_EDITING_CUT;
+            if (key == "fadingtransition" || key == "fadetransition" || key == "transitionfade" || key == "fade") return MT_SUBTYPE_FADING_TRANSITION;
+            if (key == "fog") return MT_SUBTYPE_FOG;
+            if (key == "ghost" || key == "ghosts" || key == "entity" || key == "entities") return MT_SUBTYPE_GHOST;
+            if (key == "ambiance" || key == "ambience") return MT_SUBTYPE_AMBIANCE;
+            if (key == "hdrbloom" || key == "bloomhdr" || key == "bloom") return MT_SUBTYPE_HDR_BLOOM;
+            if (key == "image" || key == "images") return MT_SUBTYPE_IMAGE;
+            if (key == "inertialtrackingcamfx" || key == "inertialtracking" || key == "camfxinertialtracking") return MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX;
+            if (key == "manialinkui" || key == "manialinkinterface" || key == "interface") return MT_SUBTYPE_MANIALINK_UI;
+            if (key == "manialinkurl" || key == "manialink") return MT_SUBTYPE_MANIALINK_URL;
+            if (key == "musicvolume" || key == "music" || key == "musicfx") return MT_SUBTYPE_MUSIC_VOLUME;
+            if (key == "opponentvisibility" || key == "opponents") return MT_SUBTYPE_OPPONENT_VISIBILITY;
+            if (key == "shakecamfx" || key == "camerashake" || key == "shake") return MT_SUBTYPE_SHAKE_CAM_FX;
+            if (key == "stereo3d" || key == "3dstereo") return MT_SUBTYPE_STEREO_3D;
+            if (key == "soundfx" || key == "sound" || key == "sounds") return MT_SUBTYPE_SOUND_FX;
+            if (key == "spectators" || key == "spectator") return MT_SUBTYPE_SPECTATORS;
+            if (key == "text") return MT_SUBTYPE_TEXT;
+            if (key == "time") return MT_SUBTYPE_TIME;
+            if (key == "timespeed") return MT_SUBTYPE_TIME_SPEED;
+            if (key == "tonemapping") return MT_SUBTYPE_TONE_MAPPING;
+            if (key == "vehiclelights" || key == "vehiclelight" || key == "lights") return MT_SUBTYPE_VEHICLE_LIGHTS;
+            if (key == "reset" || key == "empty") return MT_SUBTYPE_RESET;
+            if (key == "mixed") return MT_SUBTYPE_MIXED;
+            if (key == "unknown") return MT_SUBTYPE_UNKNOWN;
+
+            return key;
+        }
+
+        string GetTriggerSourceTargetKey(int source) {
+            if (source == TRIGGER_SOURCE_OFFZONE) return TRIGGER_TARGET_OFFZONE;
+            if (source == TRIGGER_SOURCE_MEDIATRACKER) return TRIGGER_TARGET_MEDIATRACKER;
+            return "";
+        }
+
+        bool IsCameraSubtypeTargetKey(const string &in rawKey) {
+            string key = NormalizeTriggerTargetKey(rawKey);
+            return key == MT_SUBTYPE_CAM_CUSTOM
+                || key == MT_SUBTYPE_CAM_ORBITAL
+                || key == MT_SUBTYPE_CAM_PATH
+                || key == MT_SUBTYPE_CAM_PLAYER
+                || key == MT_SUBTYPE_CAM_DEFAULT
+                || key == MT_SUBTYPE_CAM_1
+                || key == MT_SUBTYPE_CAM_2
+                || key == MT_SUBTYPE_CAM_3;
+        }
+
+        bool TriggerTargetListContains(const string &in targetKeys, const string &in rawKey) {
+            string key = NormalizeTriggerTargetKey(rawKey);
+            if (key.Length == 0) return false;
+
+            auto parts = targetKeys.Split("|");
+            for (uint i = 0; i < parts.Length; i++) {
+                if (parts[i] == key) return true;
+            }
+            return false;
+        }
+
+        string AddTriggerTargetKey(const string &in targetKeys, const string &in rawKey) {
+            string key = NormalizeTriggerTargetKey(rawKey);
+            if (key.Length == 0 || TriggerTargetListContains(targetKeys, key)) return targetKeys;
+            return targetKeys + key + "|";
+        }
+
+        string MergeTriggerTargetKeys(const string &in targetKeys, const string &in extraTargetKeys) {
+            string next = targetKeys;
+            auto parts = extraTargetKeys.Split("|");
+            for (uint i = 0; i < parts.Length; i++) {
+                next = AddTriggerTargetKey(next, parts[i]);
+            }
+            return next;
+        }
+
+        string AddMediaTrackerSubtypeTargetKey(const string &in targetKeys, const string &in rawKey) {
+            string key = NormalizeTriggerTargetKey(rawKey);
+            if (key.Length == 0) return targetKeys;
+
+            string next = AddTriggerTargetKey(targetKeys, key);
+            if (IsCameraSubtypeTargetKey(key)) {
+                next = AddTriggerTargetKey(next, MT_SUBTYPE_CAMERA);
+            }
+            return next;
+        }
+
+        string GetTriggerSourceTargetKeys(int source) {
+            return AddTriggerTargetKey("", GetTriggerSourceTargetKey(source));
+        }
+
+        string GetMediaTrackerSubtypeDisplayName(const string &in rawKey) {
+            string key = NormalizeTriggerTargetKey(rawKey);
+            if (key == MT_SUBTYPE_CAMERA) return "Camera";
+            if (key == MT_SUBTYPE_CAM_CUSTOM) return "Custom Camera";
+            if (key == MT_SUBTYPE_CAM_ORBITAL) return "Orbital Camera";
+            if (key == MT_SUBTYPE_CAM_PATH) return "Path Camera";
+            if (key == MT_SUBTYPE_CAM_PLAYER) return "Player Camera";
+            if (key == MT_SUBTYPE_CAM_DEFAULT) return "CamDefault";
+            if (key == MT_SUBTYPE_CAM_1) return "Cam1";
+            if (key == MT_SUBTYPE_CAM_2) return "Cam2";
+            if (key == MT_SUBTYPE_CAM_3) return "Cam3";
+            if (key == MT_SUBTYPE_TRIANGLES_2D) return "2D Triangles";
+            if (key == MT_SUBTYPE_TRIANGLES_3D) return "3D Triangles";
+            if (key == MT_SUBTYPE_CAR_TRAIL) return "Car Trail";
+            if (key == MT_SUBTYPE_COLORS_FX) return "Colors FX";
+            if (key == MT_SUBTYPE_COLOR_GRADING) return "Color Grading";
+            if (key == MT_SUBTYPE_DEPTH_OF_FIELD) return "Depth of Field";
+            if (key == MT_SUBTYPE_DIRTY_LENS) return "Dirty Lens";
+            if (key == MT_SUBTYPE_EDITING_CUT) return "Editing Cut";
+            if (key == MT_SUBTYPE_FADING_TRANSITION) return "Fading Transition";
+            if (key == MT_SUBTYPE_FOG) return "Fog";
+            if (key == MT_SUBTYPE_GHOST) return "Ghost";
+            if (key == MT_SUBTYPE_AMBIANCE) return "Ambiance";
+            if (key == MT_SUBTYPE_HDR_BLOOM) return "HDR Bloom";
+            if (key == MT_SUBTYPE_IMAGE) return "Image";
+            if (key == MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX) return "Inertial Tracking CamFX";
+            if (key == MT_SUBTYPE_MANIALINK_UI) return "ManiaLink UI";
+            if (key == MT_SUBTYPE_MANIALINK_URL) return "ManiaLink URL";
+            if (key == MT_SUBTYPE_MUSIC_VOLUME) return "Music Volume";
+            if (key == MT_SUBTYPE_OPPONENT_VISIBILITY) return "Opponent Visibility";
+            if (key == MT_SUBTYPE_SHAKE_CAM_FX) return "Shake Cam FX";
+            if (key == MT_SUBTYPE_STEREO_3D) return "Stereo 3D";
+            if (key == MT_SUBTYPE_SOUND_FX) return "Sound FX";
+            if (key == MT_SUBTYPE_SPECTATORS) return "Spectators";
+            if (key == MT_SUBTYPE_TEXT) return "Text";
+            if (key == MT_SUBTYPE_TIME) return "Time";
+            if (key == MT_SUBTYPE_TIME_SPEED) return "Time Speed";
+            if (key == MT_SUBTYPE_TONE_MAPPING) return "ToneMapping";
+            if (key == MT_SUBTYPE_VEHICLE_LIGHTS) return "Vehicle Lights";
+            if (key == MT_SUBTYPE_RESET) return "Reset";
+            if (key == MT_SUBTYPE_MIXED) return "Mixed";
             return "Unknown";
         }
 
@@ -47,6 +246,9 @@ namespace TriggerVisualizer {
             uint SourceIndex = 0;
             string Label;
             string DetectedLabel;
+            string SubtypeKey;
+            string SubtypeLabel;
+            string TargetKeys = "offzone|";
             bool HasIslandIndex = false;
             uint IslandIndex = 0;
             uint IslandCount = 0;
@@ -70,6 +272,7 @@ namespace TriggerVisualizer {
                 Source = source;
                 SourceIndex = sourceIndex;
                 Label = label;
+                TargetKeys = GetTriggerSourceTargetKeys(source);
             }
 
             vec3 Size() const {
@@ -125,10 +328,25 @@ namespace TriggerVisualizer {
             }
         }
 
+        bool TriggerVolumeMatchesTargetKey(const TriggerVolume@ volume, const string &in rawKey) {
+            if (volume is null) return false;
+
+            string key = NormalizeTriggerTargetKey(rawKey);
+            if (key.Length == 0) return false;
+            if (TriggerTargetListContains(volume.TargetKeys, key)) return true;
+
+            string sourceKey = GetTriggerSourceTargetKey(volume.Source);
+            if (sourceKey.Length > 0 && sourceKey == key) return true;
+            return NormalizeTriggerTargetKey(volume.SubtypeKey) == key;
+        }
+
         class MediaTrackerClipTriggerSnapshot {
             uint ClipIndex = 0;
             string ClipName;
             string DetectedLabel;
+            string SubtypeKey;
+            string SubtypeLabel;
+            string TargetKeys;
             bool HasClip = false;
             nat3 MinCoord;
             nat3 MaxCoord;
@@ -264,6 +482,8 @@ namespace TriggerVisualizer {
             bool HasAnyCommand = false;
             bool SuggestOff = false;
             bool ForceOff = false;
+            array<string> SuggestOffTargets;
+            array<string> ForceOffTargets;
             bool HasSuggestedDrawDistanceXZ = false;
             bool HasSuggestedDrawDistanceY = false;
             float SuggestedDrawDistanceXZ = 0.0f;
@@ -273,7 +493,45 @@ namespace TriggerVisualizer {
             string DisableSummary() const {
                 if (ForceOff) return "force-off";
                 if (SuggestOff) return "suggest-off";
+                if (ForceOffTargets.Length > 0 || SuggestOffTargets.Length > 0) return TargetDisableSummary();
                 return "none";
+            }
+
+            string JoinTargets(const array<string> &in targets) const {
+                string result = "";
+                for (uint i = 0; i < targets.Length; i++) {
+                    if (i > 0) result += ", ";
+                    result += targets[i];
+                }
+                return result;
+            }
+
+            string TargetDisableSummary() const {
+                string result = "";
+                if (ForceOffTargets.Length > 0) {
+                    result += "force-off: " + JoinTargets(ForceOffTargets);
+                }
+                if (SuggestOffTargets.Length > 0) {
+                    if (result.Length > 0) result += " | ";
+                    result += "suggest-off: " + JoinTargets(SuggestOffTargets);
+                }
+                return result.Length > 0 ? result : "none";
+            }
+
+            bool HasSuggestOffTarget(const string &in rawKey) const {
+                string key = NormalizeTriggerTargetKey(rawKey);
+                for (uint i = 0; i < SuggestOffTargets.Length; i++) {
+                    if (SuggestOffTargets[i] == key) return true;
+                }
+                return false;
+            }
+
+            bool HasForceOffTarget(const string &in rawKey) const {
+                string key = NormalizeTriggerTargetKey(rawKey);
+                for (uint i = 0; i < ForceOffTargets.Length; i++) {
+                    if (ForceOffTargets[i] == key) return true;
+                }
+                return false;
             }
 
             string DistanceSummary() const {

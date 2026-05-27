@@ -22,6 +22,8 @@ Map comments can include Trigger Visualizer commands:
 ```text
 /trigger-visualizer suggest-off
 /trigger-visualizer force-off
+/trigger-visualizer <trigger-type>[,<trigger-type>...] suggest-off
+/trigger-visualizer <trigger-type>[,<trigger-type>...] force-off
 /trigger-visualizer suggest-draw-distance-xz <units>
 /trigger-visualizer suggest-draw-distance-xz !<blocks>
 /trigger-visualizer suggest-draw-distance-y <units>
@@ -31,6 +33,69 @@ Map comments can include Trigger Visualizer commands:
 `!<blocks>` converts block counts to world units. X/Z uses 32 units per block;
 Y uses 8 units per block. The old offzone command prefix is intentionally not
 supported.
+
+`suggest-off` asks Trigger Visualizer to start matching triggers hidden when the
+user respects map suggestions. `force-off` always hides matching triggers.
+Without a trigger type, these commands apply to all world rendering. With a
+trigger type, they only apply to matching sources or MediaTracker subtypes.
+
+Examples:
+
+```text
+/trigger-visualizer camera,offzone suggest-off
+/trigger-visualizer cam3 force-off
+/trigger-visualizer fog,cartrail suggest-off
+```
+
+Supported source targets:
+
+- `MediaTracker`
+- `Offzone`
+
+Supported MediaTracker subtype targets:
+
+- `Camera`
+- `CamCustom`
+- `CamOrbital`
+- `CamPath`
+- `CamPlayer`
+- `CamDefault`
+- `Cam1`
+- `Cam2`
+- `Cam3`
+- `2dTriangles`
+- `3dTriangles`
+- `CarTrail`
+- `ColorsFX`
+- `ColorGrading`
+- `DepthOfField`
+- `DirtyLens`
+- `EditingCut`
+- `FadingTransition`
+- `Fog`
+- `Ghost`
+- `Ambiance`
+- `HDRBloom`
+- `Image`
+- `InertialTrackingCamFX`
+- `ManiaLinkUI`
+- `ManiaLinkURL`
+- `MusicVolume`
+- `OpponentVisibility`
+- `ShakeCamFX`
+- `Stereo3D`
+- `SoundFX`
+- `Spectators`
+- `Text`
+- `Time`
+- `TimeSpeed`
+- `ToneMapping`
+- `VehicleLights`
+- `Reset`
+- `Unknown`
+
+Target names are case-insensitive. Use no spaces inside the comma-separated
+target list; hyphens and underscores are accepted.
 
 ## Build
 

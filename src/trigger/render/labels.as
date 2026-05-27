@@ -40,12 +40,7 @@ namespace TriggerVisualizer {
                 }
 
                 if (box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER) {
-                    parts.InsertLast(box.DisplayLabelWithOptions(
-                        TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix,
-                        TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex,
-                        TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName,
-                        TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName
-                    ));
+                    parts.InsertLast(box.DisplayLabelWithOptions(TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix, TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex, TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName, TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName));
                 }
 
                 if (TriggerVisualizer::Trigger::UI::S_LabelShowRawRange && rawRange !is null) {
@@ -123,13 +118,13 @@ namespace TriggerVisualizer {
             uint CountVisibleTriggerVolumeLabels(
                 const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
                 if (boxes is null || !TriggerVisualizer::Trigger::UI::S_ShowLabels) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    float fade = GetTriggerVolumeRenderFadeFactor(boxes[i], cameraPos, playerState);
+                    float fade = GetTriggerVolumeRenderFadeFactor(boxes[i], cameraPos, proximityState);
                     if (!IsVisibleFadeFactor(fade)) continue;
                     if (ShouldDrawTriggerVolumeLabel(boxes[i], cameraPos)) count++;
                 }

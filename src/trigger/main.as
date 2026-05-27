@@ -4,6 +4,7 @@ namespace TriggerVisualizer {
         MapSnapshot@ g_MapSnapshot = null;
         CGameCtnChallenge@ g_CachedMapSnapshotRootMap = null;
         string g_CachedMapSnapshotContextKey = "";
+        string g_CachedMapSnapshotFilterKey = "";
         bool g_CachedMapSnapshotOffzoneEnabled = false;
         bool g_CachedMapSnapshotMediaTrackerEnabled = false;
         TriggerSourceSnapshot@ g_CachedOffzoneSource = null;
@@ -70,6 +71,7 @@ namespace TriggerVisualizer {
             bool mediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
             return ctx.RootMap is g_CachedMapSnapshotRootMap
                 && g_CachedMapSnapshotContextKey == GetMapSnapshotContextKey(ctx)
+                && g_CachedMapSnapshotFilterKey == TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey()
                 && g_CachedMapSnapshotOffzoneEnabled == offzoneEnabled
                 && g_CachedMapSnapshotMediaTrackerEnabled == mediaTrackerEnabled;
         }
@@ -78,6 +80,7 @@ namespace TriggerVisualizer {
             if (ctx is null) {
                 @g_CachedMapSnapshotRootMap = null;
                 g_CachedMapSnapshotContextKey = "<null>";
+                g_CachedMapSnapshotFilterKey = "";
                 g_CachedMapSnapshotOffzoneEnabled = false;
                 g_CachedMapSnapshotMediaTrackerEnabled = false;
                 return;
@@ -85,6 +88,7 @@ namespace TriggerVisualizer {
 
             @g_CachedMapSnapshotRootMap = ctx.RootMap;
             g_CachedMapSnapshotContextKey = GetMapSnapshotContextKey(ctx);
+            g_CachedMapSnapshotFilterKey = TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey();
             g_CachedMapSnapshotOffzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             g_CachedMapSnapshotMediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
         }
@@ -105,12 +109,52 @@ namespace TriggerVisualizer {
             snapshot.RawBufferPtr = offzoneSource.RawBufferPtr;
             @snapshot.GridSpec = offzoneSource.GridSpec;
             snapshot.RawRanges = offzoneSource.RawRanges;
-            snapshot.AddSource(offzoneSource);
+            AddSourceToMapSnapshot(snapshot, offzoneSource);
 
             auto mediaTrackerSource = GetMediaTrackerTriggerSource(ctx);
-            snapshot.AddSource(mediaTrackerSource);
+            AddSourceToMapSnapshot(snapshot, mediaTrackerSource);
 
             return snapshot;
+        }
+
+        bool IsMapHintTargetDisabled(const MapRenderHints@ hints, const string &in targetKey) {
+            if (hints is null || targetKey.Length == 0) return false;
+            if (hints.HasForceOffTarget(targetKey)) return true;
+            return hints.HasSuggestOffTarget(targetKey) && TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff;
+        }
+
+        bool IsSourceDisabledByMapHints(const MapRenderHints@ hints, int source) {
+            return IsMapHintTargetDisabled(hints, GetTriggerSourceTargetKey(source));
+        }
+
+        bool IsTriggerVolumeDisabledByMapHints(const MapRenderHints@ hints, const TriggerVolume@ volume) {
+            if (hints is null || volume is null) return false;
+
+            for (uint i = 0; i < hints.ForceOffTargets.Length; i++) {
+                if (TriggerVolumeMatchesTargetKey(volume, hints.ForceOffTargets[i])) return true;
+            }
+
+            if (!TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff) return false;
+            for (uint i = 0; i < hints.SuggestOffTargets.Length; i++) {
+                if (TriggerVolumeMatchesTargetKey(volume, hints.SuggestOffTargets[i])) return true;
+            }
+
+            return false;
+        }
+
+        void AddSourceToMapSnapshot(MapSnapshot@ snapshot, TriggerSourceSnapshot@ source) {
+            if (snapshot is null || source is null) return;
+
+            snapshot.Sources.InsertLast(source);
+            if (!source.Enabled) return;
+            if (IsSourceDisabledByMapHints(snapshot.RenderHints, source.Source)) return;
+
+            for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
+                auto volume = source.TriggerVolumes[i];
+                if (IsTriggerVolumeDisabledByMapHints(snapshot.RenderHints, volume)) continue;
+                if (!TriggerVisualizer::Trigger::UI::IsTriggerVolumeEnabledBySubtypeSettings(volume)) continue;
+                snapshot.TriggerVolumes.InsertLast(volume);
+            }
         }
 
         TriggerSourceSnapshot@ GetOffzoneTriggerSource(
@@ -138,12 +182,7 @@ namespace TriggerVisualizer {
             string contextKey = GetMapSnapshotContextKey(ctx);
 
             if (!enabled) {
-                if (
-                    g_CachedMediaTrackerSource !is null
-                    && ctx !is null
-                    && ctx.RootMap is g_CachedMediaTrackerRootMap
-                    && g_CachedMediaTrackerContextKey == contextKey
-                ) {
+                if (g_CachedMediaTrackerSource !is null && ctx !is null && ctx.RootMap is g_CachedMediaTrackerRootMap && g_CachedMediaTrackerContextKey == contextKey) {
                     g_CachedMediaTrackerSource.Enabled = false;
                     return g_CachedMediaTrackerSource;
                 }
@@ -157,13 +196,7 @@ namespace TriggerVisualizer {
                 );
             }
 
-            if (
-                g_CachedMediaTrackerSource !is null
-                && ctx !is null
-                && ctx.RootMap is g_CachedMediaTrackerRootMap
-                && g_CachedMediaTrackerContextKey == contextKey
-                && g_CachedMediaTrackerCellRendering == MEDIATRACKER_RENDER_CELLS
-            ) {
+            if (g_CachedMediaTrackerSource !is null && ctx !is null && ctx.RootMap is g_CachedMediaTrackerRootMap && g_CachedMediaTrackerContextKey == contextKey && g_CachedMediaTrackerCellRendering == MEDIATRACKER_RENDER_CELLS) {
                 g_CachedMediaTrackerSource.Enabled = true;
                 return g_CachedMediaTrackerSource;
             }

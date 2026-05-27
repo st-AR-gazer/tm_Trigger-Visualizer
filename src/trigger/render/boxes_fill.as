@@ -582,20 +582,23 @@ namespace TriggerVisualizer {
             uint CountTriggerVolumesCameraFacingFacesForProximity(
                 const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
                 if (boxes is null) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    if (!IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, playerState)) continue;
+                    if (!IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, proximityState)) continue;
                     count += CountTriggerVolumeCameraFacingFaces(boxes[i], cameraPos);
                 }
                 return count;
             }
 
             uint CountTriggerVolumeFillTiles(const TriggerVolume@ box, const vec3 &in cameraPos) {
-                if (ShouldRenderTriggerVolumeSimpleFill(box)) return CountTriggerVolumeCameraFacingFaces(box, cameraPos);
+                if (ShouldRenderTriggerVolumeSimpleFill(box)) return CountTriggerVolumeCameraFacingFaces(
+                    box,
+                    cameraPos
+                );
                 if (!ShouldRenderTriggerVolumeFillTiles(box)) return 0;
 
                 auto corners = GetTriggerVolumeCorners(box);
@@ -613,7 +616,7 @@ namespace TriggerVisualizer {
             uint CountTriggerVolumesFillTilesForProximity(
                 const array<TriggerVolume@> @boxes,
                 const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::PlayerPositionState@ playerState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
                 if (boxes is null) return 0;
 
@@ -621,7 +624,7 @@ namespace TriggerVisualizer {
                 uint maxFrameTiles = uint(Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1));
                 for (uint i = 0; i < boxes.Length; i++) {
                     if (count >= maxFrameTiles) return count;
-                    if (!IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, playerState)) continue;
+                    if (!IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, proximityState)) continue;
                     uint remaining = maxFrameTiles - count;
                     uint boxCount = CountTriggerVolumeFillTiles(boxes[i], cameraPos);
                     if (boxCount > remaining) {

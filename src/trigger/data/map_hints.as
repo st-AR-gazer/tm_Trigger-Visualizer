@@ -37,6 +37,35 @@ namespace TriggerVisualizer {
                 return true;
             }
 
+            bool MapHintTargetExists(const array<string> &in targets, const string &in targetKey) {
+                for (uint i = 0; i < targets.Length; i++) {
+                    if (targets[i] == targetKey) return true;
+                }
+                return false;
+            }
+
+            bool AddMapHintDisableTargets(MapRenderHints@ hints, const string &in rawTargets, bool forceOff) {
+                if (hints is null) return false;
+
+                bool addedAny = false;
+                auto targets = rawTargets.Split(",");
+                for (uint i = 0; i < targets.Length; i++) {
+                    string key = NormalizeTriggerTargetKey(targets[i]);
+                    if (key.Length == 0) continue;
+
+                    if (forceOff) {
+                        if (MapHintTargetExists(hints.ForceOffTargets, key)) continue;
+                        hints.ForceOffTargets.InsertLast(key);
+                    } else {
+                        if (MapHintTargetExists(hints.SuggestOffTargets, key)) continue;
+                        hints.SuggestOffTargets.InsertLast(key);
+                    }
+                    addedAny = true;
+                }
+
+                return addedAny;
+            }
+
             void ApplyMapHintCommand(MapRenderHints@ hints, const string &in line) {
                 if (hints is null) return;
 
@@ -66,6 +95,15 @@ namespace TriggerVisualizer {
                 }
 
                 if (tokens.Length < 3) return;
+
+                string targetedDisableCommand = tokens[2].ToLower();
+                if (targetedDisableCommand == "suggest-off" || targetedDisableCommand == "force-off") {
+                    bool forceOffTarget = targetedDisableCommand == "force-off";
+                    if (!AddMapHintDisableTargets(hints, tokens[1], forceOffTarget)) return;
+                    hints.HasAnyCommand = true;
+                    hints.Commands.InsertLast(trimmed);
+                    return;
+                }
 
                 float distance = 0.0f;
                 if (command == "suggest-draw-distance-xz") {

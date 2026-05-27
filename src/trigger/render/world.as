@@ -13,7 +13,7 @@ namespace TriggerVisualizer {
                 if (snapshot.TriggerVolumes.Length == 0) return;
 
                 vec3 cameraPos = Camera::GetCurrentPosition();
-                auto playerState = TriggerVisualizer::Trigger::Data::GetPlayerPositionState();
+                auto proximityState = TriggerVisualizer::Trigger::Data::GetProximityReferenceState(ctx);
                 ResetWorldRenderPerformanceBudgets();
 
                 auto visibleVolumes = array<TriggerVolume@>();
@@ -25,7 +25,7 @@ namespace TriggerVisualizer {
 
                 for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
                     auto volume = snapshot.TriggerVolumes[i];
-                    float fade = GetTriggerVolumeRenderFadeFactor(volume, cameraPos, playerState);
+                    float fade = GetTriggerVolumeRenderFadeFactor(volume, cameraPos, proximityState);
                     if (!IsVisibleFadeFactor(fade)) continue;
 
                     visibleVolumes.InsertLast(volume);
@@ -70,7 +70,13 @@ namespace TriggerVisualizer {
                         if (sourceIndex < snapshot.RawRanges.Length) {
                             @rawRange = snapshot.RawRanges[sourceIndex];
                         }
-                        DrawTriggerVolumeLabel(visibleVolumes[i], rawRange, visibleIndices[i], cameraPos, visibleFades[i]);
+                        DrawTriggerVolumeLabel(
+                            visibleVolumes[i],
+                            rawRange,
+                            visibleIndices[i],
+                            cameraPos,
+                            visibleFades[i]
+                        );
                     }
                 }
             }

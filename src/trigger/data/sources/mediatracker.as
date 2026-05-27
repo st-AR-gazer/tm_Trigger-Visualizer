@@ -247,11 +247,221 @@ namespace TriggerVisualizer {
                     return GetDetectedMediaTrackerCameraLabel(gameCam);
                 }
 
-                string DetectMediaTrackerClipTriggerLabel(CGameCtnMediaClip@ clip) {
-                    if (clip is null) return "";
+                class MediaTrackerClipClassification {
+                    string SubtypeKey = MT_SUBTYPE_UNKNOWN;
+                    string SubtypeLabel = GetMediaTrackerSubtypeDisplayName(MT_SUBTYPE_UNKNOWN);
+                    string DetectedLabel;
+                    string TargetKeys;
+                    uint BlockCount = 0;
+                }
+
+                bool ClassifyMediaTrackerBlock(
+                    CGameCtnMediaBlock@ block,
+                    string &out subtypeKey,
+                    string &out detectedLabel
+                ) {
+                    subtypeKey = MT_SUBTYPE_UNKNOWN;
+                    detectedLabel = "";
+                    if (block is null) return false;
+
+                    auto playerCamera = cast<CGameCtnMediaBlockCameraGame>(block);
+                    if (playerCamera !is null) {
+                        subtypeKey = MT_SUBTYPE_CAM_PLAYER;
+                        detectedLabel = GetDetectedMediaTrackerCameraLabel(playerCamera);
+                        if (detectedLabel.Length == 0) detectedLabel = "Player Camera";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockCameraCustom>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_CAM_CUSTOM;
+                        detectedLabel = "CamCustom";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockCameraOrbital>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_CAM_ORBITAL;
+                        detectedLabel = "CamOrbital";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockCameraPath>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_CAM_PATH;
+                        detectedLabel = "CamPath";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockTriangles2D>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_TRIANGLES_2D;
+                        detectedLabel = "2dTriangles";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockTriangles3D>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_TRIANGLES_3D;
+                        detectedLabel = "3dTriangles";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockTrails>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_CAR_TRAIL;
+                        detectedLabel = "CarTrail";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockFxColors>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_COLORS_FX;
+                        detectedLabel = "ColorsFX";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockColorGrading>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_COLOR_GRADING;
+                        detectedLabel = "ColorGrading";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockDOF>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_DEPTH_OF_FIELD;
+                        detectedLabel = "DepthOfField";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockDirtyLens>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_DIRTY_LENS;
+                        detectedLabel = "DirtyLens";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockEvent_deprecated>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_EDITING_CUT;
+                        detectedLabel = "EditingCut";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockTransitionFade>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_FADING_TRANSITION;
+                        detectedLabel = "FadingTransition";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockFog>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_FOG;
+                        detectedLabel = "Fog";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockGhostTM>(block) !is null || cast<CGameCtnMediaBlockEntity>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_GHOST;
+                        detectedLabel = "Ghost";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockBloomHdr>(block) !is null || cast<CGameCtnMediaBlockFxBloom>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_HDR_BLOOM;
+                        detectedLabel = "HDRBloom";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockImage>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_IMAGE;
+                        detectedLabel = "Image";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockCameraEffectInertialTracking>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX;
+                        detectedLabel = "InertialTrackingCamFX";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockInterface>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_MANIALINK_UI;
+                        detectedLabel = "ManiaLinkUI";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockManialink>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_MANIALINK_URL;
+                        detectedLabel = "ManiaLinkURL";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockMusicEffect>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_MUSIC_VOLUME;
+                        detectedLabel = "MusicVolume";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockOpponentVisibility>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_OPPONENT_VISIBILITY;
+                        detectedLabel = "OpponentVisibility";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockCameraEffectShake>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_SHAKE_CAM_FX;
+                        detectedLabel = "ShakeCamFX";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlock3dStereo>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_STEREO_3D;
+                        detectedLabel = "Stereo3D";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockSound>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_SOUND_FX;
+                        detectedLabel = "SoundFX";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockSpectators>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_SPECTATORS;
+                        detectedLabel = "Spectators";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockText>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_TEXT;
+                        detectedLabel = "Text";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockTime>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_TIME;
+                        detectedLabel = "Time";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockTimeSpeed>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_TIME_SPEED;
+                        detectedLabel = "TimeSpeed";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockToneMapping>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_TONE_MAPPING;
+                        detectedLabel = "ToneMapping";
+                        return true;
+                    }
+
+                    if (cast<CGameCtnMediaBlockVehicleLight>(block) !is null) {
+                        subtypeKey = MT_SUBTYPE_VEHICLE_LIGHTS;
+                        detectedLabel = "VehicleLights";
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                MediaTrackerClipClassification@ DetectMediaTrackerClipTrigger(CGameCtnMediaClip@ clip) {
+                    auto classification = MediaTrackerClipClassification();
+                    if (clip is null) return classification;
 
                     uint blockCount = 0;
-                    CGameCtnMediaBlockCameraGame@ onlyCameraBlock;
+                    string primarySubtypeKey = "";
+                    bool mixedSubtypes = false;
 
                     for (uint trackIndex = 0; trackIndex < clip.Tracks.Length; trackIndex++) {
                         auto track = clip.Tracks[trackIndex];
@@ -261,18 +471,51 @@ namespace TriggerVisualizer {
                             auto block = track.Blocks[blockIndex];
                             blockCount++;
 
-                            auto cameraBlock = cast<CGameCtnMediaBlockCameraGame>(block);
-                            if (cameraBlock !is null) {
-                                @onlyCameraBlock = cameraBlock;
+                            string subtypeKey = MT_SUBTYPE_UNKNOWN;
+                            string detectedLabel = "";
+                            ClassifyMediaTrackerBlock(block, subtypeKey, detectedLabel);
+
+                            classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
+                                classification.TargetKeys,
+                                subtypeKey
+                            );
+                            if (subtypeKey == MT_SUBTYPE_CAM_PLAYER && detectedLabel.Length > 0) {
+                                classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
+                                    classification.TargetKeys,
+                                    detectedLabel
+                                );
+                            }
+
+                            if (primarySubtypeKey.Length == 0) {
+                                primarySubtypeKey = subtypeKey;
+                            } else if (primarySubtypeKey != subtypeKey) {
+                                mixedSubtypes = true;
+                            }
+
+                            if (blockCount == 1 && detectedLabel.Length > 0) {
+                                classification.DetectedLabel = detectedLabel;
                             }
                         }
                     }
 
-                    if (blockCount == 0) return "Reset";
-                    if (blockCount == 1 && onlyCameraBlock !is null) {
-                        return GetDetectedMediaTrackerCameraLabel(onlyCameraBlock);
+                    classification.BlockCount = blockCount;
+                    if (blockCount == 0) {
+                        classification.SubtypeKey = MT_SUBTYPE_RESET;
+                        classification.SubtypeLabel = GetMediaTrackerSubtypeDisplayName(MT_SUBTYPE_RESET);
+                        classification.DetectedLabel = "Reset";
+                        classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
+                            classification.TargetKeys,
+                            MT_SUBTYPE_RESET
+                        );
+                        return classification;
                     }
-                    return "";
+
+                    classification.SubtypeKey = mixedSubtypes ? MT_SUBTYPE_MIXED : primarySubtypeKey;
+                    classification.SubtypeLabel = GetMediaTrackerSubtypeDisplayName(classification.SubtypeKey);
+                    if (blockCount == 1 && classification.DetectedLabel.Length == 0) {
+                        classification.DetectedLabel = classification.SubtypeLabel;
+                    }
+                    return classification;
                 }
 
                 TriggerVolume@ MediaTrackerRangeToTriggerVolume(
@@ -281,6 +524,9 @@ namespace TriggerVisualizer {
                     uint clipIndex,
                     const string &in clipName,
                     const string &in detectedLabel,
+                    const string &in subtypeKey,
+                    const string &in subtypeLabel,
+                    const string &in targetKeys,
                     uint islandIndex,
                     uint islandCount
                 ) {
@@ -291,6 +537,9 @@ namespace TriggerVisualizer {
                     string label = clipName;
                     auto volume = TriggerVolume(min, max, TRIGGER_SOURCE_MEDIATRACKER, clipIndex, label);
                     volume.DetectedLabel = detectedLabel;
+                    volume.SubtypeKey = subtypeKey;
+                    volume.SubtypeLabel = subtypeLabel;
+                    volume.TargetKeys = MergeTriggerTargetKeys(volume.TargetKeys, targetKeys);
                     if (islandCount > 1) {
                         volume.HasIslandIndex = true;
                         volume.IslandIndex = islandIndex;
@@ -317,7 +566,11 @@ namespace TriggerVisualizer {
                         trigger.HasClip = clip !is null;
                         if (clip !is null) {
                             trigger.ClipName = string(clip.Name);
-                            trigger.DetectedLabel = DetectMediaTrackerClipTriggerLabel(clip);
+                            auto classification = DetectMediaTrackerClipTrigger(clip);
+                            trigger.DetectedLabel = classification.DetectedLabel;
+                            trigger.SubtypeKey = classification.SubtypeKey;
+                            trigger.SubtypeLabel = classification.SubtypeLabel;
+                            trigger.TargetKeys = classification.TargetKeys;
                         } else {
                             trigger.ClipName = "<null clip>";
                         }
@@ -511,15 +764,7 @@ namespace TriggerVisualizer {
                             for (uint j = 0; j < ranges.Length; j++) {
                                 auto range = ranges[j];
                                 source.RawRanges.InsertLast(range);
-                                source.TriggerVolumes.InsertLast(MediaTrackerRangeToTriggerVolume(
-                                    range,
-                                    source.GridSpec,
-                                    trigger.ClipIndex,
-                                    trigger.DisplayName(),
-                                    trigger.DetectedLabel,
-                                    j,
-                                    ranges.Length
-                                ));
+                                source.TriggerVolumes.InsertLast(MediaTrackerRangeToTriggerVolume(range, source.GridSpec, trigger.ClipIndex, trigger.DisplayName(), trigger.DetectedLabel, trigger.SubtypeKey, trigger.SubtypeLabel, trigger.TargetKeys, j, ranges.Length));
                             }
                             trigger.RawCoords.Resize(0);
                         }

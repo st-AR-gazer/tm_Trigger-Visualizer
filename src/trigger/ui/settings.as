@@ -126,8 +126,12 @@ namespace TriggerVisualizer {
             const int COLOR_MODE_LINE_SPLIT_DENSITY = 2;
 
             const int PROXIMITY_MODE_CAMERA_ONLY = 0;
-            const int PROXIMITY_MODE_PLAYER_ONLY = 1;
-            const int PROXIMITY_MODE_CAMERA_AND_PLAYER = 2;
+            const int PROXIMITY_MODE_VEHICLE_ONLY = 1;
+            const int PROXIMITY_MODE_CAMERA_AND_VEHICLE = 2;
+            const int PROXIMITY_MODE_ORBITAL_ONLY = 3;
+            const int PROXIMITY_MODE_CAMERA_AND_ORBITAL = 4;
+            const int PROXIMITY_MODE_VEHICLE_AND_ORBITAL = 5;
+            const int PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL = 6;
 
             const float WORLD_BLOCK_SIZE_XZ = 32.0f;
             const float WORLD_BLOCK_SIZE_Y = 8.0f;
@@ -146,7 +150,16 @@ namespace TriggerVisualizer {
             int S_ColorMode = COLOR_MODE_STATIC;
 
             [Setting hidden name="Trigger: Render proximity mode" min=0 max=2]
-            int S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_PLAYER;
+            int S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
+
+            [Setting hidden name="Trigger: Render editor proximity mode" min=0 max=6]
+            int S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+
+            [Setting hidden name="Trigger: Render MediaTracker proximity mode" min=0 max=6]
+            int S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+
+            [Setting hidden name="Trigger: Render replay editor proximity mode" min=0 max=6]
+            int S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
 
             [Setting hidden name="Trigger: Base trigger color"]
             vec4 S_BaseTriggerColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
@@ -210,6 +223,123 @@ namespace TriggerVisualizer {
 
             [Setting hidden name="Trigger: Show MediaTracker in replay editor"]
             bool S_ShowMediaTrackerInReplayEditor = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamera = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker custom camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamCustom = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker orbital camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamOrbital = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker path camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamPath = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker player camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamPlayer = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker CamDefault subtype"]
+            bool S_ShowMediaTrackerSubtypeCamDefault = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker Cam1 subtype"]
+            bool S_ShowMediaTrackerSubtypeCam1 = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker Cam2 subtype"]
+            bool S_ShowMediaTrackerSubtypeCam2 = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker Cam3 subtype"]
+            bool S_ShowMediaTrackerSubtypeCam3 = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker 2D triangles subtype"]
+            bool S_ShowMediaTrackerSubtype2DTriangles = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker 3D triangles subtype"]
+            bool S_ShowMediaTrackerSubtype3DTriangles = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker car trail subtype"]
+            bool S_ShowMediaTrackerSubtypeCarTrail = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker colors FX subtype"]
+            bool S_ShowMediaTrackerSubtypeColorsFx = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker color grading subtype"]
+            bool S_ShowMediaTrackerSubtypeColorGrading = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker depth of field subtype"]
+            bool S_ShowMediaTrackerSubtypeDepthOfField = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker dirty lens subtype"]
+            bool S_ShowMediaTrackerSubtypeDirtyLens = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker editing cut subtype"]
+            bool S_ShowMediaTrackerSubtypeEditingCut = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker fading transition subtype"]
+            bool S_ShowMediaTrackerSubtypeFadingTransition = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker fog subtype"]
+            bool S_ShowMediaTrackerSubtypeFog = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ghost subtype"]
+            bool S_ShowMediaTrackerSubtypeGhost = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ambiance subtype"]
+            bool S_ShowMediaTrackerSubtypeAmbiance = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker HDR bloom subtype"]
+            bool S_ShowMediaTrackerSubtypeHdrBloom = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker image subtype"]
+            bool S_ShowMediaTrackerSubtypeImage = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker inertial tracking CamFX subtype"]
+            bool S_ShowMediaTrackerSubtypeInertialTrackingCamFx = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ManiaLink UI subtype"]
+            bool S_ShowMediaTrackerSubtypeManiaLinkUi = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ManiaLink URL subtype"]
+            bool S_ShowMediaTrackerSubtypeManiaLinkUrl = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker music volume subtype"]
+            bool S_ShowMediaTrackerSubtypeMusicVolume = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker opponent visibility subtype"]
+            bool S_ShowMediaTrackerSubtypeOpponentVisibility = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker shake cam FX subtype"]
+            bool S_ShowMediaTrackerSubtypeShakeCamFx = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker stereo 3D subtype"]
+            bool S_ShowMediaTrackerSubtypeStereo3D = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker sound FX subtype"]
+            bool S_ShowMediaTrackerSubtypeSoundFx = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker spectators subtype"]
+            bool S_ShowMediaTrackerSubtypeSpectators = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker text subtype"]
+            bool S_ShowMediaTrackerSubtypeText = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker time subtype"]
+            bool S_ShowMediaTrackerSubtypeTime = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker time speed subtype"]
+            bool S_ShowMediaTrackerSubtypeTimeSpeed = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ToneMapping subtype"]
+            bool S_ShowMediaTrackerSubtypeToneMapping = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker vehicle lights subtype"]
+            bool S_ShowMediaTrackerSubtypeVehicleLights = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker reset subtype"]
+            bool S_ShowMediaTrackerSubtypeReset = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker unknown subtype"]
+            bool S_ShowMediaTrackerSubtypeUnknown = true;
 
             string G_PendingTileIconSourcePath = "";
             string G_TileIconImportStatus = "";
@@ -320,7 +450,10 @@ namespace TriggerVisualizer {
                 S_MaxTileIconPatchesPerFrame = 1600;
                 S_TileIconMaxSubdivisions = 6;
                 S_ColorMode = COLOR_MODE_STATIC;
-                S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_PLAYER;
+                S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
+                S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                 S_BaseTriggerColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
                 S_DistanceFadeColor = vec4(1.0f, 0.90f, 0.20f, 1.0f);
                 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
@@ -342,6 +475,45 @@ namespace TriggerVisualizer {
                 S_ShowMediaTrackerInEditorTestMode = true;
                 S_ShowMediaTrackerInEditorMediaTracker = true;
                 S_ShowMediaTrackerInReplayEditor = true;
+                S_ShowMediaTrackerSubtypeCamera = true;
+                S_ShowMediaTrackerSubtypeCamCustom = true;
+                S_ShowMediaTrackerSubtypeCamOrbital = true;
+                S_ShowMediaTrackerSubtypeCamPath = true;
+                S_ShowMediaTrackerSubtypeCamPlayer = true;
+                S_ShowMediaTrackerSubtypeCamDefault = true;
+                S_ShowMediaTrackerSubtypeCam1 = true;
+                S_ShowMediaTrackerSubtypeCam2 = true;
+                S_ShowMediaTrackerSubtypeCam3 = true;
+                S_ShowMediaTrackerSubtype2DTriangles = true;
+                S_ShowMediaTrackerSubtype3DTriangles = true;
+                S_ShowMediaTrackerSubtypeCarTrail = true;
+                S_ShowMediaTrackerSubtypeColorsFx = true;
+                S_ShowMediaTrackerSubtypeColorGrading = true;
+                S_ShowMediaTrackerSubtypeDepthOfField = true;
+                S_ShowMediaTrackerSubtypeDirtyLens = true;
+                S_ShowMediaTrackerSubtypeEditingCut = true;
+                S_ShowMediaTrackerSubtypeFadingTransition = true;
+                S_ShowMediaTrackerSubtypeFog = true;
+                S_ShowMediaTrackerSubtypeGhost = true;
+                S_ShowMediaTrackerSubtypeAmbiance = true;
+                S_ShowMediaTrackerSubtypeHdrBloom = true;
+                S_ShowMediaTrackerSubtypeImage = true;
+                S_ShowMediaTrackerSubtypeInertialTrackingCamFx = true;
+                S_ShowMediaTrackerSubtypeManiaLinkUi = true;
+                S_ShowMediaTrackerSubtypeManiaLinkUrl = true;
+                S_ShowMediaTrackerSubtypeMusicVolume = true;
+                S_ShowMediaTrackerSubtypeOpponentVisibility = true;
+                S_ShowMediaTrackerSubtypeShakeCamFx = true;
+                S_ShowMediaTrackerSubtypeStereo3D = true;
+                S_ShowMediaTrackerSubtypeSoundFx = true;
+                S_ShowMediaTrackerSubtypeSpectators = true;
+                S_ShowMediaTrackerSubtypeText = true;
+                S_ShowMediaTrackerSubtypeTime = true;
+                S_ShowMediaTrackerSubtypeTimeSpeed = true;
+                S_ShowMediaTrackerSubtypeToneMapping = true;
+                S_ShowMediaTrackerSubtypeVehicleLights = true;
+                S_ShowMediaTrackerSubtypeReset = true;
+                S_ShowMediaTrackerSubtypeUnknown = true;
                 G_PendingTileIconSourcePath = "";
                 G_TileIconImportStatus = "";
                 TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
@@ -350,6 +522,7 @@ namespace TriggerVisualizer {
                 ClampLineSplittingSettings();
                 ClampPerformanceSettings();
                 ClampColorSettings();
+                ClampProximitySettings();
                 ClampLabelSettings();
             }
 
@@ -360,9 +533,63 @@ namespace TriggerVisualizer {
             }
 
             string GetRenderProximityModeLabel(int mode) {
-                if (mode == PROXIMITY_MODE_PLAYER_ONLY) return "Car only";
-                if (mode == PROXIMITY_MODE_CAMERA_AND_PLAYER) return "Camera + car";
+                if (mode == PROXIMITY_MODE_VEHICLE_ONLY) return "Vehicle only";
+                if (mode == PROXIMITY_MODE_CAMERA_AND_VEHICLE) return "Camera + vehicle";
+                if (mode == PROXIMITY_MODE_ORBITAL_ONLY) return "Orbital point only";
+                if (mode == PROXIMITY_MODE_CAMERA_AND_ORBITAL) return "Camera + orbital point";
+                if (mode == PROXIMITY_MODE_VEHICLE_AND_ORBITAL) return "Vehicle + orbital point";
+                if (mode == PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL) return "Camera + vehicle + orbital point";
                 return "Camera only";
+            }
+
+            string GetRuntimeAreaLabel(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                if (ctx is null) return "Playing";
+                if (ctx.IsReplayEditor) return "Replay Editor";
+                if (ctx.IsEditorMediaTracker) return "Editor MediaTracker";
+                if (ctx.IsEditorTestMode) return "Playing (editor test mode)";
+                if (ctx.IsInEditor) return "Editor";
+                return "Playing";
+            }
+
+            bool IsPlayingProximityMode(int mode) {
+                return mode == PROXIMITY_MODE_CAMERA_ONLY
+                    || mode == PROXIMITY_MODE_VEHICLE_ONLY
+                    || mode == PROXIMITY_MODE_CAMERA_AND_VEHICLE;
+            }
+
+            bool IsEditorProximityMode(int mode) {
+                return mode == PROXIMITY_MODE_CAMERA_ONLY
+                    || mode == PROXIMITY_MODE_ORBITAL_ONLY
+                    || mode == PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+            }
+
+            bool IsReplayEditorProximityMode(int mode) {
+                return IsEditorProximityMode(mode);
+            }
+
+            void ClampProximitySettings() {
+                if (!IsPlayingProximityMode(S_RenderProximityMode)) {
+                    S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
+                }
+                if (!IsEditorProximityMode(S_RenderProximityModeEditor)) {
+                    S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                }
+                if (!IsEditorProximityMode(S_RenderProximityModeMediaTracker)) {
+                    S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                }
+                if (!IsReplayEditorProximityMode(S_RenderProximityModeReplayEditor)) {
+                    S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                }
+            }
+
+            int GetRenderProximityModeForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                ClampProximitySettings();
+                if (ctx is null) return S_RenderProximityMode;
+                if (ctx.IsReplayEditor) return S_RenderProximityModeReplayEditor;
+                if (ctx.IsEditorMediaTracker) return S_RenderProximityModeMediaTracker;
+                if (ctx.IsEditorTestMode) return S_RenderProximityMode;
+                if (ctx.IsInEditor) return S_RenderProximityModeEditor;
+                return S_RenderProximityMode;
             }
 
             void RenderColorModeOption(int mode) {
@@ -372,11 +599,12 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void RenderProximityModeOption(int mode) {
-                bool selected = S_RenderProximityMode == mode;
+            bool RenderProximityModeOption(int mode, int currentMode) {
+                bool selected = currentMode == mode;
                 if (UI::Selectable(GetRenderProximityModeLabel(mode), selected)) {
-                    S_RenderProximityMode = mode;
+                    return true;
                 }
+                return false;
             }
 
             float SnapWorldDistanceToPreviousBlock(float value, float blockSize) {
@@ -809,20 +1037,86 @@ namespace TriggerVisualizer {
                 ClampColorSettings();
             }
 
-            void RenderProximitySettingsUI() {
-                UI::Text("Render Proximity Source");
-                if (UI::BeginCombo("Render based on##trigger-visualizer-proximity", GetRenderProximityModeLabel(S_RenderProximityMode))) {
-                    RenderProximityModeOption(PROXIMITY_MODE_CAMERA_ONLY);
-                    RenderProximityModeOption(PROXIMITY_MODE_PLAYER_ONLY);
-                    RenderProximityModeOption(PROXIMITY_MODE_CAMERA_AND_PLAYER);
+            int RenderProximityComboPlaying(const string &in label, const string &in id, int value) {
+                if (UI::BeginCombo(label + "##" + id, GetRenderProximityModeLabel(value))) {
+                    if (RenderProximityModeOption(PROXIMITY_MODE_CAMERA_ONLY, value)) value = PROXIMITY_MODE_CAMERA_ONLY;
+                    if (RenderProximityModeOption(PROXIMITY_MODE_VEHICLE_ONLY, value)) value = PROXIMITY_MODE_VEHICLE_ONLY;
+                    if (RenderProximityModeOption(PROXIMITY_MODE_CAMERA_AND_VEHICLE, value)) value = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
                     UI::EndCombo();
                 }
 
-                S_RenderProximityMode = Math::Clamp(
-                    S_RenderProximityMode,
-                    PROXIMITY_MODE_CAMERA_ONLY,
-                    PROXIMITY_MODE_CAMERA_AND_PLAYER
-                );
+                if (!IsPlayingProximityMode(value)) value = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
+                return value;
+            }
+
+            int RenderProximityComboEditor(const string &in label, const string &in id, int value) {
+                if (UI::BeginCombo(label + "##" + id, GetRenderProximityModeLabel(value))) {
+                    if (RenderProximityModeOption(PROXIMITY_MODE_CAMERA_ONLY, value)) value = PROXIMITY_MODE_CAMERA_ONLY;
+                    if (RenderProximityModeOption(PROXIMITY_MODE_ORBITAL_ONLY, value)) value = PROXIMITY_MODE_ORBITAL_ONLY;
+                    if (RenderProximityModeOption(PROXIMITY_MODE_CAMERA_AND_ORBITAL, value)) value = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                    UI::EndCombo();
+                }
+
+                if (!IsEditorProximityMode(value)) value = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                return value;
+            }
+
+            int RenderProximityComboReplayEditor(const string &in label, const string &in id, int value) {
+                if (UI::BeginCombo(label + "##" + id, GetRenderProximityModeLabel(value))) {
+                    if (RenderProximityModeOption(PROXIMITY_MODE_CAMERA_ONLY, value)) value = PROXIMITY_MODE_CAMERA_ONLY;
+                    if (RenderProximityModeOption(PROXIMITY_MODE_ORBITAL_ONLY, value)) value = PROXIMITY_MODE_ORBITAL_ONLY;
+                    if (RenderProximityModeOption(PROXIMITY_MODE_CAMERA_AND_ORBITAL, value)) value = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                    UI::EndCombo();
+                }
+
+                if (!IsEditorProximityMode(value)) value = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                return value;
+            }
+
+            void RenderProximitySettingsUI() {
+                UI::Text("Render Proximity Source");
+                auto ctx = TriggerVisualizer::Trigger::GetCurrentRuntimeContext();
+                UI::TextDisabled("Current area: " + GetRuntimeAreaLabel(ctx) + " | active: " + GetRenderProximityModeLabel(GetRenderProximityModeForRuntime(ctx)));
+
+                UI::BeginTabBar("trigger-visualizer-distance-proximity-area-tabs");
+
+                if (UI::BeginTabItem("Playing")) {
+                    UI::TextDisabled("Used in playable maps and editor test mode.");
+                    S_RenderProximityMode = RenderProximityComboPlaying(
+                        "Render based on",
+                        "trigger-visualizer-proximity-playing",
+                        S_RenderProximityMode
+                    );
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("Editor")) {
+                    UI::TextDisabled("Used in the normal map editor.");
+                    S_RenderProximityModeEditor = RenderProximityComboEditor(
+                        "Render based on",
+                        "trigger-visualizer-proximity-editor",
+                        S_RenderProximityModeEditor
+                    );
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("MediaTracker")) {
+                    UI::TextDisabled("Editor MediaTracker and Replay Editor use orbital point/camera.");
+                    S_RenderProximityModeMediaTracker = RenderProximityComboEditor(
+                        "Editor MediaTracker",
+                        "trigger-visualizer-proximity-mediatracker",
+                        S_RenderProximityModeMediaTracker
+                    );
+                    S_RenderProximityModeReplayEditor = RenderProximityComboReplayEditor(
+                        "Replay Editor",
+                        "trigger-visualizer-proximity-replay-editor",
+                        S_RenderProximityModeReplayEditor
+                    );
+                    UI::EndTabItem();
+                }
+
+                UI::EndTabBar();
+                ClampProximitySettings();
             }
 
             string GetRuntimeSourceContextLabel(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -877,8 +1171,335 @@ namespace TriggerVisualizer {
                 );
             }
 
+            bool IsTriggerVolumeDisabledBySubtypeToggle(
+                const TriggerVolume@ volume,
+                const string &in targetKey,
+                bool enabled
+            ) {
+                return !enabled && TriggerVisualizer::Trigger::TriggerVolumeMatchesTargetKey(volume, targetKey);
+            }
+
+            bool IsTriggerVolumeEnabledBySubtypeSettings(const TriggerVolume@ volume) {
+                if (volume is null || volume.Source != TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER) return true;
+
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAMERA, S_ShowMediaTrackerSubtypeCamera)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_CUSTOM, S_ShowMediaTrackerSubtypeCamCustom)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_ORBITAL, S_ShowMediaTrackerSubtypeCamOrbital)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_PATH, S_ShowMediaTrackerSubtypeCamPath)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_PLAYER, S_ShowMediaTrackerSubtypeCamPlayer)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_DEFAULT, S_ShowMediaTrackerSubtypeCamDefault)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_1, S_ShowMediaTrackerSubtypeCam1)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_2, S_ShowMediaTrackerSubtypeCam2)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_3, S_ShowMediaTrackerSubtypeCam3)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_TRIANGLES_2D, S_ShowMediaTrackerSubtype2DTriangles)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_TRIANGLES_3D, S_ShowMediaTrackerSubtype3DTriangles)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAR_TRAIL, S_ShowMediaTrackerSubtypeCarTrail)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_COLORS_FX, S_ShowMediaTrackerSubtypeColorsFx)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_COLOR_GRADING, S_ShowMediaTrackerSubtypeColorGrading)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_DEPTH_OF_FIELD, S_ShowMediaTrackerSubtypeDepthOfField)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_DIRTY_LENS, S_ShowMediaTrackerSubtypeDirtyLens)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_EDITING_CUT, S_ShowMediaTrackerSubtypeEditingCut)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_FADING_TRANSITION, S_ShowMediaTrackerSubtypeFadingTransition)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_FOG, S_ShowMediaTrackerSubtypeFog)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_GHOST, S_ShowMediaTrackerSubtypeGhost)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_AMBIANCE, S_ShowMediaTrackerSubtypeAmbiance)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_HDR_BLOOM, S_ShowMediaTrackerSubtypeHdrBloom)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_IMAGE, S_ShowMediaTrackerSubtypeImage)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX, S_ShowMediaTrackerSubtypeInertialTrackingCamFx)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_MANIALINK_UI, S_ShowMediaTrackerSubtypeManiaLinkUi)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_MANIALINK_URL, S_ShowMediaTrackerSubtypeManiaLinkUrl)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_MUSIC_VOLUME, S_ShowMediaTrackerSubtypeMusicVolume)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_OPPONENT_VISIBILITY, S_ShowMediaTrackerSubtypeOpponentVisibility)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_SHAKE_CAM_FX, S_ShowMediaTrackerSubtypeShakeCamFx)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_STEREO_3D, S_ShowMediaTrackerSubtypeStereo3D)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_SOUND_FX, S_ShowMediaTrackerSubtypeSoundFx)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_SPECTATORS, S_ShowMediaTrackerSubtypeSpectators)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_TEXT, S_ShowMediaTrackerSubtypeText)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_TIME, S_ShowMediaTrackerSubtypeTime)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_TIME_SPEED, S_ShowMediaTrackerSubtypeTimeSpeed)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_TONE_MAPPING, S_ShowMediaTrackerSubtypeToneMapping)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_VEHICLE_LIGHTS, S_ShowMediaTrackerSubtypeVehicleLights)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_RESET, S_ShowMediaTrackerSubtypeReset)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_UNKNOWN, S_ShowMediaTrackerSubtypeUnknown)) return false;
+
+                return true;
+            }
+
+            string SettingBoolKey(bool value) {
+                return value ? "1" : "0";
+            }
+
+            string GetMapSnapshotFilterSettingsKey() {
+                return SettingBoolKey(S_RespectMapSuggestOff)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamera)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamCustom)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamOrbital)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamPath)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamPlayer)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamDefault)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCam1)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCam2)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCam3)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtype2DTriangles)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtype3DTriangles)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCarTrail)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeColorsFx)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeColorGrading)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeDepthOfField)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeDirtyLens)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeEditingCut)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeFadingTransition)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeFog)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeGhost)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeAmbiance)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeHdrBloom)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeImage)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeInertialTrackingCamFx)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeManiaLinkUi)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeManiaLinkUrl)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeMusicVolume)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeOpponentVisibility)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeShakeCamFx)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeStereo3D)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeSoundFx)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeSpectators)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeText)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeTime)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeTimeSpeed)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeToneMapping)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeVehicleLights)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeReset)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeUnknown);
+            }
+
             bool RenderSourceContextToggleUI(const string &in label, const string &in id, bool value) {
                 return UI::Checkbox(label + "##" + id, value);
+            }
+
+            bool RenderMediaTrackerSubtypeToggleUI(const string &in label, const string &in key, bool value) {
+                return UI::Checkbox(label + "##trigger-visualizer-sources-mediatracker-subtype-" + key, value);
+            }
+
+            void RenderMediaTrackerSubtypeSettingsUI() {
+                UI::Text("MediaTracker Subtypes");
+                UI::TextDisabled("These also match mapper command targets, e.g. /trigger-visualizer camera,offzone suggest-off.");
+
+                UI::BeginTabBar("trigger-visualizer-mediatracker-subtype-tabs");
+
+                if (UI::BeginTabItem("Cameras")) {
+                    S_ShowMediaTrackerSubtypeCamera = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Camera (all)",
+                        "camera",
+                        S_ShowMediaTrackerSubtypeCamera
+                    );
+                    S_ShowMediaTrackerSubtypeCamCustom = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Custom Camera / CamCustom",
+                        "camcustom",
+                        S_ShowMediaTrackerSubtypeCamCustom
+                    );
+                    S_ShowMediaTrackerSubtypeCamOrbital = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Orbital Camera / CamOrbital",
+                        "camorbital",
+                        S_ShowMediaTrackerSubtypeCamOrbital
+                    );
+                    S_ShowMediaTrackerSubtypeCamPath = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Path Camera / CamPath",
+                        "campath",
+                        S_ShowMediaTrackerSubtypeCamPath
+                    );
+                    S_ShowMediaTrackerSubtypeCamPlayer = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Player Camera",
+                        "camplayer",
+                        S_ShowMediaTrackerSubtypeCamPlayer
+                    );
+                    UI::Indent();
+                    S_ShowMediaTrackerSubtypeCamDefault = RenderMediaTrackerSubtypeToggleUI(
+                        "Show CamDefault",
+                        "camdefault",
+                        S_ShowMediaTrackerSubtypeCamDefault
+                    );
+                    S_ShowMediaTrackerSubtypeCam1 = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Cam1",
+                        "cam1",
+                        S_ShowMediaTrackerSubtypeCam1
+                    );
+                    S_ShowMediaTrackerSubtypeCam2 = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Cam2",
+                        "cam2",
+                        S_ShowMediaTrackerSubtypeCam2
+                    );
+                    S_ShowMediaTrackerSubtypeCam3 = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Cam3",
+                        "cam3",
+                        S_ShowMediaTrackerSubtypeCam3
+                    );
+                    UI::Unindent();
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("Visual FX")) {
+                    S_ShowMediaTrackerSubtype2DTriangles = RenderMediaTrackerSubtypeToggleUI(
+                        "Show 2D Triangles / 2dTriangles",
+                        "2dtriangles",
+                        S_ShowMediaTrackerSubtype2DTriangles
+                    );
+                    S_ShowMediaTrackerSubtype3DTriangles = RenderMediaTrackerSubtypeToggleUI(
+                        "Show 3D Triangles / 3dTriangles",
+                        "3dtriangles",
+                        S_ShowMediaTrackerSubtype3DTriangles
+                    );
+                    S_ShowMediaTrackerSubtypeColorsFx = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Colors FX",
+                        "colorsfx",
+                        S_ShowMediaTrackerSubtypeColorsFx
+                    );
+                    S_ShowMediaTrackerSubtypeColorGrading = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Color Grading",
+                        "colorgrading",
+                        S_ShowMediaTrackerSubtypeColorGrading
+                    );
+                    S_ShowMediaTrackerSubtypeDepthOfField = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Depth of Field",
+                        "depthoffield",
+                        S_ShowMediaTrackerSubtypeDepthOfField
+                    );
+                    S_ShowMediaTrackerSubtypeDirtyLens = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Dirty Lens",
+                        "dirtylens",
+                        S_ShowMediaTrackerSubtypeDirtyLens
+                    );
+                    S_ShowMediaTrackerSubtypeFadingTransition = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Fading Transition",
+                        "fadingtransition",
+                        S_ShowMediaTrackerSubtypeFadingTransition
+                    );
+                    S_ShowMediaTrackerSubtypeFog = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Fog",
+                        "fog",
+                        S_ShowMediaTrackerSubtypeFog
+                    );
+                    S_ShowMediaTrackerSubtypeHdrBloom = RenderMediaTrackerSubtypeToggleUI(
+                        "Show HDR Bloom",
+                        "hdrbloom",
+                        S_ShowMediaTrackerSubtypeHdrBloom
+                    );
+                    S_ShowMediaTrackerSubtypeImage = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Image",
+                        "image",
+                        S_ShowMediaTrackerSubtypeImage
+                    );
+                    S_ShowMediaTrackerSubtypeInertialTrackingCamFx = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Inertial Tracking CamFX",
+                        "inertialtrackingcamfx",
+                        S_ShowMediaTrackerSubtypeInertialTrackingCamFx
+                    );
+                    S_ShowMediaTrackerSubtypeShakeCamFx = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Shake Cam FX",
+                        "shakecamfx",
+                        S_ShowMediaTrackerSubtypeShakeCamFx
+                    );
+                    S_ShowMediaTrackerSubtypeStereo3D = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Stereo 3D",
+                        "stereo3d",
+                        S_ShowMediaTrackerSubtypeStereo3D
+                    );
+                    S_ShowMediaTrackerSubtypeToneMapping = RenderMediaTrackerSubtypeToggleUI(
+                        "Show ToneMapping",
+                        "tonemapping",
+                        S_ShowMediaTrackerSubtypeToneMapping
+                    );
+                    S_ShowMediaTrackerSubtypeVehicleLights = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Vehicle Lights",
+                        "vehiclelights",
+                        S_ShowMediaTrackerSubtypeVehicleLights
+                    );
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("Gameplay/UI")) {
+                    S_ShowMediaTrackerSubtypeCarTrail = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Car Trail / CarTrail",
+                        "cartrail",
+                        S_ShowMediaTrackerSubtypeCarTrail
+                    );
+                    S_ShowMediaTrackerSubtypeGhost = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Ghost",
+                        "ghost",
+                        S_ShowMediaTrackerSubtypeGhost
+                    );
+                    S_ShowMediaTrackerSubtypeAmbiance = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Ambiance",
+                        "ambiance",
+                        S_ShowMediaTrackerSubtypeAmbiance
+                    );
+                    S_ShowMediaTrackerSubtypeManiaLinkUi = RenderMediaTrackerSubtypeToggleUI(
+                        "Show ManiaLink UI",
+                        "manialinkui",
+                        S_ShowMediaTrackerSubtypeManiaLinkUi
+                    );
+                    S_ShowMediaTrackerSubtypeManiaLinkUrl = RenderMediaTrackerSubtypeToggleUI(
+                        "Show ManiaLink URL",
+                        "manialinkurl",
+                        S_ShowMediaTrackerSubtypeManiaLinkUrl
+                    );
+                    S_ShowMediaTrackerSubtypeMusicVolume = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Music Volume",
+                        "musicvolume",
+                        S_ShowMediaTrackerSubtypeMusicVolume
+                    );
+                    S_ShowMediaTrackerSubtypeOpponentVisibility = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Opponent Visibility",
+                        "opponentvisibility",
+                        S_ShowMediaTrackerSubtypeOpponentVisibility
+                    );
+                    S_ShowMediaTrackerSubtypeSoundFx = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Sound FX",
+                        "soundfx",
+                        S_ShowMediaTrackerSubtypeSoundFx
+                    );
+                    S_ShowMediaTrackerSubtypeSpectators = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Spectators",
+                        "spectators",
+                        S_ShowMediaTrackerSubtypeSpectators
+                    );
+                    S_ShowMediaTrackerSubtypeText = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Text",
+                        "text",
+                        S_ShowMediaTrackerSubtypeText
+                    );
+                    S_ShowMediaTrackerSubtypeTime = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Time",
+                        "time",
+                        S_ShowMediaTrackerSubtypeTime
+                    );
+                    S_ShowMediaTrackerSubtypeTimeSpeed = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Time Speed",
+                        "timespeed",
+                        S_ShowMediaTrackerSubtypeTimeSpeed
+                    );
+                    UI::EndTabItem();
+                }
+
+                if (UI::BeginTabItem("Other")) {
+                    S_ShowMediaTrackerSubtypeEditingCut = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Editing Cut",
+                        "editingcut",
+                        S_ShowMediaTrackerSubtypeEditingCut
+                    );
+                    S_ShowMediaTrackerSubtypeReset = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Reset / empty clips",
+                        "reset",
+                        S_ShowMediaTrackerSubtypeReset
+                    );
+                    S_ShowMediaTrackerSubtypeUnknown = RenderMediaTrackerSubtypeToggleUI(
+                        "Show Unknown",
+                        "unknown",
+                        S_ShowMediaTrackerSubtypeUnknown
+                    );
+                    UI::EndTabItem();
+                }
+
+                UI::EndTabBar();
             }
 
             void RenderSourcesSettingsUI() {
@@ -953,6 +1574,8 @@ namespace TriggerVisualizer {
                         S_ShowMediaTrackerInReplayEditor
                     );
                     UI::TextDisabled("Effective now: " + (IsMediaTrackerSourceEnabledForRuntime(ctx) ? "shown" : "hidden"));
+                    UI::Separator();
+                    RenderMediaTrackerSubtypeSettingsUI();
                     UI::EndTabItem();
                 }
 
@@ -968,7 +1591,10 @@ namespace TriggerVisualizer {
                 S_LabelShowIndex = UI::Checkbox("Show index##trigger-visualizer-labels", S_LabelShowIndex);
                 S_LabelShowRawRange = UI::Checkbox("Show raw range##trigger-visualizer-labels", S_LabelShowRawRange);
                 S_LabelShowWorldSize = UI::Checkbox("Show world size##trigger-visualizer-labels", S_LabelShowWorldSize);
-                S_LabelShowIslandIndex = UI::Checkbox("Show island x/n##trigger-visualizer-labels", S_LabelShowIslandIndex);
+                S_LabelShowIslandIndex = UI::Checkbox(
+                    "Show island x/n##trigger-visualizer-labels",
+                    S_LabelShowIslandIndex
+                );
                 S_LabelShowSourcePrefix = UI::Checkbox(
                     "Show source/type prefix##trigger-visualizer-labels",
                     S_LabelShowSourcePrefix
