@@ -1,6 +1,44 @@
 namespace TriggerVisualizer {
     namespace Trigger {
         namespace Render {
+            float GetTriggerVolumeSortDistanceSq(const TriggerVolume@ volume, const vec3 &in cameraPos) {
+                if (volume is null) return 0.0f;
+                return Math::Distance2(cameraPos, volume.Center());
+            }
+
+            void SortVisibleTriggerVolumesBackToFront(
+                array<TriggerVolume@> @volumes,
+                array<float> @fades,
+                array<uint> @indices,
+                const vec3 &in cameraPos
+            ) {
+                if (volumes is null || fades is null || indices is null || volumes.Length <= 1) return;
+
+                uint gap = volumes.Length / 2;
+                while (gap > 0) {
+                    for (uint i = gap; i < volumes.Length; i++) {
+                        TriggerVolume@ volume = volumes[i];
+                        float fade = fades[i];
+                        uint index = indices[i];
+                        float sortDistanceSq = GetTriggerVolumeSortDistanceSq(volume, cameraPos);
+                        uint j = i;
+
+                        while (j >= gap && GetTriggerVolumeSortDistanceSq(volumes[j - gap], cameraPos) < sortDistanceSq) {
+                            @volumes[j] = volumes[j - gap];
+                            fades[j] = fades[j - gap];
+                            indices[j] = indices[j - gap];
+                            j -= gap;
+                        }
+
+                        @volumes[j] = volume;
+                        fades[j] = fade;
+                        indices[j] = index;
+                    }
+
+                    gap /= 2;
+                }
+            }
+
             void RenderWorld() {
                 if (!TriggerVisualizer::Trigger::UI::S_RenderWorld) return;
                 if (!TriggerVisualizer::Trigger::UI::S_ShowOutline && !TriggerVisualizer::Trigger::UI::S_ShowFill && !TriggerVisualizer::Trigger::UI::S_ShowLabels && !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
@@ -34,11 +72,15 @@ namespace TriggerVisualizer {
                 }
 
                 if (visibleVolumes.Length == 0) return;
+                SortVisibleTriggerVolumesBackToFront(visibleVolumes, visibleFades, visibleIndices, cameraPos);
 
                 auto fillTileItems = array<WorldFillTileDrawItem@>();
                 bool shouldCollectFillItems = TriggerVisualizer::Trigger::UI::S_ShowFill || TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons;
                 if (shouldCollectFillItems) {
+                    uint maxFrameFillItems = uint(Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1));
                     for (uint i = 0; i < visibleVolumes.Length; i++) {
+                        if (fillTileItems.Length >= maxFrameFillItems) break;
+                        if (G_FillTileTraversalBudgetRemaining == 0) break;
                         vec4 fillColor = TriggerVisualizer::Trigger::UI::S_ShowFill ?
                         GetFillColor(visibleVolumes[i], cameraPos, visibleFades[i]) : vec4();
                         CollectTriggerVolumeFillDrawItems(

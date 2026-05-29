@@ -61,6 +61,7 @@ namespace TriggerVisualizer {
             ) {
                 if (items is null) return 0;
                 if (budget == 0) return 0;
+                if (!ConsumeWorldFillTileTraversalBudget()) return 0;
 
                 vec3 p0 = origin;
                 vec3 p1 = origin + uEdge;
@@ -230,11 +231,7 @@ namespace TriggerVisualizer {
             }
 
             bool ShouldSortWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
-                if (items is null || items.Length <= 1) return false;
-                if (TriggerVisualizer::Trigger::UI::S_CullScreenOccludedWorldTiles) return true;
-                if (TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return true;
-                if (TriggerVisualizer::Trigger::UI::S_RandomFillTileColors) return true;
-                return !AreAllWorldFillTileColorsEquivalent(items);
+                return items !is null && items.Length > 1;
             }
 
             bool AddWorldFillTilePath(WorldFillTileDrawItem@ item) {
@@ -297,6 +294,23 @@ namespace TriggerVisualizer {
                     }
 
                     gap /= 2;
+                }
+            }
+
+            void MarkDuplicateWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
+                if (items is null || items.Length <= 1) return;
+
+                dictionary seenGeometry;
+                for (int i = int(items.Length) - 1; i >= 0; i--) {
+                    WorldFillTileDrawItem@ item = items[uint(i)];
+                    if (item is null || item.Occluded || item.GeometryKey.Length == 0) continue;
+
+                    if (seenGeometry.Exists(item.GeometryKey)) {
+                        item.Occluded = true;
+                        continue;
+                    }
+
+                    seenGeometry.Set(item.GeometryKey, true);
                 }
             }
 
@@ -386,6 +400,7 @@ namespace TriggerVisualizer {
                 if (sorted) {
                     SortWorldFillTileDrawItemsBackToFront(items);
                 }
+                MarkDuplicateWorldFillTileDrawItems(items);
                 MarkScreenOccludedWorldFillTileDrawItems(items);
 
                 nvg::Reset();
@@ -508,6 +523,7 @@ namespace TriggerVisualizer {
             ) {
                 if (items is null) return 0;
                 if (corners is null || face is null || face.Length != 4) return 0;
+                if (G_FillTileTraversalBudgetRemaining == 0) return 0;
 
                 vec3 origin = corners[face[0]];
                 vec3 uEdge = corners[face[1]] - origin;

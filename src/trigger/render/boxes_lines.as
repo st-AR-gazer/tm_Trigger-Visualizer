@@ -143,6 +143,8 @@ namespace TriggerVisualizer {
             }
 
             void DrawWorldLineSegmentImmediate(const vec3 &in start, const vec3 &in end, const vec4 &in color) {
+                if (!ConsumeWorldLineSegmentBudget()) return;
+
                 nvg::BeginPath();
                 nvg::StrokeColor(color);
                 if (DrawProjectedLineSegmentFrustumSafe(start, end, 0)) {
@@ -171,6 +173,8 @@ namespace TriggerVisualizer {
 
                 float invSegments = 1.0f / float(segmentCount);
                 for (uint i = 0; i < segmentCount; i++) {
+                    if (G_WorldLineSegmentBudgetRemaining == 0) break;
+
                     float t0 = float(i) * invSegments;
                     float t1 = float(i + 1) * invSegments;
                     DrawWorldLineSegmentImmediate(

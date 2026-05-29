@@ -1,0 +1,158 @@
+﻿namespace TriggerVisualizer {
+    namespace Trigger {
+        namespace UI {
+            [Setting hidden name="Trigger: Show offzone source"]
+            bool S_ShowOffzoneSource = true;
+
+            [Setting hidden name="Trigger: Show offzone in playable map"]
+            bool S_ShowOffzoneInPlayableMap = true;
+
+            [Setting hidden name="Trigger: Show offzone in editor"]
+            bool S_ShowOffzoneInEditor = true;
+
+            [Setting hidden name="Trigger: Show offzone in editor test mode"]
+            bool S_ShowOffzoneInEditorTestMode = true;
+
+            [Setting hidden name="Trigger: Show offzone in editor mediatracker"]
+            bool S_ShowOffzoneInEditorMediaTracker = true;
+
+            [Setting hidden name="Trigger: Show offzone in replay editor"]
+            bool S_ShowOffzoneInReplayEditor = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker source"]
+            bool S_ShowMediaTrackerSource = false;
+
+            [Setting hidden name="Trigger: Show MediaTracker in playable map"]
+            bool S_ShowMediaTrackerInPlayableMap = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker in editor"]
+            bool S_ShowMediaTrackerInEditor = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker in editor test mode"]
+            bool S_ShowMediaTrackerInEditorTestMode = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker in editor mediatracker"]
+            bool S_ShowMediaTrackerInEditorMediaTracker = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker in replay editor"]
+            bool S_ShowMediaTrackerInReplayEditor = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamera = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker custom camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamCustom = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker orbital camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamOrbital = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker path camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamPath = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker player camera subtype"]
+            bool S_ShowMediaTrackerSubtypeCamPlayer = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker CamDefault subtype"]
+            bool S_ShowMediaTrackerSubtypeCamDefault = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker Cam1 subtype"]
+            bool S_ShowMediaTrackerSubtypeCam1 = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker Cam2 subtype"]
+            bool S_ShowMediaTrackerSubtypeCam2 = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker Cam3 subtype"]
+            bool S_ShowMediaTrackerSubtypeCam3 = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker 2D triangles subtype"]
+            bool S_ShowMediaTrackerSubtype2DTriangles = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker 3D triangles subtype"]
+            bool S_ShowMediaTrackerSubtype3DTriangles = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker car trail subtype"]
+            bool S_ShowMediaTrackerSubtypeCarTrail = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker colors FX subtype"]
+            bool S_ShowMediaTrackerSubtypeColorsFx = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker color grading subtype"]
+            bool S_ShowMediaTrackerSubtypeColorGrading = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker depth of field subtype"]
+            bool S_ShowMediaTrackerSubtypeDepthOfField = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker dirty lens subtype"]
+            bool S_ShowMediaTrackerSubtypeDirtyLens = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker editing cut subtype"]
+            bool S_ShowMediaTrackerSubtypeEditingCut = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker fading transition subtype"]
+            bool S_ShowMediaTrackerSubtypeFadingTransition = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker fog subtype"]
+            bool S_ShowMediaTrackerSubtypeFog = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ghost subtype"]
+            bool S_ShowMediaTrackerSubtypeGhost = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ambiance subtype"]
+            bool S_ShowMediaTrackerSubtypeAmbiance = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker HDR bloom subtype"]
+            bool S_ShowMediaTrackerSubtypeHdrBloom = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker image subtype"]
+            bool S_ShowMediaTrackerSubtypeImage = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker inertial tracking CamFX subtype"]
+            bool S_ShowMediaTrackerSubtypeInertialTrackingCamFx = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ManiaLink UI subtype"]
+            bool S_ShowMediaTrackerSubtypeManiaLinkUi = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ManiaLink URL subtype"]
+            bool S_ShowMediaTrackerSubtypeManiaLinkUrl = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker music volume subtype"]
+            bool S_ShowMediaTrackerSubtypeMusicVolume = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker opponent visibility subtype"]
+            bool S_ShowMediaTrackerSubtypeOpponentVisibility = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker shake cam FX subtype"]
+            bool S_ShowMediaTrackerSubtypeShakeCamFx = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker stereo 3D subtype"]
+            bool S_ShowMediaTrackerSubtypeStereo3D = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker sound FX subtype"]
+            bool S_ShowMediaTrackerSubtypeSoundFx = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker spectators subtype"]
+            bool S_ShowMediaTrackerSubtypeSpectators = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker text subtype"]
+            bool S_ShowMediaTrackerSubtypeText = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker time subtype"]
+            bool S_ShowMediaTrackerSubtypeTime = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker time speed subtype"]
+            bool S_ShowMediaTrackerSubtypeTimeSpeed = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker ToneMapping subtype"]
+            bool S_ShowMediaTrackerSubtypeToneMapping = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker vehicle lights subtype"]
+            bool S_ShowMediaTrackerSubtypeVehicleLights = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker reset subtype"]
+            bool S_ShowMediaTrackerSubtypeReset = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker unknown subtype"]
+            bool S_ShowMediaTrackerSubtypeUnknown = true;
+        }
+    }
+}

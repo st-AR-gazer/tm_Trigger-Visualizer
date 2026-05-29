@@ -3,14 +3,16 @@ namespace TriggerVisualizer {
         namespace Render {
             const float MIN_VISIBLE_FADE = 0.001f;
             const float FILL_TILE_SPLIT_DISTANCE_FACTOR = 0.75f;
-            const uint FILL_TILE_MAX_DEPTH = 10;
-            const uint FILL_TILE_MAX_TILES_PER_FACE = 2048;
+            const uint FILL_TILE_MAX_DEPTH = 8;
+            const uint FILL_TILE_MAX_TILES_PER_FACE = 512;
+            const uint FILL_TILE_TRAVERSAL_BUDGET_HARD_MAX = 8192;
             const float SCREEN_QUAD_VISIBILITY_MARGIN = 128.0f;
             const float SKULL_TILE_ICON_MIN_SCREEN_SIZE = 2.0f;
             const float SKULL_TILE_ICON_TARGET_PATCH_SCREEN_SIZE = 40.0f;
             const float SKULL_TILE_ICON_TARGET_PATCH_PERSPECTIVE_ERROR = 2.0f;
             const uint SKULL_TILE_ICON_HARD_MAX_SUBDIVISIONS = 12;
             const uint LINE_FRUSTUM_MAX_DEPTH = 12;
+            const uint WORLD_LINE_SEGMENT_BUDGET_HARD_MAX = 32768;
             const int WORLD_PRIMITIVE_OUTSIDE = 0;
             const int WORLD_PRIMITIVE_MIXED = 1;
             const int WORLD_PRIMITIVE_FRONT = 2;
@@ -33,11 +35,65 @@ namespace TriggerVisualizer {
             }
 
             uint G_TileIconPatchBudgetRemaining = 1600;
+            uint G_FillTileTraversalBudgetRemaining = 4096;
+            uint G_WorldLineSegmentBudgetRemaining = 1536;
             WorldFrustumState G_WorldFrustumState;
 
             void ResetWorldRenderPerformanceBudgets() {
+                int maxFillTiles = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
+                int maxOutlineSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxOutlineSegmentsPerFrame, 1);
                 G_TileIconPatchBudgetRemaining = uint(Math::Max(TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame, 0));
+                G_FillTileTraversalBudgetRemaining = uint(Math::Clamp(maxFillTiles * 4, 256, int(FILL_TILE_TRAVERSAL_BUDGET_HARD_MAX)));
+                G_WorldLineSegmentBudgetRemaining = uint(Math::Clamp(maxOutlineSegments, 32, int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX)));
                 UpdateWorldFrustumState();
+            }
+
+            bool ConsumeWorldFillTileTraversalBudget() {
+                if (G_FillTileTraversalBudgetRemaining == 0) return false;
+                G_FillTileTraversalBudgetRemaining--;
+                return true;
+            }
+
+            bool ConsumeWorldLineSegmentBudget() {
+                if (G_WorldLineSegmentBudgetRemaining == 0) return false;
+                G_WorldLineSegmentBudgetRemaining--;
+                return true;
+            }
+
+            int GetWorldFillTileCoordKey(float value) {
+                float scaled = value * 1000.0f;
+                if (scaled >= 0.0f) return int(Math::Floor(scaled + 0.5f));
+                return int(Math::Ceil(scaled - 0.5f));
+            }
+
+            string GetWorldFillTilePointKey(const vec3 &in point) {
+                return tostring(GetWorldFillTileCoordKey(point.x))
+                    + "," + tostring(GetWorldFillTileCoordKey(point.y))
+                    + "," + tostring(GetWorldFillTileCoordKey(point.z));
+            }
+
+            void SortWorldFillTileCornerKeys(array<string> @keys) {
+                if (keys is null || keys.Length <= 1) return;
+
+                for (uint i = 1; i < keys.Length; i++) {
+                    string key = keys[i];
+                    uint j = i;
+                    while (j > 0 && keys[j - 1] > key) {
+                        keys[j] = keys[j - 1];
+                        j--;
+                    }
+                    keys[j] = key;
+                }
+            }
+
+            string GetWorldFillTileGeometryKey(const vec3 &in origin, const vec3 &in uEdge, const vec3 &in vEdge) {
+                auto keys = array<string>();
+                keys.InsertLast(GetWorldFillTilePointKey(origin));
+                keys.InsertLast(GetWorldFillTilePointKey(origin + uEdge));
+                keys.InsertLast(GetWorldFillTilePointKey(origin + uEdge + vEdge));
+                keys.InsertLast(GetWorldFillTilePointKey(origin + vEdge));
+                SortWorldFillTileCornerKeys(keys);
+                return keys[0] + "|" + keys[1] + "|" + keys[2] + "|" + keys[3];
             }
 
             class WorldFillTileDrawItem {
@@ -45,6 +101,7 @@ namespace TriggerVisualizer {
                 vec3 UEdge;
                 vec3 VEdge;
                 vec4 Color;
+                string GeometryKey;
                 float TileSeed = 0.0f;
                 float SortDistanceSq = 0.0f;
                 bool Occluded = false;
@@ -71,6 +128,7 @@ namespace TriggerVisualizer {
                     Color = color;
                     TileSeed = tileSeed;
                     SortDistanceSq = sortDistanceSq;
+                    GeometryKey = GetWorldFillTileGeometryKey(origin, uEdge, vEdge);
                 }
             }
 
@@ -364,12 +422,13 @@ namespace TriggerVisualizer {
 
             bool ShouldRenderTriggerVolumeFillTiles(const TriggerVolume@ box) {
                 if (box is null) return false;
-                return box.Source != TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER;
+                return TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons
+                    || TriggerVisualizer::Trigger::UI::S_RandomFillTileColors;
             }
 
             bool ShouldRenderTriggerVolumeSimpleFill(const TriggerVolume@ box) {
                 if (box is null) return false;
-                return box.Source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER;
+                return !ShouldRenderTriggerVolumeFillTiles(box);
             }
 
             uint CollectSimpleTriggerVolumeFillDrawItems(
@@ -422,6 +481,8 @@ namespace TriggerVisualizer {
                 array<WorldFillTileDrawItem@> @items
             ) {
                 if (items is null) return;
+                int maxFrameTiles = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
+                if (int(items.Length) >= maxFrameTiles) return;
                 if (ShouldRenderTriggerVolumeSimpleFill(box)) {
                     CollectSimpleTriggerVolumeFillDrawItems(box, cameraPos, color, boxIndex, items);
                     return;

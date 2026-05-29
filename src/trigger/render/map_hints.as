@@ -10,7 +10,8 @@ namespace TriggerVisualizer {
             }
 
             vec3 GetEffectiveRenderDistanceWorld() {
-                if (TriggerVisualizer::Trigger::UI::S_UnlimitedRenderDistance) {
+                auto ctx = GetCurrentRuntimeContext();
+                if (TriggerVisualizer::Trigger::UI::IsUnlimitedRenderDistanceForRuntime(ctx)) {
                     return vec3(
                         UNLIMITED_RENDER_DISTANCE_WORLD,
                         UNLIMITED_RENDER_DISTANCE_WORLD,
@@ -18,8 +19,8 @@ namespace TriggerVisualizer {
                     );
                 }
 
-                vec3 distance = TriggerVisualizer::Trigger::UI::GetRenderDistanceWorld();
-                if (!TriggerVisualizer::Trigger::UI::S_UseMapSuggestedDrawDistance) return distance;
+                vec3 distance = TriggerVisualizer::Trigger::UI::GetRenderDistanceWorldForRuntime(ctx);
+                if (!TriggerVisualizer::Trigger::UI::UseMapSuggestedDrawDistanceForRuntime(ctx)) return distance;
 
                 auto snapshot = GetCurrentMapSnapshot();
                 if (snapshot is null || snapshot.RenderHints is null) return distance;
