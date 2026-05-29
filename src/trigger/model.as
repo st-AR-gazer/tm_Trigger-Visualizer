@@ -252,6 +252,9 @@ namespace TriggerVisualizer {
             bool HasIslandIndex = false;
             uint IslandIndex = 0;
             uint IslandCount = 0;
+            bool IsMergedGroup = false;
+            uint MergedVolumeCount = 1;
+            bool AllowRawRangeLabel = true;
 
             TriggerVolume() { }
 
@@ -288,6 +291,12 @@ namespace TriggerVisualizer {
             }
 
             string SourceIndexLabel() const {
+                if (IsMergedGroup && Source == TRIGGER_SOURCE_OFFZONE) {
+                    return SourceName() + " group #" + tostring(SourceIndex);
+                }
+                if (IsMergedGroup) {
+                    return SourceName() + " #" + tostring(SourceIndex) + " group";
+                }
                 return SourceName() + " #" + tostring(SourceIndex);
             }
 
@@ -323,6 +332,9 @@ namespace TriggerVisualizer {
                 }
                 if (includeIslandIndex && HasIslandIndex && IslandCount > 1) {
                     label += " island " + tostring(IslandIndex + 1) + "/" + tostring(IslandCount);
+                }
+                if (IsMergedGroup && MergedVolumeCount > 1) {
+                    label += " (" + tostring(MergedVolumeCount) + " joined)";
                 }
                 return label;
             }

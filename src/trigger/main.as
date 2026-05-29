@@ -149,11 +149,24 @@ namespace TriggerVisualizer {
             if (!source.Enabled) return;
             if (IsSourceDisabledByMapHints(snapshot.RenderHints, source.Source)) return;
 
+            auto filteredVolumes = array<TriggerVolume@>();
             for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
                 auto volume = source.TriggerVolumes[i];
                 if (IsTriggerVolumeDisabledByMapHints(snapshot.RenderHints, volume)) continue;
                 if (!TriggerVisualizer::Trigger::UI::IsTriggerVolumeEnabledBySubtypeSettings(volume)) continue;
-                snapshot.TriggerVolumes.InsertLast(volume);
+                filteredVolumes.InsertLast(volume);
+            }
+
+            if (TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes) {
+                auto mergedVolumes = TriggerVisualizer::Trigger::Data::MergeAdjacentTriggerVolumes(filteredVolumes);
+                for (uint i = 0; i < mergedVolumes.Length; i++) {
+                    snapshot.TriggerVolumes.InsertLast(mergedVolumes[i]);
+                }
+                return;
+            }
+
+            for (uint i = 0; i < filteredVolumes.Length; i++) {
+                snapshot.TriggerVolumes.InsertLast(filteredVolumes[i]);
             }
         }
 

@@ -1,6 +1,9 @@
 ﻿namespace TriggerVisualizer {
     namespace Trigger {
         namespace UI {
+            [Setting hidden name="Trigger: Merge adjacent trigger volumes"]
+            bool S_MergeAdjacentTriggerVolumes = true;
+
             [Setting hidden name="Trigger: Show offzone source"]
             bool S_ShowOffzoneSource = true;
 

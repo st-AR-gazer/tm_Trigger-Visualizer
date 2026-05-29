@@ -150,6 +150,7 @@
                 S_SkullTileIconScale = 0.45f;
                 S_SkullTileIconAlpha = 0.85f;
                 S_CustomTileIconStoragePath = "";
+                S_MergeAdjacentTriggerVolumes = true;
                 S_ShowOffzoneSource = true;
                 S_ShowOffzoneInPlayableMap = true;
                 S_ShowOffzoneInEditor = true;

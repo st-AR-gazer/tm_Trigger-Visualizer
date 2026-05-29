@@ -42,6 +42,30 @@ namespace TriggerVisualizer {
                 return true;
             }
 
+            bool IsProjectedLinePotentiallyVisible(
+                const vec3 &in s0,
+                const vec3 &in s1,
+                float margin
+            ) {
+                if (s0.z >= 0 || s1.z >= 0) return false;
+                if (!TriggerVisualizer::Trigger::UI::S_CullOffscreenWorldTiles) return true;
+
+                int displayWidth = Display::GetWidth();
+                int displayHeight = Display::GetHeight();
+                if (displayWidth <= 0 || displayHeight <= 0) return true;
+
+                float minX = Math::Min(s0.x, s1.x);
+                float maxX = Math::Max(s0.x, s1.x);
+                float minY = Math::Min(s0.y, s1.y);
+                float maxY = Math::Max(s0.y, s1.y);
+
+                if (maxX < -margin) return false;
+                if (minX > float(displayWidth) + margin) return false;
+                if (maxY < -margin) return false;
+                if (minY > float(displayHeight) + margin) return false;
+                return true;
+            }
+
             bool IsWorldQuadPotentiallyVisible(
                 const vec3 &in p0,
                 const vec3 &in p1,

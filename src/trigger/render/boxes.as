@@ -422,7 +422,8 @@ namespace TriggerVisualizer {
 
             bool ShouldRenderTriggerVolumeFillTiles(const TriggerVolume@ box) {
                 if (box is null) return false;
-                return TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons
+                return TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting
+                    || TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons
                     || TriggerVisualizer::Trigger::UI::S_RandomFillTileColors;
             }
 

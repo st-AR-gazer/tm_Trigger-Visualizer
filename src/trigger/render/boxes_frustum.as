@@ -101,6 +101,9 @@ namespace TriggerVisualizer {
                 );
                 if (screenFrontVisible) return WORLD_PRIMITIVE_FRONT;
 
+                bool allScreenFront = s0.z < 0 && s1.z < 0 && s2.z < 0 && s3.z < 0;
+                if (allScreenFront) return WORLD_PRIMITIVE_OUTSIDE;
+
                 bool anyScreenFront = s0.z < 0 || s1.z < 0 || s2.z < 0 || s3.z < 0;
                 if (!G_WorldFrustumState.Valid) {
                     return anyScreenFront ? WORLD_PRIMITIVE_MIXED : WORLD_PRIMITIVE_OUTSIDE;
@@ -132,7 +135,13 @@ namespace TriggerVisualizer {
                 vec3 s0 = Camera::ToScreen(p0);
                 vec3 s1 = Camera::ToScreen(p1);
                 bool screenFront = s0.z < 0 && s1.z < 0;
-                if (screenFront) return WORLD_PRIMITIVE_FRONT;
+                if (screenFront) {
+                    return IsProjectedLinePotentiallyVisible(
+                        s0,
+                        s1,
+                        SCREEN_QUAD_VISIBILITY_MARGIN
+                    ) ? WORLD_PRIMITIVE_FRONT : WORLD_PRIMITIVE_OUTSIDE;
+                }
                 bool anyScreenFront = s0.z < 0 || s1.z < 0;
                 if (!G_WorldFrustumState.Valid) {
                     return anyScreenFront ? WORLD_PRIMITIVE_MIXED : WORLD_PRIMITIVE_OUTSIDE;

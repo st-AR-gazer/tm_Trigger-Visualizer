@@ -540,6 +540,7 @@ namespace TriggerVisualizer {
                     volume.SubtypeKey = subtypeKey;
                     volume.SubtypeLabel = subtypeLabel;
                     volume.TargetKeys = MergeTriggerTargetKeys(volume.TargetKeys, targetKeys);
+                    volume.AllowRawRangeLabel = false;
                     if (islandCount > 1) {
                         volume.HasIslandIndex = true;
                         volume.IslandIndex = islandIndex;

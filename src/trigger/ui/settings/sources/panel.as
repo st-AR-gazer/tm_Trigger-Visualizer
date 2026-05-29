@@ -112,7 +112,8 @@
             }
 
             string GetMapSnapshotFilterSettingsKey() {
-                return SettingBoolKey(S_RespectMapSuggestOff)
+                return SettingBoolKey(S_MergeAdjacentTriggerVolumes)
+                    + SettingBoolKey(S_RespectMapSuggestOff)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeCamera)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeCamCustom)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeCamOrbital)
@@ -387,6 +388,13 @@
             void RenderSourcesSettingsUI() {
                 UI::Text("Trigger Sources");
                 auto ctx = TriggerVisualizer::Trigger::GetCurrentRuntimeContext();
+
+                S_MergeAdjacentTriggerVolumes = UI::Checkbox(
+                    "Merge adjacent compatible trigger volumes##trigger-visualizer-sources-merge-adjacent",
+                    S_MergeAdjacentTriggerVolumes
+                );
+
+                UI::Separator();
 
                 UI::BeginTabBar("trigger-visualizer-source-tabs");
 

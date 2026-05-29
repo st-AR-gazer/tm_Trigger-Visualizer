@@ -108,12 +108,17 @@ namespace TriggerVisualizer {
 
                     if (TriggerVisualizer::Trigger::UI::S_ShowLabels) {
                         TriggerRangeRaw@ rawRange = null;
-                        uint sourceIndex = visibleIndices[i];
-                        if (sourceIndex < snapshot.RawRanges.Length) {
-                            @rawRange = snapshot.RawRanges[sourceIndex];
+                        auto volume = visibleVolumes[i];
+                        if (
+                            volume !is null
+                            && volume.Source == TRIGGER_SOURCE_OFFZONE
+                            && volume.AllowRawRangeLabel
+                            && volume.SourceIndex < snapshot.RawRanges.Length
+                        ) {
+                            @rawRange = snapshot.RawRanges[volume.SourceIndex];
                         }
                         DrawTriggerVolumeLabel(
-                            visibleVolumes[i],
+                            volume,
                             rawRange,
                             visibleIndices[i],
                             cameraPos,
