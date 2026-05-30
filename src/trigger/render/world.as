@@ -40,6 +40,7 @@ namespace TriggerVisualizer {
             }
 
             void RenderWorld() {
+                G_FastDrivingPerformanceModeActive = false;
                 if (!TriggerVisualizer::Trigger::UI::S_RenderWorld) return;
                 if (!TriggerVisualizer::Trigger::UI::S_ShowOutline && !TriggerVisualizer::Trigger::UI::S_ShowFill && !TriggerVisualizer::Trigger::UI::S_ShowLabels && !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
 
@@ -52,6 +53,8 @@ namespace TriggerVisualizer {
 
                 vec3 cameraPos = Camera::GetCurrentPosition();
                 auto proximityState = TriggerVisualizer::Trigger::Data::GetProximityReferenceState(ctx);
+                G_FastDrivingPerformanceModeActive = ShouldUseFastDrivingPerformanceMode(ctx, proximityState);
+                if (!TriggerVisualizer::Trigger::UI::S_ShowOutline && !ShouldRenderWorldFillNow() && !ShouldRenderWorldLabelsNow() && !ShouldRenderWorldTileIconsNow()) return;
                 ResetWorldRenderPerformanceBudgets();
 
                 auto visibleVolumes = array<TriggerVolume@>();
@@ -73,15 +76,30 @@ namespace TriggerVisualizer {
 
                 if (visibleVolumes.Length == 0) return;
                 SortVisibleTriggerVolumesBackToFront(visibleVolumes, visibleFades, visibleIndices, cameraPos);
+                int fastMaxVisibleVolumes = Math::Max(TriggerVisualizer::Trigger::UI::S_FastDrivingMaxVisibleVolumes, 1);
+                if (IsFastDrivingPerformanceModeActive() && int(visibleVolumes.Length) > fastMaxVisibleVolumes) {
+                    auto trimmedVolumes = array<TriggerVolume@>();
+                    auto trimmedFades = array<float>();
+                    auto trimmedIndices = array<uint>();
+                    uint firstKept = visibleVolumes.Length - uint(fastMaxVisibleVolumes);
+                    for (uint i = firstKept; i < visibleVolumes.Length; i++) {
+                        trimmedVolumes.InsertLast(visibleVolumes[i]);
+                        trimmedFades.InsertLast(visibleFades[i]);
+                        trimmedIndices.InsertLast(visibleIndices[i]);
+                    }
+                    visibleVolumes = trimmedVolumes;
+                    visibleFades = trimmedFades;
+                    visibleIndices = trimmedIndices;
+                }
 
                 auto fillTileItems = array<WorldFillTileDrawItem@>();
-                bool shouldCollectFillItems = TriggerVisualizer::Trigger::UI::S_ShowFill || TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons;
+                bool shouldCollectFillItems = ShouldRenderWorldFillNow() || ShouldRenderWorldTileIconsNow();
                 if (shouldCollectFillItems) {
-                    uint maxFrameFillItems = uint(Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1));
+                    uint maxFrameFillItems = uint(Math::Max(GetEffectiveMaxFillTilesPerFrame(), 0));
                     for (uint i = 0; i < visibleVolumes.Length; i++) {
                         if (fillTileItems.Length >= maxFrameFillItems) break;
                         if (G_FillTileTraversalBudgetRemaining == 0) break;
-                        vec4 fillColor = TriggerVisualizer::Trigger::UI::S_ShowFill ?
+                        vec4 fillColor = ShouldRenderWorldFillNow() ?
                         GetFillColor(visibleVolumes[i], cameraPos, visibleFades[i]) : vec4();
                         CollectTriggerVolumeFillDrawItems(
                             visibleVolumes[i],
@@ -106,7 +124,7 @@ namespace TriggerVisualizer {
                         );
                     }
 
-                    if (TriggerVisualizer::Trigger::UI::S_ShowLabels) {
+                    if (ShouldRenderWorldLabelsNow()) {
                         TriggerRangeRaw@ rawRange = null;
                         auto volume = visibleVolumes[i];
                         if (

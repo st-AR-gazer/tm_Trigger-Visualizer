@@ -57,7 +57,7 @@ namespace TriggerVisualizer {
                     auto source = TriggerSourceSnapshot(TRIGGER_SOURCE_OFFZONE, enabled);
                     source.RawTriggerSize = ReadOffzoneTriggerSize(map);
                     source.RawBufferPtr = ReadOffzoneBufferPtr(map);
-                    @source.GridSpec = BuildTriggerGridSpec(source.RawTriggerSize);
+                    @source.GridSpec = BuildTriggerGridSpec(map, source.RawTriggerSize);
                     source.RawRanges = ReadOffzoneRawRanges(map);
                     source.TriggerVolumes = TriggerRangesToTriggerVolumes(
                         source.RawRanges,

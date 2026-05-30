@@ -144,21 +144,23 @@ namespace TriggerVisualizer {
                 bool IsCoordWithinExpectedMapBounds(
                     const nat3 &in coord,
                     const nat3 &in mapSize,
-                    const nat3 &in cellsPerBlock
+                    const TriggerGridSpec@ spec
                 ) {
-                    return uint64(coord.x) <= ExpectedMaxCoordAxis(mapSize.x, cellsPerBlock.x)
-                        && uint64(coord.y) <= ExpectedMaxCoordAxis(mapSize.y + uint(OFFZONE_WORLD_Y_ANCHOR), cellsPerBlock.y)
-                        && uint64(coord.z) <= ExpectedMaxCoordAxis(mapSize.z, cellsPerBlock.z);
+                    if (spec is null) return false;
+                    uint yAnchor = uint(Math::Ceil(spec.WorldYAnchor));
+                    return uint64(coord.x) <= ExpectedMaxCoordAxis(mapSize.x, spec.CellsPerBlock.x)
+                        && uint64(coord.y) <= ExpectedMaxCoordAxis(mapSize.y + yAnchor, spec.CellsPerBlock.y)
+                        && uint64(coord.z) <= ExpectedMaxCoordAxis(mapSize.z, spec.CellsPerBlock.z);
                 }
 
                 bool IsCoordRangeWithinExpectedMapBounds(
                     const nat3 &in minCoord,
                     const nat3 &in maxCoord,
                     const nat3 &in mapSize,
-                    const nat3 &in cellsPerBlock
+                    const TriggerGridSpec@ spec
                 ) {
-                    return IsCoordWithinExpectedMapBounds(minCoord, mapSize, cellsPerBlock)
-                        && IsCoordWithinExpectedMapBounds(maxCoord, mapSize, cellsPerBlock);
+                    return IsCoordWithinExpectedMapBounds(minCoord, mapSize, spec)
+                        && IsCoordWithinExpectedMapBounds(maxCoord, mapSize, spec);
                 }
 
                 nat3 ReadMediaTrackerTriggerSize(CGameCtnChallenge@ map) {
@@ -554,7 +556,7 @@ namespace TriggerVisualizer {
                     uint clipIndex,
                     uint64 triggerPtr,
                     const nat3 &in mapSize,
-                    const nat3 &in cellsPerBlock,
+                    const TriggerGridSpec@ spec,
                     uint renderCoordBudgetRemaining,
                     bool readRenderCells
                 ) {
@@ -595,7 +597,7 @@ namespace TriggerVisualizer {
                         return trigger;
                     }
 
-                    if (!IsCoordRangeWithinExpectedMapBounds(trigger.MinCoord, trigger.MaxCoord, mapSize, cellsPerBlock)) {
+                    if (!IsCoordRangeWithinExpectedMapBounds(trigger.MinCoord, trigger.MaxCoord, mapSize, spec)) {
                         trigger.Warning = "Coordinate bounds are outside expected map limits.";
                         return trigger;
                     }
@@ -741,7 +743,7 @@ namespace TriggerVisualizer {
                             i,
                             triggerPtr,
                             source.MapSize,
-                            source.RawTriggerSize,
+                            source.GridSpec,
                             MAX_MEDIATRACKER_RENDER_COORDS_TOTAL - renderCoordCount,
                             renderCells
                         );
@@ -782,7 +784,7 @@ namespace TriggerVisualizer {
                     auto source = TriggerSourceSnapshot(TRIGGER_SOURCE_MEDIATRACKER, enabled);
                     source.RawTriggerSize = ReadMediaTrackerTriggerSize(map);
                     source.MapSize = map is null ? nat3() : map.Size;
-                    @source.GridSpec = BuildTriggerGridSpec(source.RawTriggerSize);
+                    @source.GridSpec = BuildTriggerGridSpec(map, source.RawTriggerSize);
 
                     if (map is null) {
                         source.Diagnostics.InsertLast("No map available for MediaTracker trigger probing.");

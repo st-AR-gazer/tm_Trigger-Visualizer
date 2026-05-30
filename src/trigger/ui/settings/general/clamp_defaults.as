@@ -47,15 +47,23 @@
                 S_LineSplitMinFullDistance = Math::Max(S_LineSplitMinFullDistance, 0.0f);
                 S_LineSplitMaxFullDistance = Math::Max(S_LineSplitMaxFullDistance, 0.0f);
                 S_LineSplitMaxSegmentsPerEdge = Math::Max(S_LineSplitMaxSegmentsPerEdge, 1);
-                S_MaxOutlineSegmentsPerFrame = Math::Clamp(S_MaxOutlineSegmentsPerFrame, 64, 65536);
             }
 
             void ClampPerformanceSettings() {
                 S_ScreenOcclusionCellSize = Math::Clamp(S_ScreenOcclusionCellSize, 8, 256);
                 S_FillTileMinSize = Math::Clamp(S_FillTileMinSize, 2.0f, 64.0f);
                 S_MaxFillTilesPerFrame = Math::Clamp(S_MaxFillTilesPerFrame, 128, 65536);
+                S_MaxOutlineSegmentsPerFrame = Math::Clamp(S_MaxOutlineSegmentsPerFrame, 64, 65536);
                 S_MaxTileIconPatchesPerFrame = Math::Clamp(S_MaxTileIconPatchesPerFrame, 0, 65536);
                 S_TileIconMaxSubdivisions = Math::Clamp(S_TileIconMaxSubdivisions, 1, 12);
+                S_FastDrivingSpeedThresholdKmh = Math::Clamp(S_FastDrivingSpeedThresholdKmh, 0.0f, 1000.0f);
+                S_FastDrivingMaxVisibleVolumes = Math::Clamp(S_FastDrivingMaxVisibleVolumes, 1, 512);
+                S_FastDrivingMaxFillTilesPerFrame = Math::Clamp(S_FastDrivingMaxFillTilesPerFrame, 0, 8192);
+                S_FastDrivingMaxOutlineSegmentsPerFrame = Math::Clamp(
+                    S_FastDrivingMaxOutlineSegmentsPerFrame,
+                    0,
+                    8192
+                );
             }
 
             vec4 ClampColor(const vec4 &in color) {
@@ -136,6 +144,15 @@
                 S_MaxFillTilesPerFrame = 4096;
                 S_MaxTileIconPatchesPerFrame = 1600;
                 S_TileIconMaxSubdivisions = 6;
+                S_FastDrivingPerformanceMode = true;
+                S_FastDrivingSpeedThresholdKmh = 60.0f;
+                S_FastDrivingMaxVisibleVolumes = 24;
+                S_FastDrivingMaxFillTilesPerFrame = 128;
+                S_FastDrivingMaxOutlineSegmentsPerFrame = 256;
+                S_FastDrivingDisableFill = true;
+                S_FastDrivingDisableLabels = true;
+                S_FastDrivingDisableTileIcons = true;
+                S_FastDrivingSimplifyGroupedTriggers = true;
                 S_ColorMode = COLOR_MODE_STATIC;
                 S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
                 S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;

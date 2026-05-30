@@ -80,12 +80,6 @@ namespace TriggerVisualizer {
                     LINE_SPLIT_SEGMENTS_SLIDER_MAX
                 );
 
-                UI::SetNextItemWidth(220.0f);
-                S_MaxOutlineSegmentsPerFrame = UI::InputInt(
-                    "Max outline segments per frame##trigger-visualizer-line-splitting",
-                    S_MaxOutlineSegmentsPerFrame
-                );
-
                 ClampLineSplittingSettings();
             }
         }

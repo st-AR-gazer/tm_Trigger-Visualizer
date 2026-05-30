@@ -227,15 +227,46 @@ namespace TriggerVisualizer {
         class TriggerGridSpec {
             nat3 CellsPerBlock;
             vec3 CellWorldSize;
+            float WorldYAnchor = 8.0f;
+            string WorldYAnchorSource = "default";
+            string MapCollectionName = "";
+            int MapCollectionId = -1;
+            uint MapDecoBaseHeightOffset = 0;
 
             TriggerGridSpec() {
                 CellsPerBlock = nat3(1, 1, 1);
                 CellWorldSize = vec3(32.0f, 8.0f, 32.0f);
+                WorldYAnchor = 8.0f;
             }
 
             TriggerGridSpec(const nat3 &in cellsPerBlock, const vec3 &in cellWorldSize) {
                 CellsPerBlock = cellsPerBlock;
                 CellWorldSize = cellWorldSize;
+                WorldYAnchor = 8.0f;
+            }
+
+            TriggerGridSpec(const nat3 &in cellsPerBlock, const vec3 &in cellWorldSize, float worldYAnchor) {
+                CellsPerBlock = cellsPerBlock;
+                CellWorldSize = cellWorldSize;
+                WorldYAnchor = worldYAnchor;
+            }
+
+            TriggerGridSpec(
+                const nat3 &in cellsPerBlock,
+                const vec3 &in cellWorldSize,
+                float worldYAnchor,
+                const string &in worldYAnchorSource,
+                const string &in mapCollectionName,
+                int mapCollectionId,
+                uint mapDecoBaseHeightOffset
+            ) {
+                CellsPerBlock = cellsPerBlock;
+                CellWorldSize = cellWorldSize;
+                WorldYAnchor = worldYAnchor;
+                WorldYAnchorSource = worldYAnchorSource;
+                MapCollectionName = mapCollectionName;
+                MapCollectionId = mapCollectionId;
+                MapDecoBaseHeightOffset = mapDecoBaseHeightOffset;
             }
         }
 
@@ -255,6 +286,7 @@ namespace TriggerVisualizer {
             bool IsMergedGroup = false;
             uint MergedVolumeCount = 1;
             bool AllowRawRangeLabel = true;
+            array<TriggerVolume@> ChildVolumes;
 
             TriggerVolume() { }
 
@@ -284,6 +316,10 @@ namespace TriggerVisualizer {
 
             vec3 Center() const {
                 return(Min + Max) * 0.5f;
+            }
+
+            bool HasChildVolumes() const {
+                return ChildVolumes.Length > 0;
             }
 
             string SourceName() const {

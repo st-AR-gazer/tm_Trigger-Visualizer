@@ -33,9 +33,6 @@ namespace TriggerVisualizer {
 
             [Setting hidden name="Trigger: Line split max segments per edge"]
             int S_LineSplitMaxSegmentsPerEdge = 512;
-
-            [Setting hidden name="Trigger: Max outline segments per frame" min=64 max=65536]
-            int S_MaxOutlineSegmentsPerFrame = 1536;
         }
     }
 }

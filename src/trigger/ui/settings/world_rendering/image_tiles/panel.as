@@ -96,9 +96,6 @@
 
             void RenderImageTilesSettingsUI() {
                 RenderTileIconSettingsUI();
-
-                UI::Separator();
-                RenderPerformanceSettingsUI();
             }
         }
     }

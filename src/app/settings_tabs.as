@@ -8,12 +8,17 @@ void RenderTriggerVisualizerWorldRenderingSettingsTab() {
     TriggerVisualizer::App::RenderWorldRenderingSettingsUI();
 }
 
-[SettingsTab name="Sources" icon="Filter" order=3]
+[SettingsTab name="Performance" icon="Tachometer" order=3]
+void RenderTriggerVisualizerPerformanceSettingsTab() {
+    TriggerVisualizer::App::RenderPerformanceSettingsUI();
+}
+
+[SettingsTab name="Sources" icon="Filter" order=4]
 void RenderTriggerVisualizerSourcesSettingsTab() {
     TriggerVisualizer::App::RenderSourcesSettingsUI();
 }
 
-[SettingsTab name="Labels" icon="Tags" order=4]
+[SettingsTab name="Labels" icon="Tags" order=5]
 void RenderTriggerVisualizerLabelsSettingsTab() {
     TriggerVisualizer::App::RenderLabelsSettingsUI();
 }

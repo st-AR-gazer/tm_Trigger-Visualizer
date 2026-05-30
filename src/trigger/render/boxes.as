@@ -37,14 +37,74 @@ namespace TriggerVisualizer {
             uint G_TileIconPatchBudgetRemaining = 1600;
             uint G_FillTileTraversalBudgetRemaining = 4096;
             uint G_WorldLineSegmentBudgetRemaining = 1536;
+            bool G_FastDrivingPerformanceModeActive = false;
             WorldFrustumState G_WorldFrustumState;
 
+            bool IsFastDrivingPerformanceModeActive() {
+                return G_FastDrivingPerformanceModeActive;
+            }
+
+            bool ShouldUseFastDrivingPerformanceMode(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
+            ) {
+                if (!TriggerVisualizer::Trigger::UI::S_FastDrivingPerformanceMode) return false;
+                if (ctx is null || (!ctx.IsPlayableMap && !ctx.IsEditorTestMode)) return false;
+                if (proximityState is null || !proximityState.HasVehicleSpeed) return false;
+                return proximityState.VehicleSpeedKmh >= TriggerVisualizer::Trigger::UI::S_FastDrivingSpeedThresholdKmh;
+            }
+
+            int GetEffectiveMaxFillTilesPerFrame() {
+                if (IsFastDrivingPerformanceModeActive()) {
+                    return Math::Max(TriggerVisualizer::Trigger::UI::S_FastDrivingMaxFillTilesPerFrame, 0);
+                }
+                return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
+            }
+
+            int GetEffectiveMaxOutlineSegmentsPerFrame() {
+                if (IsFastDrivingPerformanceModeActive()) {
+                    return Math::Max(TriggerVisualizer::Trigger::UI::S_FastDrivingMaxOutlineSegmentsPerFrame, 0);
+                }
+                return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxOutlineSegmentsPerFrame, 1);
+            }
+
+            int GetEffectiveMaxTileIconPatchesPerFrame() {
+                if (IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_FastDrivingDisableTileIcons) {
+                    return 0;
+                }
+                return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame, 0);
+            }
+
+            bool ShouldRenderWorldFillNow() {
+                return TriggerVisualizer::Trigger::UI::S_ShowFill
+                    && !(IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_FastDrivingDisableFill);
+            }
+
+            bool ShouldRenderWorldLabelsNow() {
+                return TriggerVisualizer::Trigger::UI::S_ShowLabels
+                    && !(IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_FastDrivingDisableLabels);
+            }
+
+            bool ShouldRenderWorldTileIconsNow() {
+                return TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons
+                    && !(IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_FastDrivingDisableTileIcons);
+            }
+
+            bool ShouldSimplifyGroupedTriggersNow() {
+                return IsFastDrivingPerformanceModeActive()
+                    && TriggerVisualizer::Trigger::UI::S_FastDrivingSimplifyGroupedTriggers;
+            }
+
             void ResetWorldRenderPerformanceBudgets() {
-                int maxFillTiles = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
-                int maxOutlineSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxOutlineSegmentsPerFrame, 1);
-                G_TileIconPatchBudgetRemaining = uint(Math::Max(TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame, 0));
-                G_FillTileTraversalBudgetRemaining = uint(Math::Clamp(maxFillTiles * 4, 256, int(FILL_TILE_TRAVERSAL_BUDGET_HARD_MAX)));
-                G_WorldLineSegmentBudgetRemaining = uint(Math::Clamp(maxOutlineSegments, 32, int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX)));
+                int maxFillTiles = GetEffectiveMaxFillTilesPerFrame();
+                int maxOutlineSegments = GetEffectiveMaxOutlineSegmentsPerFrame();
+                G_TileIconPatchBudgetRemaining = uint(GetEffectiveMaxTileIconPatchesPerFrame());
+                G_FillTileTraversalBudgetRemaining = maxFillTiles <= 0
+                    ? 0
+                    : uint(Math::Clamp(maxFillTiles * 4, 256, int(FILL_TILE_TRAVERSAL_BUDGET_HARD_MAX)));
+                G_WorldLineSegmentBudgetRemaining = maxOutlineSegments <= 0
+                    ? 0
+                    : uint(Math::Clamp(maxOutlineSegments, 32, int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX)));
                 UpdateWorldFrustumState();
             }
 
@@ -132,6 +192,29 @@ namespace TriggerVisualizer {
                 }
             }
 
+            class WorldOutlineEdgeDrawItem {
+                vec3 Start;
+                vec3 End;
+                uint BoxIndex = 0;
+                uint EdgeIndex = 0;
+                string GeometryKey;
+
+                WorldOutlineEdgeDrawItem() { }
+
+                WorldOutlineEdgeDrawItem(
+                    const vec3 &in start,
+                    const vec3 &in end,
+                    uint boxIndex,
+                    uint edgeIndex
+                ) {
+                    Start = start;
+                    End = end;
+                    BoxIndex = boxIndex;
+                    EdgeIndex = edgeIndex;
+                    GeometryKey = GetWorldLineSegmentGeometryKey(start, end);
+                }
+            }
+
             const uint[][] TRIGGER_VOLUME_EDGE_INDICES = {
                 {0, 1}, {1, 2}, {2, 3}, {3, 0},
                 {4, 5}, {5, 6}, {6, 7}, {7, 4},
@@ -146,6 +229,41 @@ namespace TriggerVisualizer {
                 {0, 3, 2, 1},
                 {4, 5, 6, 7}
             };
+
+            string GetWorldLineSegmentGeometryKey(const vec3 &in start, const vec3 &in end) {
+                string a = GetWorldFillTilePointKey(start);
+                string b = GetWorldFillTilePointKey(end);
+                return a < b ? a + "|" + b : b + "|" + a;
+            }
+
+            int FindStringIndex(const array<string> @keys, const string &in key) {
+                if (keys is null) return -1;
+                for (uint i = 0; i < keys.Length; i++) {
+                    if (keys[i] == key) return int(i);
+                }
+                return -1;
+            }
+
+            void AddGeometryKeyCount(array<string> @keys, array<uint> @counts, const string &in key) {
+                if (keys is null || counts is null || key.Length == 0) return;
+
+                int index = FindStringIndex(keys, key);
+                if (index < 0) {
+                    keys.InsertLast(key);
+                    counts.InsertLast(1);
+                    return;
+                }
+
+                counts[uint(index)]++;
+            }
+
+            uint GetGeometryKeyCount(const array<string> @keys, const array<uint> @counts, const string &in key) {
+                if (keys is null || counts is null) return 0;
+
+                int index = FindStringIndex(keys, key);
+                if (index < 0 || uint(index) >= counts.Length) return 0;
+                return counts[uint(index)];
+            }
 
             vec4 LerpColor(const vec4 &in from, const vec4 &in to, float factor) {
                 factor = Math::Clamp(factor, 0.0f, 1.0f);
@@ -198,6 +316,7 @@ namespace TriggerVisualizer {
             }
 
             float GetTriggerVolumeLineSplitDensityFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (IsFastDrivingPerformanceModeActive()) return 0.0f;
                 if (!TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting) return 0.0f;
 
                 int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitMaxSegmentsPerEdge, 1);
@@ -273,6 +392,14 @@ namespace TriggerVisualizer {
             }
 
             float GetTriggerVolumeFadeFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (box !is null && box.HasChildVolumes() && !ShouldSimplifyGroupedTriggersNow()) {
+                    float groupFade = 0.0f;
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        groupFade = Math::Max(groupFade, GetTriggerVolumeFadeFactor(box.ChildVolumes[i], cameraPos));
+                    }
+                    return groupFade;
+                }
+
                 vec3 renderDistance = GetEffectiveRenderDistanceWorld();
                 vec3 fadeBand = TriggerVisualizer::Trigger::UI::GetRenderFadeBandWorld();
                 vec3 outside = GetDistanceOutsideTriggerVolume(box, cameraPos);
@@ -422,8 +549,8 @@ namespace TriggerVisualizer {
 
             bool ShouldRenderTriggerVolumeFillTiles(const TriggerVolume@ box) {
                 if (box is null) return false;
-                return TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting
-                    || TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons
+                return (!IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting)
+                    || ShouldRenderWorldTileIconsNow()
                     || TriggerVisualizer::Trigger::UI::S_RandomFillTileColors;
             }
 
@@ -444,7 +571,7 @@ namespace TriggerVisualizer {
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
-                int maxFrameTiles = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
+                int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
                 uint drawn = 0;
                 for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
                     if (int(items.Length) >= maxFrameTiles) return drawn;
@@ -474,6 +601,122 @@ namespace TriggerVisualizer {
                 return drawn;
             }
 
+            string GetTriggerVolumeFaceGeometryKey(const array<vec3> @corners, const uint[]@ face) {
+                if (corners is null || face is null || face.Length != 4) return "";
+
+                vec3 origin = corners[face[0]];
+                vec3 uEdge = corners[face[1]] - origin;
+                vec3 vEdge = corners[face[3]] - origin;
+                return GetWorldFillTileGeometryKey(origin, uEdge, vEdge);
+            }
+
+            void AddTriggerVolumeFaceGeometryCounts(
+                const TriggerVolume@ box,
+                array<string> @keys,
+                array<uint> @counts
+            ) {
+                if (box is null || keys is null || counts is null) return;
+
+                if (box.HasChildVolumes()) {
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        AddTriggerVolumeFaceGeometryCounts(box.ChildVolumes[i], keys, counts);
+                    }
+                    return;
+                }
+
+                auto corners = GetTriggerVolumeCorners(box);
+                if (corners.Length != 8) return;
+
+                for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                    AddGeometryKeyCount(keys, counts, GetTriggerVolumeFaceGeometryKey(corners, TRIGGER_VOLUME_FACE_INDICES[i]));
+                }
+            }
+
+            bool IsDuplicateGroupFaceGeometry(
+                const array<vec3> @corners,
+                const uint[]@ face,
+                const array<string> @faceKeys,
+                const array<uint> @faceCounts
+            ) {
+                return GetGeometryKeyCount(faceKeys, faceCounts, GetTriggerVolumeFaceGeometryKey(corners, face)) > 1;
+            }
+
+            void CollectTriggerVolumeFillDrawItemsFiltered(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const vec4 &in color,
+                uint boxIndex,
+                array<WorldFillTileDrawItem@> @items,
+                const array<string> @hiddenFaceKeys,
+                const array<uint> @hiddenFaceCounts
+            ) {
+                if (items is null) return;
+                int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
+                if (int(items.Length) >= maxFrameTiles) return;
+                if (box is null) return;
+
+                if (box.HasChildVolumes()) {
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        if (int(items.Length) >= maxFrameTiles) return;
+                        CollectTriggerVolumeFillDrawItemsFiltered(
+                            box.ChildVolumes[i],
+                            cameraPos,
+                            color,
+                            boxIndex + i + 1,
+                            items,
+                            hiddenFaceKeys,
+                            hiddenFaceCounts
+                        );
+                    }
+                    return;
+                }
+
+                if (ShouldRenderTriggerVolumeSimpleFill(box)) {
+                    if (color.w <= 0.001f) return;
+
+                    auto corners = GetTriggerVolumeCorners(box);
+                    if (corners.Length != 8) return;
+
+                    for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                        if (int(items.Length) >= maxFrameTiles) return;
+
+                        auto face = TRIGGER_VOLUME_FACE_INDICES[i];
+                        if (IsDuplicateGroupFaceGeometry(corners, face, hiddenFaceKeys, hiddenFaceCounts)) continue;
+                        if (!IsTriggerVolumeFaceCameraFacing(corners, face, i, cameraPos)) continue;
+
+                        vec3 origin = corners[face[0]];
+                        vec3 uEdge = corners[face[1]] - origin;
+                        vec3 vEdge = corners[face[3]] - origin;
+                        float tileSeed = GetFillTileColorSeed(boxIndex, i);
+                        WorldFillTileDrawItem@ item = WorldFillTileDrawItem(
+                            origin,
+                            uEdge,
+                            vEdge,
+                            GetFillTileColor(color, tileSeed),
+                            tileSeed,
+                            GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos)
+                        );
+                        item.AllowTileIcon = false;
+                        if (!UpdateWorldFillTileScreenProjection(item)) continue;
+
+                        items.InsertLast(item);
+                    }
+                    return;
+                }
+
+                if (!ShouldRenderTriggerVolumeFillTiles(box)) return;
+                auto corners = GetTriggerVolumeCorners(box);
+                if (corners.Length != 8) return;
+                if (color.w <= 0.001f && !ShouldRenderWorldTileIconsNow()) return;
+
+                for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                    auto face = TRIGGER_VOLUME_FACE_INDICES[i];
+                    if (IsDuplicateGroupFaceGeometry(corners, face, hiddenFaceKeys, hiddenFaceCounts)) continue;
+                    if (!IsTriggerVolumeFaceCameraFacing(corners, face, i, cameraPos)) continue;
+                    CollectAdaptiveWorldFaceFillDrawItems(items, corners, face, cameraPos, color, boxIndex, i);
+                }
+            }
+
             void CollectTriggerVolumeFillDrawItems(
                 const TriggerVolume@ box,
                 const vec3 &in cameraPos,
@@ -482,8 +725,35 @@ namespace TriggerVisualizer {
                 array<WorldFillTileDrawItem@> @items
             ) {
                 if (items is null) return;
-                int maxFrameTiles = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
+                int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
                 if (int(items.Length) >= maxFrameTiles) return;
+                if (box !is null && box.HasChildVolumes()) {
+                    if (ShouldSimplifyGroupedTriggersNow()) {
+                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
+                        CollectTriggerVolumeFillDrawItems(
+                            simplifiedBox,
+                            cameraPos,
+                            color,
+                            boxIndex,
+                            items
+                        );
+                        return;
+                    }
+
+                    auto hiddenFaceKeys = array<string>();
+                    auto hiddenFaceCounts = array<uint>();
+                    AddTriggerVolumeFaceGeometryCounts(box, hiddenFaceKeys, hiddenFaceCounts);
+                    CollectTriggerVolumeFillDrawItemsFiltered(
+                        box,
+                        cameraPos,
+                        color,
+                        boxIndex,
+                        items,
+                        hiddenFaceKeys,
+                        hiddenFaceCounts
+                    );
+                    return;
+                }
                 if (ShouldRenderTriggerVolumeSimpleFill(box)) {
                     CollectSimpleTriggerVolumeFillDrawItems(box, cameraPos, color, boxIndex, items);
                     return;
@@ -491,12 +761,81 @@ namespace TriggerVisualizer {
                 if (!ShouldRenderTriggerVolumeFillTiles(box)) return;
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
-                if (color.w <= 0.001f && !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
+                if (color.w <= 0.001f && !ShouldRenderWorldTileIconsNow()) return;
 
                 for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
                     auto face = TRIGGER_VOLUME_FACE_INDICES[i];
                     if (!IsTriggerVolumeFaceCameraFacing(corners, face, i, cameraPos)) continue;
                     CollectAdaptiveWorldFaceFillDrawItems(items, corners, face, cameraPos, color, boxIndex, i);
+                }
+            }
+
+            void CollectTriggerVolumeOutlineEdgeDrawItems(
+                const TriggerVolume@ box,
+                uint boxIndex,
+                array<WorldOutlineEdgeDrawItem@> @items,
+                array<string> @edgeKeys,
+                array<uint> @edgeCounts
+            ) {
+                if (box is null || items is null || edgeKeys is null || edgeCounts is null) return;
+
+                if (box.HasChildVolumes()) {
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        CollectTriggerVolumeOutlineEdgeDrawItems(
+                            box.ChildVolumes[i],
+                            boxIndex + i + 1,
+                            items,
+                            edgeKeys,
+                            edgeCounts
+                        );
+                    }
+                    return;
+                }
+
+                auto corners = GetTriggerVolumeCorners(box);
+                if (corners.Length != 8) return;
+
+                for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
+                    auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
+                    WorldOutlineEdgeDrawItem@ item = WorldOutlineEdgeDrawItem(
+                        corners[edge[0]],
+                        corners[edge[1]],
+                        boxIndex,
+                        i
+                    );
+                    items.InsertLast(item);
+                    AddGeometryKeyCount(edgeKeys, edgeCounts, item.GeometryKey);
+                }
+            }
+
+            void DrawGroupedTriggerVolumeOutline(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const vec4 &in color,
+                float strokeWidth,
+                uint boxIndex
+            ) {
+                auto items = array<WorldOutlineEdgeDrawItem@>();
+                auto edgeKeys = array<string>();
+                auto edgeCounts = array<uint>();
+                CollectTriggerVolumeOutlineEdgeDrawItems(box, boxIndex, items, edgeKeys, edgeCounts);
+                if (items.Length == 0) return;
+
+                nvg::Reset();
+                nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
+
+                for (uint i = 0; i < items.Length; i++) {
+                    if (items[i] is null) continue;
+                    if (GetGeometryKeyCount(edgeKeys, edgeCounts, items[i].GeometryKey) > 1) continue;
+
+                    DrawWorldLineAdaptiveColored(
+                        items[i].Start,
+                        items[i].End,
+                        cameraPos,
+                        color,
+                        items[i].BoxIndex,
+                        items[i].EdgeIndex
+                    );
                 }
             }
 
@@ -507,6 +846,23 @@ namespace TriggerVisualizer {
                 float strokeWidth,
                 uint boxIndex
             ) {
+                if (box !is null && box.HasChildVolumes()) {
+                    if (ShouldSimplifyGroupedTriggersNow()) {
+                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
+                        DrawTriggerVolumeOutline(
+                            simplifiedBox,
+                            cameraPos,
+                            color,
+                            strokeWidth,
+                            boxIndex
+                        );
+                        return;
+                    }
+
+                    DrawGroupedTriggerVolumeOutline(box, cameraPos, color, strokeWidth, boxIndex);
+                    return;
+                }
+
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
 

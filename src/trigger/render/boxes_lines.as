@@ -23,6 +23,7 @@ namespace TriggerVisualizer {
             }
 
             uint GetAdaptiveLineSegmentCount(const vec3 &in start, const vec3 &in end, const vec3 &in cameraPos) {
+                if (IsFastDrivingPerformanceModeActive()) return 1;
                 if (!TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting) return 1;
 
                 float lineLength = Math::Distance(start, end);
@@ -62,6 +63,26 @@ namespace TriggerVisualizer {
             }
 
             uint CountTriggerVolumeOutlineSegments(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (box !is null && box.HasChildVolumes()) {
+                    if (ShouldSimplifyGroupedTriggersNow()) {
+                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
+                        return CountTriggerVolumeOutlineSegments(simplifiedBox, cameraPos);
+                    }
+
+                    uint groupCount = 0;
+                    auto items = array<WorldOutlineEdgeDrawItem@>();
+                    auto edgeKeys = array<string>();
+                    auto edgeCounts = array<uint>();
+                    CollectTriggerVolumeOutlineEdgeDrawItems(box, 0, items, edgeKeys, edgeCounts);
+
+                    for (uint i = 0; i < items.Length; i++) {
+                        if (items[i] is null) continue;
+                        if (GetGeometryKeyCount(edgeKeys, edgeCounts, items[i].GeometryKey) > 1) continue;
+                        groupCount += GetAdaptiveLineSegmentCount(items[i].Start, items[i].End, cameraPos);
+                    }
+                    return groupCount;
+                }
+
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
@@ -84,6 +105,29 @@ namespace TriggerVisualizer {
             }
 
             uint GetMaxTriggerVolumeOutlineEdgeSegments(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (box !is null && box.HasChildVolumes()) {
+                    if (ShouldSimplifyGroupedTriggersNow()) {
+                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
+                        return GetMaxTriggerVolumeOutlineEdgeSegments(simplifiedBox, cameraPos);
+                    }
+
+                    uint groupMaxSegments = 0;
+                    auto items = array<WorldOutlineEdgeDrawItem@>();
+                    auto edgeKeys = array<string>();
+                    auto edgeCounts = array<uint>();
+                    CollectTriggerVolumeOutlineEdgeDrawItems(box, 0, items, edgeKeys, edgeCounts);
+
+                    for (uint i = 0; i < items.Length; i++) {
+                        if (items[i] is null) continue;
+                        if (GetGeometryKeyCount(edgeKeys, edgeCounts, items[i].GeometryKey) > 1) continue;
+                        groupMaxSegments = Math::Max(
+                            groupMaxSegments,
+                            GetAdaptiveLineSegmentCount(items[i].Start, items[i].End, cameraPos)
+                        );
+                    }
+                    return groupMaxSegments;
+                }
+
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 

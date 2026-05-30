@@ -30,6 +30,8 @@ namespace TriggerVisualizer {
                     UI::Text("    map size " + source.MapSize.ToString());
                     if (source.GridSpec !is null) {
                         UI::Text("    grid " + source.GridSpec.CellsPerBlock.ToString() + " | cell " + source.GridSpec.CellWorldSize.ToString());
+                        UI::Text("    world y anchor " + Text::Format("%.2f", source.GridSpec.WorldYAnchor));
+                        UI::Text("    anchor source " + source.GridSpec.WorldYAnchorSource);
                     }
 
                     if (source.MediaTrackerClipTriggerCount() == 0) return;
@@ -126,6 +128,11 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tile Budget", tostring(UI::S_MaxFillTilesPerFrame)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Patch Budget", tostring(UI::S_MaxTileIconPatchesPerFrame)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Max Subdivisions", tostring(UI::S_TileIconMaxSubdivisions)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Driving Mode", OnOff(UI::S_FastDrivingPerformanceMode)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Speed Threshold", Text::Format("%.1f km/h", UI::S_FastDrivingSpeedThresholdKmh)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Visible Budget", tostring(UI::S_FastDrivingMaxVisibleVolumes)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Fill Budget", tostring(UI::S_FastDrivingMaxFillTilesPerFrame)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Outline Budget", tostring(UI::S_FastDrivingMaxOutlineSegmentsPerFrame)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Alpha", Text::Format("%.2f", UI::S_OutlineAlpha)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Alpha", Text::Format("%.2f", UI::S_FillAlpha)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Width", Text::Format("%.1f px", UI::S_OutlineWidth)));
@@ -191,6 +198,8 @@ namespace TriggerVisualizer {
 
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Camera Pos", cameraPos.ToString()));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Pos", proximityState.HasVehiclePosition ? proximityState.VehiclePosition.ToString() : "<none>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Speed", proximityState.HasVehicleSpeed ? Text::Format("%.1f km/h", proximityState.VehicleSpeedKmh) : "<none>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Render Active", OnOff(TriggerVisualizer::Trigger::Render::ShouldUseFastDrivingPerformanceMode(ctx, proximityState))));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Visible Volumes", tostring(visibleCount)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fading Volumes", tostring(fadingCount)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culled Volumes", tostring(culledCount)));
@@ -289,6 +298,11 @@ namespace TriggerVisualizer {
                     } else {
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Cells Per Block", snapshot.GridSpec.CellsPerBlock.ToString()));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Cell World Size", snapshot.GridSpec.CellWorldSize.ToString()));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("World Y Anchor", Text::Format("%.2f", snapshot.GridSpec.WorldYAnchor)));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Anchor Source", snapshot.GridSpec.WorldYAnchorSource));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Collection", snapshot.GridSpec.MapCollectionName.Length > 0 ? snapshot.GridSpec.MapCollectionName : "<unknown>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Collection Id", snapshot.GridSpec.MapCollectionId >= 0 ? tostring(snapshot.GridSpec.MapCollectionId) : "<unknown>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Deco Base Height", tostring(snapshot.GridSpec.MapDecoBaseHeightOffset)));
                     }
                     if (snapshot.TriggerVolumes.Length > 0 && UI::TreeNode("Trigger Volumes (" + snapshot.TriggerVolumes.Length + ")##trigger-trigger-volumes")) {
                         for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {

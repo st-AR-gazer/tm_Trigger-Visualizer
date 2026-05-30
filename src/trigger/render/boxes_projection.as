@@ -355,7 +355,7 @@ namespace TriggerVisualizer {
             }
 
             bool DrawSkullTileIconOnWorldTile(const vec3 &in origin, const vec3 &in uEdge, const vec3 &in vEdge) {
-                if (!TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return false;
+                if (!ShouldRenderWorldTileIconsNow()) return false;
                 if (G_TileIconPatchBudgetRemaining == 0) return false;
 
                 float uLen = Math::Distance(origin, origin + uEdge);

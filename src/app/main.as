@@ -42,8 +42,14 @@ namespace TriggerVisualizer {
         }
 
         void RenderMenu() {
-            if (UI::MenuItem(MenuTitle(), "", S_DevPanelOpen)) {
-                S_DevPanelOpen = !S_DevPanelOpen;
+            bool toggleClicked = UI::MenuItem(MenuTitle(), "", TriggerVisualizer::Trigger::UI::S_RenderWorld);
+            if (UI::IsItemClicked(UI::MouseButton::Right)) {
+                Meta::OpenSettings(TriggerVisualizer::PluginMeta);
+                return;
+            }
+
+            if (toggleClicked) {
+                TriggerVisualizer::Trigger::UI::S_RenderWorld = !TriggerVisualizer::Trigger::UI::S_RenderWorld;
             }
         }
 

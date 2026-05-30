@@ -16,6 +16,10 @@ namespace TriggerVisualizer {
                     && bMax + TRIGGER_VOLUME_MERGE_EPSILON >= aMin;
             }
 
+            bool IntervalsOverlapWithArea(float aMin, float aMax, float bMin, float bMax) {
+                return Math::Min(aMax, bMax) - Math::Max(aMin, bMin) > TRIGGER_VOLUME_MERGE_EPSILON;
+            }
+
             uint NormalizeMergedVolumeCount(uint count) {
                 return count == 0 ? 1 : count;
             }
@@ -58,6 +62,31 @@ namespace TriggerVisualizer {
                     || CanMergeTriggerVolumesOnZ(a, b);
             }
 
+            bool CanConnectTriggerVolumesOnX(const TriggerVolume@ a, const TriggerVolume@ b) {
+                return IntervalsTouchOrOverlap(a.Min.x, a.Max.x, b.Min.x, b.Max.x)
+                    && IntervalsOverlapWithArea(a.Min.y, a.Max.y, b.Min.y, b.Max.y)
+                    && IntervalsOverlapWithArea(a.Min.z, a.Max.z, b.Min.z, b.Max.z);
+            }
+
+            bool CanConnectTriggerVolumesOnY(const TriggerVolume@ a, const TriggerVolume@ b) {
+                return IntervalsOverlapWithArea(a.Min.x, a.Max.x, b.Min.x, b.Max.x)
+                    && IntervalsTouchOrOverlap(a.Min.y, a.Max.y, b.Min.y, b.Max.y)
+                    && IntervalsOverlapWithArea(a.Min.z, a.Max.z, b.Min.z, b.Max.z);
+            }
+
+            bool CanConnectTriggerVolumesOnZ(const TriggerVolume@ a, const TriggerVolume@ b) {
+                return IntervalsOverlapWithArea(a.Min.x, a.Max.x, b.Min.x, b.Max.x)
+                    && IntervalsOverlapWithArea(a.Min.y, a.Max.y, b.Min.y, b.Max.y)
+                    && IntervalsTouchOrOverlap(a.Min.z, a.Max.z, b.Min.z, b.Max.z);
+            }
+
+            bool CanConnectTriggerVolumes(const TriggerVolume@ a, const TriggerVolume@ b) {
+                if (!TriggerVolumesHaveCompatibleMergeMetadata(a, b)) return false;
+                return CanConnectTriggerVolumesOnX(a, b)
+                    || CanConnectTriggerVolumesOnY(a, b)
+                    || CanConnectTriggerVolumesOnZ(a, b);
+            }
+
             TriggerVolume@ CloneTriggerVolumeForMerge(const TriggerVolume@ source) {
                 if (source is null) return TriggerVolume();
 
@@ -75,26 +104,34 @@ namespace TriggerVisualizer {
                 return copy;
             }
 
+            void ExpandTriggerVolumeBounds(TriggerVolume@ target, const TriggerVolume@ source) {
+                if (target is null || source is null) return;
+                target.Min = vec3(
+                    Math::Min(target.Min.x, source.Min.x),
+                    Math::Min(target.Min.y, source.Min.y),
+                    Math::Min(target.Min.z, source.Min.z)
+                );
+                target.Max = vec3(
+                    Math::Max(target.Max.x, source.Max.x),
+                    Math::Max(target.Max.y, source.Max.y),
+                    Math::Max(target.Max.z, source.Max.z)
+                );
+            }
+
             TriggerVolume@ MergeTriggerVolumePair(const TriggerVolume@ a, const TriggerVolume@ b) {
                 auto merged = CloneTriggerVolumeForMerge(a);
-                merged.Min = vec3(
-                    Math::Min(a.Min.x, b.Min.x),
-                    Math::Min(a.Min.y, b.Min.y),
-                    Math::Min(a.Min.z, b.Min.z)
-                );
-                merged.Max = vec3(
-                    Math::Max(a.Max.x, b.Max.x),
-                    Math::Max(a.Max.y, b.Max.y),
-                    Math::Max(a.Max.z, b.Max.z)
-                );
+                ExpandTriggerVolumeBounds(merged, b);
                 merged.IsMergedGroup = true;
                 merged.MergedVolumeCount = NormalizeMergedVolumeCount(a.MergedVolumeCount) + NormalizeMergedVolumeCount(b.MergedVolumeCount);
                 merged.AllowRawRangeLabel = false;
                 merged.HasIslandIndex = false;
+                if (merged.Source == TRIGGER_SOURCE_OFFZONE) {
+                    merged.Label = "";
+                }
                 return merged;
             }
 
-            array<TriggerVolume@> @MergeAdjacentTriggerVolumes(const array<TriggerVolume@> @volumes) {
+            array<TriggerVolume@> @MergeAlignedTriggerCuboids(const array<TriggerVolume@> @volumes) {
                 auto merged = array<TriggerVolume@>();
                 if (volumes is null) return merged;
 
@@ -120,6 +157,85 @@ namespace TriggerVisualizer {
                 }
 
                 return merged;
+            }
+
+            TriggerVolume@ BuildConnectedTriggerVolumeGroup(
+                const array<TriggerVolume@> @members,
+                uint groupIndex
+            ) {
+                if (members is null || members.Length == 0) return TriggerVolume();
+
+                auto group = CloneTriggerVolumeForMerge(members[0]);
+                group.IsMergedGroup = true;
+                group.AllowRawRangeLabel = false;
+                group.HasIslandIndex = false;
+                group.MergedVolumeCount = 0;
+                if (group.Source == TRIGGER_SOURCE_OFFZONE) {
+                    group.SourceIndex = groupIndex;
+                    group.Label = "";
+                }
+
+                for (uint i = 0; i < members.Length; i++) {
+                    if (members[i] is null) continue;
+                    ExpandTriggerVolumeBounds(group, members[i]);
+                    group.MergedVolumeCount += NormalizeMergedVolumeCount(members[i].MergedVolumeCount);
+                    group.ChildVolumes.InsertLast(CloneTriggerVolumeForMerge(members[i]));
+                }
+
+                if (group.MergedVolumeCount == 0) {
+                    group.MergedVolumeCount = uint(group.ChildVolumes.Length);
+                }
+
+                return group;
+            }
+
+            array<TriggerVolume@> @GroupConnectedTriggerVolumes(const array<TriggerVolume@> @volumes) {
+                auto grouped = array<TriggerVolume@>();
+                if (volumes is null) return grouped;
+
+                auto consumed = array<bool>(volumes.Length, false);
+                uint groupIndex = 0;
+
+                for (uint i = 0; i < volumes.Length; i++) {
+                    if (consumed[i] || volumes[i] is null) continue;
+
+                    auto memberIndices = array<uint>();
+                    auto pending = array<uint>();
+                    pending.InsertLast(i);
+                    consumed[i] = true;
+
+                    uint pendingIndex = 0;
+                    while (pendingIndex < pending.Length) {
+                        uint current = pending[pendingIndex++];
+                        memberIndices.InsertLast(current);
+
+                        for (uint j = 0; j < volumes.Length; j++) {
+                            if (consumed[j] || volumes[j] is null) continue;
+                            if (!CanConnectTriggerVolumes(volumes[current], volumes[j])) continue;
+
+                            consumed[j] = true;
+                            pending.InsertLast(j);
+                        }
+                    }
+
+                    if (memberIndices.Length <= 1) {
+                        grouped.InsertLast(CloneTriggerVolumeForMerge(volumes[i]));
+                        continue;
+                    }
+
+                    auto members = array<TriggerVolume@>();
+                    for (uint j = 0; j < memberIndices.Length; j++) {
+                        members.InsertLast(volumes[memberIndices[j]]);
+                    }
+                    grouped.InsertLast(BuildConnectedTriggerVolumeGroup(members, groupIndex++));
+                }
+
+                return grouped;
+            }
+
+            array<TriggerVolume@> @MergeAdjacentTriggerVolumes(const array<TriggerVolume@> @volumes) {
+                auto mergedCuboids = MergeAlignedTriggerCuboids(volumes);
+                return GroupConnectedTriggerVolumes(mergedCuboids);
             }
         }
     }

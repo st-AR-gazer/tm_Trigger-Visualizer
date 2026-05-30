@@ -71,7 +71,7 @@ namespace TriggerVisualizer {
                 if (primitiveClass == WORLD_PRIMITIVE_OUTSIDE) return 0;
                 bool isMixed = primitiveClass == WORLD_PRIMITIVE_MIXED;
 
-                int maxFrameTiles = Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
+                int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
                 if (int(items.Length) >= maxFrameTiles) return 0;
 
                 uint remainingFrameBudget = uint(maxFrameTiles - int(items.Length));
@@ -268,7 +268,7 @@ namespace TriggerVisualizer {
             }
 
             void DrawWorldFillTileIconBatch(array<WorldFillTileDrawItem@> @items, uint startIndex, uint endIndex) {
-                if (items is null || !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
+                if (items is null || !ShouldRenderWorldTileIconsNow()) return;
 
                 for (uint i = startIndex; i < endIndex && i < items.Length; i++) {
                     if (items[i] is null || items[i].Occluded || !items[i].AllowTileIcon) continue;
@@ -572,6 +572,19 @@ namespace TriggerVisualizer {
             }
 
             uint CountTriggerVolumeCameraFacingFaces(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (box !is null && box.HasChildVolumes()) {
+                    if (ShouldSimplifyGroupedTriggersNow()) {
+                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
+                        return CountTriggerVolumeCameraFacingFaces(simplifiedBox, cameraPos);
+                    }
+
+                    uint groupCount = 0;
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        groupCount += CountTriggerVolumeCameraFacingFaces(box.ChildVolumes[i], cameraPos);
+                    }
+                    return groupCount;
+                }
+
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
@@ -611,6 +624,19 @@ namespace TriggerVisualizer {
             }
 
             uint CountTriggerVolumeFillTiles(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                if (box !is null && box.HasChildVolumes()) {
+                    if (ShouldSimplifyGroupedTriggersNow()) {
+                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
+                        return CountTriggerVolumeFillTiles(simplifiedBox, cameraPos);
+                    }
+
+                    uint groupCount = 0;
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        groupCount += CountTriggerVolumeFillTiles(box.ChildVolumes[i], cameraPos);
+                    }
+                    return groupCount;
+                }
+
                 if (ShouldRenderTriggerVolumeSimpleFill(box)) return CountTriggerVolumeCameraFacingFaces(
                     box,
                     cameraPos
@@ -637,7 +663,7 @@ namespace TriggerVisualizer {
                 if (boxes is null) return 0;
 
                 uint count = 0;
-                uint maxFrameTiles = uint(Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1));
+                uint maxFrameTiles = uint(Math::Max(GetEffectiveMaxFillTilesPerFrame(), 0));
                 for (uint i = 0; i < boxes.Length; i++) {
                     if (count >= maxFrameTiles) return count;
                     if (!IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, proximityState)) continue;
