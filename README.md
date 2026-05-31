@@ -3,15 +3,15 @@
 
 # Trigger Visualizer
 
-Displays map trigger volumes in normal gameplay. The current implemented source
-is Trackmania offzones, with the code structured so more trigger sources can be
-added later.
+Displays map trigger volumes without having to select the specific tool in editor 
+(i.e offzone, or a specific layer in the mediatracker), as well as in the normal 
+game mode.
 
 ## Layout
 
 Core code lives in `src/trigger/`.
 
-- `data/sources/offzone.as` reads offzone trigger data from the map.
+- `data/sources/*` reads trigger data from the map.
 - `render/` projects trigger volumes, outlines, fills, labels, and tile icons.
 - `ui/` contains settings and the developer diagnostics panel.
 
@@ -20,8 +20,8 @@ Core code lives in `src/trigger/`.
 Map comments can include Trigger Visualizer commands:
 
 ```text
-/trigger-visualizer suggest-off
-/trigger-visualizer force-off
+/trigger-visualizer <trigger-type>,<> suggest-off
+/trigger-visualizer <trigger-type>,<> force-off
 /trigger-visualizer <trigger-type>[,<trigger-type>...] suggest-off
 /trigger-visualizer <trigger-type>[,<trigger-type>...] force-off
 /trigger-visualizer suggest-draw-distance-xz <units>
