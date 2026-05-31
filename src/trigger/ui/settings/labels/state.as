@@ -5,7 +5,7 @@
             bool S_ShowLabels = true;
 
             [Setting hidden name="Trigger: Label show index"]
-            bool S_LabelShowIndex = true;
+            bool S_LabelShowIndex = false;
 
             [Setting hidden name="Trigger: Label show raw range"]
             bool S_LabelShowRawRange = false;
@@ -14,13 +14,13 @@
             bool S_LabelShowWorldSize = false;
 
             [Setting hidden name="Trigger: Label show island index"]
-            bool S_LabelShowIslandIndex = true;
+            bool S_LabelShowIslandIndex = false;
 
             [Setting hidden name="Trigger: Label show source prefix"]
-            bool S_LabelShowSourcePrefix = true;
+            bool S_LabelShowSourcePrefix = false;
 
             [Setting hidden name="Trigger: Label use detected trigger name"]
-            bool S_LabelUseDetectedTriggerName = false;
+            bool S_LabelUseDetectedTriggerName = true;
 
             [Setting hidden name="Trigger: Label show detected trigger name"]
             bool S_LabelShowDetectedTriggerName = false;

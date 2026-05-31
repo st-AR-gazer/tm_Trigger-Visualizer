@@ -49,6 +49,11 @@ namespace TriggerVisualizer {
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Detected Label", trigger.DetectedLabel.Length > 0 ? trigger.DetectedLabel : "<none>"));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Subtype", trigger.SubtypeLabel.Length > 0 ? trigger.SubtypeLabel + " (" + trigger.SubtypeKey + ")" : "<none>"));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Targets", trigger.TargetKeys.Length > 0 ? trigger.TargetKeys : "<none>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Track Color", trigger.HasMediaTrackerTrackColor ? trigger.MediaTrackerTrackColor.ToString() : "<none>"));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Ghost Color Override", OnOff(TriggerVisualizer::Trigger::TriggerTargetListContains(trigger.TargetKeys, TriggerVisualizer::Trigger::MT_SUBTYPE_GHOST))));
+                        if (trigger.EntityInfo.Length > 0) {
+                            UI::TextWrapped("Entity: " + trigger.EntityInfo);
+                        }
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Trigger Ptr", PointerLabel(trigger.TriggerStructPtr)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Buffer", PointerLabel(trigger.CoordBufferPtr)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Coord Count", tostring(trigger.RawCoordCount)));
@@ -90,6 +95,7 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("In Editor", OnOff(ctx.IsInEditor)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Map Editor", OnOff(ctx.IsMapEditor)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Editor Test Mode", OnOff(ctx.IsEditorTestMode)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Has MediaTracker Editor", OnOff(ctx.HasMediaTrackerEditor)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Editor MediaTracker", OnOff(ctx.IsEditorMediaTracker)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Replay Editor", OnOff(ctx.IsReplayEditor)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Playable Map", OnOff(ctx.IsPlayableMap)));
@@ -113,10 +119,10 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Effective", OnOff(UI::IsMediaTrackerSourceEnabledForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Use Map Distance", OnOff(UI::UseMapSuggestedDrawDistanceForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Respect Suggest Off", OnOff(UI::S_RespectMapSuggestOff)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Color Mode", UI::GetColorModeLabel(UI::S_ColorMode)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Color Source", UI::GetColorSourceLabel(UI::S_ColorSource)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Base Color", UI::S_BaseTriggerColor.ToString()));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Distance Color", UI::S_DistanceFadeColor.ToString()));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Split Color", UI::S_DenseLineSplitColor.ToString()));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Distance Tint", OnOff(UI::S_EnableDistanceFadeColor) + " " + UI::S_DistanceFadeColor.ToString()));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Split Tint", OnOff(UI::S_EnableLineSplitDensityColor) + " " + UI::S_DenseLineSplitColor.ToString()));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Segment Colors", OnOff(UI::S_RandomOutlineSegmentColors)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Tile Colors", OnOff(UI::S_RandomFillTileColors)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Skull Tile Icons", OnOff(UI::S_ShowSkullTileIcons)));
@@ -128,6 +134,8 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tile Budget", tostring(UI::S_MaxFillTilesPerFrame)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Patch Budget", tostring(UI::S_MaxTileIconPatchesPerFrame)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Max Subdivisions", tostring(UI::S_TileIconMaxSubdivisions)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Editor Refresh", tostring(UI::S_OffzoneEditorRefreshIntervalMs) + " ms"));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MT Editor Refresh", tostring(UI::S_MediaTrackerEditorRefreshIntervalMs) + " ms"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Driving Mode", OnOff(UI::S_FastDrivingPerformanceMode)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Speed Threshold", Text::Format("%.1f km/h", UI::S_FastDrivingSpeedThresholdKmh)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Visible Budget", tostring(UI::S_FastDrivingMaxVisibleVolumes)));
@@ -315,6 +323,10 @@ namespace TriggerVisualizer {
                             }
                             if (box.TargetKeys.Length > 0) {
                                 UI::Text("    targets " + box.TargetKeys);
+                            }
+                            if (box.Source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER) {
+                                UI::Text("    track color " + (box.HasMediaTrackerTrackColor ? box.MediaTrackerTrackColor.ToString() : "<none>"));
+                                UI::Text("    ghost override " + OnOff(TriggerVisualizer::Trigger::TriggerVolumeMatchesTargetKey(box, TriggerVisualizer::Trigger::MT_SUBTYPE_GHOST)));
                             }
                         }
                         UI::TreePop();

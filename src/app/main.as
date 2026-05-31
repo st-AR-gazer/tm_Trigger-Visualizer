@@ -16,7 +16,9 @@ namespace TriggerVisualizer {
         }
 
         bool ShouldRenderWithUiVisibility() {
-            if (S_HideWithGame && !UI::IsGameUIVisible()) return false;
+            auto ctx = TriggerVisualizer::Trigger::GetCurrentRuntimeContext();
+            bool isEditorContext = ctx !is null && ctx.IsInEditor;
+            if (S_HideWithGame && !isEditorContext && !UI::IsGameUIVisible()) return false;
             if (S_HideWithOP && !UI::IsOverlayShown()) return false;
             return true;
         }

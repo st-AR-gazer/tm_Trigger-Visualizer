@@ -136,11 +136,7 @@ namespace TriggerVisualizer {
                 vec3 s1 = Camera::ToScreen(p1);
                 bool screenFront = s0.z < 0 && s1.z < 0;
                 if (screenFront) {
-                    return IsProjectedLinePotentiallyVisible(
-                        s0,
-                        s1,
-                        SCREEN_QUAD_VISIBILITY_MARGIN
-                    ) ? WORLD_PRIMITIVE_FRONT : WORLD_PRIMITIVE_OUTSIDE;
+                    return IsProjectedLinePotentiallyVisible(s0, s1, SCREEN_QUAD_VISIBILITY_MARGIN) ? WORLD_PRIMITIVE_FRONT : WORLD_PRIMITIVE_OUTSIDE;
                 }
                 bool anyScreenFront = s0.z < 0 || s1.z < 0;
                 if (!G_WorldFrustumState.Valid) {

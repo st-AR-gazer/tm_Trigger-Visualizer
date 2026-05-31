@@ -76,7 +76,10 @@ namespace TriggerVisualizer {
 
                 if (visibleVolumes.Length == 0) return;
                 SortVisibleTriggerVolumesBackToFront(visibleVolumes, visibleFades, visibleIndices, cameraPos);
-                int fastMaxVisibleVolumes = Math::Max(TriggerVisualizer::Trigger::UI::S_FastDrivingMaxVisibleVolumes, 1);
+                int fastMaxVisibleVolumes = Math::Max(
+                    TriggerVisualizer::Trigger::UI::S_FastDrivingMaxVisibleVolumes,
+                    1
+                );
                 if (IsFastDrivingPerformanceModeActive() && int(visibleVolumes.Length) > fastMaxVisibleVolumes) {
                     auto trimmedVolumes = array<TriggerVolume@>();
                     auto trimmedFades = array<float>();
@@ -127,21 +130,10 @@ namespace TriggerVisualizer {
                     if (ShouldRenderWorldLabelsNow()) {
                         TriggerRangeRaw@ rawRange = null;
                         auto volume = visibleVolumes[i];
-                        if (
-                            volume !is null
-                            && volume.Source == TRIGGER_SOURCE_OFFZONE
-                            && volume.AllowRawRangeLabel
-                            && volume.SourceIndex < snapshot.RawRanges.Length
-                        ) {
+                        if (volume !is null && volume.Source == TRIGGER_SOURCE_OFFZONE && volume.AllowRawRangeLabel && volume.SourceIndex < snapshot.RawRanges.Length) {
                             @rawRange = snapshot.RawRanges[volume.SourceIndex];
                         }
-                        DrawTriggerVolumeLabel(
-                            volume,
-                            rawRange,
-                            visibleIndices[i],
-                            cameraPos,
-                            visibleFades[i]
-                        );
+                        DrawTriggerVolumeLabel(volume, rawRange, visibleIndices[i], cameraPos, visibleFades[i]);
                     }
                 }
             }

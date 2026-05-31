@@ -7,14 +7,17 @@ namespace TriggerVisualizer {
         string g_CachedMapSnapshotFilterKey = "";
         bool g_CachedMapSnapshotOffzoneEnabled = false;
         bool g_CachedMapSnapshotMediaTrackerEnabled = false;
+        uint g_CachedMapSnapshotRefreshTime = 0;
         TriggerSourceSnapshot@ g_CachedOffzoneSource = null;
         CGameCtnChallenge@ g_CachedOffzoneRootMap = null;
+        uint g_CachedOffzoneSourceRefreshTime = 0;
         TriggerSourceSnapshot@ g_CachedMediaTrackerSource = null;
         CGameCtnChallenge@ g_CachedMediaTrackerRootMap = null;
         string g_CachedMediaTrackerContextKey = "";
         bool g_CachedMediaTrackerCellRendering = false;
         string g_CachedMediaTrackerGroupName = "";
         uint64 g_CachedMediaTrackerGroupBufferPtr = 0;
+        uint g_CachedMediaTrackerSourceRefreshTime = 0;
 
         const bool MEDIATRACKER_RENDER_CELLS = true;
 
@@ -64,11 +67,50 @@ namespace TriggerVisualizer {
             return key + "|unknown";
         }
 
+        uint GetMediaTrackerEditorRefreshIntervalMs() {
+            return uint(Math::Clamp(TriggerVisualizer::Trigger::UI::S_MediaTrackerEditorRefreshIntervalMs, 100, 5000));
+        }
+
+        uint GetOffzoneEditorRefreshIntervalMs() {
+            return uint(Math::Clamp(TriggerVisualizer::Trigger::UI::S_OffzoneEditorRefreshIntervalMs, 100, 5000));
+        }
+
+        bool UsesPeriodicOffzoneEditorRefresh(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            bool offzoneEnabled
+        ) {
+            return offzoneEnabled && ctx !is null && ctx.IsMapEditor;
+        }
+
+        bool UsesPeriodicMediaTrackerEditorRefresh(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            bool mediaTrackerEnabled
+        ) {
+            return mediaTrackerEnabled && ctx !is null && ctx.IsEditorMediaTracker;
+        }
+
+        bool IsOffzoneEditorRefreshDue(uint lastRefreshTime) {
+            if (lastRefreshTime == 0) return true;
+            return Time::Now - lastRefreshTime >= GetOffzoneEditorRefreshIntervalMs();
+        }
+
+        bool IsMediaTrackerEditorRefreshDue(uint lastRefreshTime) {
+            if (lastRefreshTime == 0) return true;
+            return Time::Now - lastRefreshTime >= GetMediaTrackerEditorRefreshIntervalMs();
+        }
+
         bool CanReuseMapSnapshot(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
             if (g_MapSnapshot is null || ctx is null) return false;
 
             bool offzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             bool mediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
+            if (UsesPeriodicOffzoneEditorRefresh(ctx, offzoneEnabled) && IsOffzoneEditorRefreshDue(g_CachedOffzoneSourceRefreshTime)) {
+                return false;
+            }
+            if (UsesPeriodicMediaTrackerEditorRefresh(ctx, mediaTrackerEnabled) && IsMediaTrackerEditorRefreshDue(g_CachedMediaTrackerSourceRefreshTime)) {
+                return false;
+            }
+
             return ctx.RootMap is g_CachedMapSnapshotRootMap
                 && g_CachedMapSnapshotContextKey == GetMapSnapshotContextKey(ctx)
                 && g_CachedMapSnapshotFilterKey == TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey()
@@ -83,6 +125,7 @@ namespace TriggerVisualizer {
                 g_CachedMapSnapshotFilterKey = "";
                 g_CachedMapSnapshotOffzoneEnabled = false;
                 g_CachedMapSnapshotMediaTrackerEnabled = false;
+                g_CachedMapSnapshotRefreshTime = 0;
                 return;
             }
 
@@ -91,6 +134,7 @@ namespace TriggerVisualizer {
             g_CachedMapSnapshotFilterKey = TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey();
             g_CachedMapSnapshotOffzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             g_CachedMapSnapshotMediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
+            g_CachedMapSnapshotRefreshTime = Time::Now;
         }
 
         MapSnapshot@ BuildMapSnapshot(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -178,12 +222,16 @@ namespace TriggerVisualizer {
                 return TriggerVisualizer::Trigger::Data::Sources::ReadOffzoneTriggerSource(null, enabled);
             }
 
-            if (g_CachedOffzoneSource is null || ctx.RootMap !is g_CachedOffzoneRootMap) {
+            bool forceRefresh = UsesPeriodicOffzoneEditorRefresh(ctx, enabled)
+                && IsOffzoneEditorRefreshDue(g_CachedOffzoneSourceRefreshTime);
+
+            if (forceRefresh || g_CachedOffzoneSource is null || ctx.RootMap !is g_CachedOffzoneRootMap) {
                 @g_CachedOffzoneSource = TriggerVisualizer::Trigger::Data::Sources::ReadOffzoneTriggerSource(
                     ctx.RootMap,
                     true
                 );
                 @g_CachedOffzoneRootMap = ctx.RootMap;
+                g_CachedOffzoneSourceRefreshTime = Time::Now;
             }
 
             g_CachedOffzoneSource.Enabled = enabled;
@@ -209,16 +257,19 @@ namespace TriggerVisualizer {
                 );
             }
 
-            if (g_CachedMediaTrackerSource !is null && ctx !is null && ctx.RootMap is g_CachedMediaTrackerRootMap && g_CachedMediaTrackerContextKey == contextKey && g_CachedMediaTrackerCellRendering == MEDIATRACKER_RENDER_CELLS) {
-                g_CachedMediaTrackerSource.Enabled = true;
-                return g_CachedMediaTrackerSource;
-            }
-
             string groupName = "";
             CGameCtnMediaClipGroup@ clipGroup = null;
             uint64 groupBufferPtr = 0;
             @clipGroup = GetRuntimeMediaTrackerClipGroup(ctx, groupName);
             groupBufferPtr = TriggerVisualizer::Trigger::Data::Sources::ReadMediaTrackerClipGroupTriggerBufferPtr(clipGroup);
+
+            bool forceRefresh = UsesPeriodicMediaTrackerEditorRefresh(ctx, enabled)
+                && IsMediaTrackerEditorRefreshDue(g_CachedMediaTrackerSourceRefreshTime);
+
+            if (!forceRefresh && g_CachedMediaTrackerSource !is null && ctx !is null && ctx.RootMap is g_CachedMediaTrackerRootMap && g_CachedMediaTrackerContextKey == contextKey && g_CachedMediaTrackerCellRendering == MEDIATRACKER_RENDER_CELLS && g_CachedMediaTrackerGroupName == groupName && g_CachedMediaTrackerGroupBufferPtr == groupBufferPtr) {
+                g_CachedMediaTrackerSource.Enabled = true;
+                return g_CachedMediaTrackerSource;
+            }
 
             auto source = TriggerVisualizer::Trigger::Data::Sources::ReadMediaTrackerTriggerSource(
                 ctx.RootMap,
@@ -233,6 +284,7 @@ namespace TriggerVisualizer {
             g_CachedMediaTrackerCellRendering = MEDIATRACKER_RENDER_CELLS;
             g_CachedMediaTrackerGroupName = groupName;
             g_CachedMediaTrackerGroupBufferPtr = groupBufferPtr;
+            g_CachedMediaTrackerSourceRefreshTime = Time::Now;
 
             return source;
         }
@@ -244,12 +296,12 @@ namespace TriggerVisualizer {
             groupName = "InGame";
             if (ctx is null || ctx.RootMap is null) return null;
 
-            if (ctx.IsEditorMediaTracker && ctx.App !is null) {
+            if (ctx.HasMediaTrackerEditor && ctx.App !is null) {
                 auto mediaTrackerEditor = cast<CGameEditorMediaTracker>(ctx.App.Editor);
                 if (mediaTrackerEditor !is null) {
                     auto pluginApi = cast<CGameEditorMediaTrackerPluginAPI>(mediaTrackerEditor.PluginAPI);
                     if (pluginApi !is null && pluginApi.ClipGroup !is null) {
-                        groupName = "EditorActive";
+                        groupName = ctx.IsEditorMediaTracker ? "EditorActive" : "ReplayEditorActive";
                         return pluginApi.ClipGroup;
                     }
                 }

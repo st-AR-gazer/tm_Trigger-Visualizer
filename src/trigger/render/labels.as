@@ -39,7 +39,7 @@ namespace TriggerVisualizer {
                     parts.InsertLast("#" + index);
                 }
 
-                if (box !is null && (box.Source == TRIGGER_SOURCE_MEDIATRACKER || box.IsMergedGroup)) {
+                if (box !is null && (box.Source == TRIGGER_SOURCE_MEDIATRACKER || box.IsMergedGroup || TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix)) {
                     parts.InsertLast(box.DisplayLabelWithOptions(TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix, TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex, TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName, TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName));
                 }
 

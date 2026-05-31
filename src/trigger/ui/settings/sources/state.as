@@ -23,7 +23,7 @@
             bool S_ShowOffzoneInReplayEditor = true;
 
             [Setting hidden name="Trigger: Show MediaTracker source"]
-            bool S_ShowMediaTrackerSource = false;
+            bool S_ShowMediaTrackerSource = true;
 
             [Setting hidden name="Trigger: Show MediaTracker in playable map"]
             bool S_ShowMediaTrackerInPlayableMap = true;
@@ -67,13 +67,22 @@
             [Setting hidden name="Trigger: Show MediaTracker Cam3 subtype"]
             bool S_ShowMediaTrackerSubtypeCam3 = true;
 
+            [Setting hidden name="Trigger: Show MediaTracker CamHelico subtype"]
+            bool S_ShowMediaTrackerSubtypeCamHelico = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker CamFree subtype"]
+            bool S_ShowMediaTrackerSubtypeCamFree = true;
+
+            [Setting hidden name="Trigger: Show MediaTracker CamSpectator subtype"]
+            bool S_ShowMediaTrackerSubtypeCamSpectator = true;
+
             [Setting hidden name="Trigger: Show MediaTracker 2D triangles subtype"]
             bool S_ShowMediaTrackerSubtype2DTriangles = true;
 
             [Setting hidden name="Trigger: Show MediaTracker 3D triangles subtype"]
             bool S_ShowMediaTrackerSubtype3DTriangles = true;
 
-            [Setting hidden name="Trigger: Show MediaTracker car trail subtype"]
+            [Setting hidden name="Trigger: Show MediaTracker car trails subtype"]
             bool S_ShowMediaTrackerSubtypeCarTrail = true;
 
             [Setting hidden name="Trigger: Show MediaTracker colors FX subtype"]
@@ -99,9 +108,6 @@
 
             [Setting hidden name="Trigger: Show MediaTracker ghost subtype"]
             bool S_ShowMediaTrackerSubtypeGhost = true;
-
-            [Setting hidden name="Trigger: Show MediaTracker ambiance subtype"]
-            bool S_ShowMediaTrackerSubtypeAmbiance = true;
 
             [Setting hidden name="Trigger: Show MediaTracker HDR bloom subtype"]
             bool S_ShowMediaTrackerSubtypeHdrBloom = true;

@@ -64,7 +64,10 @@ namespace TriggerVisualizer {
                     int64 deltaMs = now - G_PreviousVehiclePositionTime;
                     if (deltaMs > 0 && deltaMs < 2000) {
                         float deltaSeconds = float(deltaMs) / 1000.0f;
-                        G_LastVehicleSpeedKmh = Math::Distance(vehicleState.Position, G_PreviousVehiclePosition) / deltaSeconds * 3.6f;
+                        G_LastVehicleSpeedKmh = Math::Distance(
+                            vehicleState.Position,
+                            G_PreviousVehiclePosition
+                        ) / deltaSeconds * 3.6f;
                     }
                 }
 

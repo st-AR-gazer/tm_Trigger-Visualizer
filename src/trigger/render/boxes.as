@@ -99,12 +99,10 @@ namespace TriggerVisualizer {
                 int maxFillTiles = GetEffectiveMaxFillTilesPerFrame();
                 int maxOutlineSegments = GetEffectiveMaxOutlineSegmentsPerFrame();
                 G_TileIconPatchBudgetRemaining = uint(GetEffectiveMaxTileIconPatchesPerFrame());
-                G_FillTileTraversalBudgetRemaining = maxFillTiles <= 0
-                    ? 0
-                    : uint(Math::Clamp(maxFillTiles * 4, 256, int(FILL_TILE_TRAVERSAL_BUDGET_HARD_MAX)));
-                G_WorldLineSegmentBudgetRemaining = maxOutlineSegments <= 0
-                    ? 0
-                    : uint(Math::Clamp(maxOutlineSegments, 32, int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX)));
+                G_FillTileTraversalBudgetRemaining = maxFillTiles <= 0 ?
+                0 : uint(Math::Clamp(maxFillTiles * 4, 256, int(FILL_TILE_TRAVERSAL_BUDGET_HARD_MAX)));
+                G_WorldLineSegmentBudgetRemaining = maxOutlineSegments <= 0 ?
+                0 : uint(Math::Clamp(maxOutlineSegments, 32, int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX)));
                 UpdateWorldFrustumState();
             }
 
@@ -201,12 +199,7 @@ namespace TriggerVisualizer {
 
                 WorldOutlineEdgeDrawItem() { }
 
-                WorldOutlineEdgeDrawItem(
-                    const vec3 &in start,
-                    const vec3 &in end,
-                    uint boxIndex,
-                    uint edgeIndex
-                ) {
+                WorldOutlineEdgeDrawItem(const vec3 &in start, const vec3 &in end, uint boxIndex, uint edgeIndex) {
                     Start = start;
                     End = end;
                     BoxIndex = boxIndex;
@@ -270,6 +263,54 @@ namespace TriggerVisualizer {
                 return Math::Lerp(from, to, factor);
             }
 
+            float Wrap01(float value) {
+                value = value - Math::Floor(value);
+                if (value < 0.0f) value += 1.0f;
+                return value;
+            }
+
+            vec3 RgbToHsv(const vec4 &in color) {
+                float maxValue = Math::Max(color.x, Math::Max(color.y, color.z));
+                float minValue = Math::Min(color.x, Math::Min(color.y, color.z));
+                float delta = maxValue - minValue;
+                float hue = 0.0f;
+
+                if (delta > 0.00001f) {
+                    if (maxValue == color.x) {
+                        hue = (color.y - color.z) / delta;
+                        if (hue < 0.0f) hue += 6.0f;
+                    } else if (maxValue == color.y) {
+                        hue = ((color.z - color.x) / delta) + 2.0f;
+                    } else {
+                        hue = ((color.x - color.y) / delta) + 4.0f;
+                    }
+                    hue /= 6.0f;
+                }
+
+                float saturation = maxValue <= 0.00001f ? 0.0f : delta / maxValue;
+                return vec3(hue, saturation, maxValue);
+            }
+
+            vec4 HsvToRgb(float hue, float saturation, float value, float alpha) {
+                hue = Wrap01(hue);
+                saturation = Math::Clamp(saturation, 0.0f, 1.0f);
+                value = Math::Clamp(value, 0.0f, 1.0f);
+
+                float r = Math::Clamp(Math::Abs(hue * 6.0f - 3.0f) - 1.0f, 0.0f, 1.0f);
+                float g = Math::Clamp(2.0f - Math::Abs(hue * 6.0f - 2.0f), 0.0f, 1.0f);
+                float b = Math::Clamp(2.0f - Math::Abs(hue * 6.0f - 4.0f), 0.0f, 1.0f);
+
+                r = (1.0f + (r - 1.0f) * saturation) * value;
+                g = (1.0f + (g - 1.0f) * saturation) * value;
+                b = (1.0f + (b - 1.0f) * saturation) * value;
+                return vec4(r, g, b, alpha);
+            }
+
+            vec4 ShiftColorHue(const vec4 &in color, float hueShift) {
+                vec3 hsv = RgbToHsv(color);
+                return HsvToRgb(hsv.x + hueShift, hsv.y, hsv.z, color.w);
+            }
+
             float StableRandom01(float seed) {
                 float value = Math::Sin(seed * 12.9898f + 78.233f) * 43758.5453f;
                 return value - Math::Floor(value);
@@ -280,14 +321,7 @@ namespace TriggerVisualizer {
                 float s = 0.65f + StableRandom01(seed + 17.0f) * 0.25f;
                 float v = 0.85f + StableRandom01(seed + 31.0f) * 0.15f;
 
-                float r = Math::Clamp(Math::Abs(h * 6.0f - 3.0f) - 1.0f, 0.0f, 1.0f);
-                float g = Math::Clamp(2.0f - Math::Abs(h * 6.0f - 2.0f), 0.0f, 1.0f);
-                float b = Math::Clamp(2.0f - Math::Abs(h * 6.0f - 4.0f), 0.0f, 1.0f);
-
-                r = (1.0f + (r - 1.0f) * s) * v;
-                g = (1.0f + (g - 1.0f) * s) * v;
-                b = (1.0f + (b - 1.0f) * s) * v;
-                return vec4(r, g, b, alpha);
+                return HsvToRgb(h, s, v, alpha);
             }
 
             float GetOutlineSegmentColorSeed(uint boxIndex, uint edgeIndex, uint segmentIndex) {
@@ -331,16 +365,21 @@ namespace TriggerVisualizer {
             }
 
             vec4 GetColorModeColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
-                int colorMode = TriggerVisualizer::Trigger::UI::S_ColorMode;
                 vec4 color = TriggerVisualizer::Trigger::UI::S_BaseTriggerColor;
 
-                if (colorMode == TriggerVisualizer::Trigger::UI::COLOR_MODE_DISTANCE_FADE) {
+                if (TriggerVisualizer::Trigger::UI::S_ColorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
+                    color = box.MediaTrackerTrackColor;
+                }
+
+                if (TriggerVisualizer::Trigger::UI::S_EnableDistanceFadeColor) {
                     color = LerpColor(
                         color,
                         TriggerVisualizer::Trigger::UI::S_DistanceFadeColor,
                         1.0f - Math::Clamp(fade, 0.0f, 1.0f)
                     );
-                } else if (colorMode == TriggerVisualizer::Trigger::UI::COLOR_MODE_LINE_SPLIT_DENSITY) {
+                }
+
+                if (TriggerVisualizer::Trigger::UI::S_EnableLineSplitDensityColor) {
                     color = LerpColor(
                         color,
                         TriggerVisualizer::Trigger::UI::S_DenseLineSplitColor,
@@ -353,6 +392,9 @@ namespace TriggerVisualizer {
 
             vec4 GetOutlineColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = GetColorModeColor(box, cameraPos, fade);
+                if (TriggerVisualizer::Trigger::UI::S_ColorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS) {
+                    color = ShiftColorHue(color, TriggerVisualizer::Trigger::UI::S_MediaTrackerTrackOutlineHueShift);
+                }
                 color.w *= TriggerVisualizer::Trigger::UI::S_OutlineAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return color;
             }
@@ -549,7 +591,7 @@ namespace TriggerVisualizer {
 
             bool ShouldRenderTriggerVolumeFillTiles(const TriggerVolume@ box) {
                 if (box is null) return false;
-                return (!IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting)
+                return(!IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting)
                     || ShouldRenderWorldTileIconsNow()
                     || TriggerVisualizer::Trigger::UI::S_RandomFillTileColors;
             }
@@ -628,7 +670,11 @@ namespace TriggerVisualizer {
                 if (corners.Length != 8) return;
 
                 for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
-                    AddGeometryKeyCount(keys, counts, GetTriggerVolumeFaceGeometryKey(corners, TRIGGER_VOLUME_FACE_INDICES[i]));
+                    AddGeometryKeyCount(
+                        keys,
+                        counts,
+                        GetTriggerVolumeFaceGeometryKey(corners, TRIGGER_VOLUME_FACE_INDICES[i])
+                    );
                 }
             }
 
@@ -730,13 +776,7 @@ namespace TriggerVisualizer {
                 if (box !is null && box.HasChildVolumes()) {
                     if (ShouldSimplifyGroupedTriggersNow()) {
                         auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        CollectTriggerVolumeFillDrawItems(
-                            simplifiedBox,
-                            cameraPos,
-                            color,
-                            boxIndex,
-                            items
-                        );
+                        CollectTriggerVolumeFillDrawItems(simplifiedBox, cameraPos, color, boxIndex, items);
                         return;
                     }
 
@@ -849,13 +889,7 @@ namespace TriggerVisualizer {
                 if (box !is null && box.HasChildVolumes()) {
                     if (ShouldSimplifyGroupedTriggersNow()) {
                         auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        DrawTriggerVolumeOutline(
-                            simplifiedBox,
-                            cameraPos,
-                            color,
-                            strokeWidth,
-                            boxIndex
-                        );
+                        DrawTriggerVolumeOutline(simplifiedBox, cameraPos, color, strokeWidth, boxIndex);
                         return;
                     }
 

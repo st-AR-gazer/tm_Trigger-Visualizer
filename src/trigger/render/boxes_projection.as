@@ -42,11 +42,7 @@ namespace TriggerVisualizer {
                 return true;
             }
 
-            bool IsProjectedLinePotentiallyVisible(
-                const vec3 &in s0,
-                const vec3 &in s1,
-                float margin
-            ) {
+            bool IsProjectedLinePotentiallyVisible(const vec3 &in s0, const vec3 &in s1, float margin) {
                 if (s0.z >= 0 || s1.z >= 0) return false;
                 if (!TriggerVisualizer::Trigger::UI::S_CullOffscreenWorldTiles) return true;
 

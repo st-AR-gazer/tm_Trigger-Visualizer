@@ -95,6 +95,8 @@ namespace TriggerVisualizer {
                 copy.SubtypeKey = source.SubtypeKey;
                 copy.SubtypeLabel = source.SubtypeLabel;
                 copy.TargetKeys = source.TargetKeys;
+                copy.HasMediaTrackerTrackColor = source.HasMediaTrackerTrackColor;
+                copy.MediaTrackerTrackColor = source.MediaTrackerTrackColor;
                 copy.HasIslandIndex = source.HasIslandIndex;
                 copy.IslandIndex = source.IslandIndex;
                 copy.IslandCount = source.IslandCount;
@@ -159,10 +161,7 @@ namespace TriggerVisualizer {
                 return merged;
             }
 
-            TriggerVolume@ BuildConnectedTriggerVolumeGroup(
-                const array<TriggerVolume@> @members,
-                uint groupIndex
-            ) {
+            TriggerVolume@ BuildConnectedTriggerVolumeGroup(const array<TriggerVolume@> @members, uint groupIndex) {
                 if (members is null || members.Length == 0) return TriggerVolume();
 
                 auto group = CloneTriggerVolumeForMerge(members[0]);

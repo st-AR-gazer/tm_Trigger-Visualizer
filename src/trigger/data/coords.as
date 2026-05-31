@@ -167,13 +167,17 @@ namespace TriggerVisualizer {
                 if (range is null || spec is null) return TriggerVolume();
                 vec3 min = TriggerCoordToWorldPos(range.Start, spec);
                 vec3 max = TriggerCoordToWorldPos(range.End + int3(1, 1, 1), spec);
-                return TriggerVolume(
+                auto volume = TriggerVolume(
                     min,
                     max,
                     source,
                     sourceIndex,
                     GetTriggerSourceName(source) + " #" + tostring(sourceIndex)
                 );
+                if (source == TRIGGER_SOURCE_OFFZONE) {
+                    volume.DetectedLabel = GetTriggerSourceName(source);
+                }
+                return volume;
             }
 
             array<TriggerVolume@> @TriggerRangesToTriggerVolumes(

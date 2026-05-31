@@ -56,14 +56,12 @@
                 S_MaxOutlineSegmentsPerFrame = Math::Clamp(S_MaxOutlineSegmentsPerFrame, 64, 65536);
                 S_MaxTileIconPatchesPerFrame = Math::Clamp(S_MaxTileIconPatchesPerFrame, 0, 65536);
                 S_TileIconMaxSubdivisions = Math::Clamp(S_TileIconMaxSubdivisions, 1, 12);
+                S_MediaTrackerEditorRefreshIntervalMs = Math::Clamp(S_MediaTrackerEditorRefreshIntervalMs, 100, 5000);
+                S_OffzoneEditorRefreshIntervalMs = Math::Clamp(S_OffzoneEditorRefreshIntervalMs, 100, 5000);
                 S_FastDrivingSpeedThresholdKmh = Math::Clamp(S_FastDrivingSpeedThresholdKmh, 0.0f, 1000.0f);
                 S_FastDrivingMaxVisibleVolumes = Math::Clamp(S_FastDrivingMaxVisibleVolumes, 1, 512);
                 S_FastDrivingMaxFillTilesPerFrame = Math::Clamp(S_FastDrivingMaxFillTilesPerFrame, 0, 8192);
-                S_FastDrivingMaxOutlineSegmentsPerFrame = Math::Clamp(
-                    S_FastDrivingMaxOutlineSegmentsPerFrame,
-                    0,
-                    8192
-                );
+                S_FastDrivingMaxOutlineSegmentsPerFrame = Math::Clamp(S_FastDrivingMaxOutlineSegmentsPerFrame, 0, 8192);
             }
 
             vec4 ClampColor(const vec4 &in color) {
@@ -76,10 +74,30 @@
             }
 
             void ClampColorSettings() {
-                S_ColorMode = Math::Clamp(S_ColorMode, COLOR_MODE_STATIC, COLOR_MODE_LINE_SPLIT_DENSITY);
+                S_ColorMode = Math::Clamp(S_ColorMode, COLOR_MODE_STATIC, COLOR_MODE_MEDIATRACKER_TRACK_COLORS);
+                if (!S_ColorModeMigrated) {
+                    if (S_ColorMode == COLOR_MODE_MEDIATRACKER_TRACK_COLORS) {
+                        S_ColorSource = COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS;
+                    } else if (S_ColorMode == COLOR_MODE_DISTANCE_FADE) {
+                        S_ColorSource = COLOR_SOURCE_UNIFORM;
+                        S_EnableDistanceFadeColor = true;
+                    } else if (S_ColorMode == COLOR_MODE_LINE_SPLIT_DENSITY) {
+                        S_ColorSource = COLOR_SOURCE_UNIFORM;
+                        S_EnableLineSplitDensityColor = true;
+                    } else {
+                        S_ColorSource = COLOR_SOURCE_UNIFORM;
+                    }
+                    S_ColorModeMigrated = true;
+                }
+                S_ColorSource = Math::Clamp(
+                    S_ColorSource,
+                    COLOR_SOURCE_UNIFORM,
+                    COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS
+                );
                 S_BaseTriggerColor = ClampColor(S_BaseTriggerColor);
                 S_DistanceFadeColor = ClampColor(S_DistanceFadeColor);
                 S_DenseLineSplitColor = ClampColor(S_DenseLineSplitColor);
+                S_MediaTrackerTrackOutlineHueShift = Math::Clamp(S_MediaTrackerTrackOutlineHueShift, -1.0f, 1.0f);
                 S_SkullTileIconScale = Math::Clamp(S_SkullTileIconScale, 0.05f, 1.0f);
                 S_SkullTileIconAlpha = Math::Clamp(S_SkullTileIconAlpha, 0.0f, 1.0f);
             }
@@ -93,12 +111,12 @@
             void ResetSettingsToDefaults() {
                 S_RenderWorld = true;
                 S_ShowLabels = true;
-                S_LabelShowIndex = true;
+                S_LabelShowIndex = false;
                 S_LabelShowRawRange = false;
                 S_LabelShowWorldSize = false;
-                S_LabelShowIslandIndex = true;
-                S_LabelShowSourcePrefix = true;
-                S_LabelUseDetectedTriggerName = false;
+                S_LabelShowIslandIndex = false;
+                S_LabelShowSourcePrefix = false;
+                S_LabelUseDetectedTriggerName = true;
                 S_LabelShowDetectedTriggerName = false;
                 S_LabelFontSize = 16.0f;
                 S_LabelAlpha = 0.95f;
@@ -144,6 +162,8 @@
                 S_MaxFillTilesPerFrame = 4096;
                 S_MaxTileIconPatchesPerFrame = 1600;
                 S_TileIconMaxSubdivisions = 6;
+                S_MediaTrackerEditorRefreshIntervalMs = 500;
+                S_OffzoneEditorRefreshIntervalMs = 500;
                 S_FastDrivingPerformanceMode = true;
                 S_FastDrivingSpeedThresholdKmh = 60.0f;
                 S_FastDrivingMaxVisibleVolumes = 24;
@@ -153,14 +173,19 @@
                 S_FastDrivingDisableLabels = true;
                 S_FastDrivingDisableTileIcons = true;
                 S_FastDrivingSimplifyGroupedTriggers = true;
-                S_ColorMode = COLOR_MODE_STATIC;
+                S_ColorMode = COLOR_MODE_MEDIATRACKER_TRACK_COLORS;
+                S_ColorModeMigrated = true;
+                S_ColorSource = COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS;
+                S_EnableDistanceFadeColor = false;
+                S_EnableLineSplitDensityColor = false;
                 S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
                 S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                 S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                 S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
-                S_BaseTriggerColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
+                S_BaseTriggerColor = vec4(0.85f, 0.71f, 1.0f, 1.0f);
                 S_DistanceFadeColor = vec4(1.0f, 0.90f, 0.20f, 1.0f);
                 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
+                S_MediaTrackerTrackOutlineHueShift = 0.06f;
                 S_RandomOutlineSegmentColors = false;
                 S_RandomFillTileColors = false;
                 S_ShowSkullTileIcons = false;
@@ -174,7 +199,7 @@
                 S_ShowOffzoneInEditorTestMode = true;
                 S_ShowOffzoneInEditorMediaTracker = true;
                 S_ShowOffzoneInReplayEditor = true;
-                S_ShowMediaTrackerSource = false;
+                S_ShowMediaTrackerSource = true;
                 S_ShowMediaTrackerInPlayableMap = true;
                 S_ShowMediaTrackerInEditor = true;
                 S_ShowMediaTrackerInEditorTestMode = true;
@@ -189,6 +214,9 @@
                 S_ShowMediaTrackerSubtypeCam1 = true;
                 S_ShowMediaTrackerSubtypeCam2 = true;
                 S_ShowMediaTrackerSubtypeCam3 = true;
+                S_ShowMediaTrackerSubtypeCamHelico = true;
+                S_ShowMediaTrackerSubtypeCamFree = true;
+                S_ShowMediaTrackerSubtypeCamSpectator = true;
                 S_ShowMediaTrackerSubtype2DTriangles = true;
                 S_ShowMediaTrackerSubtype3DTriangles = true;
                 S_ShowMediaTrackerSubtypeCarTrail = true;
@@ -200,7 +228,6 @@
                 S_ShowMediaTrackerSubtypeFadingTransition = true;
                 S_ShowMediaTrackerSubtypeFog = true;
                 S_ShowMediaTrackerSubtypeGhost = true;
-                S_ShowMediaTrackerSubtypeAmbiance = true;
                 S_ShowMediaTrackerSubtypeHdrBloom = true;
                 S_ShowMediaTrackerSubtypeImage = true;
                 S_ShowMediaTrackerSubtypeInertialTrackingCamFx = true;

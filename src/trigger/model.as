@@ -7,17 +7,20 @@ namespace TriggerVisualizer {
         const string TRIGGER_TARGET_MEDIATRACKER = "mediatracker";
 
         const string MT_SUBTYPE_CAMERA = "camera";
-        const string MT_SUBTYPE_CAM_CUSTOM = "camcustom";
-        const string MT_SUBTYPE_CAM_ORBITAL = "camorbital";
-        const string MT_SUBTYPE_CAM_PATH = "campath";
-        const string MT_SUBTYPE_CAM_PLAYER = "camplayer";
-        const string MT_SUBTYPE_CAM_DEFAULT = "camdefault";
-        const string MT_SUBTYPE_CAM_1 = "cam1";
-        const string MT_SUBTYPE_CAM_2 = "cam2";
-        const string MT_SUBTYPE_CAM_3 = "cam3";
-        const string MT_SUBTYPE_TRIANGLES_2D = "2dtriangles";
-        const string MT_SUBTYPE_TRIANGLES_3D = "3dtriangles";
-        const string MT_SUBTYPE_CAR_TRAIL = "cartrail";
+        const string MT_SUBTYPE_CUSTOM_CAMERA = "customcamera";
+        const string MT_SUBTYPE_ORBITAL_CAMERA = "orbitalcamera";
+        const string MT_SUBTYPE_PATH_CAMERA = "pathcamera";
+        const string MT_SUBTYPE_PLAYER_CAMERA = "playercamera";
+        const string MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT = "playercamerasubtypecamdefault";
+        const string MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1 = "playercamerasubtypecam1";
+        const string MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2 = "playercamerasubtypecam2";
+        const string MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3 = "playercamerasubtypecam3";
+        const string MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO = "playercamerasubtypecamhelico";
+        const string MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE = "playercamerasubtypecamfree";
+        const string MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR = "playercamerasubtypecamspectator";
+        const string MT_SUBTYPE_2D_TRIANGLES = "2dtriangles";
+        const string MT_SUBTYPE_3D_TRIANGLES = "3dtriangles";
+        const string MT_SUBTYPE_CAR_TRAILS = "cartrails";
         const string MT_SUBTYPE_COLORS_FX = "colorsfx";
         const string MT_SUBTYPE_COLOR_GRADING = "colorgrading";
         const string MT_SUBTYPE_DEPTH_OF_FIELD = "depthoffield";
@@ -26,7 +29,6 @@ namespace TriggerVisualizer {
         const string MT_SUBTYPE_FADING_TRANSITION = "fadingtransition";
         const string MT_SUBTYPE_FOG = "fog";
         const string MT_SUBTYPE_GHOST = "ghost";
-        const string MT_SUBTYPE_AMBIANCE = "ambiance";
         const string MT_SUBTYPE_HDR_BLOOM = "hdrbloom";
         const string MT_SUBTYPE_IMAGE = "image";
         const string MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX = "inertialtrackingcamfx";
@@ -61,18 +63,21 @@ namespace TriggerVisualizer {
             if (key == "offzone" || key == "offzones") return TRIGGER_TARGET_OFFZONE;
 
             if (key == "cameras" || key == "camera") return MT_SUBTYPE_CAMERA;
-            if (key == "customcamera" || key == "customcam" || key == "camcustom") return MT_SUBTYPE_CAM_CUSTOM;
-            if (key == "orbitalcamera" || key == "orbitalcam" || key == "camorbital") return MT_SUBTYPE_CAM_ORBITAL;
-            if (key == "pathcamera" || key == "pathcam" || key == "campath") return MT_SUBTYPE_CAM_PATH;
-            if (key == "playercamera" || key == "playercam" || key == "camplayer" || key == "gamecamera") return MT_SUBTYPE_CAM_PLAYER;
-            if (key == "defaultcamera" || key == "camdefault") return MT_SUBTYPE_CAM_DEFAULT;
-            if (key == "externalcamera" || key == "external1camera" || key == "cam1") return MT_SUBTYPE_CAM_1;
-            if (key == "external2camera" || key == "cam2") return MT_SUBTYPE_CAM_2;
-            if (key == "internalcamera" || key == "cam3") return MT_SUBTYPE_CAM_3;
+            if (key == "customcamera" || key == "customcam" || key == "camcustom") return MT_SUBTYPE_CUSTOM_CAMERA;
+            if (key == "orbitalcamera" || key == "orbitalcam" || key == "camorbital") return MT_SUBTYPE_ORBITAL_CAMERA;
+            if (key == "pathcamera" || key == "pathcam" || key == "campath") return MT_SUBTYPE_PATH_CAMERA;
+            if (key == "playercamera" || key == "playercam" || key == "camplayer" || key == "gamecamera") return MT_SUBTYPE_PLAYER_CAMERA;
+            if (key == "defaultcamera" || key == "camdefault") return MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT;
+            if (key == "externalcamera" || key == "external1camera" || key == "cam1") return MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1;
+            if (key == "external2camera" || key == "cam2") return MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2;
+            if (key == "internalcamera" || key == "cam3") return MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3;
+            if (key == "helicocamera" || key == "helicam" || key == "helico" || key == "camhelico") return MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO;
+            if (key == "freecamera" || key == "freecam" || key == "camfree") return MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE;
+            if (key == "spectatorcamera" || key == "spectatorcam" || key == "camspectator") return MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR;
 
-            if (key == "2dtriangle" || key == "2dtriangles") return MT_SUBTYPE_TRIANGLES_2D;
-            if (key == "3dtriangle" || key == "3dtriangles") return MT_SUBTYPE_TRIANGLES_3D;
-            if (key == "cartrail" || key == "cartrails" || key == "trail" || key == "trails") return MT_SUBTYPE_CAR_TRAIL;
+            if (key == "2dtriangle" || key == "2dtriangles") return MT_SUBTYPE_2D_TRIANGLES;
+            if (key == "3dtriangle" || key == "3dtriangles") return MT_SUBTYPE_3D_TRIANGLES;
+            if (key == "cartrail" || key == "cartrails" || key == "trail" || key == "trails") return MT_SUBTYPE_CAR_TRAILS;
             if (key == "colorsfx" || key == "colorfx") return MT_SUBTYPE_COLORS_FX;
             if (key == "colorgrading" || key == "grading") return MT_SUBTYPE_COLOR_GRADING;
             if (key == "dof" || key == "depthoffield") return MT_SUBTYPE_DEPTH_OF_FIELD;
@@ -80,8 +85,7 @@ namespace TriggerVisualizer {
             if (key == "editingcut" || key == "cut") return MT_SUBTYPE_EDITING_CUT;
             if (key == "fadingtransition" || key == "fadetransition" || key == "transitionfade" || key == "fade") return MT_SUBTYPE_FADING_TRANSITION;
             if (key == "fog") return MT_SUBTYPE_FOG;
-            if (key == "ghost" || key == "ghosts" || key == "entity" || key == "entities") return MT_SUBTYPE_GHOST;
-            if (key == "ambiance" || key == "ambience") return MT_SUBTYPE_AMBIANCE;
+            if (key == "ghost" || key == "ghosts" || key == "gps" || key == "entity" || key == "entities") return MT_SUBTYPE_GHOST;
             if (key == "hdrbloom" || key == "bloomhdr" || key == "bloom") return MT_SUBTYPE_HDR_BLOOM;
             if (key == "image" || key == "images") return MT_SUBTYPE_IMAGE;
             if (key == "inertialtrackingcamfx" || key == "inertialtracking" || key == "camfxinertialtracking") return MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX;
@@ -113,14 +117,17 @@ namespace TriggerVisualizer {
 
         bool IsCameraSubtypeTargetKey(const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
-            return key == MT_SUBTYPE_CAM_CUSTOM
-                || key == MT_SUBTYPE_CAM_ORBITAL
-                || key == MT_SUBTYPE_CAM_PATH
-                || key == MT_SUBTYPE_CAM_PLAYER
-                || key == MT_SUBTYPE_CAM_DEFAULT
-                || key == MT_SUBTYPE_CAM_1
-                || key == MT_SUBTYPE_CAM_2
-                || key == MT_SUBTYPE_CAM_3;
+            return key == MT_SUBTYPE_CUSTOM_CAMERA
+                || key == MT_SUBTYPE_ORBITAL_CAMERA
+                || key == MT_SUBTYPE_PATH_CAMERA
+                || key == MT_SUBTYPE_PLAYER_CAMERA
+                || key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT
+                || key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1
+                || key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2
+                || key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3
+                || key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO
+                || key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE
+                || key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR;
         }
 
         bool TriggerTargetListContains(const string &in targetKeys, const string &in rawKey) {
@@ -167,17 +174,20 @@ namespace TriggerVisualizer {
         string GetMediaTrackerSubtypeDisplayName(const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
             if (key == MT_SUBTYPE_CAMERA) return "Camera";
-            if (key == MT_SUBTYPE_CAM_CUSTOM) return "Custom Camera";
-            if (key == MT_SUBTYPE_CAM_ORBITAL) return "Orbital Camera";
-            if (key == MT_SUBTYPE_CAM_PATH) return "Path Camera";
-            if (key == MT_SUBTYPE_CAM_PLAYER) return "Player Camera";
-            if (key == MT_SUBTYPE_CAM_DEFAULT) return "CamDefault";
-            if (key == MT_SUBTYPE_CAM_1) return "Cam1";
-            if (key == MT_SUBTYPE_CAM_2) return "Cam2";
-            if (key == MT_SUBTYPE_CAM_3) return "Cam3";
-            if (key == MT_SUBTYPE_TRIANGLES_2D) return "2D Triangles";
-            if (key == MT_SUBTYPE_TRIANGLES_3D) return "3D Triangles";
-            if (key == MT_SUBTYPE_CAR_TRAIL) return "Car Trail";
+            if (key == MT_SUBTYPE_CUSTOM_CAMERA) return "Custom Camera";
+            if (key == MT_SUBTYPE_ORBITAL_CAMERA) return "Orbital Camera";
+            if (key == MT_SUBTYPE_PATH_CAMERA) return "Path Camera";
+            if (key == MT_SUBTYPE_PLAYER_CAMERA) return "Player Camera";
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) return "CamDefault";
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) return "Cam1";
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) return "Cam2";
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) return "Cam3";
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) return "CamHelico";
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) return "CamFree";
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) return "CamSpectator";
+            if (key == MT_SUBTYPE_2D_TRIANGLES) return "2D Triangles";
+            if (key == MT_SUBTYPE_3D_TRIANGLES) return "3D Triangles";
+            if (key == MT_SUBTYPE_CAR_TRAILS) return "Car Trails";
             if (key == MT_SUBTYPE_COLORS_FX) return "Colors FX";
             if (key == MT_SUBTYPE_COLOR_GRADING) return "Color Grading";
             if (key == MT_SUBTYPE_DEPTH_OF_FIELD) return "Depth of Field";
@@ -186,7 +196,6 @@ namespace TriggerVisualizer {
             if (key == MT_SUBTYPE_FADING_TRANSITION) return "Fading Transition";
             if (key == MT_SUBTYPE_FOG) return "Fog";
             if (key == MT_SUBTYPE_GHOST) return "Ghost";
-            if (key == MT_SUBTYPE_AMBIANCE) return "Ambiance";
             if (key == MT_SUBTYPE_HDR_BLOOM) return "HDR Bloom";
             if (key == MT_SUBTYPE_IMAGE) return "Image";
             if (key == MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX) return "Inertial Tracking CamFX";
@@ -206,6 +215,57 @@ namespace TriggerVisualizer {
             if (key == MT_SUBTYPE_RESET) return "Reset";
             if (key == MT_SUBTYPE_MIXED) return "Mixed";
             return "Unknown";
+        }
+
+        vec4 GetMediaTrackerTrackColorForSubtype(const string &in rawKey) {
+            string key = NormalizeTriggerTargetKey(rawKey);
+
+            if (key == MT_SUBTYPE_CAMERA) return vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_CUSTOM_CAMERA) return vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_ORBITAL_CAMERA) return vec4(0.5019608f, 0.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_PATH_CAMERA) return vec4(1.0f, 0.5019608f, 1.0f, 1.0f);
+            if (key == MT_SUBTYPE_PLAYER_CAMERA) return vec4(1.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) return vec4(1.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) return vec4(1.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) return vec4(1.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) return vec4(1.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) return vec4(1.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) return vec4(1.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) return vec4(1.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_2D_TRIANGLES) return vec4(0.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_3D_TRIANGLES) return vec4(0.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_CAR_TRAILS) return vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_COLORS_FX) return vec4(0.0f, 1.0f, 0.5019608f, 1.0f);
+            if (key == MT_SUBTYPE_COLOR_GRADING) return vec4(0.0f, 0.5019608f, 1.0f, 1.0f);
+            if (key == MT_SUBTYPE_DEPTH_OF_FIELD) return vec4(1.0f, 0.0f, 0.5019608f, 1.0f);
+            if (key == MT_SUBTYPE_DIRTY_LENS) return vec4(1.0f, 1.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_EDITING_CUT) return vec4(0.7490196f, 0.7490196f, 0.7490196f, 1.0f);
+            if (key == MT_SUBTYPE_FADING_TRANSITION) return vec4(1.0f, 1.0f, 0.5019608f, 1.0f);
+            if (key == MT_SUBTYPE_FOG) return vec4(0.0f, 1.0f, 1.0f, 1.0f);
+            if (key == MT_SUBTYPE_GHOST) return vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            if (key == MT_SUBTYPE_HDR_BLOOM) return vec4(0.5019608f, 1.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_IMAGE) return vec4(0.0f, 0.5019608f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX) return vec4(0.2509804f, 0.5019608f, 0.5019608f, 1.0f);
+            if (key == MT_SUBTYPE_MANIALINK_UI) return vec4(0.0f, 1.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_MANIALINK_URL) return vec4(0.1019608f, 0.5019608f, 0.1019608f, 1.0f);
+            if (key == MT_SUBTYPE_MUSIC_VOLUME) return vec4(0.2509804f, 0.2509804f, 0.2509804f, 1.0f);
+            if (key == MT_SUBTYPE_OPPONENT_VISIBILITY) return vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_SHAKE_CAM_FX) return vec4(0.5019608f, 0.0f, 1.0f, 1.0f);
+            if (key == MT_SUBTYPE_STEREO_3D) return vec4(0.0f, 0.0f, 0.5019608f, 1.0f);
+            if (key == MT_SUBTYPE_SOUND_FX) return vec4(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+            if (key == MT_SUBTYPE_SPECTATORS) return vec4(0.0f, 0.0f, 0.5019608f, 1.0f);
+            if (key == MT_SUBTYPE_TEXT) return vec4(0.5019608f, 1.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_TIME) return vec4(0.8509804f, 0.8509804f, 0.8509804f, 1.0f);
+            if (key == MT_SUBTYPE_TIME_SPEED) return vec4(0.2f, 0.0f, 0.2f, 1.0f);
+            if (key == MT_SUBTYPE_TONE_MAPPING) return vec4(0.0f, 0.3019608f, 0.6f, 1.0f);
+            if (key == MT_SUBTYPE_VEHICLE_LIGHTS) return vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            if (key == MT_SUBTYPE_RESET) return vec4(0.0f, 0.75f, 1.0f, 1.0f);
+            if (key == MT_SUBTYPE_MIXED) return vec4(0.92f, 0.74f, 0.26f, 1.0f);
+            return vec4(0.85f, 0.45f, 0.95f, 1.0f);
+        }
+
+        vec4 GetMediaTrackerGpsTrackColor() {
+            return vec4(1.0f, 0.20f, 0.76f, 1.0f);
         }
 
         class TriggerRangeRaw {
@@ -280,6 +340,8 @@ namespace TriggerVisualizer {
             string SubtypeKey;
             string SubtypeLabel;
             string TargetKeys = "offzone|";
+            bool HasMediaTrackerTrackColor = false;
+            vec4 MediaTrackerTrackColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
             bool HasIslandIndex = false;
             uint IslandIndex = 0;
             uint IslandCount = 0;
@@ -395,6 +457,9 @@ namespace TriggerVisualizer {
             string SubtypeKey;
             string SubtypeLabel;
             string TargetKeys;
+            string EntityInfo;
+            bool HasMediaTrackerTrackColor = false;
+            vec4 MediaTrackerTrackColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
             bool HasClip = false;
             nat3 MinCoord;
             nat3 MaxCoord;

@@ -44,7 +44,7 @@ Examples:
 ```text
 /trigger-visualizer camera,offzone suggest-off
 /trigger-visualizer cam3 force-off
-/trigger-visualizer fog,cartrail suggest-off
+/trigger-visualizer fog,cartrails suggest-off
 ```
 
 Supported source targets:
@@ -55,17 +55,20 @@ Supported source targets:
 Supported MediaTracker subtype targets:
 
 - `Camera`
-- `CamCustom`
-- `CamOrbital`
-- `CamPath`
-- `CamPlayer`
-- `CamDefault`
-- `Cam1`
-- `Cam2`
-- `Cam3`
+- `CustomCamera`
+- `OrbitalCamera`
+- `PathCamera`
+- `PlayerCamera`
+- `PlayerCameraSubtypeCamDefault`
+- `PlayerCameraSubtypeCam1`
+- `PlayerCameraSubtypeCam2`
+- `PlayerCameraSubtypeCam3`
+- `PlayerCameraSubtypeCamHelico`
+- `PlayerCameraSubtypeCamFree`
+- `PlayerCameraSubtypeCamSpectator`
 - `2dTriangles`
 - `3dTriangles`
-- `CarTrail`
+- `CarTrails`
 - `ColorsFX`
 - `ColorGrading`
 - `DepthOfField`
@@ -74,7 +77,6 @@ Supported MediaTracker subtype targets:
 - `FadingTransition`
 - `Fog`
 - `Ghost`
-- `Ambiance`
 - `HDRBloom`
 - `Image`
 - `InertialTrackingCamFX`
@@ -95,7 +97,8 @@ Supported MediaTracker subtype targets:
 - `Unknown`
 
 Target names are case-insensitive. Use no spaces inside the comma-separated
-target list; hyphens and underscores are accepted.
+target list; hyphens and underscores are accepted. Legacy aliases such as
+`CamCustom`, `Cam1`, and `CarTrail` are still accepted.
 
 ## Build
 

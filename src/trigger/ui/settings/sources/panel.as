@@ -1,4 +1,4 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
         namespace UI {
             string GetRuntimeSourceContextLabel(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -65,17 +65,20 @@
                 if (volume is null || volume.Source != TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER) return true;
 
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAMERA, S_ShowMediaTrackerSubtypeCamera)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_CUSTOM, S_ShowMediaTrackerSubtypeCamCustom)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_ORBITAL, S_ShowMediaTrackerSubtypeCamOrbital)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_PATH, S_ShowMediaTrackerSubtypeCamPath)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_PLAYER, S_ShowMediaTrackerSubtypeCamPlayer)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_DEFAULT, S_ShowMediaTrackerSubtypeCamDefault)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_1, S_ShowMediaTrackerSubtypeCam1)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_2, S_ShowMediaTrackerSubtypeCam2)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAM_3, S_ShowMediaTrackerSubtypeCam3)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_TRIANGLES_2D, S_ShowMediaTrackerSubtype2DTriangles)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_TRIANGLES_3D, S_ShowMediaTrackerSubtype3DTriangles)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAR_TRAIL, S_ShowMediaTrackerSubtypeCarTrail)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CUSTOM_CAMERA, S_ShowMediaTrackerSubtypeCamCustom)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_ORBITAL_CAMERA, S_ShowMediaTrackerSubtypeCamOrbital)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PATH_CAMERA, S_ShowMediaTrackerSubtypeCamPath)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA, S_ShowMediaTrackerSubtypeCamPlayer)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT, S_ShowMediaTrackerSubtypeCamDefault)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1, S_ShowMediaTrackerSubtypeCam1)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2, S_ShowMediaTrackerSubtypeCam2)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3, S_ShowMediaTrackerSubtypeCam3)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO, S_ShowMediaTrackerSubtypeCamHelico)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE, S_ShowMediaTrackerSubtypeCamFree)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR, S_ShowMediaTrackerSubtypeCamSpectator)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_2D_TRIANGLES, S_ShowMediaTrackerSubtype2DTriangles)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_3D_TRIANGLES, S_ShowMediaTrackerSubtype3DTriangles)) return false;
+                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_CAR_TRAILS, S_ShowMediaTrackerSubtypeCarTrail)) return false;
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_COLORS_FX, S_ShowMediaTrackerSubtypeColorsFx)) return false;
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_COLOR_GRADING, S_ShowMediaTrackerSubtypeColorGrading)) return false;
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_DEPTH_OF_FIELD, S_ShowMediaTrackerSubtypeDepthOfField)) return false;
@@ -84,7 +87,6 @@
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_FADING_TRANSITION, S_ShowMediaTrackerSubtypeFadingTransition)) return false;
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_FOG, S_ShowMediaTrackerSubtypeFog)) return false;
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_GHOST, S_ShowMediaTrackerSubtypeGhost)) return false;
-                if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_AMBIANCE, S_ShowMediaTrackerSubtypeAmbiance)) return false;
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_HDR_BLOOM, S_ShowMediaTrackerSubtypeHdrBloom)) return false;
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_IMAGE, S_ShowMediaTrackerSubtypeImage)) return false;
                 if (IsTriggerVolumeDisabledBySubtypeToggle(volume, TriggerVisualizer::Trigger::MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX, S_ShowMediaTrackerSubtypeInertialTrackingCamFx)) return false;
@@ -123,6 +125,9 @@
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeCam1)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeCam2)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeCam3)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamHelico)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamFree)
+                    + SettingBoolKey(S_ShowMediaTrackerSubtypeCamSpectator)
                     + SettingBoolKey(S_ShowMediaTrackerSubtype2DTriangles)
                     + SettingBoolKey(S_ShowMediaTrackerSubtype3DTriangles)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeCarTrail)
@@ -134,7 +139,6 @@
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeFadingTransition)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeFog)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeGhost)
-                    + SettingBoolKey(S_ShowMediaTrackerSubtypeAmbiance)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeHdrBloom)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeImage)
                     + SettingBoolKey(S_ShowMediaTrackerSubtypeInertialTrackingCamFx)
@@ -165,7 +169,6 @@
 
             void RenderMediaTrackerSubtypeSettingsUI() {
                 UI::Text("MediaTracker Subtypes");
-                UI::TextDisabled("These also match mapper command targets, e.g. /trigger-visualizer camera,offzone suggest-off.");
 
                 UI::BeginTabBar("trigger-visualizer-mediatracker-subtype-tabs");
 
@@ -176,45 +179,60 @@
                         S_ShowMediaTrackerSubtypeCamera
                     );
                     S_ShowMediaTrackerSubtypeCamCustom = RenderMediaTrackerSubtypeToggleUI(
-                        "Show Custom Camera / CamCustom",
-                        "camcustom",
+                        "Show Custom Camera",
+                        "customcamera",
                         S_ShowMediaTrackerSubtypeCamCustom
                     );
                     S_ShowMediaTrackerSubtypeCamOrbital = RenderMediaTrackerSubtypeToggleUI(
-                        "Show Orbital Camera / CamOrbital",
-                        "camorbital",
+                        "Show Orbital Camera",
+                        "orbitalcamera",
                         S_ShowMediaTrackerSubtypeCamOrbital
                     );
                     S_ShowMediaTrackerSubtypeCamPath = RenderMediaTrackerSubtypeToggleUI(
-                        "Show Path Camera / CamPath",
-                        "campath",
+                        "Show Path Camera",
+                        "pathcamera",
                         S_ShowMediaTrackerSubtypeCamPath
                     );
                     S_ShowMediaTrackerSubtypeCamPlayer = RenderMediaTrackerSubtypeToggleUI(
                         "Show Player Camera",
-                        "camplayer",
+                        "playercamera",
                         S_ShowMediaTrackerSubtypeCamPlayer
                     );
                     UI::Indent();
                     S_ShowMediaTrackerSubtypeCamDefault = RenderMediaTrackerSubtypeToggleUI(
                         "Show CamDefault",
-                        "camdefault",
+                        "playercamerasubtypecamdefault",
                         S_ShowMediaTrackerSubtypeCamDefault
                     );
                     S_ShowMediaTrackerSubtypeCam1 = RenderMediaTrackerSubtypeToggleUI(
                         "Show Cam1",
-                        "cam1",
+                        "playercamerasubtypecam1",
                         S_ShowMediaTrackerSubtypeCam1
                     );
                     S_ShowMediaTrackerSubtypeCam2 = RenderMediaTrackerSubtypeToggleUI(
                         "Show Cam2",
-                        "cam2",
+                        "playercamerasubtypecam2",
                         S_ShowMediaTrackerSubtypeCam2
                     );
                     S_ShowMediaTrackerSubtypeCam3 = RenderMediaTrackerSubtypeToggleUI(
                         "Show Cam3",
-                        "cam3",
+                        "playercamerasubtypecam3",
                         S_ShowMediaTrackerSubtypeCam3
+                    );
+                    S_ShowMediaTrackerSubtypeCamHelico = RenderMediaTrackerSubtypeToggleUI(
+                        "Show CamHelico",
+                        "playercamerasubtypecamhelico",
+                        S_ShowMediaTrackerSubtypeCamHelico
+                    );
+                    S_ShowMediaTrackerSubtypeCamFree = RenderMediaTrackerSubtypeToggleUI(
+                        "Show CamFree",
+                        "playercamerasubtypecamfree",
+                        S_ShowMediaTrackerSubtypeCamFree
+                    );
+                    S_ShowMediaTrackerSubtypeCamSpectator = RenderMediaTrackerSubtypeToggleUI(
+                        "Show CamSpectator",
+                        "playercamerasubtypecamspectator",
+                        S_ShowMediaTrackerSubtypeCamSpectator
                     );
                     UI::Unindent();
                     UI::EndTabItem();
@@ -301,19 +319,14 @@
 
                 if (UI::BeginTabItem("Gameplay/UI")) {
                     S_ShowMediaTrackerSubtypeCarTrail = RenderMediaTrackerSubtypeToggleUI(
-                        "Show Car Trail / CarTrail",
-                        "cartrail",
+                        "Show Car Trails",
+                        "cartrails",
                         S_ShowMediaTrackerSubtypeCarTrail
                     );
                     S_ShowMediaTrackerSubtypeGhost = RenderMediaTrackerSubtypeToggleUI(
                         "Show Ghost",
                         "ghost",
                         S_ShowMediaTrackerSubtypeGhost
-                    );
-                    S_ShowMediaTrackerSubtypeAmbiance = RenderMediaTrackerSubtypeToggleUI(
-                        "Show Ambiance",
-                        "ambiance",
-                        S_ShowMediaTrackerSubtypeAmbiance
                     );
                     S_ShowMediaTrackerSubtypeManiaLinkUi = RenderMediaTrackerSubtypeToggleUI(
                         "Show ManiaLink UI",

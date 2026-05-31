@@ -25,6 +25,12 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: Tile icon max subdivisions" min=1 max=12]
             int S_TileIconMaxSubdivisions = 6;
 
+            [Setting hidden name="Trigger: MediaTracker editor refresh interval ms" min=100 max=5000]
+            int S_MediaTrackerEditorRefreshIntervalMs = 500;
+
+            [Setting hidden name="Trigger: Offzone editor refresh interval ms" min=100 max=5000]
+            int S_OffzoneEditorRefreshIntervalMs = 500;
+
             [Setting hidden name="Trigger: Fast driving performance mode"]
             bool S_FastDrivingPerformanceMode = true;
 

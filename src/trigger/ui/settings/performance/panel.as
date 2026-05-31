@@ -52,6 +52,21 @@ namespace TriggerVisualizer {
                 );
 
                 UI::Separator();
+                UI::Text("Editable Source Cache");
+
+                UI::SetNextItemWidth(220.0f);
+                S_OffzoneEditorRefreshIntervalMs = UI::InputInt(
+                    "Offzone editor refresh interval (ms)##trigger-visualizer-performance",
+                    S_OffzoneEditorRefreshIntervalMs
+                );
+
+                UI::SetNextItemWidth(220.0f);
+                S_MediaTrackerEditorRefreshIntervalMs = UI::InputInt(
+                    "MediaTracker editor refresh interval (ms)##trigger-visualizer-performance",
+                    S_MediaTrackerEditorRefreshIntervalMs
+                );
+
+                UI::Separator();
                 UI::Text("Fast Driving Mode");
                 S_FastDrivingPerformanceMode = UI::Checkbox(
                     "Enable fast-driving performance mode##trigger-visualizer-performance",

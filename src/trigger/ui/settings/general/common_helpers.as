@@ -4,7 +4,13 @@
             string GetColorModeLabel(int mode) {
                 if (mode == COLOR_MODE_DISTANCE_FADE) return "Distance fade";
                 if (mode == COLOR_MODE_LINE_SPLIT_DENSITY) return "Line split density";
-                return "Static";
+                if (mode == COLOR_MODE_MEDIATRACKER_TRACK_COLORS) return "MediaTracker track colors";
+                return "Uniform color";
+            }
+
+            string GetColorSourceLabel(int source) {
+                if (source == COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS) return "MediaTracker track colors";
+                return "Uniform color";
             }
 
             string GetRenderProximityModeLabel(int mode) {
@@ -61,10 +67,10 @@
                 return S_RenderProximityMode;
             }
 
-            void RenderColorModeOption(int mode) {
-                bool selected = S_ColorMode == mode;
-                if (UI::Selectable(GetColorModeLabel(mode), selected)) {
-                    S_ColorMode = mode;
+            void RenderColorSourceOption(int source) {
+                bool selected = S_ColorSource == source;
+                if (UI::Selectable(GetColorSourceLabel(source), selected)) {
+                    S_ColorSource = source;
                 }
             }
 

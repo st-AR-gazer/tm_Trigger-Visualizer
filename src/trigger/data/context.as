@@ -12,6 +12,7 @@ namespace TriggerVisualizer {
                 bool IsEditorTestMode = false;
                 bool IsEditorMediaTracker = false;
                 bool IsReplayEditor = false;
+                bool HasMediaTrackerEditor = false;
                 bool IsPlayableMap = false;
                 bool IsInMenu = false;
                 string MapUid;
@@ -53,10 +54,8 @@ namespace TriggerVisualizer {
                 auto mapEditor = cast<CGameCtnEditorFree>(app.Editor);
                 auto mediaTrackerEditor = cast<CGameEditorMediaTracker>(app.Editor);
                 ctx.IsMapEditor = mapEditor !is null;
-                ctx.IsEditorMediaTracker = mediaTrackerEditor !is null
-                    && ctx.RootMap !is null
-                    && ctx.RootMap.MapInfo !is null
-                    && ctx.RootMap.MapInfo.Kind == 6;
+                ctx.HasMediaTrackerEditor = mediaTrackerEditor !is null;
+                ctx.IsEditorMediaTracker = ctx.HasMediaTrackerEditor && ctx.HasMap;
                 ctx.IsReplayEditor = mediaTrackerEditor !is null && !ctx.IsEditorMediaTracker;
                 ctx.IsEditorTestMode = ctx.IsMapEditor && ctx.HasPlayground;
                 ctx.IsPlayableMap = ctx.HasMap && ctx.HasPlayground && !ctx.IsInEditor;
