@@ -16,7 +16,6 @@ namespace TriggerVisualizer {
 
             void UpdateWorldFrustumState() {
                 G_WorldFrustumState.Valid = false;
-
                 CHmsCamera@ camera = Camera::GetCurrent();
                 if (camera is null) return;
 
@@ -91,7 +90,6 @@ namespace TriggerVisualizer {
                 vec3 s1 = Camera::ToScreen(p1);
                 vec3 s2 = Camera::ToScreen(p2);
                 vec3 s3 = Camera::ToScreen(p3);
-
                 bool screenFrontVisible = IsProjectedQuadPotentiallyVisible(
                     s0,
                     s1,

@@ -21,14 +21,12 @@
 
             void RenderTileIconImagePickerUI() {
                 UI::Text("Image");
-
                 UI::PushItemWidth(520.0f);
                 G_PendingTileIconSourcePath = UI::InputText(
                     "Image path##trigger-visualizer-tile-icon-manual-path",
                     G_PendingTileIconSourcePath
                 );
                 UI::PopItemWidth();
-
                 UI::Text("Current image:");
                 UI::PushItemWidth(520.0f);
                 UI::InputText(
@@ -53,14 +51,12 @@
                     } else if (UI::Button("Add this image##trigger-visualizer-tile-icon-add-selected")) {
                         AddPendingTileIconImage();
                     }
-
                     UI::SameLine();
                     if (UI::Button("Clear selection##trigger-visualizer-tile-icon-clear-selected")) {
                         G_PendingTileIconSourcePath = "";
                         G_TileIconImportStatus = "";
                     }
                 }
-
                 if (G_TileIconImportStatus.Length > 0) {
                     UI::TextWrapped(G_TileIconImportStatus);
                 }
@@ -72,7 +68,6 @@
                     "Show tile icon at tile centers##trigger-visualizer-image-tiles",
                     S_ShowSkullTileIcons
                 );
-
                 UI::SetNextItemWidth(220.0f);
                 S_SkullTileIconScale = UI::SliderFloat(
                     "Tile icon scale##trigger-visualizer-image-tiles",
@@ -80,7 +75,6 @@
                     0.05f,
                     1.0f
                 );
-
                 UI::SetNextItemWidth(220.0f);
                 S_SkullTileIconAlpha = UI::SliderFloat(
                     "Tile icon alpha##trigger-visualizer-image-tiles",
@@ -88,9 +82,7 @@
                     0.0f,
                     1.0f
                 );
-
                 RenderTileIconImagePickerUI();
-
                 ClampColorSettings();
             }
 

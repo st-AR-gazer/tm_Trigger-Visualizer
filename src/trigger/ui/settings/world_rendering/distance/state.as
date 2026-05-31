@@ -8,7 +8,6 @@
             const int PROXIMITY_MODE_CAMERA_AND_ORBITAL = 4;
             const int PROXIMITY_MODE_VEHICLE_AND_ORBITAL = 5;
             const int PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL = 6;
-
             const float WORLD_BLOCK_SIZE_XZ = 32.0f;
             const float WORLD_BLOCK_SIZE_Y = 8.0f;
             const float WORLD_RENDER_SLIDER_MAX_XZ = WORLD_BLOCK_SIZE_XZ * 48.0f;
@@ -19,70 +18,48 @@
             const int DISTANCE_SETTINGS_PLAYING = 0;
             const int DISTANCE_SETTINGS_EDITOR = 1;
             const int DISTANCE_SETTINGS_MEDIATRACKER = 2;
-
             [Setting hidden name="Trigger: Render distance XZ" min=0 max=50000]
             float S_RenderDistanceXZ = 224.0f;
-
             [Setting hidden name="Trigger: Render distance Y" min=0 max=50000]
             float S_RenderDistanceY = 56.0f;
-
             [Setting hidden name="Trigger: Render fade band XZ" min=0 max=50000]
             float S_RenderFadeBandXZ = 32.0f;
-
             [Setting hidden name="Trigger: Render fade band Y" min=0 max=50000]
             float S_RenderFadeBandY = 8.0f;
-
             [Setting hidden name="Trigger: Unlimited render distance"]
             bool S_UnlimitedRenderDistance = false;
-
             [Setting hidden name="Trigger: Use map suggested draw distance"]
             bool S_UseMapSuggestedDrawDistance = true;
-
             [Setting hidden name="Trigger: Render editor distance XZ" min=0 max=50000]
             float S_RenderDistanceXZEditor = 320.0f;
-
             [Setting hidden name="Trigger: Render editor distance Y" min=0 max=50000]
             float S_RenderDistanceYEditor = 80.0f;
-
             [Setting hidden name="Trigger: Render editor fade band XZ" min=0 max=50000]
             float S_RenderFadeBandXZEditor = 32.0f;
-
             [Setting hidden name="Trigger: Render editor fade band Y" min=0 max=50000]
             float S_RenderFadeBandYEditor = 8.0f;
-
             [Setting hidden name="Trigger: Unlimited editor render distance"]
             bool S_UnlimitedRenderDistanceEditor = false;
-
             [Setting hidden name="Trigger: Use editor map suggested draw distance"]
             bool S_UseMapSuggestedDrawDistanceEditor = true;
-
             [Setting hidden name="Trigger: Render MediaTracker distance XZ" min=0 max=50000]
             float S_RenderDistanceXZMediaTracker = 224.0f;
-
             [Setting hidden name="Trigger: Render MediaTracker distance Y" min=0 max=50000]
             float S_RenderDistanceYMediaTracker = 56.0f;
-
             [Setting hidden name="Trigger: Render MediaTracker fade band XZ" min=0 max=50000]
             float S_RenderFadeBandXZMediaTracker = 32.0f;
-
             [Setting hidden name="Trigger: Render MediaTracker fade band Y" min=0 max=50000]
             float S_RenderFadeBandYMediaTracker = 8.0f;
-
             [Setting hidden name="Trigger: Unlimited MediaTracker render distance"]
             bool S_UnlimitedRenderDistanceMediaTracker = false;
-
             [Setting hidden name="Trigger: Use MediaTracker map suggested draw distance"]
             bool S_UseMapSuggestedDrawDistanceMediaTracker = true;
-
             [Setting hidden name="Trigger: Render proximity mode" min=0 max=2]
             int S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
-
             [Setting hidden name="Trigger: Render editor proximity mode" min=0 max=6]
             int S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
-
             [Setting hidden name="Trigger: Render MediaTracker proximity mode" min=0 max=6]
             int S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
-
             [Setting hidden name="Trigger: Render replay editor proximity mode" min=0 max=6]
             int S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
 
@@ -237,7 +214,6 @@
             vec3 GetRenderFadeBandWorld() {
                 return GetRenderFadeBandWorldForRuntime(TriggerVisualizer::Trigger::GetCurrentRuntimeContext());
             }
-
         }
     }
 }

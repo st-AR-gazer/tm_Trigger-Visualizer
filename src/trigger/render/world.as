@@ -29,12 +29,10 @@ namespace TriggerVisualizer {
                             indices[j] = indices[j - gap];
                             j -= gap;
                         }
-
                         @volumes[j] = volume;
                         fades[j] = fade;
                         indices[j] = index;
                     }
-
                     gap /= 2;
                 }
             }
@@ -56,7 +54,6 @@ namespace TriggerVisualizer {
                 G_FastDrivingPerformanceModeActive = ShouldUseFastDrivingPerformanceMode(ctx, proximityState);
                 if (!TriggerVisualizer::Trigger::UI::S_ShowOutline && !ShouldRenderWorldFillNow() && !ShouldRenderWorldLabelsNow() && !ShouldRenderWorldTileIconsNow()) return;
                 ResetWorldRenderPerformanceBudgets();
-
                 auto visibleVolumes = array<TriggerVolume@>();
                 auto visibleFades = array<float>();
                 auto visibleIndices = array<uint>();
@@ -73,7 +70,6 @@ namespace TriggerVisualizer {
                     visibleFades.InsertLast(fade);
                     visibleIndices.InsertLast(i);
                 }
-
                 if (visibleVolumes.Length == 0) return;
                 SortVisibleTriggerVolumesBackToFront(visibleVolumes, visibleFades, visibleIndices, cameraPos);
                 int fastMaxVisibleVolumes = Math::Max(
@@ -113,7 +109,6 @@ namespace TriggerVisualizer {
                         );
                     }
                 }
-
                 DrawWorldFillTileDrawItems(fillTileItems);
 
                 for (uint i = 0; i < visibleVolumes.Length; i++) {
@@ -126,7 +121,6 @@ namespace TriggerVisualizer {
                             visibleIndices[i]
                         );
                     }
-
                     if (ShouldRenderWorldLabelsNow()) {
                         TriggerRangeRaw@ rawRange = null;
                         auto volume = visibleVolumes[i];

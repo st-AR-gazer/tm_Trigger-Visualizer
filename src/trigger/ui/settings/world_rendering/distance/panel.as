@@ -35,18 +35,15 @@
             ) {
                 UI::SetNextItemWidth(260.0f);
                 value = UI::SliderFloat(label + "##" + id, value, minValue, maxValue, "%.0f m");
-
                 float buttonSize = UI::GetFrameHeight();
                 UI::SameLine();
                 if (UI::Button("-##" + id + "-prev-block", vec2(buttonSize, buttonSize))) {
                     value = SnapWorldDistanceToPreviousBlock(value, blockSize);
                 }
-
                 UI::SameLine();
                 if (UI::Button("+##" + id + "-next-block", vec2(buttonSize, buttonSize))) {
                     value = SnapWorldDistanceToNextBlock(value, blockSize);
                 }
-
                 UI::SameLine();
                 UI::TextDisabled("~" + Text::Format("%.1f", value / blockSize) + " blocks");
                 return value;
@@ -84,7 +81,6 @@
             void RenderDistanceProfileSettingsUI(int context, const string &in id, const string &in description) {
                 UI::Text(GetDistanceSettingsContextLabel(context) + " Distance");
                 UI::TextDisabled(description);
-
                 int proximityMode = GetRenderProximityModeForDistanceContext(context);
                 proximityMode = RenderProximityComboForDistanceContext(
                     context,
@@ -92,7 +88,6 @@
                     proximityMode
                 );
                 SetRenderProximityModeForDistanceContext(context, proximityMode);
-
                 UI::Separator();
                 bool unlimited = IsUnlimitedRenderDistanceForContext(context);
                 unlimited = UI::Checkbox(
@@ -100,12 +95,10 @@
                     unlimited
                 );
                 SetUnlimitedRenderDistanceForContext(context, unlimited);
-
                 float distanceXZ = GetRenderDistanceXZForContext(context);
                 float distanceY = GetRenderDistanceYForContext(context);
                 float fadeXZ = GetRenderFadeBandXZForContext(context);
                 float fadeY = GetRenderFadeBandYForContext(context);
-
                 distanceXZ = RenderWorldDistanceSlider(
                     "Render distance X/Z",
                     "trigger-visualizer-settings-render-distance-xz-" + id,
@@ -140,21 +133,18 @@
                 );
                 SetRenderDistanceForContext(context, distanceXZ, distanceY);
                 SetRenderFadeBandForContext(context, fadeXZ, fadeY);
-
                 bool useMapDistance = UseMapSuggestedDrawDistanceForContext(context);
                 useMapDistance = UI::Checkbox(
                     "Use map-suggested draw distance##trigger-visualizer-settings-map-distance-" + id,
                     useMapDistance
                 );
                 SetUseMapSuggestedDrawDistanceForContext(context, useMapDistance);
-
                 ClampWorldRenderingSettings();
                 ClampProximitySettings();
             }
 
             void RenderWorldDistanceSettingsUI() {
                 UI::BeginTabBar("trigger-visualizer-distance-profile-tabs");
-
                 if (UI::BeginTabItem("Playing")) {
                     RenderDistanceProfileSettingsUI(
                         DISTANCE_SETTINGS_PLAYING,
@@ -163,7 +153,6 @@
                     );
                     UI::EndTabItem();
                 }
-
                 if (UI::BeginTabItem("Editor")) {
                     RenderDistanceProfileSettingsUI(
                         DISTANCE_SETTINGS_EDITOR,
@@ -172,7 +161,6 @@
                     );
                     UI::EndTabItem();
                 }
-
                 if (UI::BeginTabItem("MediaTracker")) {
                     RenderDistanceProfileSettingsUI(
                         DISTANCE_SETTINGS_MEDIATRACKER,
@@ -181,10 +169,8 @@
                     );
                     UI::EndTabItem();
                 }
-
                 UI::EndTabBar();
             }
-
         }
     }
 }

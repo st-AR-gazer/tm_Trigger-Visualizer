@@ -34,7 +34,6 @@ namespace TriggerVisualizer {
                 float maxX = Math::Max(Math::Max(s0.x, s1.x), Math::Max(s2.x, s3.x));
                 float minY = Math::Min(Math::Min(s0.y, s1.y), Math::Min(s2.y, s3.y));
                 float maxY = Math::Max(Math::Max(s0.y, s1.y), Math::Max(s2.y, s3.y));
-
                 if (maxX < -margin) return false;
                 if (minX > float(displayWidth) + margin) return false;
                 if (maxY < -margin) return false;
@@ -54,7 +53,6 @@ namespace TriggerVisualizer {
                 float maxX = Math::Max(s0.x, s1.x);
                 float minY = Math::Min(s0.y, s1.y);
                 float maxY = Math::Max(s0.y, s1.y);
-
                 if (maxX < -margin) return false;
                 if (minX > float(displayWidth) + margin) return false;
                 if (maxY < -margin) return false;
@@ -158,7 +156,6 @@ namespace TriggerVisualizer {
                 float right = left + float(cellSize);
                 float bottom = top + float(cellSize);
                 vec2 center = vec2((left + right) * 0.5f, (top + bottom) * 0.5f);
-
                 if (IsPointInsideProjectedQuad(center, s0, s1, s2, s3)) return true;
                 if (IsPointInsideProjectedQuad(vec2(left, top), s0, s1, s2, s3)) return true;
                 if (IsPointInsideProjectedQuad(vec2(right, top), s0, s1, s2, s3)) return true;
@@ -252,10 +249,8 @@ namespace TriggerVisualizer {
                 vec2 p2Delta = s2.xy - s0.xy;
                 float p2LocalY = DotScreen(p2Delta, yAxis) / yPerpendicular;
                 float p2LocalX = (DotScreen(p2Delta, xAxis) - yParallel * p2LocalY) / xLen;
-
                 vec2 patternOrigin = vec2(-uvMin.x / uvSize.x, -uvMin.y / uvSize.y);
                 vec2 patternSize = vec2(1.0f / uvSize.x, 1.0f / uvSize.y);
-
                 nvg::Save();
                 nvg::Translate(s0.xy);
                 nvg::Rotate(Math::Atan2(xAxis.y, xAxis.x));
@@ -301,20 +296,16 @@ namespace TriggerVisualizer {
                 vec3 rightEdge = p1 - p0;
                 vec3 downEdge = p3 - p0;
                 float step = 1.0f / float(subdivisions);
-
                 for (uint y = 0; y < subdivisions; y++) {
                     float v0 = float(y) * step;
                     float v1 = float(y + 1) * step;
-
                     for (uint x = 0; x < subdivisions; x++) {
                         float u0 = float(x) * step;
                         float u1 = float(x + 1) * step;
-
                         vec3 q0 = p0 + rightEdge * u0 + downEdge * v0;
                         vec3 q1 = p0 + rightEdge * u1 + downEdge * v0;
                         vec3 q2 = p0 + rightEdge * u1 + downEdge * v1;
                         vec3 q3 = p0 + rightEdge * u0 + downEdge * v1;
-
                         drewAny = DrawAffineTexturedWorldQuadPatch(
                             q0,
                             q1,
@@ -327,7 +318,6 @@ namespace TriggerVisualizer {
                         ) || drewAny;
                     }
                 }
-
                 if (patchCount >= G_TileIconPatchBudgetRemaining) {
                     G_TileIconPatchBudgetRemaining = 0;
                 } else {
@@ -366,7 +356,6 @@ namespace TriggerVisualizer {
 
                 vec3 rightDir = uDir;
                 vec3 downDir = vDir;
-
                 bool uIsVertical = Math::Abs(uDir.y) > Math::Abs(vDir.y) && Math::Abs(uDir.y) > 0.5f;
                 bool vIsVertical = Math::Abs(vDir.y) >= Math::Abs(uDir.y) && Math::Abs(vDir.y) > 0.5f;
                 if (uIsVertical || vIsVertical) {
@@ -383,7 +372,6 @@ namespace TriggerVisualizer {
                 vec3 p1 = center + halfRight - halfDown;
                 vec3 p2 = center + halfRight + halfDown;
                 vec3 p3 = center - halfRight + halfDown;
-
                 if (!IsWorldQuadPotentiallyVisible(p0, p1, p2, p3, SCREEN_QUAD_VISIBILITY_MARGIN)) return false;
 
                 nvg::Texture@ texture = Assets::GetSkullTileIconTexture();

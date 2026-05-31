@@ -42,7 +42,6 @@ namespace TriggerVisualizer {
             RuntimeContext@ GetRuntimeContext() {
                 auto app = GetApp();
                 auto ctx = RuntimeContext();
-
                 @ctx.App = app;
                 @ctx.RootMap = cast<CGameCtnChallenge>(app.RootMap);
                 @ctx.Playground = app.CurrentPlayground;
@@ -50,7 +49,6 @@ namespace TriggerVisualizer {
                 ctx.HasPlayground = ctx.Playground !is null;
                 ctx.IsInEditor = app.Editor !is null;
                 ctx.MapUid = GetMapUid(ctx.RootMap);
-
                 auto mapEditor = cast<CGameCtnEditorFree>(app.Editor);
                 auto mediaTrackerEditor = cast<CGameEditorMediaTracker>(app.Editor);
                 ctx.IsMapEditor = mapEditor !is null;

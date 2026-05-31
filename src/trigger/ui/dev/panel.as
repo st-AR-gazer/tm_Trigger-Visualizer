@@ -33,7 +33,6 @@ namespace TriggerVisualizer {
                         UI::Text("    world y anchor " + Text::Format("%.2f", source.GridSpec.WorldYAnchor));
                         UI::Text("    anchor source " + source.GridSpec.WorldYAnchorSource);
                     }
-
                     if (source.MediaTrackerClipTriggerCount() == 0) return;
                     if (!UI::TreeNode("MediaTracker Clip Triggers (" + source.MediaTrackerClipTriggerCount() + ")##trigger-source-mt-clips-" + sourceIndex)) return;
 
@@ -77,17 +76,14 @@ namespace TriggerVisualizer {
                             }
                             UI::TreePop();
                         }
-
                         UI::TreePop();
                     }
-
                     UI::TreePop();
                 }
 
                 void RenderDevPanelContent() {
                     auto ctx = GetCurrentRuntimeContext();
                     auto snapshot = GetCurrentMapSnapshot();
-
                     UI::Text("Runtime");
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("State", ctx.StateLabel()));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Has Map", OnOff(ctx.HasMap)));
@@ -100,7 +96,6 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Replay Editor", OnOff(ctx.IsReplayEditor)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Playable Map", OnOff(ctx.IsPlayableMap)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Map UID", ctx.HasMapUid() ? ctx.MapUid : "<none>"));
-
                     UI::Separator();
                     UI::Text("Render Settings");
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("World Render", OnOff(UI::S_RenderWorld)));
@@ -203,7 +198,6 @@ namespace TriggerVisualizer {
                                 maxEdgeSegments = edgeSegments;
                             }
                         }
-
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Camera Pos", cameraPos.ToString()));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Pos", proximityState.HasVehiclePosition ? proximityState.VehiclePosition.ToString() : "<none>"));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Speed", proximityState.HasVehicleSpeed ? Text::Format("%.1f km/h", proximityState.VehicleSpeedKmh) : "<none>"));
@@ -258,7 +252,6 @@ namespace TriggerVisualizer {
                             UI::TreePop();
                         }
                     }
-
                     UI::Separator();
                     UI::Text("Raw Map Data");
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Snapshot Map UID", snapshot.MapUid.Length > 0 ? snapshot.MapUid : "<none>"));
@@ -298,7 +291,6 @@ namespace TriggerVisualizer {
                         }
                         UI::TreePop();
                     }
-
                     UI::Separator();
                     UI::Text("Computed World Data");
                     if (snapshot.GridSpec is null) {

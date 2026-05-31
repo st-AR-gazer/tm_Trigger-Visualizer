@@ -29,7 +29,6 @@ namespace TriggerVisualizer {
                     distance.x = snapshot.RenderHints.SuggestedDrawDistanceXZ;
                     distance.z = snapshot.RenderHints.SuggestedDrawDistanceXZ;
                 }
-
                 if (snapshot.RenderHints.HasSuggestedDrawDistanceY) {
                     distance.y = snapshot.RenderHints.SuggestedDrawDistanceY;
                 }

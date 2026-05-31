@@ -2,10 +2,8 @@ namespace TriggerVisualizer {
     namespace Trigger {
         const int TRIGGER_SOURCE_OFFZONE = 0;
         const int TRIGGER_SOURCE_MEDIATRACKER = 1;
-
         const string TRIGGER_TARGET_OFFZONE = "offzone";
         const string TRIGGER_TARGET_MEDIATRACKER = "mediatracker";
-
         const string MT_SUBTYPE_CAMERA = "camera";
         const string MT_SUBTYPE_CUSTOM_CAMERA = "customcamera";
         const string MT_SUBTYPE_ORBITAL_CAMERA = "orbitalcamera";
@@ -58,7 +56,6 @@ namespace TriggerVisualizer {
         string NormalizeTriggerTargetKey(const string &in rawKey) {
             string key = rawKey.ToLower().Trim();
             key = key.Replace(" ", "").Replace("-", "").Replace("_", "").Replace("/", "");
-
             if (key == "media" || key == "mt" || key == "mediatracker") return TRIGGER_TARGET_MEDIATRACKER;
             if (key == "offzone" || key == "offzones") return TRIGGER_TARGET_OFFZONE;
 
@@ -219,7 +216,6 @@ namespace TriggerVisualizer {
 
         vec4 GetMediaTrackerTrackColorForSubtype(const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
-
             if (key == MT_SUBTYPE_CAMERA) return vec4(1.0f, 0.0f, 0.0f, 1.0f);
             if (key == MT_SUBTYPE_CUSTOM_CAMERA) return vec4(1.0f, 0.0f, 0.0f, 1.0f);
             if (key == MT_SUBTYPE_ORBITAL_CAMERA) return vec4(0.5019608f, 0.0f, 0.0f, 1.0f);
@@ -415,7 +411,6 @@ namespace TriggerVisualizer {
                 string label = SourceIndexLabel();
                 bool hasCustomLabel = Label.Length > 0;
                 bool hasDetectedLabel = DetectedLabel.Length > 0;
-
                 if (Label.Length > 0) {
                     label = Label;
                 }

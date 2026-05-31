@@ -8,7 +8,6 @@
                     RenderColorSourceOption(COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS);
                     UI::EndCombo();
                 }
-
                 UI::Separator();
                 UI::Text("Base");
                 S_BaseTriggerColor = UI::InputColor4(
@@ -25,7 +24,6 @@
                         "%.2f"
                     );
                 }
-
                 UI::Separator();
                 UI::Text("Color Effects");
                 S_EnableDistanceFadeColor = UI::Checkbox(
@@ -38,7 +36,6 @@
                     S_DistanceFadeColor
                 );
                 UI::EndDisabled();
-
                 S_EnableLineSplitDensityColor = UI::Checkbox(
                     "Tint by line split density##trigger-visualizer-color",
                     S_EnableLineSplitDensityColor
@@ -49,15 +46,12 @@
                     S_DenseLineSplitColor
                 );
                 UI::EndDisabled();
-
                 UI::Separator();
                 UI::Text("Appearance");
                 UI::SetNextItemWidth(220.0f);
                 S_OutlineAlpha = UI::SliderFloat("Outline alpha##trigger-visualizer-color", S_OutlineAlpha, 0.0f, 1.0f);
-
                 UI::SetNextItemWidth(220.0f);
                 S_FillAlpha = UI::SliderFloat("Fill alpha##trigger-visualizer-color", S_FillAlpha, 0.0f, 1.0f);
-
                 UI::SetNextItemWidth(220.0f);
                 S_OutlineWidth = UI::SliderFloat(
                     "Outline width##trigger-visualizer-color",
@@ -66,7 +60,6 @@
                     16.0f,
                     "%.1f px"
                 );
-
                 UI::Separator();
                 UI::Text("Stable Random Colors");
                 S_RandomOutlineSegmentColors = UI::Checkbox(
@@ -77,7 +70,6 @@
                     "Random color per fill section/tile##trigger-visualizer-color",
                     S_RandomFillTileColors
                 );
-
                 ClampWorldRenderingSettings();
                 ClampColorSettings();
             }

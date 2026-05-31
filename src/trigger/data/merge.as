@@ -180,7 +180,6 @@ namespace TriggerVisualizer {
                     group.MergedVolumeCount += NormalizeMergedVolumeCount(members[i].MergedVolumeCount);
                     group.ChildVolumes.InsertLast(CloneTriggerVolumeForMerge(members[i]));
                 }
-
                 if (group.MergedVolumeCount == 0) {
                     group.MergedVolumeCount = uint(group.ChildVolumes.Length);
                 }
@@ -202,7 +201,6 @@ namespace TriggerVisualizer {
                     auto pending = array<uint>();
                     pending.InsertLast(i);
                     consumed[i] = true;
-
                     uint pendingIndex = 0;
                     while (pendingIndex < pending.Length) {
                         uint current = pending[pendingIndex++];

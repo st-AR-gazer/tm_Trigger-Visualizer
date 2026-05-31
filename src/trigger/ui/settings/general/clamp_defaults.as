@@ -249,7 +249,6 @@
                 G_PendingTileIconSourcePath = "";
                 G_TileIconImportStatus = "";
                 TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
-
                 ClampWorldRenderingSettings();
                 ClampLineSplittingSettings();
                 ClampPerformanceSettings();

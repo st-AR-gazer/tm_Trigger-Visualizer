@@ -51,7 +51,6 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::UI::S_LineSplitMaxFullDistance
                 );
                 fullDistance = Math::Min(fullDistance, Math::Max(startDistance - 0.001f, 0.0f));
-
                 float cameraDistance = GetDistanceToWorldLineSegment(cameraPos, start, end);
                 if (cameraDistance >= startDistance) return 1;
                 if (cameraDistance <= fullDistance) return uint(maxSegments);
@@ -147,7 +146,10 @@ namespace TriggerVisualizer {
 
                 uint maxSegments = 0;
                 for (uint i = 0; i < boxes.Length; i++) {
-                    maxSegments = Math::Max(maxSegments, GetMaxTriggerVolumeOutlineEdgeSegments(boxes[i], cameraPos));
+                    maxSegments = Math::Max(
+                        maxSegments,
+                        GetMaxTriggerVolumeOutlineEdgeSegments(boxes[i], cameraPos)
+                    );
                 }
                 return maxSegments;
             }

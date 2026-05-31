@@ -6,15 +6,12 @@ namespace TriggerVisualizer {
 
                 const uint16 O_MAP_CLIPAMBIANCE = GetMemberOffset("CGameCtnChallenge", "ClipAmbiance");
                 const uint16 O_MAP_MEDIATRACKER_SIZE_OFFSET = O_MAP_CLIPAMBIANCE + 0x18;
-
                 const uint16 O_MT_CLIPGROUP_TRIGGER_BUFFER = 0x28;
                 const uint16 O_MT_TRIGGER_MIN_COORDS = 0x0;
                 const uint16 O_MT_TRIGGER_MAX_COORDS = 0xC;
                 const uint16 O_MT_TRIGGER_COORD_BUFFER = 0x18;
                 const uint16 SZ_MT_CLIPGROUP_TRIGGER_STRUCT = 0x40;
-
                 const uint64 BASE_ADDR_END = Dev::BaseAddressEnd();
-
                 const uint MAX_MEDIATRACKER_TRIGGER_PROBE_COUNT = 128;
                 const uint MAX_MEDIATRACKER_TRIGGER_CAPACITY = 4096;
                 const uint MAX_MEDIATRACKER_COORD_SAMPLES_PER_TRIGGER = 16;
@@ -22,7 +19,6 @@ namespace TriggerVisualizer {
                 const uint MAX_MEDIATRACKER_RENDER_COORDS_TOTAL = 20000;
                 const uint MAX_MEDIATRACKER_COORD_CAPACITY_HARD = 1000000;
                 const uint MEDIATRACKER_MAP_BOUNDS_MARGIN_BLOCKS = 16;
-
                 const int MEDIATRACKER_GAME_CAM_DEFAULT = 0;
                 const int MEDIATRACKER_GAME_CAM_INTERNAL = 1;
                 const int MEDIATRACKER_GAME_CAM_EXTERNAL = 2;
@@ -30,13 +26,11 @@ namespace TriggerVisualizer {
                 const int MEDIATRACKER_GAME_CAM_FREE = 4;
                 const int MEDIATRACKER_GAME_CAM_SPECTATOR = 5;
                 const int MEDIATRACKER_GAME_CAM_EXTERNAL_2 = 6;
-
                 const uint16 O_MT_ENTITY_RECORD_DATA = 0x58;
                 const uint16 O_MT_ENTITY_GHOST_NAME = 0x68;
                 const uint16 O_MT_ENTITY_RACE_TIME = 0x7C;
                 const uint16 O_MT_ENTITY_KEYS = 0x140;
                 const uint16 SZ_MT_ENTITY_KEY = 0x1C;
-
                 const uint MAX_MT_ENTITY_KEYS_CAPACITY = 256;
                 const uint MAX_MT_ENTITY_KEY_COLOR_SAMPLES = 16;
 
@@ -121,7 +115,6 @@ namespace TriggerVisualizer {
                         remaining.Delete(startKey);
                         auto queue = array<int3>();
                         queue.InsertLast(uniqueCoords[i]);
-
                         int3 minCoord = uniqueCoords[i];
                         int3 maxCoord = uniqueCoords[i];
                         uint cursor = 0;
@@ -140,7 +133,6 @@ namespace TriggerVisualizer {
                                 queue.InsertLast(neighbor);
                             }
                         }
-
                         ranges.InsertLast(TriggerRangeRaw(minCoord, maxCoord));
                     }
 
@@ -419,7 +411,6 @@ namespace TriggerVisualizer {
                             break;
                         }
                     }
-
                     info.KeysReadable = true;
                     if (colorCount == 0) return true;
 
@@ -440,7 +431,6 @@ namespace TriggerVisualizer {
                     info.GhostName = SafeReadEntityOffsetString(entityBlock, O_MT_ENTITY_GHOST_NAME);
                     info.RaceTime = SafeReadEntityOffsetUint32(entityBlock, O_MT_ENTITY_RACE_TIME);
                     TryReadMediaTrackerEntityTrailColor(entityBlock, info);
-
                     info.IsGhostEntity = info.HasRecordData
                         || info.GhostName.Length > 0
                         || info.HasTrailColor;
@@ -690,7 +680,6 @@ namespace TriggerVisualizer {
                         for (uint blockIndex = 0; blockIndex < track.Blocks.Length; blockIndex++) {
                             auto block = track.Blocks[blockIndex];
                             blockCount++;
-
                             string subtypeKey = MT_SUBTYPE_UNKNOWN;
                             string detectedLabel = "";
                             bool hasSpecificTrackColor = false;
@@ -726,7 +715,6 @@ namespace TriggerVisualizer {
                                 blockColorSum += ColorVec3(blockColor);
                                 blockColorCount++;
                             }
-
                             classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
                                 classification.TargetKeys,
                                 normalizedSubtypeKey
@@ -737,13 +725,11 @@ namespace TriggerVisualizer {
                                     detectedLabel
                                 );
                             }
-
                             if (primarySubtypeKey.Length == 0) {
                                 primarySubtypeKey = subtypeKey;
                             } else if (primarySubtypeKey != subtypeKey) {
                                 mixedSubtypes = true;
                             }
-
                             if (blockCount == 1 && detectedLabel.Length > 0) {
                                 classification.DetectedLabel = detectedLabel;
                             }
@@ -752,7 +738,6 @@ namespace TriggerVisualizer {
                                 classification.EntityInfo += entityInfo;
                             }
                         }
-
                         if (trackHasGhost) {
                             hasGhostTrack = true;
                             classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
@@ -765,7 +750,6 @@ namespace TriggerVisualizer {
                             trackColorCount++;
                         }
                     }
-
                     classification.BlockCount = blockCount;
                     if (blockCount == 0) {
                         classification.SubtypeKey = MT_SUBTYPE_RESET;
@@ -800,14 +784,16 @@ namespace TriggerVisualizer {
                         classification.SubtypeKey = MT_SUBTYPE_GHOST;
                         classification.SubtypeLabel = GetMediaTrackerSubtypeDisplayName(MT_SUBTYPE_GHOST);
                         classification.DetectedLabel = "Ghost";
-                        classification.TargetKeys = AddMediaTrackerSubtypeTargetKey("", MT_SUBTYPE_GHOST);
+                        classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
+                            "",
+                            MT_SUBTYPE_GHOST
+                        );
                         return classification;
                     } else if (trackColorCount > 0) {
                         classification.TrackColor = ColorVec4(trackColorSum * (1.0f / float(trackColorCount)));
                     } else {
                         classification.TrackColor = GetMediaTrackerTrackColorForSubtype(MT_SUBTYPE_UNKNOWN);
                     }
-
                     classification.SubtypeKey = mixedSubtypes ? MT_SUBTYPE_MIXED : primarySubtypeKey;
                     classification.SubtypeLabel = GetMediaTrackerSubtypeDisplayName(classification.SubtypeKey);
                     if (mixedSubtypes) {
@@ -865,7 +851,6 @@ namespace TriggerVisualizer {
                     auto trigger = MediaTrackerClipTriggerSnapshot();
                     trigger.ClipIndex = clipIndex;
                     trigger.TriggerStructPtr = triggerPtr;
-
                     if (clipGroup !is null && clipIndex < clipGroup.Clips.Length) {
                         auto clip = clipGroup.Clips[clipIndex];
                         trigger.HasClip = clip !is null;
@@ -1054,7 +1039,6 @@ namespace TriggerVisualizer {
                         );
                         source.MediaTrackerClipTriggers.InsertLast(trigger);
                         source.RawCoordCount = SaturatingAddUint(source.RawCoordCount, trigger.RawCoordCount);
-
                         if (trigger.HasWarning()) {
                             source.BadTriggerCount++;
                             source.Diagnostics.InsertLast(groupName + " clip #" + tostring(i) + " (" + trigger.DisplayName() + "): " + trigger.Warning);
@@ -1104,7 +1088,6 @@ namespace TriggerVisualizer {
                     if (!renderCells) {
                         source.Diagnostics.InsertLast("MediaTracker exact cell rendering is disabled; no bounds fallback will be drawn for sparse triggers.");
                     }
-
                     ReadMediaTrackerClipGroupIntoSource(source, clipGroup, groupName, renderCells);
                     return source;
                 }

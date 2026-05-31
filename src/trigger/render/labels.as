@@ -34,23 +34,18 @@ namespace TriggerVisualizer {
 
             string BuildTriggerVolumeLabelText(uint index, const TriggerRangeRaw@ rawRange, const TriggerVolume@ box) {
                 array<string> parts;
-
                 if (TriggerVisualizer::Trigger::UI::S_LabelShowIndex) {
                     parts.InsertLast("#" + index);
                 }
-
                 if (box !is null && (box.Source == TRIGGER_SOURCE_MEDIATRACKER || box.IsMergedGroup || TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix)) {
                     parts.InsertLast(box.DisplayLabelWithOptions(TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix, TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex, TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName, TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName));
                 }
-
                 if (TriggerVisualizer::Trigger::UI::S_LabelShowRawRange && rawRange !is null) {
                     parts.InsertLast(FormatRawRangeLabel(rawRange));
                 }
-
                 if (TriggerVisualizer::Trigger::UI::S_LabelShowWorldSize) {
                     parts.InsertLast(FormatWorldSizeLabel(box));
                 }
-
                 if (parts.Length == 0) {
                     parts.InsertLast("#" + index);
                 }
@@ -82,19 +77,16 @@ namespace TriggerVisualizer {
                 nvg::Reset();
                 nvg::FontSize(TriggerVisualizer::Trigger::UI::S_LabelFontSize);
                 nvg::TextAlign(nvg::Align::Left | nvg::Align::Top);
-
                 vec2 textSize = nvg::TextBounds(label);
                 vec2 padding = vec2(6.0f, 4.0f);
                 vec2 cardSize = textSize + padding * 2.0f;
                 vec2 cardPos = screenPos - vec2(cardSize.x * 0.5f, cardSize.y + 8.0f);
                 vec2 textPos = cardPos + padding;
-
                 nvg::BeginPath();
                 nvg::RoundedRect(cardPos, cardSize, 4.0f);
                 nvg::FillColor(GetLabelBackgroundColor(fade));
                 nvg::Fill();
                 nvg::ClosePath();
-
                 nvg::FillColor(vec4(0.0f, 0.0f, 0.0f, 0.65f * Math::Clamp(fade, 0.0f, 1.0f)));
                 nvg::Text(textPos + vec2(1.0f, 1.0f), label);
                 nvg::FillColor(GetLabelTextColor(fade));

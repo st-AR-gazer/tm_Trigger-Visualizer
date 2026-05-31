@@ -16,7 +16,6 @@ namespace TriggerVisualizer {
 
                 vec3 min = box.Min;
                 vec3 max = box.Max;
-
                 corners.InsertLast(vec3(min.x, min.y, min.z));
                 corners.InsertLast(vec3(max.x, min.y, min.z));
                 corners.InsertLast(vec3(max.x, max.y, min.z));

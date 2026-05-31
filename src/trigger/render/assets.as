@@ -131,8 +131,8 @@ namespace TriggerVisualizer {
                             "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                     }
-
                     file.Close();
+
                     return null;
                 }
 

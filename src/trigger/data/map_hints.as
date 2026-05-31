@@ -131,7 +131,6 @@ namespace TriggerVisualizer {
                     "\r\n",
                     "\n"
                 ).Replace("\r", "\n");
-
                 auto lines = normalized.Split("\n");
                 for (uint i = 0; i < lines.Length; i++) {
                     ApplyMapHintCommand(hints, lines[i]);

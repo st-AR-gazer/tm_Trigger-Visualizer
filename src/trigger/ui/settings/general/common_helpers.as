@@ -89,7 +89,6 @@
                     if (RenderProximityModeOption(PROXIMITY_MODE_CAMERA_AND_VEHICLE, value)) value = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
                     UI::EndCombo();
                 }
-
                 if (!IsPlayingProximityMode(value)) value = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
                 return value;
             }
@@ -101,7 +100,6 @@
                     if (RenderProximityModeOption(PROXIMITY_MODE_CAMERA_AND_ORBITAL, value)) value = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                     UI::EndCombo();
                 }
-
                 if (!IsEditorProximityMode(value)) value = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                 return value;
             }

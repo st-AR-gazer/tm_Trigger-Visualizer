@@ -58,7 +58,6 @@ namespace TriggerVisualizer {
                 state.HasVehiclePosition = true;
                 state.VehiclePosition = vehicleState.Position;
                 state.HasVehicleSpeed = true;
-
                 int64 now = Time::Now;
                 if (G_HasPreviousVehiclePosition && G_PreviousVehiclePositionTime > 0) {
                     int64 deltaMs = now - G_PreviousVehiclePositionTime;
@@ -70,7 +69,6 @@ namespace TriggerVisualizer {
                         ) / deltaSeconds * 3.6f;
                     }
                 }
-
                 G_HasPreviousVehiclePosition = true;
                 G_PreviousVehiclePosition = vehicleState.Position;
                 G_PreviousVehiclePositionTime = now;
@@ -84,7 +82,6 @@ namespace TriggerVisualizer {
                 if (ctx.IsPlayableMap || ctx.IsEditorTestMode) {
                     PopulateVehiclePosition(state);
                 }
-
                 if (ctx.IsInEditor && !ctx.IsEditorTestMode) {
                     PopulateOrbitalPoint(state);
                 }

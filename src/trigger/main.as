@@ -146,7 +146,6 @@ namespace TriggerVisualizer {
 
             snapshot.MapComments = TriggerVisualizer::Trigger::Data::ReadMapComments(ctx.RootMap);
             @snapshot.RenderHints = TriggerVisualizer::Trigger::Data::ParseMapRenderHints(snapshot.MapComments);
-
             bool offzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             auto offzoneSource = GetOffzoneTriggerSource(ctx, offzoneEnabled);
             snapshot.RawTriggerSize = offzoneSource.RawTriggerSize;
@@ -154,7 +153,6 @@ namespace TriggerVisualizer {
             @snapshot.GridSpec = offzoneSource.GridSpec;
             snapshot.RawRanges = offzoneSource.RawRanges;
             AddSourceToMapSnapshot(snapshot, offzoneSource);
-
             auto mediaTrackerSource = GetMediaTrackerTriggerSource(ctx);
             AddSourceToMapSnapshot(snapshot, mediaTrackerSource);
 
@@ -177,7 +175,6 @@ namespace TriggerVisualizer {
             for (uint i = 0; i < hints.ForceOffTargets.Length; i++) {
                 if (TriggerVolumeMatchesTargetKey(volume, hints.ForceOffTargets[i])) return true;
             }
-
             if (!TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff) return false;
             for (uint i = 0; i < hints.SuggestOffTargets.Length; i++) {
                 if (TriggerVolumeMatchesTargetKey(volume, hints.SuggestOffTargets[i])) return true;
@@ -200,7 +197,6 @@ namespace TriggerVisualizer {
                 if (!TriggerVisualizer::Trigger::UI::IsTriggerVolumeEnabledBySubtypeSettings(volume)) continue;
                 filteredVolumes.InsertLast(volume);
             }
-
             if (TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes) {
                 auto mergedVolumes = TriggerVisualizer::Trigger::Data::MergeAdjacentTriggerVolumes(filteredVolumes);
                 for (uint i = 0; i < mergedVolumes.Length; i++) {
@@ -233,7 +229,6 @@ namespace TriggerVisualizer {
                 @g_CachedOffzoneRootMap = ctx.RootMap;
                 g_CachedOffzoneSourceRefreshTime = Time::Now;
             }
-
             g_CachedOffzoneSource.Enabled = enabled;
             return g_CachedOffzoneSource;
         }
@@ -262,7 +257,6 @@ namespace TriggerVisualizer {
             uint64 groupBufferPtr = 0;
             @clipGroup = GetRuntimeMediaTrackerClipGroup(ctx, groupName);
             groupBufferPtr = TriggerVisualizer::Trigger::Data::Sources::ReadMediaTrackerClipGroupTriggerBufferPtr(clipGroup);
-
             bool forceRefresh = UsesPeriodicMediaTrackerEditorRefresh(ctx, enabled)
                 && IsMediaTrackerEditorRefreshDue(g_CachedMediaTrackerSourceRefreshTime);
 

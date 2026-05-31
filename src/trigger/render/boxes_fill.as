@@ -70,7 +70,6 @@ namespace TriggerVisualizer {
                 int primitiveClass = ClassifyWorldQuadForFrustum(p0, p1, p2, p3);
                 if (primitiveClass == WORLD_PRIMITIVE_OUTSIDE) return 0;
                 bool isMixed = primitiveClass == WORLD_PRIMITIVE_MIXED;
-
                 int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
                 if (int(items.Length) >= maxFrameTiles) return 0;
 
@@ -284,15 +283,12 @@ namespace TriggerVisualizer {
                     for (uint i = gap; i < items.Length; i++) {
                         WorldFillTileDrawItem@ item = items[i];
                         uint j = i;
-
                         while (j >= gap && items[j - gap].SortDistanceSq < item.SortDistanceSq) {
                             @items[j] = items[j - gap];
                             j -= gap;
                         }
-
                         @items[j] = item;
                     }
-
                     gap /= 2;
                 }
             }
@@ -326,13 +322,11 @@ namespace TriggerVisualizer {
                 int columns = Math::Max(1, int(Math::Ceil(float(displayWidth) / float(cellSize))));
                 int rows = Math::Max(1, int(Math::Ceil(float(displayHeight) / float(cellSize))));
                 auto occupied = array<bool>(uint(columns * rows), false);
-
                 for (int i = int(items.Length) - 1; i >= 0; i--) {
                     WorldFillTileDrawItem@ item = items[uint(i)];
                     if (item is null) continue;
 
                     item.Occluded = false;
-
                     float minX = 0.0f;
                     float maxX = 0.0f;
                     float minY = 0.0f;
@@ -364,7 +358,6 @@ namespace TriggerVisualizer {
                     int maxCellX = Math::Clamp(int(Math::Floor(maxX / float(cellSize))), 0, columns - 1);
                     int minCellY = Math::Clamp(int(Math::Floor(minY / float(cellSize))), 0, rows - 1);
                     int maxCellY = Math::Clamp(int(Math::Floor(maxY / float(cellSize))), 0, rows - 1);
-
                     bool hasCell = false;
                     bool fullyCovered = true;
                     for (int y = minCellY; y <= maxCellY; y++) {
@@ -402,20 +395,17 @@ namespace TriggerVisualizer {
                 }
                 MarkDuplicateWorldFillTileDrawItems(items);
                 MarkScreenOccludedWorldFillTileDrawItems(items);
-
                 nvg::Reset();
                 uint groupStart = 0;
                 while (groupStart < items.Length) {
                     WorldFillTileDrawItem@ groupItem = items[groupStart];
                     vec4 groupColor = groupItem is null ? vec4() : groupItem.Color;
                     uint groupEnd = groupStart + 1;
-
                     while (groupEnd < items.Length) {
                         WorldFillTileDrawItem@ nextItem = items[groupEnd];
                         if (nextItem is null || !AreFillTileColorsEquivalent(nextItem.Color, groupColor)) break;
                         groupEnd++;
                     }
-
                     DrawWorldFillTileFillBatch(items, groupStart, groupEnd, groupColor);
                     DrawWorldFillTileIconBatch(items, groupStart, groupEnd);
                     groupStart = groupEnd;
@@ -439,7 +429,6 @@ namespace TriggerVisualizer {
                 int primitiveClass = ClassifyWorldQuadForFrustum(p0, p1, p2, p3);
                 if (primitiveClass == WORLD_PRIMITIVE_OUTSIDE) return 0;
                 bool isMixed = primitiveClass == WORLD_PRIMITIVE_MIXED;
-
                 float uLen = Math::Distance(origin, origin + uEdge);
                 float vLen = Math::Distance(origin, origin + vEdge);
                 float minTileSize = GetFillTileMinSize();
@@ -454,7 +443,14 @@ namespace TriggerVisualizer {
                 vec3 halfV = vEdge * 0.5f;
 
                 if (splitU && splitV) {
-                    count += CountAdaptiveWorldFaceTiles(origin, halfU, halfV, cameraPos, depth + 1, budget - count);
+                    count += CountAdaptiveWorldFaceTiles(
+                        origin,
+                        halfU,
+                        halfV,
+                        cameraPos,
+                        depth + 1,
+                        budget - count
+                    );
                     if (count >= budget) return count;
                     count += CountAdaptiveWorldFaceTiles(
                         origin + halfU,
@@ -486,7 +482,14 @@ namespace TriggerVisualizer {
                 }
 
                 if (splitU) {
-                    count += CountAdaptiveWorldFaceTiles(origin, halfU, vEdge, cameraPos, depth + 1, budget - count);
+                    count += CountAdaptiveWorldFaceTiles(
+                        origin,
+                        halfU,
+                        vEdge,
+                        cameraPos,
+                        depth + 1,
+                        budget - count
+                    );
                     if (count >= budget) return count;
                     count += CountAdaptiveWorldFaceTiles(
                         origin + halfU,
@@ -499,7 +502,14 @@ namespace TriggerVisualizer {
                     return count;
                 }
 
-                count += CountAdaptiveWorldFaceTiles(origin, uEdge, halfV, cameraPos, depth + 1, budget - count);
+                count += CountAdaptiveWorldFaceTiles(
+                    origin,
+                    uEdge,
+                    halfV,
+                    cameraPos,
+                    depth + 1,
+                    budget - count
+                );
                 if (count >= budget) return count;
                 count += CountAdaptiveWorldFaceTiles(
                     origin + halfV,

@@ -4,10 +4,8 @@ namespace TriggerVisualizer {
     namespace App {
         [Setting hidden name="Dev panel open"]
         bool S_DevPanelOpen = true;
-
         [Setting hidden name="Hide with game UI"]
         bool S_HideWithGame = true;
-
         [Setting hidden name="Hide with Openplanet UI"]
         bool S_HideWithOP = false;
 

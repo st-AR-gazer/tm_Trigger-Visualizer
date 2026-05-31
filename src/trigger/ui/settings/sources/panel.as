@@ -169,9 +169,7 @@ namespace TriggerVisualizer {
 
             void RenderMediaTrackerSubtypeSettingsUI() {
                 UI::Text("MediaTracker Subtypes");
-
                 UI::BeginTabBar("trigger-visualizer-mediatracker-subtype-tabs");
-
                 if (UI::BeginTabItem("Cameras")) {
                     S_ShowMediaTrackerSubtypeCamera = RenderMediaTrackerSubtypeToggleUI(
                         "Show Camera (all)",
@@ -237,7 +235,6 @@ namespace TriggerVisualizer {
                     UI::Unindent();
                     UI::EndTabItem();
                 }
-
                 if (UI::BeginTabItem("Visual FX")) {
                     S_ShowMediaTrackerSubtype2DTriangles = RenderMediaTrackerSubtypeToggleUI(
                         "Show 2D Triangles / 2dTriangles",
@@ -316,7 +313,6 @@ namespace TriggerVisualizer {
                     );
                     UI::EndTabItem();
                 }
-
                 if (UI::BeginTabItem("Gameplay/UI")) {
                     S_ShowMediaTrackerSubtypeCarTrail = RenderMediaTrackerSubtypeToggleUI(
                         "Show Car Trails",
@@ -375,7 +371,6 @@ namespace TriggerVisualizer {
                     );
                     UI::EndTabItem();
                 }
-
                 if (UI::BeginTabItem("Other")) {
                     S_ShowMediaTrackerSubtypeEditingCut = RenderMediaTrackerSubtypeToggleUI(
                         "Show Editing Cut",
@@ -394,23 +389,18 @@ namespace TriggerVisualizer {
                     );
                     UI::EndTabItem();
                 }
-
                 UI::EndTabBar();
             }
 
             void RenderSourcesSettingsUI() {
                 UI::Text("Trigger Sources");
                 auto ctx = TriggerVisualizer::Trigger::GetCurrentRuntimeContext();
-
                 S_MergeAdjacentTriggerVolumes = UI::Checkbox(
                     "Merge adjacent compatible trigger volumes##trigger-visualizer-sources-merge-adjacent",
                     S_MergeAdjacentTriggerVolumes
                 );
-
                 UI::Separator();
-
                 UI::BeginTabBar("trigger-visualizer-source-tabs");
-
                 if (UI::BeginTabItem("Offzone")) {
                     S_ShowOffzoneSource = UI::Checkbox(
                         "Show Offzone (global trigger)##trigger-visualizer-sources-offzone-global",
@@ -444,7 +434,6 @@ namespace TriggerVisualizer {
                     UI::TextDisabled("Effective now: " + (IsOffzoneSourceEnabledForRuntime(ctx) ? "shown" : "hidden"));
                     UI::EndTabItem();
                 }
-
                 if (UI::BeginTabItem("MediaTracker")) {
                     S_ShowMediaTrackerSource = UI::Checkbox(
                         "Show MediaTracker (global trigger)##trigger-visualizer-sources-mediatracker-global",
@@ -480,7 +469,6 @@ namespace TriggerVisualizer {
                     RenderMediaTrackerSubtypeSettingsUI();
                     UI::EndTabItem();
                 }
-
                 UI::EndTabBar();
             }
         }

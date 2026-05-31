@@ -77,7 +77,6 @@ namespace TriggerVisualizer {
                 collectionName = GetMapCollectionName(map);
                 collectionId = GetMapCollectionId(map);
                 decoBaseHeightOffset = map is null ? 0 : map.DecoBaseHeightOffset;
-
                 if (map is null) return float(OFFZONE_WORLD_Y_ANCHOR);
 
                 float knownVistaAnchor = float(OFFZONE_WORLD_Y_ANCHOR);
@@ -131,7 +130,6 @@ namespace TriggerVisualizer {
                     collectionId,
                     decoBaseHeightOffset
                 );
-
                 nat3 normalized = NormalizeCellsPerBlock(cellsPerBlock);
                 vec3 cellWorldSize = vec3(
                     OFFZONE_BLOCK_WORLD_SIZE.x / float(normalized.x),

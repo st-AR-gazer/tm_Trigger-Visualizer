@@ -213,7 +213,6 @@ namespace TriggerVisualizer {
                 {4, 5}, {5, 6}, {6, 7}, {7, 4},
                 {0, 4}, {1, 5}, {2, 6}, {3, 7}
             };
-
             const uint[][] TRIGGER_VOLUME_FACE_INDICES = {
                 {0, 4, 7, 3},
                 {1, 2, 6, 5},
@@ -295,11 +294,9 @@ namespace TriggerVisualizer {
                 hue = Wrap01(hue);
                 saturation = Math::Clamp(saturation, 0.0f, 1.0f);
                 value = Math::Clamp(value, 0.0f, 1.0f);
-
                 float r = Math::Clamp(Math::Abs(hue * 6.0f - 3.0f) - 1.0f, 0.0f, 1.0f);
                 float g = Math::Clamp(2.0f - Math::Abs(hue * 6.0f - 2.0f), 0.0f, 1.0f);
                 float b = Math::Clamp(2.0f - Math::Abs(hue * 6.0f - 4.0f), 0.0f, 1.0f);
-
                 r = (1.0f + (r - 1.0f) * saturation) * value;
                 g = (1.0f + (g - 1.0f) * saturation) * value;
                 b = (1.0f + (b - 1.0f) * saturation) * value;
@@ -346,7 +343,11 @@ namespace TriggerVisualizer {
             }
 
             float GetFillTileMinSize() {
-                return Math::Clamp(TriggerVisualizer::Trigger::UI::S_FillTileMinSize, 2.0f, 64.0f);
+                return Math::Clamp(
+                    TriggerVisualizer::Trigger::UI::S_FillTileMinSize,
+                    2.0f,
+                    64.0f
+                );
             }
 
             float GetTriggerVolumeLineSplitDensityFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
@@ -366,11 +367,9 @@ namespace TriggerVisualizer {
 
             vec4 GetColorModeColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = TriggerVisualizer::Trigger::UI::S_BaseTriggerColor;
-
                 if (TriggerVisualizer::Trigger::UI::S_ColorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
                     color = box.MediaTrackerTrackColor;
                 }
-
                 if (TriggerVisualizer::Trigger::UI::S_EnableDistanceFadeColor) {
                     color = LerpColor(
                         color,
@@ -378,7 +377,6 @@ namespace TriggerVisualizer {
                         1.0f - Math::Clamp(fade, 0.0f, 1.0f)
                     );
                 }
-
                 if (TriggerVisualizer::Trigger::UI::S_EnableLineSplitDensityColor) {
                     color = LerpColor(
                         color,
@@ -428,7 +426,6 @@ namespace TriggerVisualizer {
 
                 fadeBand = Math::Min(fadeBand, renderDistance);
                 float fadeStart = Math::Max(renderDistance - fadeBand, 0.0f);
-
                 if (axisDistance <= fadeStart) return 1.0f;
                 return 1.0f - ((axisDistance - fadeStart) / fadeBand);
             }
@@ -445,7 +442,6 @@ namespace TriggerVisualizer {
                 vec3 renderDistance = GetEffectiveRenderDistanceWorld();
                 vec3 fadeBand = TriggerVisualizer::Trigger::UI::GetRenderFadeBandWorld();
                 vec3 outside = GetDistanceOutsideTriggerVolume(box, cameraPos);
-
                 float fx = GetAxisFadeFactor(outside.x, renderDistance.x, fadeBand.x);
                 float fy = GetAxisFadeFactor(outside.y, renderDistance.y, fadeBand.y);
                 float fz = GetAxisFadeFactor(outside.z, renderDistance.z, fadeBand.z);
@@ -844,7 +840,11 @@ namespace TriggerVisualizer {
                         i
                     );
                     items.InsertLast(item);
-                    AddGeometryKeyCount(edgeKeys, edgeCounts, item.GeometryKey);
+                    AddGeometryKeyCount(
+                        edgeKeys,
+                        edgeCounts,
+                        item.GeometryKey
+                    );
                 }
             }
 
@@ -858,7 +858,13 @@ namespace TriggerVisualizer {
                 auto items = array<WorldOutlineEdgeDrawItem@>();
                 auto edgeKeys = array<string>();
                 auto edgeCounts = array<uint>();
-                CollectTriggerVolumeOutlineEdgeDrawItems(box, boxIndex, items, edgeKeys, edgeCounts);
+                CollectTriggerVolumeOutlineEdgeDrawItems(
+                    box,
+                    boxIndex,
+                    items,
+                    edgeKeys,
+                    edgeCounts
+                );
                 if (items.Length == 0) return;
 
                 nvg::Reset();
@@ -905,7 +911,14 @@ namespace TriggerVisualizer {
 
                 for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
                     auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
-                    DrawWorldLineAdaptiveColored(corners[edge[0]], corners[edge[1]], cameraPos, color, boxIndex, i);
+                    DrawWorldLineAdaptiveColored(
+                        corners[edge[0]],
+                        corners[edge[1]],
+                        cameraPos,
+                        color,
+                        boxIndex,
+                        i
+                    );
                 }
             }
         }
