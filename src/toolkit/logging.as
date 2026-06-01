@@ -207,13 +207,11 @@ void log(
 ) {
     string lineInfo = line >= 0 ? " " + tostring(line) : "";
     while (lineInfo.Length > 0 && lineInfo.Length < 4) lineInfo += " ";
-
     if (_fnName.Length > logging::S_maxFunctionNameLength) {
         _fnName = _fnName.SubStr(0, logging::S_maxFunctionNameLength);
     }
 
     while (_fnName.Length < logging::S_maxFunctionNameLength) _fnName += " ";
-    
     if (!logging::S_showFunctionNameInLogs) _fnName = "";
 
     array<string> tags = {

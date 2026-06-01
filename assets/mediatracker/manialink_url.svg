@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">ManiaLink URL icon</title>
+  <desc id="desc">A dark green link icon for ManiaLink URL.</desc>
+  <defs>
+    <linearGradient id="accent" x1="44" y1="44" x2="214" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#80c080"/>
+      <stop offset="1" stop-color="#1a801a"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.2"/>
+  <g filter="url(#shadow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M105 150l-16 16c-16 16-42-10-26-26l28-28c11-11 27-11 38 0" stroke="#f7f2ff" stroke-width="9"/>
+    <path d="M151 106l16-16c16-16 42 10 26 26l-28 28c-11 11-27 11-38 0" stroke="url(#accent)" stroke-width="9"/>
+    <path d="M113 143l30-30" stroke="#f7f2ff" stroke-width="5"/>
+  </g>
+</svg>

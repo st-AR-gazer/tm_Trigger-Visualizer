@@ -120,7 +120,7 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Split Tint", OnOff(UI::S_EnableLineSplitDensityColor) + " " + UI::S_DenseLineSplitColor.ToString()));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Segment Colors", OnOff(UI::S_RandomOutlineSegmentColors)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Tile Colors", OnOff(UI::S_RandomFillTileColors)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Skull Tile Icons", OnOff(UI::S_ShowSkullTileIcons)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Tile Icons", OnOff(UI::S_ShowSkullTileIcons)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Skull Icon Scale", Text::Format("%.2f", UI::S_SkullTileIconScale)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offscreen Tile Culling", OnOff(UI::S_CullOffscreenWorldTiles)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Screen Occlusion Culling", OnOff(UI::S_CullScreenOccludedWorldTiles)));

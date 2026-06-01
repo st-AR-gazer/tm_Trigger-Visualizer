@@ -3,11 +3,21 @@ namespace TriggerVisualizer {
         namespace Render {
             namespace Assets {
                 const string DEFAULT_SKULL_TILE_ICON_PATH = "src/assets/skull_and_crossbones.png";
+                const string OFFZONE_TILE_ICON_TEXTURE_KEY = "$offzone";
+                const string STORAGE_TILE_ICON_TEXTURE_KEY_PREFIX = "$storage:";
+                const string MEDIATRACKER_TILE_ICON_BASE_PATH = "src/assets/mediatracker/";
                 const string TILE_ICON_STORAGE_DIR = "assets/";
+                const int TILE_ICON_TEXTURE_FLAGS = nvg::TextureFlags::FlipY;
 
                 nvg::Texture@ g_SkullTileIconTexture = null;
                 bool g_TriedLoadSkullTileIconTexture = false;
                 string g_LoadedSkullTileIconPath = "";
+                array<string> g_BuiltInTileIconTexturePaths;
+                array<bool> g_TriedLoadBuiltInTileIconTextures;
+                array<nvg::Texture@> g_BuiltInTileIconTextures;
+                array<string> g_StorageTileIconTexturePaths;
+                array<bool> g_TriedLoadStorageTileIconTextures;
+                array<nvg::Texture@> g_StorageTileIconTextures;
 
                 bool IsSupportedTileIconImagePath(const string &in path) {
                     string ext = Path::GetExtension(path).ToLower();
@@ -34,6 +44,20 @@ namespace TriggerVisualizer {
                     @g_SkullTileIconTexture = null;
                     g_TriedLoadSkullTileIconTexture = false;
                     g_LoadedSkullTileIconPath = "";
+                }
+
+                int FindBuiltInTileIconTextureCacheIndex(const string &in path) {
+                    for (uint i = 0; i < g_BuiltInTileIconTexturePaths.Length; i++) {
+                        if (g_BuiltInTileIconTexturePaths[i] == path) return int(i);
+                    }
+                    return -1;
+                }
+
+                int FindStorageTileIconTextureCacheIndex(const string &in storagePath) {
+                    for (uint i = 0; i < g_StorageTileIconTexturePaths.Length; i++) {
+                        if (g_StorageTileIconTexturePaths[i] == storagePath) return int(i);
+                    }
+                    return -1;
                 }
 
                 string BuildStoredTileIconPath(const string &in sourcePath) {
@@ -139,12 +163,12 @@ namespace TriggerVisualizer {
                 nvg::Texture@ LoadTileIconTexture(const string &in path, bool absolutePath) {
                     try {
                         if (!absolutePath) {
-                            return nvg::LoadTexture(path);
+                            return nvg::LoadTexture(path, TILE_ICON_TEXTURE_FLAGS);
                         }
 
                         MemoryBuffer@ buffer = ReadFileToBuffer(path);
                         if (buffer is null) return null;
-                        return nvg::LoadTexture(buffer);
+                        return nvg::LoadTexture(buffer, TILE_ICON_TEXTURE_FLAGS);
                     } catch {
                         log(
                             "Failed to load tile icon texture: " + path,
@@ -155,6 +179,77 @@ namespace TriggerVisualizer {
                     }
 
                     return null;
+                }
+
+                nvg::Texture@ GetBuiltInTileIconTexture(const string &in path) {
+                    if (path.Length == 0) return null;
+
+                    int cacheIndex = FindBuiltInTileIconTextureCacheIndex(path);
+                    if (cacheIndex < 0) {
+                        g_BuiltInTileIconTexturePaths.InsertLast(path);
+                        g_TriedLoadBuiltInTileIconTextures.InsertLast(false);
+                        g_BuiltInTileIconTextures.InsertLast(null);
+                        cacheIndex = int(g_BuiltInTileIconTexturePaths.Length) - 1;
+                    }
+
+                    uint index = uint(cacheIndex);
+                    if (!g_TriedLoadBuiltInTileIconTextures[index]) {
+                        g_TriedLoadBuiltInTileIconTextures[index] = true;
+                        @g_BuiltInTileIconTextures[index] = LoadTileIconTexture(path, false);
+                        if (g_BuiltInTileIconTextures[index] is null) {
+                            log(
+                                "Failed to load built-in tile icon texture: " + path,
+                                LogLevel::Warning,
+                                175,
+                                "TriggerVisualizer::Trigger::Render::Assets::GetBuiltInTileIconTexture"
+                            );
+                        }
+                    }
+
+                    return g_BuiltInTileIconTextures[index];
+                }
+
+                nvg::Texture@ GetStorageTileIconTexture(const string &in storagePath) {
+                    if (storagePath.Length == 0) return null;
+
+                    int cacheIndex = FindStorageTileIconTextureCacheIndex(storagePath);
+                    if (cacheIndex < 0) {
+                        g_StorageTileIconTexturePaths.InsertLast(storagePath);
+                        g_TriedLoadStorageTileIconTextures.InsertLast(false);
+                        g_StorageTileIconTextures.InsertLast(null);
+                        cacheIndex = int(g_StorageTileIconTexturePaths.Length) - 1;
+                    }
+
+                    uint index = uint(cacheIndex);
+                    if (!g_TriedLoadStorageTileIconTextures[index]) {
+                        g_TriedLoadStorageTileIconTextures[index] = true;
+                        string path = IO::FromStorageFolder(storagePath);
+                        @g_StorageTileIconTextures[index] = LoadTileIconTexture(path, true);
+                        if (g_StorageTileIconTextures[index] is null) {
+                            log(
+                                "Failed to load custom tile icon texture: " + path,
+                                LogLevel::Warning,
+                                210,
+                                "TriggerVisualizer::Trigger::Render::Assets::GetStorageTileIconTexture"
+                            );
+                        }
+                    }
+
+                    return g_StorageTileIconTextures[index];
+                }
+
+                string GetCustomTileIconTextureKey(const string &in storagePath) {
+                    if (storagePath.Length == 0) return "";
+                    return STORAGE_TILE_ICON_TEXTURE_KEY_PREFIX + storagePath;
+                }
+
+                bool IsCustomTileIconTextureKey(const string &in key) {
+                    return key.StartsWith(STORAGE_TILE_ICON_TEXTURE_KEY_PREFIX);
+                }
+
+                string GetCustomTileIconStoragePathFromKey(const string &in key) {
+                    if (!IsCustomTileIconTextureKey(key)) return "";
+                    return key.SubStr(STORAGE_TILE_ICON_TEXTURE_KEY_PREFIX.Length);
                 }
 
                 nvg::Texture@ GetSkullTileIconTexture() {
@@ -186,6 +281,118 @@ namespace TriggerVisualizer {
 
                 bool HasSkullTileIconTexture() {
                     return GetSkullTileIconTexture() !is null;
+                }
+
+                string GetMediaTrackerTileIconPathForSubtype(const string &in rawKey) {
+                    string key = NormalizeTriggerTargetKey(rawKey);
+                    if (key == MT_SUBTYPE_CAMERA) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_player.png";
+                    if (key == MT_SUBTYPE_CUSTOM_CAMERA) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_custom.png";
+                    if (key == MT_SUBTYPE_ORBITAL_CAMERA) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_orbital.png";
+                    if (key == MT_SUBTYPE_PATH_CAMERA) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_path.png";
+                    if (key == MT_SUBTYPE_PLAYER_CAMERA) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_player.png";
+                    if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_default.png";
+                    if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_cam1_external.png";
+                    if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_cam2_external.png";
+                    if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_cam3_internal.png";
+                    if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_helico.png";
+                    if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_free.png";
+                    if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_spectator.png";
+                    if (key == MT_SUBTYPE_2D_TRIANGLES) return MEDIATRACKER_TILE_ICON_BASE_PATH + "triangles_2d.png";
+                    if (key == MT_SUBTYPE_3D_TRIANGLES) return MEDIATRACKER_TILE_ICON_BASE_PATH + "triangles_3d.png";
+                    if (key == MT_SUBTYPE_COLORS_FX) return MEDIATRACKER_TILE_ICON_BASE_PATH + "colors_fx.png";
+                    if (key == MT_SUBTYPE_COLOR_GRADING) return MEDIATRACKER_TILE_ICON_BASE_PATH + "color_grading.png";
+                    if (key == MT_SUBTYPE_DEPTH_OF_FIELD) return MEDIATRACKER_TILE_ICON_BASE_PATH + "depth_of_field.png";
+                    if (key == MT_SUBTYPE_DIRTY_LENS) return MEDIATRACKER_TILE_ICON_BASE_PATH + "dirty_lens.png";
+                    if (key == MT_SUBTYPE_FADING_TRANSITION) return MEDIATRACKER_TILE_ICON_BASE_PATH + "fading_transition.png";
+                    if (key == MT_SUBTYPE_FOG) return MEDIATRACKER_TILE_ICON_BASE_PATH + "fog.png";
+                    if (key == MT_SUBTYPE_GHOST) return MEDIATRACKER_TILE_ICON_BASE_PATH + "ghost.png";
+                    if (key == MT_SUBTYPE_HDR_BLOOM) return MEDIATRACKER_TILE_ICON_BASE_PATH + "hdr_bloom.png";
+                    if (key == MT_SUBTYPE_IMAGE) return MEDIATRACKER_TILE_ICON_BASE_PATH + "image.png";
+                    if (key == MT_SUBTYPE_MANIALINK_UI) return MEDIATRACKER_TILE_ICON_BASE_PATH + "manialink_ui.png";
+                    if (key == MT_SUBTYPE_MANIALINK_URL) return MEDIATRACKER_TILE_ICON_BASE_PATH + "manialink_url.png";
+                    if (key == MT_SUBTYPE_MUSIC_VOLUME) return MEDIATRACKER_TILE_ICON_BASE_PATH + "music_volume.png";
+                    if (key == MT_SUBTYPE_SOUND_FX) return MEDIATRACKER_TILE_ICON_BASE_PATH + "sound_fx.png";
+                    if (key == MT_SUBTYPE_SPECTATORS) return MEDIATRACKER_TILE_ICON_BASE_PATH + "camera/camera_spectator.png";
+                    if (key == MT_SUBTYPE_TEXT) return MEDIATRACKER_TILE_ICON_BASE_PATH + "text.png";
+                    if (key == MT_SUBTYPE_TIME) return MEDIATRACKER_TILE_ICON_BASE_PATH + "time.png";
+                    if (key == MT_SUBTYPE_TIME_SPEED) return MEDIATRACKER_TILE_ICON_BASE_PATH + "time_speed.png";
+                    if (key == MT_SUBTYPE_RESET) return MEDIATRACKER_TILE_ICON_BASE_PATH + "reset.png";
+                    return "";
+                }
+
+                string GetMediaTrackerTileIconTextureKeyForSubtype(const string &in rawKey) {
+                    string key = NormalizeTriggerTargetKey(rawKey);
+                    if (!TriggerVisualizer::Trigger::UI::IsTileIconEnabledForSubtype(key)) return "";
+
+                    string customStoragePath = TriggerVisualizer::Trigger::UI::GetTileIconCustomStoragePathForSubtype(key);
+                    if (customStoragePath.Length > 0) return GetCustomTileIconTextureKey(customStoragePath);
+                    return GetMediaTrackerTileIconPathForSubtype(key);
+                }
+
+                string GetMediaTrackerTileIconTextureKeyFromTargetKeys(const string &in targetKeys) {
+                    const string[] priority = {
+                        MT_SUBTYPE_GHOST,
+                        MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT,
+                        MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1,
+                        MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2,
+                        MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3,
+                        MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO,
+                        MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE,
+                        MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR,
+                        MT_SUBTYPE_CUSTOM_CAMERA,
+                        MT_SUBTYPE_ORBITAL_CAMERA,
+                        MT_SUBTYPE_PATH_CAMERA,
+                        MT_SUBTYPE_PLAYER_CAMERA,
+                        MT_SUBTYPE_CAMERA,
+                        MT_SUBTYPE_2D_TRIANGLES,
+                        MT_SUBTYPE_3D_TRIANGLES,
+                        MT_SUBTYPE_FOG,
+                        MT_SUBTYPE_IMAGE,
+                        MT_SUBTYPE_TEXT,
+                        MT_SUBTYPE_TIME,
+                        MT_SUBTYPE_TIME_SPEED,
+                        MT_SUBTYPE_FADING_TRANSITION,
+                        MT_SUBTYPE_MANIALINK_UI,
+                        MT_SUBTYPE_MANIALINK_URL,
+                        MT_SUBTYPE_SOUND_FX,
+                        MT_SUBTYPE_MUSIC_VOLUME,
+                        MT_SUBTYPE_COLORS_FX,
+                        MT_SUBTYPE_COLOR_GRADING,
+                        MT_SUBTYPE_DIRTY_LENS,
+                        MT_SUBTYPE_HDR_BLOOM,
+                        MT_SUBTYPE_DEPTH_OF_FIELD,
+                        MT_SUBTYPE_SPECTATORS,
+                        MT_SUBTYPE_RESET
+                    };
+
+                    for (uint i = 0; i < priority.Length; i++) {
+                        if (!TriggerTargetListContains(targetKeys, priority[i])) continue;
+                        string textureKey = GetMediaTrackerTileIconTextureKeyForSubtype(priority[i]);
+                        if (textureKey.Length > 0) return textureKey;
+                    }
+
+                    return "";
+                }
+
+                string GetTileIconTextureKeyForVolume(const TriggerVolume@ volume) {
+                    if (volume is null) return "";
+                    if (volume.Source == TRIGGER_SOURCE_OFFZONE) {
+                        return TriggerVisualizer::Trigger::UI::S_ShowOffzoneTileIcon ? OFFZONE_TILE_ICON_TEXTURE_KEY : "";
+                    }
+                    if (volume.Source != TRIGGER_SOURCE_MEDIATRACKER) return "";
+
+                    string textureKey = GetMediaTrackerTileIconTextureKeyForSubtype(volume.SubtypeKey);
+                    if (textureKey.Length > 0) return textureKey;
+                    return GetMediaTrackerTileIconTextureKeyFromTargetKeys(volume.TargetKeys);
+                }
+
+                nvg::Texture@ GetTileIconTextureByKey(const string &in key) {
+                    if (key.Length == 0) return null;
+                    if (key == OFFZONE_TILE_ICON_TEXTURE_KEY) return GetSkullTileIconTexture();
+                    if (IsCustomTileIconTextureKey(key)) {
+                        return GetStorageTileIconTexture(GetCustomTileIconStoragePathFromKey(key));
+                    }
+                    return GetBuiltInTileIconTexture(key);
                 }
             }
         }

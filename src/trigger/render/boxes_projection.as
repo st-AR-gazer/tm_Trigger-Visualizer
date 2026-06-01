@@ -340,9 +340,15 @@ namespace TriggerVisualizer {
                 return normalized;
             }
 
-            bool DrawSkullTileIconOnWorldTile(const vec3 &in origin, const vec3 &in uEdge, const vec3 &in vEdge) {
+            bool DrawTileIconOnWorldTile(
+                const vec3 &in origin,
+                const vec3 &in uEdge,
+                const vec3 &in vEdge,
+                nvg::Texture@ texture
+            ) {
                 if (!ShouldRenderWorldTileIconsNow()) return false;
                 if (G_TileIconPatchBudgetRemaining == 0) return false;
+                if (texture is null) return false;
 
                 float uLen = Math::Distance(origin, origin + uEdge);
                 float vLen = Math::Distance(origin, origin + vEdge);
@@ -373,9 +379,6 @@ namespace TriggerVisualizer {
                 vec3 p2 = center + halfRight + halfDown;
                 vec3 p3 = center - halfRight + halfDown;
                 if (!IsWorldQuadPotentiallyVisible(p0, p1, p2, p3, SCREEN_QUAD_VISIBILITY_MARGIN)) return false;
-
-                nvg::Texture@ texture = Assets::GetSkullTileIconTexture();
-                if (texture is null) return false;
 
                 return DrawSubdividedTexturedWorldQuad(
                     p0,

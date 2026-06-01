@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">CamCustom icon</title>
+  <desc id="desc">A custom free-position camera icon with editable transform handles.</desc>
+  <defs>
+    <linearGradient id="accent" x1="44" y1="44" x2="214" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff6b6b"/>
+      <stop offset="1" stop-color="#ff0000"/>
+    </linearGradient>
+    <linearGradient id="cameraAccent" x1="78" y1="91" x2="177" y2="176" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8ee8ff"/>
+      <stop offset="1" stop-color="#22aaff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.18"/>
+  <g filter="url(#shadow)">
+    <path d="M45 70h166v122H45z" fill="none" stroke="#f7f2ff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10 12" opacity="0.9"/>
+    <circle cx="45" cy="70" r="9" fill="url(#accent)" stroke="#f7f2ff" stroke-width="2.5"/>
+    <circle cx="211" cy="70" r="9" fill="url(#accent)" stroke="#f7f2ff" stroke-width="2.5"/>
+    <circle cx="45" cy="192" r="9" fill="url(#accent)" stroke="#f7f2ff" stroke-width="2.5"/>
+    <circle cx="211" cy="192" r="9" fill="url(#accent)" stroke="#f7f2ff" stroke-width="2.5"/>
+    <path d="M128 64v33M128 64l-14 14M128 64l14 14" fill="none" stroke="url(#accent)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M128 198v-33M128 198l-14-14M128 198l14-14" fill="none" stroke="url(#accent)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M50 131h35M50 131l14-14M50 131l14 14" fill="none" stroke="url(#accent)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M206 131h-35M206 131l-14-14M206 131l-14 14" fill="none" stroke="url(#accent)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M86 111h45l11-15h28c8 0 14 6 14 14v50c0 8-6 14-14 14H86c-8 0-14-6-14-14v-35c0-8 6-14 14-14z" fill="url(#cameraAccent)" stroke="#f7f2ff" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="126" cy="143" r="25" fill="#171820"/>
+    <circle cx="126" cy="143" r="13" fill="url(#cameraAccent)"/>
+    <circle cx="131" cy="137" r="5" fill="#f7f2ff"/>
+    <path d="M86 121h24" stroke="#f7f2ff" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="196" cy="69" r="26" fill="url(#accent)"/>
+    <text x="196" y="84" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" font-weight="900" fill="#171820">C</text>
+  </g>
+</svg>

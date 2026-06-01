@@ -57,7 +57,8 @@ namespace TriggerVisualizer {
                 const vec4 &in baseColor,
                 float tileSeed,
                 uint depth,
-                uint budget
+                uint budget,
+                const string &in tileIconTextureKey = ""
             ) {
                 if (items is null) return 0;
                 if (budget == 0) return 0;
@@ -92,6 +93,7 @@ namespace TriggerVisualizer {
                         tileSeed,
                         GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos)
                     );
+                    item.TileIconTextureKey = tileIconTextureKey;
                     if (!UpdateWorldFillTileScreenProjection(item)) return 0;
                     items.InsertLast(item);
                     return 1;
@@ -111,7 +113,8 @@ namespace TriggerVisualizer {
                         baseColor,
                         tileSeed * 4.0f + 1.0f,
                         depth + 1,
-                        budget - drawn
+                        budget - drawn,
+                        tileIconTextureKey
                     );
                     if (drawn >= budget) return drawn;
                     drawn += CollectAdaptiveWorldFaceTileDrawItems(
@@ -123,7 +126,8 @@ namespace TriggerVisualizer {
                         baseColor,
                         tileSeed * 4.0f + 2.0f,
                         depth + 1,
-                        budget - drawn
+                        budget - drawn,
+                        tileIconTextureKey
                     );
                     if (drawn >= budget) return drawn;
                     drawn += CollectAdaptiveWorldFaceTileDrawItems(
@@ -135,7 +139,8 @@ namespace TriggerVisualizer {
                         baseColor,
                         tileSeed * 4.0f + 3.0f,
                         depth + 1,
-                        budget - drawn
+                        budget - drawn,
+                        tileIconTextureKey
                     );
                     if (drawn >= budget) return drawn;
                     drawn += CollectAdaptiveWorldFaceTileDrawItems(
@@ -147,7 +152,8 @@ namespace TriggerVisualizer {
                         baseColor,
                         tileSeed * 4.0f + 4.0f,
                         depth + 1,
-                        budget - drawn
+                        budget - drawn,
+                        tileIconTextureKey
                     );
                     return drawn;
                 }
@@ -162,7 +168,8 @@ namespace TriggerVisualizer {
                         baseColor,
                         tileSeed * 2.0f + 1.0f,
                         depth + 1,
-                        budget - drawn
+                        budget - drawn,
+                        tileIconTextureKey
                     );
                     if (drawn >= budget) return drawn;
                     drawn += CollectAdaptiveWorldFaceTileDrawItems(
@@ -174,7 +181,8 @@ namespace TriggerVisualizer {
                         baseColor,
                         tileSeed * 2.0f + 2.0f,
                         depth + 1,
-                        budget - drawn
+                        budget - drawn,
+                        tileIconTextureKey
                     );
                     return drawn;
                 }
@@ -188,7 +196,8 @@ namespace TriggerVisualizer {
                     baseColor,
                     tileSeed * 2.0f + 1.0f,
                     depth + 1,
-                    budget - drawn
+                    budget - drawn,
+                    tileIconTextureKey
                 );
                 if (drawn >= budget) return drawn;
                 drawn += CollectAdaptiveWorldFaceTileDrawItems(
@@ -200,7 +209,8 @@ namespace TriggerVisualizer {
                     baseColor,
                     tileSeed * 2.0f + 2.0f,
                     depth + 1,
-                    budget - drawn
+                    budget - drawn,
+                    tileIconTextureKey
                 );
                 return drawn;
             }
@@ -271,7 +281,12 @@ namespace TriggerVisualizer {
 
                 for (uint i = startIndex; i < endIndex && i < items.Length; i++) {
                     if (items[i] is null || items[i].Occluded || !items[i].AllowTileIcon) continue;
-                    DrawSkullTileIconOnWorldTile(items[i].Origin, items[i].UEdge, items[i].VEdge);
+                    DrawTileIconOnWorldTile(
+                        items[i].Origin,
+                        items[i].UEdge,
+                        items[i].VEdge,
+                        Assets::GetTileIconTextureByKey(items[i].TileIconTextureKey)
+                    );
                 }
             }
 
@@ -529,7 +544,8 @@ namespace TriggerVisualizer {
                 const vec3 &in cameraPos,
                 const vec4 &in baseColor,
                 uint boxIndex,
-                uint faceIndex
+                uint faceIndex,
+                const string &in tileIconTextureKey = ""
             ) {
                 if (items is null) return 0;
                 if (corners is null || face is null || face.Length != 4) return 0;
@@ -547,7 +563,8 @@ namespace TriggerVisualizer {
                     baseColor,
                     GetFillTileColorSeed(boxIndex, faceIndex),
                     0,
-                    FILL_TILE_MAX_TILES_PER_FACE
+                    FILL_TILE_MAX_TILES_PER_FACE,
+                    tileIconTextureKey
                 );
             }
 

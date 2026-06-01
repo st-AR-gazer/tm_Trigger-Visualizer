@@ -191,7 +191,7 @@
                 S_ShowSkullTileIcons = false;
                 S_SkullTileIconScale = 0.45f;
                 S_SkullTileIconAlpha = 0.85f;
-                S_CustomTileIconStoragePath = "";
+                ResetTileIconSettingsToDefaults();
                 S_MergeAdjacentTriggerVolumes = true;
                 S_ShowOffzoneSource = true;
                 S_ShowOffzoneInPlayableMap = true;
@@ -246,7 +246,6 @@
                 S_ShowMediaTrackerSubtypeVehicleLights = true;
                 S_ShowMediaTrackerSubtypeReset = true;
                 S_ShowMediaTrackerSubtypeUnknown = true;
-                G_PendingTileIconSourcePath = "";
                 G_TileIconImportStatus = "";
                 TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
                 ClampWorldRenderingSettings();

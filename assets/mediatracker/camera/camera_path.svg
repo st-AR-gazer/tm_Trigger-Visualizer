@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">CamPath icon</title>
+  <desc id="desc">A path camera icon with connected waypoint nodes.</desc>
+  <defs>
+    <linearGradient id="accent" x1="44" y1="44" x2="214" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffd1ff"/>
+      <stop offset="1" stop-color="#ff80ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.22"/>
+  <g filter="url(#shadow)">
+    <path d="M55 172c34-78 83 48 146-42" fill="none" stroke="#f7f2ff" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="55" cy="172" r="10" fill="url(#accent)" stroke="#f7f2ff" stroke-width="2.5"/>
+    <circle cx="125" cy="159" r="10" fill="url(#accent)" stroke="#f7f2ff" stroke-width="2.5"/>
+    <circle cx="201" cy="130" r="10" fill="url(#accent)" stroke="#f7f2ff" stroke-width="2.5"/>
+    <path d="M76 65h51l13-16h31c9 0 16 7 16 16v49c0 9-7 16-16 16H76c-9 0-16-7-16-16V81c0-9 7-16 16-16z" fill="#f7f2ff"/>
+    <circle cx="123" cy="99" r="22" fill="#171820"/>
+    <circle cx="123" cy="99" r="11" fill="url(#accent)"/>
+  </g>
+</svg>

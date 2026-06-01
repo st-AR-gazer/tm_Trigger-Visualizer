@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Fading Transition icon</title>
+  <desc id="desc">Two panels fading through a bright transition band.</desc>
+  <defs>
+    <linearGradient id="accent" x1="44" y1="44" x2="214" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffcc"/>
+      <stop offset="1" stop-color="#ffff80"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="54" y1="128" x2="202" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7f2ff"/>
+      <stop offset="0.5" stop-color="#ffff80"/>
+      <stop offset="1" stop-color="#171820"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.18"/>
+  <g filter="url(#shadow)">
+    <rect x="56" y="78" width="144" height="100" rx="18" fill="url(#fade)" stroke="#f7f2ff" stroke-width="5"/>
+    <path d="M86 96v64M112 96v64M138 96v64M164 96v64" stroke="#171820" stroke-width="3.5" opacity="0.45"/>
+    <path d="M63 198h130" stroke="url(#accent)" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

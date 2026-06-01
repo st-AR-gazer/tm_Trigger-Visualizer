@@ -33,6 +33,7 @@ namespace TriggerVisualizer {
         }
 
         void RenderInterface() {
+            FILE_EXPLORER_BASE_RENDERER();
             if (!ShouldRenderWindow()) return;
 
             bool devPanelOpen = S_DevPanelOpen;

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Fog icon</title>
+  <desc id="desc">Layered cyan fog bands.</desc>
+  <defs>
+    <linearGradient id="accent" x1="44" y1="44" x2="214" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#bfffff"/>
+      <stop offset="1" stop-color="#00ffff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.16"/>
+  <g filter="url(#shadow)" fill="none" stroke-linecap="round">
+    <path d="M66 102c20-21 51-21 69 0 12-10 33-8 43 5 16 0 29 12 29 28" stroke="#f7f2ff" stroke-width="5"/>
+    <path d="M54 137h148" stroke="url(#accent)" stroke-width="9"/>
+    <path d="M74 162h116" stroke="#f7f2ff" stroke-width="6" opacity="0.9"/>
+    <path d="M50 187h60M137 187h69" stroke="url(#accent)" stroke-width="5"/>
+  </g>
+</svg>

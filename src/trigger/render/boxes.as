@@ -160,6 +160,7 @@ namespace TriggerVisualizer {
                 vec3 VEdge;
                 vec4 Color;
                 string GeometryKey;
+                string TileIconTextureKey;
                 float TileSeed = 0.0f;
                 float SortDistanceSq = 0.0f;
                 bool Occluded = false;
@@ -629,6 +630,7 @@ namespace TriggerVisualizer {
                         tileSeed,
                         GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos)
                     );
+                    item.TileIconTextureKey = Assets::GetTileIconTextureKeyForVolume(box);
                     item.AllowTileIcon = false;
                     if (!UpdateWorldFillTileScreenProjection(item)) continue;
 
@@ -738,6 +740,7 @@ namespace TriggerVisualizer {
                             tileSeed,
                             GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos)
                         );
+                        item.TileIconTextureKey = Assets::GetTileIconTextureKeyForVolume(box);
                         item.AllowTileIcon = false;
                         if (!UpdateWorldFillTileScreenProjection(item)) continue;
 
@@ -755,7 +758,16 @@ namespace TriggerVisualizer {
                     auto face = TRIGGER_VOLUME_FACE_INDICES[i];
                     if (IsDuplicateGroupFaceGeometry(corners, face, hiddenFaceKeys, hiddenFaceCounts)) continue;
                     if (!IsTriggerVolumeFaceCameraFacing(corners, face, i, cameraPos)) continue;
-                    CollectAdaptiveWorldFaceFillDrawItems(items, corners, face, cameraPos, color, boxIndex, i);
+                    CollectAdaptiveWorldFaceFillDrawItems(
+                        items,
+                        corners,
+                        face,
+                        cameraPos,
+                        color,
+                        boxIndex,
+                        i,
+                        Assets::GetTileIconTextureKeyForVolume(box)
+                    );
                 }
             }
 
@@ -802,7 +814,16 @@ namespace TriggerVisualizer {
                 for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
                     auto face = TRIGGER_VOLUME_FACE_INDICES[i];
                     if (!IsTriggerVolumeFaceCameraFacing(corners, face, i, cameraPos)) continue;
-                    CollectAdaptiveWorldFaceFillDrawItems(items, corners, face, cameraPos, color, boxIndex, i);
+                    CollectAdaptiveWorldFaceFillDrawItems(
+                        items,
+                        corners,
+                        face,
+                        cameraPos,
+                        color,
+                        boxIndex,
+                        i,
+                        Assets::GetTileIconTextureKeyForVolume(box)
+                    );
                 }
             }
 

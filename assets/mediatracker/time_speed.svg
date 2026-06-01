@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Time Speed icon</title>
+  <desc id="desc">A dark violet speed clock.</desc>
+  <defs>
+    <linearGradient id="accent" x1="44" y1="44" x2="214" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8c3d8c"/>
+      <stop offset="1" stop-color="#330033"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.28"/>
+  <g filter="url(#shadow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M68 154c5-63 115-63 120 0" stroke="#f7f2ff" stroke-width="6"/>
+    <path d="M89 151c8-38 70-38 78 0" stroke="url(#accent)" stroke-width="4.5" opacity="0.9"/>
+    <path d="M128 154l39-43" stroke="url(#accent)" stroke-width="7"/>
+    <circle cx="128" cy="154" r="7" fill="#f7f2ff" stroke="url(#accent)" stroke-width="3"/>
+    <path d="M78 132l-14-5M96 101l-10-12M128 90v-16M160 101l10-12M178 132l14-5" stroke="#f7f2ff" stroke-width="4" opacity="0.85"/>
+    <path d="M65 190h126M88 205h80" stroke="url(#accent)" stroke-width="5"/>
+  </g>
+</svg>
