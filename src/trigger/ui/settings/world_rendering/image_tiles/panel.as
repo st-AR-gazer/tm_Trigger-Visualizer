@@ -406,6 +406,8 @@
                     "Show tile icon at tile centers##trigger-visualizer-image-tiles",
                     S_ShowSkullTileIcons
                 );
+                UI::SameLine();
+                UI::TextDisabled("~20 fps performance drop! (e.g. 90 fps -> 70 fps)");
                 UI::SetNextItemWidth(220.0f);
                 S_SkullTileIconScale = UI::SliderFloat(
                     "Tile icon scale##trigger-visualizer-image-tiles",

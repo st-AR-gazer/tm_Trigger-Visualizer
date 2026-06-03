@@ -146,8 +146,11 @@ namespace TriggerVisualizer {
                 SetMediaTrackerEnabledSubtypesForContext(context, targetKeys);
             }
 
-            void ResetSourceSettingsToDefaults() {
+            void ResetSourceGroupingSettingsToDefaults() {
                 S_MergeAdjacentTriggerVolumes = true;
+            }
+
+            void ResetSourceProfileSettingsToDefaults() {
                 S_ShowOffzoneSource = true;
                 S_ShowOffzoneSourceEditor = true;
                 S_ShowOffzoneSourceMediaTracker = true;
@@ -157,6 +160,11 @@ namespace TriggerVisualizer {
                 S_MediaTrackerEnabledSubtypesPlaying = DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
                 S_MediaTrackerEnabledSubtypesEditor = DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR;
                 S_MediaTrackerEnabledSubtypesMediaTracker = DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;
+            }
+
+            void ResetSourceSettingsToDefaults() {
+                ResetSourceGroupingSettingsToDefaults();
+                ResetSourceProfileSettingsToDefaults();
             }
         }
     }

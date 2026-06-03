@@ -108,8 +108,11 @@
                 S_LabelBackgroundAlpha = Math::Clamp(S_LabelBackgroundAlpha, 0.0f, 1.0f);
             }
 
-            void ResetSettingsToDefaults() {
+            void ResetGeneralTriggerSettingsToDefaults() {
                 S_RenderWorld = true;
+            }
+
+            void ResetLabelContentSettingsToDefaults() {
                 S_ShowLabels = true;
                 S_LabelShowIndex = false;
                 S_LabelShowRawRange = false;
@@ -118,11 +121,26 @@
                 S_LabelShowSourcePrefix = false;
                 S_LabelUseDetectedTriggerName = true;
                 S_LabelShowDetectedTriggerName = false;
+            }
+
+            void ResetLabelAppearanceSettingsToDefaults() {
                 S_LabelFontSize = 16.0f;
                 S_LabelAlpha = 0.95f;
                 S_LabelBackgroundAlpha = 0.20f;
+                ClampLabelSettings();
+            }
+
+            void ResetLabelSettingsToDefaults() {
+                ResetLabelContentSettingsToDefaults();
+                ResetLabelAppearanceSettingsToDefaults();
+            }
+
+            void ResetWorldDisplaySettingsToDefaults() {
                 S_ShowFill = true;
                 S_ShowOutline = true;
+            }
+
+            void ResetWorldDistanceSettingsToDefaults() {
                 S_RenderDistanceXZ = 224.0f;
                 S_RenderDistanceY = 56.0f;
                 S_RenderFadeBandXZ = 32.0f;
@@ -141,10 +159,15 @@
                 S_RenderFadeBandYMediaTracker = 8.0f;
                 S_UnlimitedRenderDistanceMediaTracker = true;
                 S_UseMapSuggestedDrawDistanceMediaTracker = true;
-                S_RespectMapSuggestOff = true;
-                S_OutlineAlpha = 0.20f;
-                S_FillAlpha = 0.03f;
-                S_OutlineWidth = 2.0f;
+                S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
+                S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
+                ClampWorldRenderingSettings();
+                ClampProximitySettings();
+            }
+
+            void ResetWorldLineSplittingSettingsToDefaults() {
                 S_AdaptiveLineSplitting = true;
                 S_LineSplitTargetSegmentLength = 4.0f;
                 S_LineSplitStartDistanceFactor = 0.33f;
@@ -154,16 +177,70 @@
                 S_LineSplitMinFullDistance = 2.0f;
                 S_LineSplitMaxFullDistance = 96.0f;
                 S_LineSplitMaxSegmentsPerEdge = 512;
-                S_MaxOutlineSegmentsPerFrame = 1536;
+                ClampLineSplittingSettings();
+            }
+
+            void ResetWorldColorSettingsToDefaults() {
+                S_ColorMode = COLOR_MODE_MEDIATRACKER_TRACK_COLORS;
+                S_ColorModeMigrated = true;
+                S_ColorSource = COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS;
+                S_EnableDistanceFadeColor = false;
+                S_EnableLineSplitDensityColor = false;
+                S_BaseTriggerColor = vec4(0.85f, 0.71f, 1.0f, 1.0f);
+                S_DistanceFadeColor = vec4(1.0f, 0.90f, 0.20f, 1.0f);
+                S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
+                S_MediaTrackerTrackOutlineHueShift = 0.06f;
+                S_OutlineAlpha = 0.20f;
+                S_FillAlpha = 0.03f;
+                S_OutlineWidth = 2.0f;
+                S_RandomOutlineSegmentColors = false;
+                S_RandomFillTileColors = false;
+                ClampWorldRenderingSettings();
+                ClampColorSettings();
+            }
+
+            void ResetWorldTileIconSettingsToDefaults() {
+                S_ShowSkullTileIcons = false;
+                S_SkullTileIconScale = 0.45f;
+                S_SkullTileIconAlpha = 0.85f;
+                ResetTileIconSettingsToDefaults();
+                G_TileIconImportStatus = "";
+                TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
+                ClampColorSettings();
+            }
+
+            void ResetWorldMapHintSettingsToDefaults() {
+                S_RespectMapSuggestOff = true;
+            }
+
+            void ResetWorldRenderingSettingsToDefaults() {
+                ResetWorldDisplaySettingsToDefaults();
+                ResetWorldDistanceSettingsToDefaults();
+                ResetWorldLineSplittingSettingsToDefaults();
+                ResetWorldColorSettingsToDefaults();
+                ResetWorldTileIconSettingsToDefaults();
+                ResetWorldMapHintSettingsToDefaults();
+            }
+
+            void ResetPerformanceBudgetSettingsToDefaults() {
                 S_CullOffscreenWorldTiles = true;
                 S_CullScreenOccludedWorldTiles = false;
                 S_ScreenOcclusionCellSize = 32;
                 S_FillTileMinSize = 4.0f;
                 S_MaxFillTilesPerFrame = 4096;
+                S_MaxOutlineSegmentsPerFrame = 1536;
                 S_MaxTileIconPatchesPerFrame = 1600;
                 S_TileIconMaxSubdivisions = 6;
+                ClampPerformanceSettings();
+            }
+
+            void ResetPerformanceRefreshSettingsToDefaults() {
                 S_MediaTrackerEditorRefreshIntervalMs = 500;
                 S_OffzoneEditorRefreshIntervalMs = 500;
+                ClampPerformanceSettings();
+            }
+
+            void ResetPerformanceFastDrivingSettingsToDefaults() {
                 S_FastDrivingPerformanceMode = true;
                 S_FastDrivingSpeedThresholdKmh = 60.0f;
                 S_FastDrivingMaxVisibleVolumes = 24;
@@ -173,34 +250,21 @@
                 S_FastDrivingDisableLabels = true;
                 S_FastDrivingDisableTileIcons = true;
                 S_FastDrivingSimplifyGroupedTriggers = true;
-                S_ColorMode = COLOR_MODE_MEDIATRACKER_TRACK_COLORS;
-                S_ColorModeMigrated = true;
-                S_ColorSource = COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS;
-                S_EnableDistanceFadeColor = false;
-                S_EnableLineSplitDensityColor = false;
-                S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
-                S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
-                S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
-                S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
-                S_BaseTriggerColor = vec4(0.85f, 0.71f, 1.0f, 1.0f);
-                S_DistanceFadeColor = vec4(1.0f, 0.90f, 0.20f, 1.0f);
-                S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
-                S_MediaTrackerTrackOutlineHueShift = 0.06f;
-                S_RandomOutlineSegmentColors = false;
-                S_RandomFillTileColors = false;
-                S_ShowSkullTileIcons = false;
-                S_SkullTileIconScale = 0.45f;
-                S_SkullTileIconAlpha = 0.85f;
-                ResetTileIconSettingsToDefaults();
-                ResetSourceSettingsToDefaults();
-                G_TileIconImportStatus = "";
-                TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
-                ClampWorldRenderingSettings();
-                ClampLineSplittingSettings();
                 ClampPerformanceSettings();
-                ClampColorSettings();
-                ClampProximitySettings();
-                ClampLabelSettings();
+            }
+
+            void ResetPerformanceSettingsToDefaults() {
+                ResetPerformanceBudgetSettingsToDefaults();
+                ResetPerformanceRefreshSettingsToDefaults();
+                ResetPerformanceFastDrivingSettingsToDefaults();
+            }
+
+            void ResetSettingsToDefaults() {
+                ResetGeneralTriggerSettingsToDefaults();
+                ResetWorldRenderingSettingsToDefaults();
+                ResetPerformanceSettingsToDefaults();
+                ResetSourceSettingsToDefaults();
+                ResetLabelSettingsToDefaults();
             }
         }
     }

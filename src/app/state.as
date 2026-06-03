@@ -11,10 +11,22 @@ namespace TriggerVisualizer {
 
         string g_MenuIcon = "";
 
-        void ResetSettingsToDefaults() {
-            S_DevPanelOpen = true;
+        void ResetGeneralVisibilitySettingsToDefaults() {
             S_HideWithGame = true;
             S_HideWithOP = false;
+        }
+
+        void ResetGeneralDeveloperSettingsToDefaults() {
+            S_DevPanelOpen = true;
+        }
+
+        void ResetGeneralSettingsToDefaults() {
+            ResetGeneralVisibilitySettingsToDefaults();
+            ResetGeneralDeveloperSettingsToDefaults();
+        }
+
+        void ResetSettingsToDefaults() {
+            ResetGeneralSettingsToDefaults();
         }
 
         string PluginNameHash() {
