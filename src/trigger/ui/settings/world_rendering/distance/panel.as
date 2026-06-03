@@ -37,11 +37,11 @@
                 value = UI::SliderFloat(label + "##" + id, value, minValue, maxValue, "%.0f m");
                 float buttonSize = UI::GetFrameHeight();
                 UI::SameLine();
-                if (UI::Button("-##" + id + "-prev-block", vec2(buttonSize, buttonSize))) {
+                if (TriggerVisualizer::Shared::StyledButton("-##" + id + "-prev-block", vec2(buttonSize, buttonSize))) {
                     value = SnapWorldDistanceToPreviousBlock(value, blockSize);
                 }
                 UI::SameLine();
-                if (UI::Button("+##" + id + "-next-block", vec2(buttonSize, buttonSize))) {
+                if (TriggerVisualizer::Shared::StyledButton("+##" + id + "-next-block", vec2(buttonSize, buttonSize))) {
                     value = SnapWorldDistanceToNextBlock(value, blockSize);
                 }
                 UI::SameLine();

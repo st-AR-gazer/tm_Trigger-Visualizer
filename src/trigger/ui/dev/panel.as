@@ -108,9 +108,11 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fade Band", UI::GetRenderFadeBandWorldForRuntime(ctx).ToString() + " m"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Area", UI::GetRuntimeAreaLabel(ctx)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Source", UI::GetRenderProximityModeLabel(UI::GetRenderProximityModeForRuntime(ctx))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Source", OnOff(UI::S_ShowOffzoneSource)));
+                    int sourceContext = UI::GetSourceSettingsContextForRuntime(ctx);
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Source Profile", UI::GetSourceSettingsContextLabel(sourceContext)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Source", OnOff(UI::IsOffzoneSourceEnabledForContext(sourceContext))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Effective", OnOff(UI::IsOffzoneSourceEnabledForRuntime(ctx))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Source", OnOff(UI::S_ShowMediaTrackerSource)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Source", OnOff(UI::IsMediaTrackerSourceEnabledForContext(sourceContext))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Effective", OnOff(UI::IsMediaTrackerSourceEnabledForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Use Map Distance", OnOff(UI::UseMapSuggestedDrawDistanceForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Respect Suggest Off", OnOff(UI::S_RespectMapSuggestOff)));

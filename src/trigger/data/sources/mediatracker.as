@@ -767,9 +767,13 @@ namespace TriggerVisualizer {
                     classification.HasTrackColor = true;
                     if (hasGhostTrack && hasPlayerCameraTrack) {
                         classification.TrackColor = GetMediaTrackerGpsTrackColor();
-                        classification.SubtypeKey = MT_SUBTYPE_GHOST;
-                        classification.SubtypeLabel = GetMediaTrackerSubtypeDisplayName(MT_SUBTYPE_GHOST);
+                        classification.SubtypeKey = MT_SUBTYPE_GPS;
+                        classification.SubtypeLabel = GetMediaTrackerSubtypeDisplayName(MT_SUBTYPE_GPS);
                         classification.DetectedLabel = "GPS";
+                        classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
+                            classification.TargetKeys,
+                            MT_SUBTYPE_GPS
+                        );
                         classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
                             classification.TargetKeys,
                             MT_SUBTYPE_GHOST

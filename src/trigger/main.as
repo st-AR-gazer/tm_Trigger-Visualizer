@@ -113,7 +113,7 @@ namespace TriggerVisualizer {
 
             return ctx.RootMap is g_CachedMapSnapshotRootMap
                 && g_CachedMapSnapshotContextKey == GetMapSnapshotContextKey(ctx)
-                && g_CachedMapSnapshotFilterKey == TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey()
+                && g_CachedMapSnapshotFilterKey == TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey(ctx)
                 && g_CachedMapSnapshotOffzoneEnabled == offzoneEnabled
                 && g_CachedMapSnapshotMediaTrackerEnabled == mediaTrackerEnabled;
         }
@@ -131,7 +131,7 @@ namespace TriggerVisualizer {
 
             @g_CachedMapSnapshotRootMap = ctx.RootMap;
             g_CachedMapSnapshotContextKey = GetMapSnapshotContextKey(ctx);
-            g_CachedMapSnapshotFilterKey = TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey();
+            g_CachedMapSnapshotFilterKey = TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey(ctx);
             g_CachedMapSnapshotOffzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             g_CachedMapSnapshotMediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
             g_CachedMapSnapshotRefreshTime = Time::Now;
@@ -152,9 +152,9 @@ namespace TriggerVisualizer {
             snapshot.RawBufferPtr = offzoneSource.RawBufferPtr;
             @snapshot.GridSpec = offzoneSource.GridSpec;
             snapshot.RawRanges = offzoneSource.RawRanges;
-            AddSourceToMapSnapshot(snapshot, offzoneSource);
+            AddSourceToMapSnapshot(snapshot, offzoneSource, ctx);
             auto mediaTrackerSource = GetMediaTrackerTriggerSource(ctx);
-            AddSourceToMapSnapshot(snapshot, mediaTrackerSource);
+            AddSourceToMapSnapshot(snapshot, mediaTrackerSource, ctx);
 
             return snapshot;
         }
@@ -183,7 +183,11 @@ namespace TriggerVisualizer {
             return false;
         }
 
-        void AddSourceToMapSnapshot(MapSnapshot@ snapshot, TriggerSourceSnapshot@ source) {
+        void AddSourceToMapSnapshot(
+            MapSnapshot@ snapshot,
+            TriggerSourceSnapshot@ source,
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx
+        ) {
             if (snapshot is null || source is null) return;
 
             snapshot.Sources.InsertLast(source);
@@ -194,7 +198,7 @@ namespace TriggerVisualizer {
             for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
                 auto volume = source.TriggerVolumes[i];
                 if (IsTriggerVolumeDisabledByMapHints(snapshot.RenderHints, volume)) continue;
-                if (!TriggerVisualizer::Trigger::UI::IsTriggerVolumeEnabledBySubtypeSettings(volume)) continue;
+                if (!TriggerVisualizer::Trigger::UI::IsTriggerVolumeEnabledBySubtypeSettings(volume, ctx)) continue;
                 filteredVolumes.InsertLast(volume);
             }
             if (TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes) {

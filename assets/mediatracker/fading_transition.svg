@@ -16,7 +16,7 @@
     </filter>
   </defs>
   <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
-  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.18"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.58"/>
   <g filter="url(#shadow)">
     <rect x="56" y="78" width="144" height="100" rx="18" fill="url(#fade)" stroke="#f7f2ff" stroke-width="5"/>
     <path d="M86 96v64M112 96v64M138 96v64M164 96v64" stroke="#171820" stroke-width="3.5" opacity="0.45"/>

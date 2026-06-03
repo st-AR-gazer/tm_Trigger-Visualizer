@@ -51,7 +51,7 @@
             [Setting hidden name="Trigger: Render MediaTracker fade band Y" min=0 max=50000]
             float S_RenderFadeBandYMediaTracker = 8.0f;
             [Setting hidden name="Trigger: Unlimited MediaTracker render distance"]
-            bool S_UnlimitedRenderDistanceMediaTracker = false;
+            bool S_UnlimitedRenderDistanceMediaTracker = true;
             [Setting hidden name="Trigger: Use MediaTracker map suggested draw distance"]
             bool S_UseMapSuggestedDrawDistanceMediaTracker = true;
             [Setting hidden name="Trigger: Render proximity mode" min=0 max=2]

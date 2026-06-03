@@ -12,7 +12,7 @@
     </filter>
   </defs>
   <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
-  <rect x="24" y="24" width="208" height="208" rx="48" fill="#80ff00" opacity="0.15"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="#80ff00" opacity="0.45"/>
   <g filter="url(#shadow)">
     <circle cx="128" cy="128" r="78" fill="url(#accent)"/>
     <path d="M128 57v142M57 128h142M78 78l100 100M178 78L78 178" stroke="#f7f2ff" stroke-width="5" stroke-linecap="round"/>

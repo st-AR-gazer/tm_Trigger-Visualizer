@@ -11,7 +11,7 @@
     </filter>
   </defs>
   <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
-  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.18"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.58"/>
   <g filter="url(#shadow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <path d="M128 79l13 43 45 52M73 174l68-52" stroke="url(#accent)" stroke-width="5"/>
     <path d="M73 174l55-95 58 95z" stroke="#f7f2ff" stroke-width="6"/>

@@ -7,7 +7,6 @@ namespace TriggerVisualizer {
                 const string STORAGE_TILE_ICON_TEXTURE_KEY_PREFIX = "$storage:";
                 const string MEDIATRACKER_TILE_ICON_BASE_PATH = "src/assets/mediatracker/";
                 const string TILE_ICON_STORAGE_DIR = "assets/";
-                const int TILE_ICON_TEXTURE_FLAGS = nvg::TextureFlags::FlipY;
 
                 nvg::Texture@ g_SkullTileIconTexture = null;
                 bool g_TriedLoadSkullTileIconTexture = false;
@@ -82,7 +81,7 @@ namespace TriggerVisualizer {
                         log(
                             "Cannot import tile icon because the source file does not exist: " + sourcePath,
                             LogLevel::Warning,
-                            58,
+                            81,
                             "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                         return "";
@@ -92,7 +91,7 @@ namespace TriggerVisualizer {
                         log(
                             "Cannot import tile icon because the file type is not supported: " + sourcePath,
                             LogLevel::Warning,
-                            68,
+                            91,
                             "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                         return "";
@@ -112,7 +111,7 @@ namespace TriggerVisualizer {
                         log(
                             "Failed to copy tile icon image to storage: " + sourcePath + " -> " + targetPath,
                             LogLevel::Error,
-                            88,
+                            111,
                             "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                         return "";
@@ -122,7 +121,7 @@ namespace TriggerVisualizer {
                         log(
                             "Tile icon copy did not create the expected storage file: " + targetPath,
                             LogLevel::Error,
-                            98,
+                            121,
                             "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                         return "";
@@ -151,7 +150,7 @@ namespace TriggerVisualizer {
                         log(
                             "Failed to read tile icon image file: " + path,
                             LogLevel::Warning,
-                            127,
+                            150,
                             "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                     }
@@ -163,17 +162,17 @@ namespace TriggerVisualizer {
                 nvg::Texture@ LoadTileIconTexture(const string &in path, bool absolutePath) {
                     try {
                         if (!absolutePath) {
-                            return nvg::LoadTexture(path, TILE_ICON_TEXTURE_FLAGS);
+                            return nvg::LoadTexture(path);
                         }
 
                         MemoryBuffer@ buffer = ReadFileToBuffer(path);
                         if (buffer is null) return null;
-                        return nvg::LoadTexture(buffer, TILE_ICON_TEXTURE_FLAGS);
+                        return nvg::LoadTexture(buffer);
                     } catch {
                         log(
                             "Failed to load tile icon texture: " + path,
                             LogLevel::Warning,
-                            149,
+                            172,
                             "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                         );
                     }
@@ -200,8 +199,8 @@ namespace TriggerVisualizer {
                             log(
                                 "Failed to load built-in tile icon texture: " + path,
                                 LogLevel::Warning,
-                                175,
-                                "TriggerVisualizer::Trigger::Render::Assets::GetBuiltInTileIconTexture"
+                                199,
+                                "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                             );
                         }
                     }
@@ -229,8 +228,8 @@ namespace TriggerVisualizer {
                             log(
                                 "Failed to load custom tile icon texture: " + path,
                                 LogLevel::Warning,
-                                210,
-                                "TriggerVisualizer::Trigger::Render::Assets::GetStorageTileIconTexture"
+                                228,
+                                "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
                             );
                         }
                     }
@@ -265,8 +264,8 @@ namespace TriggerVisualizer {
                             log(
                                 "Failed to load configured tile icon texture: " + path,
                                 LogLevel::Warning,
-                                170,
-                                "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                                264,
+                                "TriggerVisualizer::Trigger::Render::Assets::GetCustomTileIconStoragePathFromKey"
                             );
 
                             if (path != DEFAULT_SKULL_TILE_ICON_PATH) {

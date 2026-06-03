@@ -142,7 +142,7 @@
                 UI::TableNextColumn();
                 UI::Text(label);
                 UI::TableNextColumn();
-                if (UI::Button("Reset##reset-icon-" + key)) {
+                if (TriggerVisualizer::Shared::StyledButton("Reset##reset-icon-" + key)) {
                     ResetTileIconPath(key, isOffzone, defaultPath);
                 }
                 UI::TableNextColumn();
@@ -161,7 +161,7 @@
                     ApplyTileIconSourcePath(key, isOffzone, defaultPath, inputValue);
                 }
                 UI::TableNextColumn();
-                if (UI::Button(Icons::FolderOpen + "##explore-icon-" + key)) {
+                if (TriggerVisualizer::Shared::StyledButton(Icons::FolderOpen + "##explore-icon-" + key)) {
                     OpenTileIconFileExplorer(
                         key,
                         GetTileIconDisplayPath(defaultPath, storagePath)

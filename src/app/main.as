@@ -1,10 +1,20 @@
 namespace TriggerVisualizer {
     namespace App {
+        void PushPluginButtonStyleUI() {
+            UI::PushStyleColor(UI::Col::Button, vec4(0.16f, 0.30f, 0.36f, 0.78f));
+            UI::PushStyleColor(UI::Col::ButtonHovered, vec4(0.20f, 0.39f, 0.46f, 0.92f));
+            UI::PushStyleColor(UI::Col::ButtonActive, vec4(0.24f, 0.46f, 0.54f, 1.00f));
+        }
+
+        void PopPluginButtonStyleUI() {
+            UI::PopStyleColor(3);
+        }
+
         void Main() {
             log(
                 "Loaded " + TriggerVisualizer::PluginMeta.Name + " v" + TriggerVisualizer::PluginMeta.Version,
                 LogLevel::Debug,
-                4,
+                14,
                 "TriggerVisualizer::App::Main"
             );
             TriggerVisualizer::Trigger::Main();
@@ -33,13 +43,17 @@ namespace TriggerVisualizer {
         }
 
         void RenderInterface() {
+            PushPluginButtonStyleUI();
             FILE_EXPLORER_BASE_RENDERER();
+            PopPluginButtonStyleUI();
             if (!ShouldRenderWindow()) return;
 
             bool devPanelOpen = S_DevPanelOpen;
+            PushPluginButtonStyleUI();
             if (UI::Begin(MenuTitle() + "###dev-panel-" + TriggerVisualizer::PluginMeta.ID, devPanelOpen, UI::WindowFlags::None)) {
                 RenderWindow();
             }
+            PopPluginButtonStyleUI();
             S_DevPanelOpen = devPanelOpen;
             UI::End();
         }

@@ -3,7 +3,9 @@ namespace TriggerVisualizer {
         void RenderWorldRenderingSettingsUI() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-world-rendering", vec2(0, 0), false);
             if (open) {
+                PushPluginButtonStyleUI();
                 TriggerVisualizer::Trigger::UI::RenderWorldRenderingSettingsUI();
+                PopPluginButtonStyleUI();
             }
             UI::EndChild();
         }
@@ -11,7 +13,9 @@ namespace TriggerVisualizer {
         void RenderLineSplittingSettingsUI() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-line-splitting", vec2(0, 0), false);
             if (open) {
+                PushPluginButtonStyleUI();
                 TriggerVisualizer::Trigger::UI::RenderLineSplittingSettingsUI();
+                PopPluginButtonStyleUI();
             }
             UI::EndChild();
         }
@@ -19,7 +23,9 @@ namespace TriggerVisualizer {
         void RenderPerformanceSettingsUI() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-performance", vec2(0, 0), false);
             if (open) {
+                PushPluginButtonStyleUI();
                 TriggerVisualizer::Trigger::UI::RenderPerformanceSettingsUI();
+                PopPluginButtonStyleUI();
             }
             UI::EndChild();
         }
@@ -27,7 +33,9 @@ namespace TriggerVisualizer {
         void RenderColorSettingsUI() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-color", vec2(0, 0), false);
             if (open) {
+                PushPluginButtonStyleUI();
                 TriggerVisualizer::Trigger::UI::RenderColorSettingsUI();
+                PopPluginButtonStyleUI();
             }
             UI::EndChild();
         }
@@ -35,7 +43,9 @@ namespace TriggerVisualizer {
         void RenderProximitySettingsUI() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-proximity", vec2(0, 0), false);
             if (open) {
+                PushPluginButtonStyleUI();
                 TriggerVisualizer::Trigger::UI::RenderProximitySettingsUI();
+                PopPluginButtonStyleUI();
             }
             UI::EndChild();
         }
@@ -43,7 +53,9 @@ namespace TriggerVisualizer {
         void RenderLabelsSettingsUI() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-labels", vec2(0, 0), false);
             if (open) {
+                PushPluginButtonStyleUI();
                 TriggerVisualizer::Trigger::UI::RenderLabelsSettingsUI();
+                PopPluginButtonStyleUI();
             }
             UI::EndChild();
         }
@@ -51,7 +63,9 @@ namespace TriggerVisualizer {
         void RenderSourcesSettingsUI() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-sources", vec2(0, 0), false);
             if (open) {
+                PushPluginButtonStyleUI();
                 TriggerVisualizer::Trigger::UI::RenderSourcesSettingsUI();
+                PopPluginButtonStyleUI();
             }
             UI::EndChild();
         }
@@ -59,7 +73,9 @@ namespace TriggerVisualizer {
         void RenderLoggingSettingsUI() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-logging", vec2(0, 0), false);
             if (open) {
+                PushPluginButtonStyleUI();
                 logging::RenderSettingsUI("trigger-visualizer-logging");
+                PopPluginButtonStyleUI();
             }
             UI::EndChild();
         }

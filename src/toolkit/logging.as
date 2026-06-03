@@ -172,7 +172,7 @@ namespace logging {
         writeToFile = UI::Checkbox("Write a copy of each log line to file##" + idPrefix, writeToFile);
         if (writeToFile != S_writeLogToFile) S_writeLogToFile = writeToFile;
         UI::TextDisabled(g_diagFilePath.Length > 0 ? g_diagFilePath : IO::FromStorageFolder(kLogsFolder));
-        if (UI::Button("Copy log path##" + idPrefix)) IO::SetClipboard(g_diagFilePath);
+        if (TriggerVisualizer::Shared::StyledButton("Copy log path##" + idPrefix)) IO::SetClipboard(g_diagFilePath);
 
         UI::Separator();
         S_showDefaultLogs = UI::Checkbox("Mirror standard levels to Openplanet log##" + idPrefix, S_showDefaultLogs);

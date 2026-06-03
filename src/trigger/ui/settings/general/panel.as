@@ -7,13 +7,13 @@ namespace TriggerVisualizer {
                 UI::Text("Restore Trigger Visualizer defaults?");
                 UI::TextDisabled("This resets General, World Rendering, Performance, Sources, and Labels settings.");
                 UI::Separator();
-                if (UI::Button("Restore defaults##trigger-visualizer-confirm-restore-defaults")) {
+                if (TriggerVisualizer::Shared::StyledButton("Restore defaults##trigger-visualizer-confirm-restore-defaults")) {
                     ResetSettingsToDefaults();
                     TriggerVisualizer::Trigger::UI::ResetSettingsToDefaults();
                     UI::CloseCurrentPopup();
                 }
                 UI::SameLine();
-                if (UI::Button("Cancel##trigger-visualizer-cancel-restore-defaults")) {
+                if (TriggerVisualizer::Shared::StyledButton("Cancel##trigger-visualizer-cancel-restore-defaults")) {
                     UI::CloseCurrentPopup();
                 }
                 UI::EndPopup();
@@ -36,7 +36,7 @@ namespace TriggerVisualizer {
                 S_DevPanelOpen = UI::Checkbox("Show dev panel##trigger-visualizer-settings-general", S_DevPanelOpen);
                 UI::Separator();
                 UI::Text("Defaults");
-                if (UI::Button("Restore defaults##trigger-visualizer-open-restore-defaults")) {
+                if (TriggerVisualizer::Shared::StyledButton("Restore defaults##trigger-visualizer-open-restore-defaults")) {
                     UI::OpenPopup(RESTORE_DEFAULTS_POPUP_ID);
                 }
                 RenderRestoreDefaultsModal();

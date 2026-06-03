@@ -27,6 +27,7 @@ namespace TriggerVisualizer {
         const string MT_SUBTYPE_FADING_TRANSITION = "fadingtransition";
         const string MT_SUBTYPE_FOG = "fog";
         const string MT_SUBTYPE_GHOST = "ghost";
+        const string MT_SUBTYPE_GPS = "gps";
         const string MT_SUBTYPE_HDR_BLOOM = "hdrbloom";
         const string MT_SUBTYPE_IMAGE = "image";
         const string MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX = "inertialtrackingcamfx";
@@ -82,7 +83,8 @@ namespace TriggerVisualizer {
             if (key == "editingcut" || key == "cut") return MT_SUBTYPE_EDITING_CUT;
             if (key == "fadingtransition" || key == "fadetransition" || key == "transitionfade" || key == "fade") return MT_SUBTYPE_FADING_TRANSITION;
             if (key == "fog") return MT_SUBTYPE_FOG;
-            if (key == "ghost" || key == "ghosts" || key == "gps" || key == "entity" || key == "entities") return MT_SUBTYPE_GHOST;
+            if (key == "ghost" || key == "ghosts" || key == "entity" || key == "entities") return MT_SUBTYPE_GHOST;
+            if (key == "gps") return MT_SUBTYPE_GPS;
             if (key == "hdrbloom" || key == "bloomhdr" || key == "bloom") return MT_SUBTYPE_HDR_BLOOM;
             if (key == "image" || key == "images") return MT_SUBTYPE_IMAGE;
             if (key == "inertialtrackingcamfx" || key == "inertialtracking" || key == "camfxinertialtracking") return MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX;
@@ -193,6 +195,7 @@ namespace TriggerVisualizer {
             if (key == MT_SUBTYPE_FADING_TRANSITION) return "Fading Transition";
             if (key == MT_SUBTYPE_FOG) return "Fog";
             if (key == MT_SUBTYPE_GHOST) return "Ghost";
+            if (key == MT_SUBTYPE_GPS) return "GPS";
             if (key == MT_SUBTYPE_HDR_BLOOM) return "HDR Bloom";
             if (key == MT_SUBTYPE_IMAGE) return "Image";
             if (key == MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX) return "Inertial Tracking CamFX";
@@ -239,6 +242,7 @@ namespace TriggerVisualizer {
             if (key == MT_SUBTYPE_FADING_TRANSITION) return vec4(1.0f, 1.0f, 0.5019608f, 1.0f);
             if (key == MT_SUBTYPE_FOG) return vec4(0.0f, 1.0f, 1.0f, 1.0f);
             if (key == MT_SUBTYPE_GHOST) return vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            if (key == MT_SUBTYPE_GPS) return GetMediaTrackerGpsTrackColor();
             if (key == MT_SUBTYPE_HDR_BLOOM) return vec4(0.5019608f, 1.0f, 0.0f, 1.0f);
             if (key == MT_SUBTYPE_IMAGE) return vec4(0.0f, 0.5019608f, 0.0f, 1.0f);
             if (key == MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX) return vec4(0.2509804f, 0.5019608f, 0.5019608f, 1.0f);

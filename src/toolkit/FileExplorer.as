@@ -91,7 +91,7 @@
  *    array<ElementInfo@> selectedElements;
  *    
  *    void SomeRenderFunction() {
- *        if (UI::Button(Icons::FolderOpen + " Open File Explorer")) {
+ *        if (TriggerVisualizer::Shared::StyledButton(Icons::FolderOpen + " Open File Explorer")) {
  *            FileExplorer::fe_Start(
  *                "Local Files",                       // Unique session ID
  *                true,                                // _mustReturn: Require selection
@@ -125,7 +125,7 @@
  * 
  *        // and if you only want to get the paths you can do this instead:
  * 
- *        if (UI::Button(Icons::FolderOpen + " Open File Explorer")) {
+ *        if (TriggerVisualizer::Shared::StyledButton(Icons::FolderOpen + " Open File Explorer")) {
  *            FileExplorer::fe_Start(
  *                "Local Files",                       // Unique session ID
  *                true,                                // _mustReturn: Require selection
@@ -273,7 +273,7 @@
 
         if (UI::Begin("Path explorer", true, UI::WindowFlags::AlwaysAutoResize)) {
             // Button to open the File Explorer for Paths
-            if (UI::Button(Icons::FolderOpen + " Open File Explorer")) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::FolderOpen + " Open File Explorer")) {
                 FileExplorer::fe_Start(
                     "Local Files",                       // Unique session ID
                     true,                                // _mustReturn: Require selection
@@ -287,7 +287,7 @@
             }
 
             // Button to open the File Explorer for ElementInfo
-            if (UI::Button(Icons::Info + " Open Element Explorer")) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::Info + " Open Element Explorer")) {
                 FileExplorer::fe_Start(
                     "ElementInfo Session",               // Unique session ID
                     true,                                // _mustReturn: Require selection
@@ -565,8 +565,8 @@ namespace FileExplorer {
                     log(
                         "Settings version mismatch or not found. Settings cannot be loaded.",
                         LogLevel::Error,
-                        547,
-                        "ClearSelections"
+                        565,
+                        "FileExplorer::ClearSelections"
                     );
                 }
             }
@@ -676,7 +676,12 @@ namespace FileExplorer {
                     Text::ParseFloat(parts[3])
                 );
             }
-            return vec4(1, 1, 1, 1);
+            return vec4(
+                1,
+                1,
+                1,
+                1
+            );
         }
     }
 
@@ -728,8 +733,8 @@ namespace FileExplorer {
                 log(
                     "Return type is not 'path'. Cannot get selected paths.",
                     LogLevel::Warning,
-                    710,
-                    "IsSelectionComplete"
+                    728,
+                    "FileExplorer::IsSelectionComplete"
                 );
                 return null;
             }
@@ -746,8 +751,8 @@ namespace FileExplorer {
                 log(
                     "Return type is not 'ElementInfo'. Cannot get selected elements.",
                     LogLevel::Warning,
-                    721,
-                    "IsSelectionComplete"
+                    746,
+                    "FileExplorer::IsSelectionComplete"
                 );
                 return null;
             }
@@ -870,7 +875,12 @@ namespace FileExplorer {
 
         void MoveUpOneDirectory() {
             string path = GetPath();
-            log("Current path before moving up: " + path, LogLevel::Info, 841, "MoveUpOneDirectory");
+            log(
+                "Current path before moving up: " + path,
+                LogLevel::Info,
+                873,
+                "FileExplorer::MoveUpOneDirectory"
+            );
             UpdateHistory(path);
             if (path.EndsWith("/") || path.EndsWith("\\")) {
                 path = path.SubStr(0, path.Length - 1);
@@ -885,7 +895,12 @@ namespace FileExplorer {
             if (!path.EndsWith("/") && !path.EndsWith("\\")) {
                 path += "/";
             }
-            log("New path after moving up: " + path, LogLevel::Info, 860, "MoveUpOneDirectory");
+            log(
+                "New path after moving up: " + path,
+                LogLevel::Info,
+                888,
+                "FileExplorer::MoveUpOneDirectory"
+            );
             explorer.tab[0].LoadDirectory(path);
         }
 
@@ -898,8 +913,8 @@ namespace FileExplorer {
                     log(
                         "Folder is not in the current folder, cannot move into it.",
                         LogLevel::Warning,
-                        871,
-                        "MoveIntoSelectedDirectory"
+                        898,
+                        "FileExplorer::MoveIntoSelectedDirectory"
                     );
                 } else {
                     UpdateHistory(selectedElement.path);
@@ -909,8 +924,8 @@ namespace FileExplorer {
                 log(
                     "No folder selected or selected element is not a folder.",
                     LogLevel::Warning,
-                    877,
-                    "MoveIntoSelectedDirectory"
+                    909,
+                    "FileExplorer::MoveIntoSelectedDirectory"
                 );
             }
         }
@@ -1500,7 +1515,12 @@ namespace FileExplorer {
 
         void RefreshCurrentDirectory() {
             string currentPath = explorer.tab[0].nav.GetPath();
-            log("Refreshing directory: " + currentPath, LogLevel::Info, 1537, "RefreshCurrentDirectory");
+            log(
+                "Refreshing directory: " + currentPath,
+                LogLevel::Info,
+                1503,
+                "FileExplorer::RefreshCurrentDirectory"
+            );
             explorer.tab[0].LoadDirectory(currentPath);
         }
 
@@ -1510,23 +1530,28 @@ namespace FileExplorer {
                 log(
                     "Opening folder: " + selectedElement.path,
                     LogLevel::Info,
-                    1544,
-                    "OpenSelectedFolderInNativeFileExplorer"
+                    1510,
+                    "FileExplorer::OpenSelectedFolderInNativeFileExplorer"
                 );
                 OpenExplorerPath(selectedElement.path);
             } else {
                 log(
                     "No folder selected or selected element is not a folder.",
                     LogLevel::Error,
-                    1547,
-                    "OpenSelectedFolderInNativeFileExplorer"
+                    1518,
+                    "FileExplorer::OpenSelectedFolderInNativeFileExplorer"
                 );
             }
         }
 
         void OpenCurrentFolderInNativeFileExplorer() {
             string currentPath = explorer.tab[0].nav.GetPath();
-            log("Opening folder: " + currentPath, LogLevel::Info, 1553, "OpenCurrentFolderInNativeFileExplorer");
+            log(
+                "Opening folder: " + currentPath,
+                LogLevel::Info,
+                1529,
+                "FileExplorer::OpenCurrentFolderInNativeFileExplorer"
+            );
             OpenExplorerPath(currentPath);
         }
 
@@ -1559,13 +1584,13 @@ namespace FileExplorer {
 
         void DisabledButton(const string &in text, const vec2 &in size = vec2()) {
             UI::BeginDisabled();
-            UI::Button(text, size);
+            TriggerVisualizer::Shared::StyledButton(text, size);
             UI::EndDisabled();
         }
 
         void DisabledIconButton(const string &in iconText, const vec2 &in size = vec2()) {
             UI::BeginDisabled();
-            UI::Button(iconText, size);
+            TriggerVisualizer::Shared::StyledButton(iconText, size);
             UI::EndDisabled();
         }
 
@@ -1627,14 +1652,19 @@ namespace FileExplorer {
                         log(
                             "Deleting empty folder: " + selectedElement.path,
                             LogLevel::Info,
-                            1658,
-                            "DeleteSelectedElement"
+                            1627,
+                            "FileExplorer::DeleteSelectedElement"
                         );
                         IO::DeleteFolder(selectedElement.path);
                         explorer.tab[0].LoadDirectory(explorer.tab[0].nav.GetPath());
                     }
                 } else {
-                    log("Deleting file: " + selectedElement.path, LogLevel::Info, 1663, "DeleteSelectedElement");
+                    log(
+                        "Deleting file: " + selectedElement.path,
+                        LogLevel::Info,
+                        1637,
+                        "FileExplorer::DeleteSelectedElement"
+                    );
                     IO::Delete(selectedElement.path);
                     explorer.tab[0].LoadDirectory(explorer.tab[0].nav.GetPath());
                 }
@@ -1671,7 +1701,12 @@ namespace FileExplorer {
             ElementInfo@ selectedElement = explorer.tab[0].GetSelectedElement();
             if (selectedElement !is null) {
                 if (explorer.config.pinnedElements.Find(selectedElement.path) == -1) {
-                    log("Pinning element: " + selectedElement.path, LogLevel::Info, 1703, "PinSelectedElement");
+                    log(
+                        "Pinning element: " + selectedElement.path,
+                        LogLevel::Info,
+                        1674,
+                        "FileExplorer::PinSelectedElement"
+                    );
                     explorer.config.pinnedElements.InsertLast(selectedElement.path);
                     explorer.config.SaveSharedSettings();
                 }
@@ -1833,19 +1868,44 @@ namespace FileExplorer {
             string sessionKey = pluginName + "::" + instConfig.id;
 
             if (!explorersByPlugin.Get(sessionKey, @explorer)) {
-                log("Explorer not found for sessionKey: " + sessionKey, LogLevel::Error, 1881, "Open");
+                log(
+                    "Explorer not found for sessionKey: " + sessionKey,
+                    LogLevel::Error,
+                    1836,
+                    "FileExplorer::Open"
+                );
                 return;
             }
-            log("Config initialized with path: " + instConfig.path, LogLevel::Info, 1882, "Open");
+            log(
+                "Config initialized with path: " + instConfig.path,
+                LogLevel::Info,
+                1839,
+                "FileExplorer::Open"
+            );
             if (nav is null) {
                 @nav = Navigation(this);
-                log("Navigation initialized", LogLevel::Info, 1884, "Open");
+                log(
+                    "Navigation initialized",
+                    LogLevel::Info,
+                    1842,
+                    "FileExplorer::Open"
+                );
             }
             if (nav is null) {
-                log("Navigation is null after initialization.", LogLevel::Error, 1885, "Open");
+                log(
+                    "Navigation is null after initialization.",
+                    LogLevel::Error,
+                    1845,
+                    "FileExplorer::Open"
+                );
                 return;
             }
-            log("Setting navigation path to: " + instConfig.path, LogLevel::Info, 1886, "Open");
+            log(
+                "Setting navigation path to: " + instConfig.path,
+                LogLevel::Info,
+                1848,
+                "FileExplorer::Open"
+            );
             nav.SetPath(instConfig.path);
             config.LoadSharedSettings();
             exports.selectionComplete = false;
@@ -2026,7 +2086,11 @@ namespace FileExplorer {
 
         void Render_Columns() {
             if (UI::GetWindowSize().x> 250 && UI::GetWindowSize().y> 155) {
-                UI::BeginTable("FileExplorerTable", 3, UI::TableFlags::Resizable | UI::TableFlags::Borders);
+                UI::BeginTable(
+                    "FileExplorerTable",
+                    3,
+                    UI::TableFlags::Resizable | UI::TableFlags::Borders
+                );
                 UI::TableNextColumn();
                 UI::BeginChild("LeftSidebar", vec2(0, 0), true);
                 Render_LeftSidebar();
@@ -2046,9 +2110,18 @@ namespace FileExplorer {
         }
 
         void Render_TopBar() {
-            UI::PushStyleColor(UI::Col::Button, vec4(0, 0, 0, 0));
-            UI::PushStyleColor(UI::Col::ButtonHovered, vec4(0, 0, 0, 0));
-            UI::PushStyleColor(UI::Col::ButtonActive, vec4(0, 0, 0, 0));
+            UI::PushStyleColor(
+                UI::Col::Button,
+                vec4(0, 0, 0, 0)
+            );
+            UI::PushStyleColor(
+                UI::Col::ButtonHovered,
+                vec4(0, 0, 0, 0)
+            );
+            UI::PushStyleColor(
+                UI::Col::ButtonActive,
+                vec4(0, 0, 0, 0)
+            );
 
             // print(UI::GetWindowContentRegionWidth());
             UI::Text("File Explorer | " + "\\$888" + Meta::ExecutingPlugin().Name + "\\$g" + " | " + instConfig.id);
@@ -2058,35 +2131,44 @@ namespace FileExplorer {
             UI::Dummy(vec2(availWidth - 240, 0));
             UI::SameLine();
             vec2 buttonSize = vec2(60, 0);
-            UI::PushStyleColor(UI::Col::Button, vec4(0, 0, 0, 0));
-            UI::PushStyleColor(UI::Col::ButtonHovered, vec4(0, 0, 0, 0));
-            UI::PushStyleColor(UI::Col::ButtonActive, vec4(0, 0, 0, 0));
+            UI::PushStyleColor(
+                UI::Col::Button,
+                vec4(0, 0, 0, 0)
+            );
+            UI::PushStyleColor(
+                UI::Col::ButtonHovered,
+                vec4(0, 0, 0, 0)
+            );
+            UI::PushStyleColor(
+                UI::Col::ButtonActive,
+                vec4(0, 0, 0, 0)
+            );
             uint currentPage = explorer.tab[0].CurrentPage + 1;
             uint totalPages = explorer.tab[0].TotalPages;
             string text = ("\\$AAA" + currentPage + "/" + totalPages + "\\$g");
 
             if (config.enablePagination) {
-                if (UI::Button(text, buttonSize)) {
+                if (TriggerVisualizer::Shared::StyledButton(text, buttonSize)) {
                 }
             } else {
-                if (UI::Button("##", buttonSize)) {
+                if (TriggerVisualizer::Shared::StyledButton("##", buttonSize)) {
                 }
             }
             UI::PopStyleColor(3);
             UI::SameLine();
-            if (UI::Button(Icons::WindowMinimize)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::WindowMinimize)) {
                 utils.MinimizeWindow();
             }
             UI::SameLine();
-            if (UI::Button(Icons::WindowMaximize)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::WindowMaximize)) {
                 utils.MaximizeWindow();
             }
             UI::SameLine();
-            if (UI::Button(Icons::WindowClose)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::WindowClose)) {
                 explorer.Close();
             }
             UI::SameLine();
-            if (UI::Button(Icons::WindowRestore)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::WindowRestore)) {
                 utils.BaseWindow();
             }
             UI::Separator();
@@ -2103,7 +2185,7 @@ namespace FileExplorer {
 
             // Navigation Buttons
             if (explorer.tab[0].nav.HistoryIndex> 0) {
-                if (UI::Button(Icons::ArrowLeft)) {
+                if (TriggerVisualizer::Shared::StyledButton(Icons::ArrowLeft)) {
                     explorer.tab[0].nav.NavigateBack();
                 }
             } else {
@@ -2111,7 +2193,7 @@ namespace FileExplorer {
             }
             UI::SameLine();
             if (explorer.tab[0].nav.HistoryIndex < int(explorer.tab[0].nav.History.Length) - 1) {
-                if (UI::Button(Icons::ArrowRight)) {
+                if (TriggerVisualizer::Shared::StyledButton(Icons::ArrowRight)) {
                     explorer.tab[0].nav.NavigateForward();
                 }
             } else {
@@ -2119,7 +2201,7 @@ namespace FileExplorer {
             }
             UI::SameLine();
             if (explorer.tab[0].nav.CanMoveUpDirectory()) {
-                if (UI::Button(Icons::ArrowUp)) {
+                if (TriggerVisualizer::Shared::StyledButton(Icons::ArrowUp)) {
                     explorer.tab[0].nav.MoveUpOneDirectory();
                 }
             } else {
@@ -2128,7 +2210,7 @@ namespace FileExplorer {
             UI::SameLine();
 
             if (explorer.tab[0].GetSelectedElement() !is null && explorer.tab[0].GetSelectedElement().isFolder && explorer.tab[0].GetSelectedElement().isSelected) {
-                if (UI::Button(Icons::ArrowDown)) {
+                if (TriggerVisualizer::Shared::StyledButton(Icons::ArrowDown)) {
                     explorer.tab[0].nav.MoveIntoSelectedDirectory();
                 }
             } else {
@@ -2171,7 +2253,7 @@ namespace FileExplorer {
                 UI::SameLine();
             } else {
                 if (explorer.tab[0].CurrentPage > 0) {
-                    if (UI::Button(Icons::ChevronLeft)) {
+                    if (TriggerVisualizer::Shared::StyledButton(Icons::ChevronLeft)) {
                         explorer.tab[0].CurrentPage--;
                     }
                 } else {
@@ -2180,7 +2262,7 @@ namespace FileExplorer {
                 UI::SameLine();
 
                 if (explorer.tab[0].CurrentPage < explorer.tab[0].TotalPages - 1) {
-                    if (UI::Button(Icons::ChevronRight)) {
+                    if (TriggerVisualizer::Shared::StyledButton(Icons::ChevronRight)) {
                         explorer.tab[0].CurrentPage++;
                     }
                 } else {
@@ -2188,11 +2270,11 @@ namespace FileExplorer {
                 }
                 UI::SameLine();
             }
-            if (UI::Button(Icons::Refresh)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::Refresh)) {
                 utils.RefreshCurrentDirectory();
             }
             UI::SameLine();
-            if (UI::Button(Icons::FolderOpen)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::FolderOpen)) {
                 utils.OpenCurrentFolderInNativeFileExplorer();
             }
             UI::SameLine();
@@ -2203,42 +2285,51 @@ namespace FileExplorer {
                 UI::SameLine();
                 utils.DisabledIconButton(Icons::ThumbTack);
             } else {
-                if (UI::Button(Icons::Trash)) {
+                if (TriggerVisualizer::Shared::StyledButton(Icons::Trash)) {
                     utils.DeleteSelectedElement();
                 }
                 UI::SameLine();
-                if (UI::Button(Icons::Pencil)) {
+                if (TriggerVisualizer::Shared::StyledButton(Icons::Pencil)) {
                     utils.RENDER_RENAME_POPUP_FLAG = !utils.RENDER_RENAME_POPUP_FLAG;
                 }
                 UI::SameLine();
-                if (UI::Button(Icons::ThumbTack)) {
+                if (TriggerVisualizer::Shared::StyledButton(Icons::ThumbTack)) {
                     utils.PinSelectedElement();
                 }
             }
             UI::SameLine();
-            if (UI::Button(Icons::Filter)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::Filter)) {
                 UI::OpenPopup("filterMenu");
             }
 
             if (UI::BeginPopup("filterMenu")) {
                 UI::Text("All filters");
                 UI::Separator();
-                UI::PushStyleColor(UI::Col::Button, vec4(0, 0, 0, 0));
-                UI::PushStyleColor(UI::Col::ButtonHovered, vec4(0, 0, 0, 0));
-                UI::PushStyleColor(UI::Col::ButtonActive, vec4(0, 0, 0, 0));
-                if (UI::Button("Add filter", vec2(70, 0))) {
+                UI::PushStyleColor(
+                    UI::Col::Button,
+                    vec4(0, 0, 0, 0)
+                );
+                UI::PushStyleColor(
+                    UI::Col::ButtonHovered,
+                    vec4(0, 0, 0, 0)
+                );
+                UI::PushStyleColor(
+                    UI::Col::ButtonActive,
+                    vec4(0, 0, 0, 0)
+                );
+                if (TriggerVisualizer::Shared::StyledButton("Add filter", vec2(70, 0))) {
                 }
                 UI::PopStyleColor(3);
                 UI::SameLine();
                 newFilter = UI::InputText("##", newFilter);
                 UI::SameLine();
-                if (UI::Button("Add")) {
+                if (TriggerVisualizer::Shared::StyledButton("Add")) {
                     instConfig.filters.InsertLast(newFilter.ToLower());
                     explorer.tab[0].LoadDirectory(explorer.tab[0].nav.GetPath());
                 }
                 UI::Separator();
                 UI::Text("Filter length: " + instConfig.filters.Length);
-                if (UI::Button("Remove All Filters")) {
+                if (TriggerVisualizer::Shared::StyledButton("Remove All Filters")) {
                     instConfig.filters.Resize(0);
                     explorer.tab[0].LoadDirectory(explorer.tab[0].nav.GetPath());
                 }
@@ -2263,7 +2354,7 @@ namespace FileExplorer {
                 UI::EndPopup();
             }
             UI::SameLine();
-            if (UI::Button(Icons::Sort)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::Sort)) {
                 UI::OpenPopup("sortMenu");
             }
             if (UI::BeginPopup("sortMenu")) {
@@ -2315,7 +2406,7 @@ namespace FileExplorer {
             UI::SameLine();
             UI::Dummy(vec2(UI::GetContentRegionAvail().x - 45, 0));
             UI::SameLine();
-            if (UI::Button(Icons::Bars)) {
+            if (TriggerVisualizer::Shared::StyledButton(Icons::Bars)) {
                 UI::OpenPopup("burgerMenu");
             }
 
@@ -2383,7 +2474,7 @@ namespace FileExplorer {
                         UI::Text("Add a path to the blacklist:");
                         newBlacklistPath = UI::InputText("##NewPath", newBlacklistPath);
 
-                        if (UI::Button("Add Path") && newBlacklistPath != "") {
+                        if (TriggerVisualizer::Shared::StyledButton("Add Path") && newBlacklistPath != "") {
                             if (config.blacklistedRecursiveSearchPaths.Find(newBlacklistPath) == -1) {
                                 config.blacklistedRecursiveSearchPaths.InsertLast(newBlacklistPath);
                                 config.SaveSharedSettings();
@@ -2398,7 +2489,7 @@ namespace FileExplorer {
                             string path = config.blacklistedRecursiveSearchPaths[i];
                             UI::Text(path);
                             UI::SameLine();
-                            if (UI::Button("Remove##" + i)) {
+                            if (TriggerVisualizer::Shared::StyledButton("Remove##" + i)) {
                                 config.blacklistedRecursiveSearchPaths.RemoveAt(i);
                                 config.SaveSharedSettings();
                                 explorer.tab[0].LoadDirectory(explorer.tab[0].nav.GetPath());
@@ -2478,13 +2569,13 @@ namespace FileExplorer {
             if (UI::BeginPopupModal("RenamePopup", UI::WindowFlags::AlwaysAutoResize)) {
                 UI::Text("Enter new name:");
                 newFileName = UI::InputText("##RenameInput", newFileName);
-                if (UI::Button("Rename")) {
+                if (TriggerVisualizer::Shared::StyledButton("Rename")) {
                     utils.RenameSelectedElement(newFileName);
                     newFileName = "";
                     UI::CloseCurrentPopup();
                 }
                 UI::SameLine();
-                if (UI::Button("Cancel")) {
+                if (TriggerVisualizer::Shared::StyledButton("Cancel")) {
                     newFileName = "";
                     UI::CloseCurrentPopup();
                 }
@@ -2502,8 +2593,8 @@ namespace FileExplorer {
                     log(
                         "Deleting empty folder: " + selectedElement.path,
                         LogLevel::Info,
-                        2548,
-                        "Render_DeleteConfirmationPopup"
+                        2502,
+                        "FileExplorer::Render_DeleteConfirmationPopup"
                     );
                     IO::DeleteFolder(selectedElement.path);
                     utils.RENDER_DELETE_CONFIRMATION_POPUP_FLAG = false;
@@ -2514,13 +2605,13 @@ namespace FileExplorer {
                 ElementInfo@ selectedElement = explorer.tab[0].GetSelectedElement();
                 UI::Text("Are you sure you want to delete this folder and all its contents?");
                 UI::Separator();
-                if (UI::Button("Yes, delete all")) {
+                if (TriggerVisualizer::Shared::StyledButton("Yes, delete all")) {
                     if (selectedElement !is null && selectedElement.isFolder) {
                         log(
                             "Deleting folder with contents: " + selectedElement.path,
                             LogLevel::Info,
-                            2562,
-                            "Render_DeleteConfirmationPopup"
+                            2519,
+                            "FileExplorer::Render_DeleteConfirmationPopup"
                         );
                         IO::DeleteFolder(selectedElement.path, true);
                         utils.RENDER_DELETE_CONFIRMATION_POPUP_FLAG = false;
@@ -2529,14 +2620,14 @@ namespace FileExplorer {
                         log(
                             "No selected element or element is not a folder.",
                             LogLevel::Error,
-                            2567,
-                            "Render_DeleteConfirmationPopup"
+                            2529,
+                            "FileExplorer::Render_DeleteConfirmationPopup"
                         );
                     }
                     UI::CloseCurrentPopup();
                 }
                 UI::SameLine();
-                if (UI::Button("Cancel")) {
+                if (TriggerVisualizer::Shared::StyledButton("Cancel")) {
                     utils.RENDER_DELETE_CONFIRMATION_POPUP_FLAG = false;
                     UI::CloseCurrentPopup();
                 }
@@ -2577,7 +2668,7 @@ namespace FileExplorer {
                     }
                     if (hasValidSelections) {
                         string buttonText = instConfig.returnType == "path" ? "Return Selected Paths" : "Return Selected Elements";
-                        if (UI::Button(buttonText)) {
+                        if (TriggerVisualizer::Shared::StyledButton(buttonText)) {
                             if (instConfig.returnType == "path") {
                                 explorer.exports.SetSelectionComplete(instConfig.selectedPaths, null);
                             } else if (instConfig.returnType == "elementinfo") {
@@ -2600,7 +2691,7 @@ namespace FileExplorer {
                     }
                 }
                 UI::SameLine();
-                if (UI::Button("Select All")) {
+                if (TriggerVisualizer::Shared::StyledButton("Select All")) {
                     utils.SelectAllVisibleAndValidElements();
                 }
                 UI::SameLine();
@@ -2896,7 +2987,7 @@ namespace FileExplorer {
                 ElementInfo@ element = explorer.tab[0].GetSelectedElement();
                 if (element !is null) {
                     bool canAddMore = instConfig.returnType == "path" ?
-                        instConfig.selectedPaths.Length < uint(instConfig.minMaxReturnAmount.y) || instConfig.minMaxReturnAmount.y == -1 : instConfig.selectedElements.Length < uint(instConfig.minMaxReturnAmount.y) || instConfig.minMaxReturnAmount.y == -1;
+                    instConfig.selectedPaths.Length < uint(instConfig.minMaxReturnAmount.y) || instConfig.minMaxReturnAmount.y == -1 : instConfig.selectedElements.Length < uint(instConfig.minMaxReturnAmount.y) || instConfig.minMaxReturnAmount.y == -1;
                     bool isValidElement = utils.IsValidReturnElement(element);
 
                     if (canAddMore && isValidElement) {
@@ -2960,8 +3051,11 @@ namespace FileExplorer {
 
             bool isValid = utils.IsValidReturnElement(element);
             vec4 textColor = element.isFolder ?
-                (isValid ? config.validFolderColor : config.invalidFolderColor) : (isValid ? config.validFileColor : config.invalidFileColor);
-            UI::PushStyleColor(UI::Col::Text, textColor);
+            (isValid ? config.validFolderColor : config.invalidFolderColor) : (isValid ? config.validFileColor : config.invalidFileColor);
+            UI::PushStyleColor(
+                UI::Col::Text,
+                textColor
+            );
             UI::Selectable(displayName, element.isSelected);
             UI::PopStyleColor();
             if (UI::IsItemHovered() && UI::IsMouseClicked(UI::MouseButton::Left) && (UI::IsKeyDown(UI::Key::LeftCtrl) || UI::IsKeyDown(UI::Key::RightCtrl))) {
@@ -3011,8 +3105,8 @@ namespace FileExplorer {
                             log(
                                 "Removed path from selected paths: " + element.path,
                                 LogLevel::Info,
-                                3070,
-                                "HandleElementSelection"
+                                3011,
+                                "FileExplorer::HandleElementSelection"
                             );
                         }
                     } else if (instConfig.returnType == "elementinfo") {
@@ -3023,8 +3117,8 @@ namespace FileExplorer {
                             log(
                                 "Removed element from selected elements: " + element.name,
                                 LogLevel::Info,
-                                3077,
-                                "HandleElementSelection"
+                                3023,
+                                "FileExplorer::HandleElementSelection"
                             );
                         }
                     }
@@ -3040,15 +3134,20 @@ namespace FileExplorer {
                         log(
                             "Added element to selected elements via pinnedElements double-click: " + element.name,
                             LogLevel::Info,
-                            3090,
-                            "HandleElementSelection"
+                            3040,
+                            "FileExplorer::HandleElementSelection"
                         );
                     }
                     @explorer.CurrentSelectedElement = element;
                 } else if (contextType == ContextType::mainArea) {
                     if (element.isFolder) {
                         explorer.tab[0].nav.MoveIntoSelectedDirectory();
-                        log("Navigated into folder: " + element.path, LogLevel::Info, 3097, "HandleElementSelection");
+                        log(
+                            "Navigated into folder: " + element.path,
+                            LogLevel::Info,
+                            3051,
+                            "FileExplorer::HandleElementSelection"
+                        );
                     } else if (canAddMore) {
                         if (instConfig.returnType == "path") {
                             if (instConfig.selectedPaths.Find(element.path) == -1) {
@@ -3057,8 +3156,8 @@ namespace FileExplorer {
                                 log(
                                     "Added path to selected paths via mainArea double-click: " + element.path,
                                     LogLevel::Info,
-                                    3103,
-                                    "HandleElementSelection"
+                                    3057,
+                                    "FileExplorer::HandleElementSelection"
                                 );
                             }
                         } else if (instConfig.returnType == "elementinfo") {
@@ -3068,8 +3167,8 @@ namespace FileExplorer {
                                 log(
                                     "Added element to selected elements via mainArea double-click: " + element.name,
                                     LogLevel::Info,
-                                    3109,
-                                    "HandleElementSelection"
+                                    3068,
+                                    "FileExplorer::HandleElementSelection"
                                 );
                             }
                         }
@@ -3090,8 +3189,8 @@ namespace FileExplorer {
                         log(
                             "Added element to selected elements via pinnedElements single click: " + element.name,
                             LogLevel::Info,
-                            3128,
-                            "HandleElementSelection"
+                            3090,
+                            "FileExplorer::HandleElementSelection"
                         );
                     }
                     @explorer.CurrentSelectedElement = element;
@@ -3321,8 +3420,8 @@ namespace FileExplorer {
                 if (VERBOSE_GBX) log(
                     "Number of header chunks: " + tostring(chunkCount),
                     LogLevel::Info,
-                    3285,
-                    "ReadHeader"
+                    3321,
+                    "FileExplorer::gbx::ReadHeader"
                 );
 
                 for (int i = 0; i < chunkCount; i++) {
@@ -3333,8 +3432,8 @@ namespace FileExplorer {
                     if (VERBOSE_GBX) log(
                         "Header Chunk " + tostring(i) + ": ID=" + tostring(chunk.ChunkId) + ", Size=" + tostring(chunk.ChunkSize),
                         LogLevel::Info,
-                        3292,
-                        "ReadHeader"
+                        3333,
+                        "FileExplorer::gbx::ReadHeader"
                     );
                 }
             }
@@ -3347,8 +3446,8 @@ namespace FileExplorer {
                     if (VERBOSE_GBX) log(
                         "Processing ChunkId: " + tostring(headerChunks[i].ChunkId),
                         LogLevel::Info,
-                        3302,
-                        "ReadChunks"
+                        3347,
+                        "FileExplorer::gbx::ReadChunks"
                     );
 
                     if (  //headerChunks[i].ChunkId == GBX_CHUNK_IDS::Replay0 ||
@@ -3375,16 +3474,16 @@ namespace FileExplorer {
                             if (VERBOSE_GBX) log(
                                 "ChunkId " + tostring(headerChunks[i].ChunkId) + " contains XML of length: " + tostring(xmlLength),
                                 LogLevel::Info,
-                                3326,
-                                "ReadChunks"
+                                3375,
+                                "FileExplorer::gbx::ReadChunks"
                             );
 
                             string currentXmlContent = chunkData.ReadString(xmlLength);
                             if (VERBOSE_GBX) log(
                                 "Read XML content: " + currentXmlContent.SubStr(0, Math::Min(currentXmlContent.Length, 100)),
                                 LogLevel::Debug,
-                                3329,
-                                "ReadChunks"
+                                3383,
+                                "FileExplorer::gbx::ReadChunks"
                             );
 
                             if (xmlContent != "") {
@@ -3392,24 +3491,24 @@ namespace FileExplorer {
                                 if (VERBOSE_GBX) log(
                                     "Accumulated XML content from ChunkId: " + tostring(headerChunks[i].ChunkId),
                                     LogLevel::Info,
-                                    3333,
-                                    "ReadChunks"
+                                    3392,
+                                    "FileExplorer::gbx::ReadChunks"
                                 );
                             } else {
                                 xmlContent = currentXmlContent;
                                 if (VERBOSE_GBX) log(
                                     "Extracted XML content from ChunkId: " + tostring(headerChunks[i].ChunkId),
                                     LogLevel::Info,
-                                    3336,
-                                    "ReadChunks"
+                                    3400,
+                                    "FileExplorer::gbx::ReadChunks"
                                 );
                             }
                         } catch {
                             if (VERBOSE_GBX) log(
                                 "Error reading XML content from ChunkId: " + tostring(headerChunks[i].ChunkId),
                                 LogLevel::Error,
-                                3339,
-                                "ReadChunks"
+                                3408,
+                                "FileExplorer::gbx::ReadChunks"
                             );
                             continue;
                         }
@@ -3419,16 +3518,16 @@ namespace FileExplorer {
                         if (VERBOSE_GBX) log(
                             "Error: Timeout while reading GBX chunks for file: " + filePath,
                             LogLevel::Error,
-                            3345,
-                            "ReadChunks"
+                            3419,
+                            "FileExplorer::gbx::ReadChunks"
                         );
                     }
                 }
                 if (VERBOSE_GBX) log(
                     "Total XML Content Length: " + tostring(xmlContent.Length),
                     LogLevel::Info,
-                    3349,
-                    "ReadChunks"
+                    3427,
+                    "FileExplorer::gbx::ReadChunks"
                 );
             }
 
@@ -3437,8 +3536,8 @@ namespace FileExplorer {
                     if (VERBOSE_GBX) log(
                         "Warning: No XML content found in GBX file: " + filePath,
                         LogLevel::Warning,
-                        3354,
-                        "ParseXmlContent"
+                        3437,
+                        "FileExplorer::gbx::ParseXmlContent"
                     );
                     return;
                 }
@@ -3452,7 +3551,12 @@ namespace FileExplorer {
                     metadata["exever"] = rootNode.Attribute("exever");
                     metadata["exebuild"] = rootNode.Attribute("exebuild");
                     metadata["title"] = rootNode.Attribute("title");
-                    if (VERBOSE_GBX) log("Parsed GBX Type: " + gbxType, LogLevel::Info, 3370, "ParseXmlContent");
+                    if (VERBOSE_GBX) log(
+                        "Parsed GBX Type: " + gbxType,
+                        LogLevel::Info,
+                        3455,
+                        "FileExplorer::gbx::ParseXmlContent"
+                    );
 
                     if (gbxType == "map") {
                         ParseMapMetadata(rootNode);
@@ -3464,8 +3568,8 @@ namespace FileExplorer {
                         if (VERBOSE_GBX) log(
                             "Warning: Unknown GBX type '" + gbxType + "' in file: " + filePath,
                             LogLevel::Warning,
-                            3379,
-                            "ParseXmlContent"
+                            3464,
+                            "FileExplorer::gbx::ParseXmlContent"
                         );
                     }
                     XML::Node playermodelNode = rootNode.Child("playermodel");
@@ -3474,29 +3578,39 @@ namespace FileExplorer {
                         if (VERBOSE_GBX) log(
                             "Parsed playermodel_id: " + string(metadata["playermodel_id"]),
                             LogLevel::Info,
-                            3385,
-                            "ParseXmlContent"
+                            3474,
+                            "FileExplorer::gbx::ParseXmlContent"
                         );
                     }
                 } else {
                     if (VERBOSE_GBX) log(
                         "Error: Missing root node in GBX file: " + filePath,
                         LogLevel::Error,
-                        3388,
-                        "ParseXmlContent"
+                        3482,
+                        "FileExplorer::gbx::ParseXmlContent"
                     );
                 }
             }
 
             void ParseMapMetadata(XML::Node &in rootNode) {
-                if (VERBOSE_GBX) log("Parsing Map Metadata", LogLevel::Info, 3393, "ParseMapMetadata");
+                if (VERBOSE_GBX) log(
+                    "Parsing Map Metadata",
+                    LogLevel::Info,
+                    3492,
+                    "FileExplorer::gbx::ParseMapMetadata"
+                );
                 XML::Node identNode = rootNode.Child("ident");
                 if (identNode) {
                     metadata["map_uid"] = identNode.Attribute("uid");
                     metadata["map_name"] = identNode.Attribute("name");
                     metadata["map_author"] = identNode.Attribute("author");
                     metadata["map_authorzone"] = identNode.Attribute("authorzone");
-                    if (VERBOSE_GBX) log("Parsed ident node for Map", LogLevel::Info, 3400, "ParseMapMetadata");
+                    if (VERBOSE_GBX) log(
+                        "Parsed ident node for Map",
+                        LogLevel::Info,
+                        3499,
+                        "FileExplorer::gbx::ParseMapMetadata"
+                    );
                 }
                 ParseDescNode(rootNode);
                 XML::Node timesNode = rootNode.Child("times");
@@ -3507,20 +3621,35 @@ namespace FileExplorer {
                     metadata["times_authortime"] = timesNode.Attribute("authortime");
                     metadata["times_authorscore"] = timesNode.Attribute("authorscore");
                     metadata["times_challenger"] = timesNode.Attribute("challenger");
-                    if (VERBOSE_GBX) log("Parsed times node for Map", LogLevel::Info, 3413, "ParseMapMetadata");
+                    if (VERBOSE_GBX) log(
+                        "Parsed times node for Map",
+                        LogLevel::Info,
+                        3510,
+                        "FileExplorer::gbx::ParseMapMetadata"
+                    );
                 }
                 ParseDependencies(rootNode);
             }
 
             void ParseReplayMetadata(XML::Node &in rootNode) {
-                if (VERBOSE_GBX) log("Parsing Replay Metadata", LogLevel::Info, 3420, "ParseReplayMetadata");
+                if (VERBOSE_GBX) log(
+                    "Parsing Replay Metadata",
+                    LogLevel::Info,
+                    3516,
+                    "FileExplorer::gbx::ParseReplayMetadata"
+                );
                 XML::Node mapNode = rootNode.Child("map");
                 if (mapNode) {
                     metadata["map_uid"] = mapNode.Attribute("uid");
                     metadata["map_name"] = mapNode.Attribute("name");
                     metadata["map_author"] = mapNode.Attribute("author");
                     metadata["map_authorzone"] = mapNode.Attribute("authorzone");
-                    if (VERBOSE_GBX) log("Parsed map node for Replay", LogLevel::Info, 3427, "ParseReplayMetadata");
+                    if (VERBOSE_GBX) log(
+                        "Parsed map node for Replay",
+                        LogLevel::Info,
+                        3523,
+                        "FileExplorer::gbx::ParseReplayMetadata"
+                    );
                 }
                 ParseDescNode(rootNode);
                 XML::Node timesNode = rootNode.Child("times");
@@ -3529,7 +3658,12 @@ namespace FileExplorer {
                     metadata["replay_respawns"] = timesNode.Attribute("respawns");
                     metadata["replay_stuntscore"] = timesNode.Attribute("stuntscore");
                     metadata["replay_validable"] = timesNode.Attribute("validable");
-                    if (VERBOSE_GBX) log("Parsed times node for Replay", LogLevel::Info, 3438, "ParseReplayMetadata");
+                    if (VERBOSE_GBX) log(
+                        "Parsed times node for Replay",
+                        LogLevel::Info,
+                        3532,
+                        "FileExplorer::gbx::ParseReplayMetadata"
+                    );
                 }
                 XML::Node checkpointsNode = rootNode.Child("checkpoints");
                 if (checkpointsNode) {
@@ -3537,14 +3671,19 @@ namespace FileExplorer {
                     if (VERBOSE_GBX) log(
                         "Parsed checkpoints node for Replay",
                         LogLevel::Info,
-                        3444,
-                        "ParseReplayMetadata"
+                        3537,
+                        "FileExplorer::gbx::ParseReplayMetadata"
                     );
                 }
             }
 
             void ParseChallengeMetadata(XML::Node &in rootNode) {
-                if (VERBOSE_GBX) log("Parsing Challenge Metadata", LogLevel::Info, 3449, "ParseChallengeMetadata");
+                if (VERBOSE_GBX) log(
+                    "Parsing Challenge Metadata",
+                    LogLevel::Info,
+                    3547,
+                    "FileExplorer::gbx::ParseChallengeMetadata"
+                );
                 XML::Node identNode = rootNode.Child("ident");
                 if (identNode) {
                     metadata["map_uid"] = identNode.Attribute("uid");
@@ -3553,8 +3692,8 @@ namespace FileExplorer {
                     if (VERBOSE_GBX) log(
                         "Parsed ident node for Challenge",
                         LogLevel::Info,
-                        3455,
-                        "ParseChallengeMetadata"
+                        3553,
+                        "FileExplorer::gbx::ParseChallengeMetadata"
                     );
                 }
                 ParseDescNode(rootNode);
@@ -3569,8 +3708,8 @@ namespace FileExplorer {
                     if (VERBOSE_GBX) log(
                         "Parsed times node for Challenge",
                         LogLevel::Info,
-                        3468,
-                        "ParseChallengeMetadata"
+                        3569,
+                        "FileExplorer::gbx::ParseChallengeMetadata"
                     );
                 }
                 ParseDependencies(rootNode);
@@ -3588,7 +3727,12 @@ namespace FileExplorer {
                     metadata["desc_validated"] = descNode.Attribute("validated");
                     metadata["desc_nblaps"] = descNode.Attribute("nblaps");
                     metadata["desc_hasghostblocks"] = descNode.Attribute("hasghostblocks");
-                    if (VERBOSE_GBX) log("Parsed desc node", LogLevel::Info, 3486, "ParseDescNode");
+                    if (VERBOSE_GBX) log(
+                        "Parsed desc node",
+                        LogLevel::Info,
+                        3591,
+                        "FileExplorer::gbx::ParseDescNode"
+                    );
                 }
             }
 
@@ -3605,8 +3749,8 @@ namespace FileExplorer {
                     if (VERBOSE_GBX) log(
                         "Parsed dependencies node with " + tostring(depIndex) + " dependencies",
                         LogLevel::Info,
-                        3500,
-                        "ParseDependencies"
+                        3605,
+                        "FileExplorer::gbx::ParseDependencies"
                     );
                 }
             }
@@ -3615,15 +3759,15 @@ namespace FileExplorer {
                 if (VERBOSE_GBX) log(
                     "Listing all ChunkIds for file: " + filePath,
                     LogLevel::Info,
-                    3505,
-                    "ListAllChunkIds"
+                    3615,
+                    "FileExplorer::gbx::ListAllChunkIds"
                 );
                 for (uint i = 0; i < headerChunks.Length; i++) {
                     if (VERBOSE_GBX) log(
                         "Chunk " + tostring(i) + " - ChunkId: " + tostring(headerChunks[i].ChunkId) + ", ChunkSize: " + tostring(headerChunks[i].ChunkSize),
                         LogLevel::Info,
-                        3507,
-                        "ListAllChunkIds"
+                        3622,
+                        "FileExplorer::gbx::ListAllChunkIds"
                     );
                 }
             }
@@ -3633,18 +3777,38 @@ namespace FileExplorer {
             }
 
             dictionary Parse() {
-                if (VERBOSE_GBX) log("Parse started for file: " + filePath, LogLevel::Info, 3516, "Parse");
+                if (VERBOSE_GBX) log(
+                    "Parse started for file: " + filePath,
+                    LogLevel::Info,
+                    3636,
+                    "FileExplorer::gbx::Parse"
+                );
                 try {
-                    if (VERBOSE_GBX) log("Opening GBX file: " + filePath, LogLevel::Info, 3518, "Parse");
+                    if (VERBOSE_GBX) log(
+                        "Opening GBX file: " + filePath,
+                        LogLevel::Info,
+                        3638,
+                        "FileExplorer::gbx::Parse"
+                    );
                     gbxFile.Open(filePath, IO::FileMode::Read);
                     ReadHeader();
                     ListAllChunkIds();
                     ReadChunks();
                     ParseXmlContent();
                     gbxFile.Close();
-                    if (VERBOSE_GBX) log("Closed GBX file: " + filePath, LogLevel::Info, 3526, "Parse");
+                    if (VERBOSE_GBX) log(
+                        "Closed GBX file: " + filePath,
+                        LogLevel::Info,
+                        3645,
+                        "FileExplorer::gbx::Parse"
+                    );
                 } catch {
-                    if (VERBOSE_GBX) log("Exception in file: " + filePath, LogLevel::Error, 3528, "Parse");
+                    if (VERBOSE_GBX) log(
+                        "Exception in file: " + filePath,
+                        LogLevel::Error,
+                        3647,
+                        "FileExplorer::gbx::Parse"
+                    );
                     gbxFile.Close();
                 }
                 return metadata;
@@ -3736,8 +3900,8 @@ namespace FileExplorer {
             log(
                 "All file explorer instances for this plugin have been closed.",
                 LogLevel::Error,
-                3635,
-                "fe_ForceClose"
+                3736,
+                "FileExplorer::fe_ForceClose"
             );
             return;
         }
@@ -3747,7 +3911,12 @@ namespace FileExplorer {
         if (explorersByPlugin.Get(sessionKey, @explorer)) {
             explorer.Close();
             explorersByPlugin.Delete(sessionKey);
-            log("File explorer instance '" + id + "' has been closed.", LogLevel::Info, 3644, "fe_ForceClose");
+            log(
+                "File explorer instance '" + id + "' has been closed.",
+                LogLevel::Info,
+                3750,
+                "FileExplorer::fe_ForceClose"
+            );
         } else {
             NotifyError(
                 "Error",

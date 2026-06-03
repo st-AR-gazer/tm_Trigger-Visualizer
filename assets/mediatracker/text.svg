@@ -11,7 +11,7 @@
     </filter>
   </defs>
   <rect x="24" y="24" width="208" height="208" rx="48" fill="#171820"/>
-  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.18"/>
+  <rect x="24" y="24" width="208" height="208" rx="48" fill="url(#accent)" opacity="0.58"/>
   <g filter="url(#shadow)">
     <rect x="58" y="68" width="140" height="120" rx="18" fill="#f7f2ff"/>
     <text x="101" y="151" text-anchor="middle" font-family="Arial, sans-serif" font-size="86" font-weight="900" fill="#171820">T</text>
