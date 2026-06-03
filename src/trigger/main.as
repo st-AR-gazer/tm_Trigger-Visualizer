@@ -165,6 +165,31 @@ namespace TriggerVisualizer {
             return hints.HasSuggestOffTarget(targetKey) && TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff;
         }
 
+        bool IsGlobalWorldRenderingDisabledByMapHints(const MapRenderHints@ hints) {
+            if (hints is null) return false;
+            if (hints.ForceOff) return true;
+            return hints.SuggestOff && TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff;
+        }
+
+        string GetGlobalWorldRenderingMapHintDisableSummary(const MapRenderHints@ hints) {
+            if (hints is null) return "";
+            if (hints.ForceOff) return "/trigger-visualizer force-off";
+            if (hints.SuggestOff && TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff) {
+                return "/trigger-visualizer suggest-off";
+            }
+            return "";
+        }
+
+        string GetWorldRenderingHiddenByMapCommentSummary() {
+            auto snapshot = GetCurrentMapSnapshot();
+            if (snapshot is null) return "";
+            return GetGlobalWorldRenderingMapHintDisableSummary(snapshot.RenderHints);
+        }
+
+        bool IsWorldRenderingHiddenByMapComment() {
+            return GetWorldRenderingHiddenByMapCommentSummary().Length > 0;
+        }
+
         bool IsSourceDisabledByMapHints(const MapRenderHints@ hints, int source) {
             return IsMapHintTargetDisabled(hints, GetTriggerSourceTargetKey(source));
         }

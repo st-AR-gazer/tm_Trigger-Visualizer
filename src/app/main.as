@@ -59,7 +59,16 @@ namespace TriggerVisualizer {
         }
 
         void RenderMenu() {
-            bool toggleClicked = UI::MenuItem(MenuTitle(), "", TriggerVisualizer::Trigger::UI::S_RenderWorld);
+            string mapCommentHideSummary = TriggerVisualizer::Trigger::GetWorldRenderingHiddenByMapCommentSummary();
+            bool hiddenByMapComment = mapCommentHideSummary.Length > 0;
+            string menuLabel = hiddenByMapComment
+                ? "\\$888" + MenuIcon() + " " + TriggerVisualizer::PluginMeta.Name + " (hidden by map)\\$z"
+                : MenuTitle();
+
+            bool toggleClicked = UI::MenuItem(menuLabel, "", TriggerVisualizer::Trigger::UI::S_RenderWorld);
+            if (hiddenByMapComment) {
+                UI::SetItemTooltip("Rendering is hidden by current map comment: " + mapCommentHideSummary);
+            }
             if (UI::IsItemClicked(UI::MouseButton::Right)) {
                 Meta::OpenSettings(TriggerVisualizer::PluginMeta);
                 return;

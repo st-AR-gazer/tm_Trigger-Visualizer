@@ -222,6 +222,15 @@ namespace TriggerVisualizer {
                     "Enable all rendering##trigger-visualizer-settings-general",
                     TriggerVisualizer::Trigger::UI::S_RenderWorld
                 );
+                string mapCommentHideSummary = TriggerVisualizer::Trigger::GetWorldRenderingHiddenByMapCommentSummary();
+                if (mapCommentHideSummary.Length > 0) {
+                    UI::PushStyleColor(UI::Col::Text, vec4(0.72f, 0.72f, 0.72f, 1.0f));
+                    UI::TextWrapped(
+                        "Hidden by current map comment: " + mapCommentHideSummary
+                            + ". Disable map suggest-off handling or remove the map command to render again."
+                    );
+                    UI::PopStyleColor();
+                }
                 UI::Separator();
                 UI::Text("Developer Tools");
                 S_DevPanelOpen = UI::Checkbox("Show dev panel##trigger-visualizer-settings-general", S_DevPanelOpen);
