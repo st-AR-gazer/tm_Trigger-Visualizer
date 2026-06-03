@@ -1388,7 +1388,13 @@ namespace FileExplorer {
                     bool found = false;
                     for (uint j = 0; j<instConfig.filters.Length; j++) {
                         string filter = instConfig.filters[j];
-                        if (instConfig.IsFilterActive(filter) && (element.gbxType.ToLower() == filter.ToLower())) {
+                        if (!instConfig.IsFilterActive(filter)) continue;
+                        filter = filter.ToLower();
+                        if (filter.StartsWith(".")) filter = filter.SubStr(1);
+
+                        string elementType = element.type.ToLower();
+                        string elementGbxType = element.gbxType.ToLower();
+                        if (elementType == filter || elementGbxType == filter) {
                             found = true;
                             break;
                         }
