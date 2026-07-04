@@ -611,6 +611,7 @@ namespace TriggerVisualizer {
                     }
                     return groupCount;
                 }
+                if (box !is null && box.HasCustomOutlineGeometry()) return 0;
 
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
@@ -663,6 +664,7 @@ namespace TriggerVisualizer {
                     }
                     return groupCount;
                 }
+                if (box !is null && box.HasCustomOutlineGeometry()) return 0;
 
                 if (ShouldRenderTriggerVolumeSimpleFill(box)) return CountTriggerVolumeCameraFacingFaces(
                     box,

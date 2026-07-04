@@ -225,10 +225,7 @@ namespace TriggerVisualizer {
                 string mapCommentHideSummary = TriggerVisualizer::Trigger::GetWorldRenderingHiddenByMapCommentSummary();
                 if (mapCommentHideSummary.Length > 0) {
                     UI::PushStyleColor(UI::Col::Text, vec4(0.72f, 0.72f, 0.72f, 1.0f));
-                    UI::TextWrapped(
-                        "Hidden by current map comment: " + mapCommentHideSummary
-                            + ". Disable map suggest-off handling or remove the map command to render again."
-                    );
+                    UI::TextWrapped("Hidden by current map comment: " + mapCommentHideSummary + ". Disable map suggest-off handling or remove the map command to render again.");
                     UI::PopStyleColor();
                 }
                 UI::Separator();

@@ -114,6 +114,11 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Effective", OnOff(UI::IsOffzoneSourceEnabledForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Source", OnOff(UI::IsMediaTrackerSourceEnabledForContext(sourceContext))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Effective", OnOff(UI::IsMediaTrackerSourceEnabledForRuntime(ctx))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Crystal Source", OnOff(UI::IsCrystalSourceEnabledForContext(sourceContext))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Crystal Effective", OnOff(UI::IsCrystalSourceEnabledForRuntime(ctx))));
+                    if (TriggerVisualizer::Shared::StyledButton("Refresh Crystal Cache##trigger-dev-refresh-crystal")) {
+                        TriggerVisualizer::Trigger::RefreshCrystalSourceCache();
+                    }
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Use Map Distance", OnOff(UI::UseMapSuggestedDrawDistanceForRuntime(ctx))));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Respect Suggest Off", OnOff(UI::S_RespectMapSuggestOff)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Color Source", UI::GetColorSourceLabel(UI::S_ColorSource)));

@@ -97,12 +97,20 @@ namespace TriggerVisualizer {
                 copy.TargetKeys = source.TargetKeys;
                 copy.HasMediaTrackerTrackColor = source.HasMediaTrackerTrackColor;
                 copy.MediaTrackerTrackColor = source.MediaTrackerTrackColor;
+                copy.HasTriggerTypeColor = source.HasTriggerTypeColor;
+                copy.TriggerTypeColor = source.TriggerTypeColor;
                 copy.HasIslandIndex = source.HasIslandIndex;
                 copy.IslandIndex = source.IslandIndex;
                 copy.IslandCount = source.IslandCount;
                 copy.IsMergedGroup = source.IsMergedGroup;
                 copy.MergedVolumeCount = NormalizeMergedVolumeCount(source.MergedVolumeCount);
                 copy.AllowRawRangeLabel = source.AllowRawRangeLabel;
+                copy.OutlineShapeKind = source.OutlineShapeKind;
+                uint outlineLineCount = source.OutlineLineCount();
+                for (uint i = 0; i < outlineLineCount; i++) {
+                    copy.OutlineLineStarts.InsertLast(source.OutlineLineStarts[i]);
+                    copy.OutlineLineEnds.InsertLast(source.OutlineLineEnds[i]);
+                }
                 return copy;
             }
 

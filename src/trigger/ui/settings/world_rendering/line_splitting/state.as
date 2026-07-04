@@ -6,6 +6,7 @@ namespace TriggerVisualizer {
             const float LINE_SPLIT_START_DISTANCE_SLIDER_MAX = 2048.0f;
             const float LINE_SPLIT_FULL_DISTANCE_SLIDER_MAX = 512.0f;
             const int LINE_SPLIT_SEGMENTS_SLIDER_MAX = 512;
+
             [Setting hidden name="Trigger: Adaptive line splitting"]
             bool S_AdaptiveLineSplitting = true;
             [Setting hidden name="Trigger: Line split minimum segment length"]

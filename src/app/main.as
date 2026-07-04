@@ -17,7 +17,6 @@ namespace TriggerVisualizer {
                 14,
                 "TriggerVisualizer::App::Main"
             );
-            TriggerVisualizer::Trigger::Main();
         }
 
         void Render() {
@@ -53,18 +52,16 @@ namespace TriggerVisualizer {
             if (UI::Begin(MenuTitle() + "###dev-panel-" + TriggerVisualizer::PluginMeta.ID, devPanelOpen, UI::WindowFlags::None)) {
                 RenderWindow();
             }
+            UI::End();
             PopPluginButtonStyleUI();
             S_DevPanelOpen = devPanelOpen;
-            UI::End();
         }
 
         void RenderMenu() {
             string mapCommentHideSummary = TriggerVisualizer::Trigger::GetWorldRenderingHiddenByMapCommentSummary();
             bool hiddenByMapComment = mapCommentHideSummary.Length > 0;
-            string menuLabel = hiddenByMapComment
-                ? "\\$888" + MenuIcon() + " " + TriggerVisualizer::PluginMeta.Name + " (hidden by map)\\$z"
-                : MenuTitle();
-
+            string menuLabel = hiddenByMapComment ?
+                "\\$888" + MenuIcon() + " " + TriggerVisualizer::PluginMeta.Name + " (hidden by map)\\$z" : MenuTitle();
             bool toggleClicked = UI::MenuItem(menuLabel, "", TriggerVisualizer::Trigger::UI::S_RenderWorld);
             if (hiddenByMapComment) {
                 UI::SetItemTooltip("Rendering is hidden by current map comment: " + mapCommentHideSummary);

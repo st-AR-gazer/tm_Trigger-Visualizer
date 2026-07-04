@@ -34,9 +34,9 @@ namespace logging {
     [Setting category="z~DEV" name="Show default OP logs" hidden]
     bool S_showDefaultLogs = true;
     [Setting category="z~DEV" name="Show Custom logs" hidden]
-    bool DEV_S_sCustom = true;
+    bool DEV_S_sCustom = false;
     [Setting category="z~DEV" name="Show Debug logs" hidden]
-    bool DEV_S_sDebug = true;
+    bool DEV_S_sDebug = false;
     [Setting category="z~DEV" name="Show Info logs" hidden]
     bool DEV_S_sInfo = true;
     [Setting category="z~DEV" name="Show Notice logs" hidden]
@@ -48,7 +48,7 @@ namespace logging {
     [Setting category="z~DEV" name="Show Critical logs" hidden]
     bool DEV_S_sCritical = true;
     [Setting category="z~DEV" name="Set log level" min=0 max=5 hidden]
-    int DEV_S_sLogLevelSlider = 0;
+    int DEV_S_sLogLevelSlider = 2;
     [Setting category="z~DEV" name="Show function name in logs" hidden]
     bool S_showFunctionNameInLogs = true;
     [Setting category="z~DEV" name="Set max function name length in logs" min=0 max=50 hidden]
@@ -63,6 +63,17 @@ namespace logging {
 
     string g_diagFilePath;
     int lastSliderValue = DEV_S_sLogLevelSlider;
+
+    bool IsLevelEnabled(LogLevel level) {
+        if (level == LogLevel::Custom) return DEV_S_sCustom;
+        if (level == LogLevel::Debug) return DEV_S_sDebug;
+        if (level == LogLevel::Info) return DEV_S_sInfo;
+        if (level == LogLevel::Notice) return DEV_S_sNotice;
+        if (level == LogLevel::Warning) return DEV_S_sWarning;
+        if (level == LogLevel::Error) return DEV_S_sError;
+        if (level == LogLevel::Critical) return DEV_S_sCritical;
+        return false;
+    }
 
     void AppendToDiagFile(const string &in line) {
         if (!S_writeLogToFile) return;
@@ -199,7 +210,7 @@ namespace logging {
 
 void log(
     const string &in msg,
-    LogLevel level = LogLevel::,
+    LogLevel level = LogLevel::Info,
     int line = -1,
     string _fnName = "",
     string _tag = "",
@@ -242,16 +253,7 @@ void log(
     string full = prefix + "\\$z" + body + lineInfo + " : " + _fnName + " : \\$z" + msg;
     string ts = Time::FormatString("%Y-%m-%d %H:%M:%S  ");
     logging::AppendToDiagFile(ts + Text::StripOpenplanetFormatCodes(full));
-    array<bool> enabled = {
-        logging::DEV_S_sDebug,
-        logging::DEV_S_sInfo,
-        logging::DEV_S_sNotice,
-        logging::DEV_S_sWarning,
-        logging::DEV_S_sError,
-        logging::DEV_S_sCritical
-    };
-    if (level != LogLevel::Custom && !enabled[int(level)]) return;
-    if (level == LogLevel::Custom && !logging::DEV_S_sCustom) return;
+    if (!logging::IsLevelEnabled(level)) return;
 
     ///<
     if (logging::S_showDefaultLogs && level != LogLevel::Custom) {
@@ -260,7 +262,7 @@ void log(
             break;
         case LogLevel::Error : error(msg);
             break;
-        case LogLevel::Critical : error("\$o\$i\$w" + msg);
+        case LogLevel::Critical : error("\\$o\\$i\\$w" + msg);
             break;
         default:
             trace(msg);
@@ -270,6 +272,22 @@ void log(
         print(full);
     }
     ///>
+}
+
+namespace logging {
+    void HandledException(
+        const string &in context,
+        const string &in detail,
+        LogLevel level = LogLevel::Debug,
+        int line = -1,
+        const string &in tag = "catch",
+        const string &in tagColor = "\\$888"
+    ) {
+        if (!IsLevelEnabled(level)) return;
+        string message = "Handled exception";
+        if (detail.Length > 0) message += ": " + detail;
+        log(message, level, line, context, tag, tagColor);
+    }
 }
 
 auto logging_initializer = startnew(logging::Initialise);

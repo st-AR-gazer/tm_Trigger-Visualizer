@@ -1,0 +1,221 @@
+namespace TriggerVisualizer {
+    namespace Trigger {
+        namespace Data {
+            namespace Sources {
+                bool CrystalBlockHasExpandableClipEvidence(CGameCtnBlock@ block, CGameCtnBlockInfoVariant@ variant) {
+                    if (block !is null) {
+                        uint unitCount = CrystalMinUint(
+                            block.BlockUnits.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_UNITS_PER_BLOCK
+                        );
+                        for (uint i = 0; i < unitCount; i++) {
+                            auto unit = block.BlockUnits[i];
+                            if (unit !is null && CrystalBlockUnitInfoHasExpandableClipEvidence(unit.BlockUnitModel)) return true;
+                        }
+                    }
+                    if (variant !is null) {
+                        uint infoCount = CrystalMinUint(
+                            variant.BlockUnitInfos.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_UNITS_PER_BLOCK
+                        );
+                        for (uint i = 0; i < infoCount; i++) {
+                            if (CrystalBlockUnitInfoHasExpandableClipEvidence(variant.BlockUnitInfos[i])) return true;
+                        }
+                        uint modelCount = CrystalMinUint(
+                            variant.BlockUnitModels.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_UNITS_PER_BLOCK
+                        );
+                        for (uint i = 0; i < modelCount; i++) {
+                            if (CrystalBlockUnitInfoHasExpandableClipEvidence(variant.BlockUnitModels[i])) return true;
+                        }
+                    }
+                    return false;
+                }
+
+                bool CrystalBlockHasWaypointTarget(CGameCtnBlock@ block) {
+                    if (block is null || block.BlockInfo is null) return false;
+                    auto waypointType = block.BlockInfo.WaypointType;
+                    return waypointType != CGameCtnBlockInfo::EWayPointType::None;
+                }
+
+                string CrystalBlockInfoNameText(CGameCtnBlock@ block) {
+                    if (block is null || block.BlockInfo is null) return "";
+                    return string(block.BlockInfo.Name);
+                }
+
+                string CrystalBlockInfoNameSearchText(CGameCtnBlock@ block) {
+                    return NormalizeCrystalTriggerTypeSearchText(CrystalBlockInfoNameText(block));
+                }
+
+                bool CrystalBlockLooksExpandable(CGameCtnBlock@ block) {
+                    return CrystalBlockHasExpandableClipEvidence(block, GetCrystalBlockVariantWithBaseFallback(block));
+                }
+
+                bool CrystalBlockHasAnyMaterialModifier(CGameCtnBlock@ block) {
+                    if (block is null || block.BlockInfo is null) return false;
+                    try {
+                        if (block.BlockInfo.MaterialModifier !is null) return true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockHasAnyMaterialModifier",
+                            "BlockInfo.MaterialModifier was not readable."
+                        );
+                    }
+                    try {
+                        if (block.BlockInfo.MaterialModifier2 !is null) return true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockHasAnyMaterialModifier",
+                            "BlockInfo.MaterialModifier2 was not readable."
+                        );
+                    }
+                    return false;
+                }
+
+                bool CrystalBlockHasGameplaySpecialMaterialModifier(CGameCtnBlock@ block) {
+                    if (block is null || block.BlockInfo is null) return false;
+                    if (!CrystalBlockHasAnyMaterialModifier(block)) return false;
+                    string keys = AddCrystalBlockMaterialModifierTargetKeys(
+                        GetTriggerSourceTargetKeys(TRIGGER_SOURCE_CRYSTAL),
+                        block
+                    );
+                    return CrystalTargetKeysHaveGameplaySpecial(keys);
+                }
+
+                bool CrystalTargetKeysHaveGameplaySpecial(const string &in targetKeys) {
+                    return TriggerTargetListContains(targetKeys, TRIGGER_TYPE_TURBO)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_TURBO2)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_TURBO_ROULETTE)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_TURBO_ROULETTE_YELLOW)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_TURBO_ROULETTE_CYAN)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_TURBO_ROULETTE_PURPLE)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_BOOST)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_BOOST2)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_CRUISE)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_NO_BRAKES)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_NO_ENGINE)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_NO_STEERING)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_SLOWMO)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_FRAGILE)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_RESET)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_FORCED_ACCELERATION)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_NO_GRIP)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_VEHICLE_TRANSFORM_RESET)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_VEHICLE_TRANSFORM_SNOW)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_VEHICLE_TRANSFORM_RALLY)
+                        || TriggerTargetListContains(targetKeys, TRIGGER_TYPE_VEHICLE_TRANSFORM_DESERT);
+                }
+
+                string AddCrystalBlockWaypointTargetKeysNoMaterial(const string &in keys, CGameCtnBlock@ block) {
+                    string next = AddTriggerTargetKey(keys, CRYSTAL_SUBTYPE_BLOCK);
+                    next = AddTriggerTargetKey(next, CRYSTAL_SUBTYPE_BLOCK_WAYPOINT);
+                    next = AddTriggerTargetKey(next, "waypoint");
+                    if (block is null || block.BlockInfo is null) return next;
+
+                    auto waypointType = block.BlockInfo.WaypointType;
+                    if (waypointType == CGameCtnBlockInfo::EWayPointType::Start) {
+                        next = AddTriggerTargetKey(next, "start");
+                    } else if (waypointType == CGameCtnBlockInfo::EWayPointType::Checkpoint) {
+                        next = AddTriggerTargetKey(next, "checkpoint");
+                    } else if (waypointType == CGameCtnBlockInfo::EWayPointType::Finish) {
+                        next = AddTriggerTargetKey(next, "finish");
+                    } else if (waypointType == CGameCtnBlockInfo::EWayPointType::StartFinish) {
+                        next = AddTriggerTargetKey(next, "startfinish");
+                    } else if (waypointType == CGameCtnBlockInfo::EWayPointType::Dispenser) {
+                        next = AddTriggerTargetKey(next, "dispenser");
+                    }
+                    return next;
+                }
+
+                string GetCrystalExpandableSpecialGateTargetKeys(CGameCtnBlock@ block) {
+                    string keys = GetCrystalExpandableSpecialGateBaseTargetKeys();
+                    return AddCrystalBlockMaterialModifierTargetKeys(keys, block);
+                }
+
+                string GetCrystalExpandableSpecialGateBaseTargetKeys() {
+                    string keys = GetTriggerSourceTargetKeys(TRIGGER_SOURCE_CRYSTAL);
+                    keys = AddTriggerTargetKey(keys, CRYSTAL_SUBTYPE_BLOCK);
+                    keys = AddTriggerTargetKey(keys, CRYSTAL_SUBTYPE_GATE);
+                    keys = AddTriggerTargetKey(keys, "gate");
+                    return keys;
+                }
+
+                string AddCrystalExpandableSpecialGateMaterialKeysAfterSurfaceEvidence(
+                    const string &in surfaceTargetKeys,
+                    CGameCtnBlock@ block
+                ) {
+                    return AddCrystalBlockMaterialModifierTargetKeys(surfaceTargetKeys, block);
+                }
+
+                bool CrystalBlockHasSpecialExpandableGateTarget(
+                    CGameCtnBlock@ block,
+                    CGameCtnBlockInfoVariant@ variant,
+                    const string &in specialTargetKeys
+                ) {
+                    if (block is null || block.BlockInfo is null || variant is null) return false;
+                    if (variant.Gate !is null && variant.Gate.Shape !is null) return false;
+                    return CrystalTargetKeysHaveGameplaySpecial(specialTargetKeys);
+                }
+
+                bool CrystalExpandableEditorVariantHasSpecialGateModelEvidence(CGameCtnBlockInfoVariant@ variant) {
+                    if (variant is null) return false;
+                    try {
+                        return variant.Gate !is null;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalExpandableEditorVariantHasSpecialGateModelEvidence",
+                            "Variant.Gate was not readable."
+                        );
+                    }
+                    return false;
+                }
+
+                bool CrystalTryGetExpandableSpecialGateClipTargetKeys(
+                    CGameEditorPluginMap@ pluginMap,
+                    CGameCtnBlock@ block,
+                    CGameCtnBlockInfoVariant@ variant,
+                    string &out targetKeys,
+                    string &out detail,
+                    CrystalExpandableEditorScriptClipStats@ editorStats
+                ) {
+                    targetKeys = "";
+                    detail = "";
+                    if (block is null || block.BlockInfo is null || variant is null) return false;
+                    if (variant.Gate !is null && variant.Gate.Shape !is null) return false;
+
+                    bool hasPublicGateModelEvidence = CrystalExpandableEditorVariantHasSpecialGateModelEvidence(variant);
+                    bool hasSideAxisOpposedScriptClipEvidence = false;
+                    string opposedScriptClipDetail = "";
+                    if (!hasPublicGateModelEvidence && pluginMap !is null) {
+                        bool opposedUsesSideAxis = false;
+                        if (CrystalTryGetExpandableOpposedEditorScriptClipEvidence(pluginMap, block, opposedUsesSideAxis, opposedScriptClipDetail)) {
+                            if (editorStats !is null) {
+                                editorStats.SpecialMaterialOpposedScriptClipCandidates++;
+                            }
+                            if (opposedUsesSideAxis) {
+                                hasSideAxisOpposedScriptClipEvidence = true;
+                                if (editorStats !is null) {
+                                    editorStats.SpecialMaterialSideAxisOpposedScriptClipCandidates++;
+                                }
+                            }
+                        }
+                    }
+                    if (!hasPublicGateModelEvidence && !hasSideAxisOpposedScriptClipEvidence) return false;
+
+                    string keys = GetCrystalExpandableSpecialGateTargetKeys(block);
+                    if (!CrystalTargetKeysHaveGameplaySpecial(keys)) return false;
+                    if (!CrystalBlockHasExpandableClipEvidence(block, variant)) return false;
+
+                    targetKeys = keys;
+                    if (hasPublicGateModelEvidence) {
+                        detail = "public Gate model + MaterialModifier; geometry gated by connected expandable BlockUnits/public clip keys";
+                    } else {
+                        detail = "side-axis opposed public editor script clips + MaterialModifier; geometry gated by connected editor script clips";
+                        if (opposedScriptClipDetail.Length > 0) detail += " | " + opposedScriptClipDetail;
+                    }
+                    return true;
+                }
+            }
+        }
+    }
+}

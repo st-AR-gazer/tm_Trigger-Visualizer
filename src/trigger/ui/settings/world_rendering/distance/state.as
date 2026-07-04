@@ -18,6 +18,7 @@
             const int DISTANCE_SETTINGS_PLAYING = 0;
             const int DISTANCE_SETTINGS_EDITOR = 1;
             const int DISTANCE_SETTINGS_MEDIATRACKER = 2;
+
             [Setting hidden name="Trigger: Render distance XZ" min=0 max=50000]
             float S_RenderDistanceXZ = 224.0f;
             [Setting hidden name="Trigger: Render distance Y" min=0 max=50000]

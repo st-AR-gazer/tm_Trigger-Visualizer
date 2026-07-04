@@ -9,6 +9,8 @@ namespace TriggerVisualizer {
             int S_ScreenOcclusionCellSize = 32;
             [Setting hidden name="Trigger: Fill tile minimum size" min=2 max=64]
             float S_FillTileMinSize = 4.0f;
+            [Setting hidden name="Trigger: Max visible volumes per frame" min=16 max=4096]
+            int S_MaxVisibleVolumesPerFrame = 512;
             [Setting hidden name="Trigger: Max fill tiles per frame" min=128 max=65536]
             int S_MaxFillTilesPerFrame = 4096;
             [Setting hidden name="Trigger: Max outline segments per frame" min=64 max=65536]

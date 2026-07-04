@@ -7,6 +7,7 @@ namespace TriggerVisualizer {
         string g_CachedMapSnapshotFilterKey = "";
         bool g_CachedMapSnapshotOffzoneEnabled = false;
         bool g_CachedMapSnapshotMediaTrackerEnabled = false;
+        bool g_CachedMapSnapshotCrystalEnabled = false;
         uint g_CachedMapSnapshotRefreshTime = 0;
         TriggerSourceSnapshot@ g_CachedOffzoneSource = null;
         CGameCtnChallenge@ g_CachedOffzoneRootMap = null;
@@ -18,12 +19,24 @@ namespace TriggerVisualizer {
         string g_CachedMediaTrackerGroupName = "";
         uint64 g_CachedMediaTrackerGroupBufferPtr = 0;
         uint g_CachedMediaTrackerSourceRefreshTime = 0;
+        TriggerSourceSnapshot@ g_CachedCrystalSource = null;
+        CGameCtnChallenge@ g_CachedCrystalRootMap = null;
+        string g_CachedCrystalContextKey = "";
+        uint g_CachedCrystalBlockCount = 0;
+        uint g_CachedCrystalBakedBlockCount = 0;
+        uint g_CachedCrystalAnchoredObjectCount = 0;
+        uint g_CachedCrystalSourceCacheVersion = 0;
+        uint g_CrystalSourceCacheVersion = 1;
+        uint g_CachedCrystalSourceRefreshTime = 0;
+        bool g_CrystalSourceRefreshInProgress = false;
+        CGameCtnChallenge@ g_PendingCrystalRootMap = null;
+        string g_PendingCrystalContextKey = "";
+        uint g_PendingCrystalBlockCount = 0;
+        uint g_PendingCrystalBakedBlockCount = 0;
+        uint g_PendingCrystalAnchoredObjectCount = 0;
+        uint g_PendingCrystalSourceCacheVersion = 0;
 
         const bool MEDIATRACKER_RENDER_CELLS = true;
-
-        void Main() {
-            RefreshCurrentState();
-        }
 
         void RenderWorld() {
             RefreshCurrentState();
@@ -104,6 +117,7 @@ namespace TriggerVisualizer {
 
             bool offzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             bool mediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
+            bool crystalEnabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForRuntime(ctx);
             if (UsesPeriodicOffzoneEditorRefresh(ctx, offzoneEnabled) && IsOffzoneEditorRefreshDue(g_CachedOffzoneSourceRefreshTime)) {
                 return false;
             }
@@ -115,7 +129,9 @@ namespace TriggerVisualizer {
                 && g_CachedMapSnapshotContextKey == GetMapSnapshotContextKey(ctx)
                 && g_CachedMapSnapshotFilterKey == TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey(ctx)
                 && g_CachedMapSnapshotOffzoneEnabled == offzoneEnabled
-                && g_CachedMapSnapshotMediaTrackerEnabled == mediaTrackerEnabled;
+                && g_CachedMapSnapshotMediaTrackerEnabled == mediaTrackerEnabled
+                && g_CachedMapSnapshotCrystalEnabled == crystalEnabled
+                && CanReuseCrystalTriggerSource(ctx, crystalEnabled);
         }
 
         void StoreMapSnapshotCacheState(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -125,6 +141,7 @@ namespace TriggerVisualizer {
                 g_CachedMapSnapshotFilterKey = "";
                 g_CachedMapSnapshotOffzoneEnabled = false;
                 g_CachedMapSnapshotMediaTrackerEnabled = false;
+                g_CachedMapSnapshotCrystalEnabled = false;
                 g_CachedMapSnapshotRefreshTime = 0;
                 return;
             }
@@ -134,6 +151,7 @@ namespace TriggerVisualizer {
             g_CachedMapSnapshotFilterKey = TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey(ctx);
             g_CachedMapSnapshotOffzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             g_CachedMapSnapshotMediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
+            g_CachedMapSnapshotCrystalEnabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForRuntime(ctx);
             g_CachedMapSnapshotRefreshTime = Time::Now;
         }
 
@@ -155,6 +173,9 @@ namespace TriggerVisualizer {
             AddSourceToMapSnapshot(snapshot, offzoneSource, ctx);
             auto mediaTrackerSource = GetMediaTrackerTriggerSource(ctx);
             AddSourceToMapSnapshot(snapshot, mediaTrackerSource, ctx);
+            bool crystalEnabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForRuntime(ctx);
+            auto crystalSource = GetCrystalTriggerSource(ctx, crystalEnabled);
+            AddSourceToMapSnapshot(snapshot, crystalSource, ctx);
 
             return snapshot;
         }
@@ -226,7 +247,8 @@ namespace TriggerVisualizer {
                 if (!TriggerVisualizer::Trigger::UI::IsTriggerVolumeEnabledBySubtypeSettings(volume, ctx)) continue;
                 filteredVolumes.InsertLast(volume);
             }
-            if (TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes) {
+            bool canMergeSource = source.Source != TRIGGER_SOURCE_CRYSTAL;
+            if (canMergeSource && TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes) {
                 auto mergedVolumes = TriggerVisualizer::Trigger::Data::MergeAdjacentTriggerVolumes(filteredVolumes);
                 for (uint i = 0; i < mergedVolumes.Length; i++) {
                     snapshot.TriggerVolumes.InsertLast(mergedVolumes[i]);
@@ -260,6 +282,230 @@ namespace TriggerVisualizer {
             }
             g_CachedOffzoneSource.Enabled = enabled;
             return g_CachedOffzoneSource;
+        }
+
+        uint GetCrystalMapBlockCount(CGameCtnChallenge@ map) {
+            if (map is null) return 0;
+            try {
+                return map.Blocks.Length;
+            } catch {
+                return 0;
+            }
+        }
+
+        uint GetCrystalMapBakedBlockCount(CGameCtnChallenge@ map) {
+            if (map is null) return 0;
+            try {
+                return map.BakedBlocks.Length;
+            } catch {
+                return 0;
+            }
+        }
+
+        uint GetCrystalMapAnchoredObjectCount(CGameCtnChallenge@ map) {
+            if (map is null) return 0;
+            try {
+                return map.AnchoredObjects.Length;
+            } catch {
+                return 0;
+            }
+        }
+
+        bool CanReuseCrystalTriggerSource(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            bool enabled
+        ) {
+            if (!enabled) return true;
+            if (ctx is null || ctx.RootMap is null) return false;
+            if (g_CrystalSourceRefreshInProgress && ctx.RootMap is g_PendingCrystalRootMap && g_PendingCrystalContextKey == GetMapSnapshotContextKey(ctx) && g_PendingCrystalBlockCount == GetCrystalMapBlockCount(ctx.RootMap) && g_PendingCrystalBakedBlockCount == GetCrystalMapBakedBlockCount(ctx.RootMap) && g_PendingCrystalAnchoredObjectCount == GetCrystalMapAnchoredObjectCount(ctx.RootMap) && g_PendingCrystalSourceCacheVersion == g_CrystalSourceCacheVersion) {
+                return true;
+            }
+            if (g_CachedCrystalSource is null) return false;
+            return ctx.RootMap is g_CachedCrystalRootMap
+                && g_CachedCrystalContextKey == GetMapSnapshotContextKey(ctx)
+                && g_CachedCrystalBlockCount == GetCrystalMapBlockCount(ctx.RootMap)
+                && g_CachedCrystalBakedBlockCount == GetCrystalMapBakedBlockCount(ctx.RootMap)
+                && g_CachedCrystalAnchoredObjectCount == GetCrystalMapAnchoredObjectCount(ctx.RootMap)
+                && g_CachedCrystalSourceCacheVersion == g_CrystalSourceCacheVersion;
+        }
+
+        void RefreshCrystalSourceCache() {
+            g_CrystalSourceCacheVersion++;
+            @g_CachedCrystalSource = null;
+            @g_CachedCrystalRootMap = null;
+            g_CachedCrystalContextKey = "";
+            g_CachedCrystalBlockCount = 0;
+            g_CachedCrystalBakedBlockCount = 0;
+            g_CachedCrystalAnchoredObjectCount = 0;
+            g_CachedCrystalSourceCacheVersion = 0;
+            g_CachedCrystalSourceRefreshTime = 0;
+            g_CrystalSourceRefreshInProgress = false;
+            @g_PendingCrystalRootMap = null;
+            g_PendingCrystalContextKey = "";
+            g_PendingCrystalBlockCount = 0;
+            g_PendingCrystalBakedBlockCount = 0;
+            g_PendingCrystalAnchoredObjectCount = 0;
+            g_PendingCrystalSourceCacheVersion = 0;
+            @g_MapSnapshot = null;
+        }
+
+        TriggerSourceSnapshot@ CreateCrystalRefreshingSource(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            bool enabled
+        ) {
+            auto source = TriggerVisualizer::Trigger::Data::Sources::CreateCrystalTriggerSourceShell(ctx, enabled);
+            if (enabled) {
+                TriggerVisualizer::Trigger::Data::Sources::AddCrystalDiagnostic(
+                    source,
+                    "Crystal source cache refresh is running in the background; existing cached Crystal volumes are reused when available."
+                );
+            }
+            return source;
+        }
+
+        void QueueCrystalSourceRefresh(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            const string &in contextKey,
+            uint blockCount,
+            uint bakedBlockCount,
+            uint anchoredObjectCount
+        ) {
+            if (ctx is null || ctx.RootMap is null) return;
+            if (g_CrystalSourceRefreshInProgress && ctx.RootMap is g_PendingCrystalRootMap && g_PendingCrystalContextKey == contextKey && g_PendingCrystalBlockCount == blockCount && g_PendingCrystalBakedBlockCount == bakedBlockCount && g_PendingCrystalAnchoredObjectCount == anchoredObjectCount && g_PendingCrystalSourceCacheVersion == g_CrystalSourceCacheVersion) {
+                return;
+            }
+
+            g_CrystalSourceRefreshInProgress = true;
+            @g_PendingCrystalRootMap = ctx.RootMap;
+            g_PendingCrystalContextKey = contextKey;
+            g_PendingCrystalBlockCount = blockCount;
+            g_PendingCrystalBakedBlockCount = bakedBlockCount;
+            g_PendingCrystalAnchoredObjectCount = anchoredObjectCount;
+            g_PendingCrystalSourceCacheVersion = g_CrystalSourceCacheVersion;
+            startnew(CoroutineFunc(RefreshCrystalSourceCacheAsync));
+        }
+
+        bool CrystalSourceRefreshRequestMatches(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            const string &in contextKey,
+            uint blockCount,
+            uint bakedBlockCount,
+            uint anchoredObjectCount,
+            uint cacheVersion
+        ) {
+            return ctx !is null
+                && ctx.RootMap !is null
+                && ctx.RootMap is g_PendingCrystalRootMap
+                && g_PendingCrystalContextKey == contextKey
+                && g_PendingCrystalBlockCount == blockCount
+                && g_PendingCrystalBakedBlockCount == bakedBlockCount
+                && g_PendingCrystalAnchoredObjectCount == anchoredObjectCount
+                && cacheVersion == g_CrystalSourceCacheVersion;
+        }
+
+        bool StoreCrystalSourceCacheIfCurrent(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            const string &in contextKey,
+            uint blockCount,
+            uint bakedBlockCount,
+            uint anchoredObjectCount,
+            uint cacheVersion,
+            TriggerSourceSnapshot@ source
+        ) {
+            if (source is null) return false;
+            if (!CrystalSourceRefreshRequestMatches(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion)) {
+                return false;
+            }
+
+            @g_CachedCrystalSource = source;
+            @g_CachedCrystalRootMap = ctx.RootMap;
+            g_CachedCrystalContextKey = contextKey;
+            g_CachedCrystalBlockCount = blockCount;
+            g_CachedCrystalBakedBlockCount = bakedBlockCount;
+            g_CachedCrystalAnchoredObjectCount = anchoredObjectCount;
+            g_CachedCrystalSourceCacheVersion = cacheVersion;
+            g_CachedCrystalSourceRefreshTime = Time::Now;
+            @g_MapSnapshot = null;
+            return true;
+        }
+
+        void RefreshCrystalSourceCacheAsync() {
+            auto ctx = TriggerVisualizer::Trigger::Data::GetRuntimeContext();
+            if (ctx is null || ctx.RootMap is null) {
+                g_CrystalSourceRefreshInProgress = false;
+                return;
+            }
+
+            string contextKey = GetMapSnapshotContextKey(ctx);
+            uint blockCount = GetCrystalMapBlockCount(ctx.RootMap);
+            uint bakedBlockCount = GetCrystalMapBakedBlockCount(ctx.RootMap);
+            uint anchoredObjectCount = GetCrystalMapAnchoredObjectCount(ctx.RootMap);
+            uint cacheVersion = g_PendingCrystalSourceCacheVersion;
+            if (!CrystalSourceRefreshRequestMatches(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion)) {
+                g_CrystalSourceRefreshInProgress = false;
+                return;
+            }
+
+            auto source = TriggerVisualizer::Trigger::Data::Sources::CreateCrystalTriggerSourceShell(ctx, true);
+            uint frameStart = Time::Now;
+            TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalExpandableBlockUnitTriggers(source, ctx.RootMap);
+            frameStart = TriggerVisualizer::Trigger::Data::Sources::CrystalSourceBuildCheckpoint(frameStart);
+            if (!StoreCrystalSourceCacheIfCurrent(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) {
+                g_CrystalSourceRefreshInProgress = false;
+                return;
+            }
+            log(
+                "Crystal source cache refresh published expandable partial cache with " + tostring(source.TriggerVolumeCount()) + " trigger volumes.",
+                LogLevel::Info,
+                466,
+                "TriggerVisualizer::Trigger::RefreshCrystalSourceCacheAsync"
+            );
+            TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalBlocks(source, ctx.RootMap);
+            frameStart = TriggerVisualizer::Trigger::Data::Sources::CrystalSourceBuildCheckpoint(frameStart);
+            if (!CrystalSourceRefreshRequestMatches(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion)) {
+                g_CrystalSourceRefreshInProgress = false;
+                return;
+            }
+
+            TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalAnchoredObjects(source, ctx.RootMap);
+            frameStart = TriggerVisualizer::Trigger::Data::Sources::CrystalSourceBuildCheckpoint(frameStart);
+            TriggerVisualizer::Trigger::Data::Sources::AddCrystalFinalCountsDiagnostic(source);
+            StoreCrystalSourceCacheIfCurrent(
+                ctx,
+                contextKey,
+                blockCount,
+                bakedBlockCount,
+                anchoredObjectCount,
+                cacheVersion,
+                source
+            );
+            g_CrystalSourceRefreshInProgress = false;
+        }
+
+        TriggerSourceSnapshot@ GetCrystalTriggerSource(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            bool enabled
+        ) {
+            if (ctx is null || ctx.RootMap is null) {
+                return TriggerVisualizer::Trigger::Data::Sources::ReadCrystalTriggerSource(ctx, enabled);
+            }
+
+            string contextKey = GetMapSnapshotContextKey(ctx);
+            uint blockCount = GetCrystalMapBlockCount(ctx.RootMap);
+            uint bakedBlockCount = GetCrystalMapBakedBlockCount(ctx.RootMap);
+            uint anchoredObjectCount = GetCrystalMapAnchoredObjectCount(ctx.RootMap);
+
+            if (g_CachedCrystalSource !is null && ctx.RootMap is g_CachedCrystalRootMap && g_CachedCrystalContextKey == contextKey && g_CachedCrystalBlockCount == blockCount && g_CachedCrystalBakedBlockCount == bakedBlockCount && g_CachedCrystalAnchoredObjectCount == anchoredObjectCount && g_CachedCrystalSourceCacheVersion == g_CrystalSourceCacheVersion) {
+                g_CachedCrystalSource.Enabled = enabled;
+                return g_CachedCrystalSource;
+            }
+
+            QueueCrystalSourceRefresh(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount);
+            if (g_CachedCrystalSource !is null) {
+                g_CachedCrystalSource.Enabled = enabled;
+                return g_CachedCrystalSource;
+            }
+            return CreateCrystalRefreshingSource(ctx, enabled);
         }
 
         TriggerSourceSnapshot@ GetMediaTrackerTriggerSource(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {

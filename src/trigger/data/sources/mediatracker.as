@@ -711,7 +711,7 @@ namespace TriggerVisualizer {
                                     hasPlayerCameraTrack = true;
                                 }
                                 vec4 blockColor = hasSpecificTrackColor ?
-                                specificTrackColor : GetMediaTrackerTrackColorForSubtype(normalizedSubtypeKey);
+                                    specificTrackColor : GetMediaTrackerTrackColorForSubtype(normalizedSubtypeKey);
                                 blockColorSum += ColorVec3(blockColor);
                                 blockColorCount++;
                             }

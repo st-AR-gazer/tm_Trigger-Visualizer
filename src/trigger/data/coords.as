@@ -66,6 +66,43 @@ namespace TriggerVisualizer {
                 return false;
             }
 
+            bool TryGetKnownCrystalPlacedBlockWorldYAnchor(
+                const string &in rawCollectionName,
+                int collectionId,
+                float &out worldYAnchor,
+                string &out source
+            ) {
+                string key = NormalizeMapCollectionName(rawCollectionName);
+
+                if (key == "stadium" || key == "stadium2020") {
+                    worldYAnchor = 8.0f;
+                    source = "crystal-block-calibration:Stadium";
+                    return true;
+                }
+                if (key == "bluebay" || collectionId == 28) {
+                    worldYAnchor = 5.0f;
+                    source = "crystal-block-calibration:BlueBay";
+                    return true;
+                }
+                if (key == "greencoast" || collectionId == 15) {
+                    worldYAnchor = 5.0f;
+                    source = "crystal-block-calibration:GreenCoast";
+                    return true;
+                }
+                if (key == "redisland" || collectionId == 16) {
+                    worldYAnchor = 15.0f;
+                    source = "crystal-block-calibration:RedIsland";
+                    return true;
+                }
+                if (key == "whiteshore" || collectionId == 29) {
+                    worldYAnchor = 15.0f;
+                    source = "crystal-block-calibration:WhiteShore";
+                    return true;
+                }
+
+                return false;
+            }
+
             float GetMapTriggerWorldYAnchor(
                 CGameCtnChallenge@ map,
                 string &out source,
@@ -73,7 +110,7 @@ namespace TriggerVisualizer {
                 int &out collectionId,
                 uint &out decoBaseHeightOffset
             ) {
-                source = "default";
+                source = "default:no-map";
                 collectionName = GetMapCollectionName(map);
                 collectionId = GetMapCollectionId(map);
                 decoBaseHeightOffset = map is null ? 0 : map.DecoBaseHeightOffset;
@@ -86,14 +123,52 @@ namespace TriggerVisualizer {
                     return knownVistaAnchor;
                 }
 
-                uint anchor = map.DecoBaseHeightOffset;
-                if (anchor > 0 && anchor <= 1024) {
-                    source = "DecoBaseHeightOffset";
-                    return float(anchor);
+                uint rawDecoBaseHeightOffset = map.DecoBaseHeightOffset;
+                if (rawDecoBaseHeightOffset > 0 && rawDecoBaseHeightOffset <= 1024) {
+                    source = "unknown-vista:DecoBaseHeightOffset fallback";
+                    return float(rawDecoBaseHeightOffset);
                 }
 
-                source = "default";
+                source = "default:unknown-vista";
                 return float(OFFZONE_WORLD_Y_ANCHOR);
+            }
+
+            float GetMapPlacedBlockWorldYAnchor(
+                CGameCtnChallenge@ map,
+                CGameCtnBlock@ block,
+                string &out source,
+                string &out collectionName,
+                int &out collectionId,
+                uint &out decoBaseHeightOffset,
+                float &out triggerGridWorldYAnchor
+            ) {
+                source = "trigger-grid";
+                collectionName = GetMapCollectionName(map);
+                collectionId = GetMapCollectionId(map);
+                decoBaseHeightOffset = map is null ? 0 : map.DecoBaseHeightOffset;
+                triggerGridWorldYAnchor = float(OFFZONE_WORLD_Y_ANCHOR);
+                string triggerAnchorSource = "";
+                string triggerCollectionName = "";
+                int triggerCollectionId = -1;
+                uint triggerDecoBaseHeightOffset = 0;
+                triggerGridWorldYAnchor = GetMapTriggerWorldYAnchor(
+                    map,
+                    triggerAnchorSource,
+                    triggerCollectionName,
+                    triggerCollectionId,
+                    triggerDecoBaseHeightOffset
+                );
+                float placedBlockWorldYAnchor = 0.0f;
+                string placedBlockAnchorSource = "";
+                if (TryGetKnownCrystalPlacedBlockWorldYAnchor(collectionName, collectionId, placedBlockWorldYAnchor, placedBlockAnchorSource)) {
+                    source = placedBlockAnchorSource;
+                } else {
+                    source = "crystal-block-calibration:unknown-zero";
+                }
+                if (triggerAnchorSource.Length > 0) {
+                    source += " grid=" + triggerAnchorSource;
+                }
+                return placedBlockWorldYAnchor;
             }
 
             nat3 NormalizeCellsPerBlock(const nat3 &in cellsPerBlock) {

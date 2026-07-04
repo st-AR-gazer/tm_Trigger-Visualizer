@@ -194,8 +194,10 @@ namespace TriggerVisualizer {
             class WorldOutlineEdgeDrawItem {
                 vec3 Start;
                 vec3 End;
+                vec4 Color;
                 uint BoxIndex = 0;
                 uint EdgeIndex = 0;
+                float SortDistanceSq = 0.0f;
                 string GeometryKey;
 
                 WorldOutlineEdgeDrawItem() { }
@@ -256,6 +258,72 @@ namespace TriggerVisualizer {
                 int index = FindStringIndex(keys, key);
                 if (index < 0 || uint(index) >= counts.Length) return 0;
                 return counts[uint(index)];
+            }
+
+            bool RenderPriorityModeUsesCamera(int mode) {
+                return mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_ONLY
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_VEHICLE
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_ORBITAL
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
+            }
+
+            bool RenderPriorityModeUsesVehicle(int mode) {
+                return mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_ONLY
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_VEHICLE
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_AND_ORBITAL
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
+            }
+
+            bool RenderPriorityModeUsesOrbital(int mode) {
+                return mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_ORBITAL_ONLY
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_ORBITAL
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_AND_ORBITAL
+                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
+            }
+
+            float GetDistanceSqToWorldLineSegment(const vec3 &in point, const vec3 &in start, const vec3 &in end) {
+                vec3 line = end - start;
+                float lineLengthSq = Math::Distance2(start, end);
+                if (lineLengthSq <= 0.0001f) return Math::Distance2(point, start);
+
+                float t = Math::Dot(point - start, line) / lineLengthSq;
+                t = Math::Clamp(t, 0.0f, 1.0f);
+                return Math::Distance2(point, Math::Lerp(start, end, t));
+            }
+
+            float GetWorldLineRenderPriorityDistanceSq(
+                const vec3 &in start,
+                const vec3 &in end,
+                const vec3 &in cameraPos,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
+                int mode
+            ) {
+                float best = 1e30f;
+                bool hasCandidate = false;
+                if (RenderPriorityModeUsesCamera(mode)) {
+                    best = Math::Min(best, GetDistanceSqToWorldLineSegment(cameraPos, start, end));
+                    hasCandidate = true;
+                }
+                if (RenderPriorityModeUsesVehicle(mode) && proximityState !is null && proximityState.HasVehiclePosition) {
+                    best = Math::Min(best, GetDistanceSqToWorldLineSegment(proximityState.VehiclePosition, start, end));
+                    hasCandidate = true;
+                }
+                if (RenderPriorityModeUsesOrbital(mode) && proximityState !is null && proximityState.HasOrbitalPoint) {
+                    best = Math::Min(best, GetDistanceSqToWorldLineSegment(proximityState.OrbitalPoint, start, end));
+                    hasCandidate = true;
+                }
+
+                return hasCandidate ? best : GetDistanceSqToWorldLineSegment(cameraPos, start, end);
+            }
+
+            float GetWorldLineRenderPriorityDistanceSq(
+                const vec3 &in start,
+                const vec3 &in end,
+                const vec3 &in cameraPos,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
+            ) {
+                int mode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
+                return GetWorldLineRenderPriorityDistanceSq(start, end, cameraPos, proximityState, mode);
             }
 
             vec4 LerpColor(const vec4 &in from, const vec4 &in to, float factor) {
@@ -368,7 +436,11 @@ namespace TriggerVisualizer {
 
             vec4 GetColorModeColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = TriggerVisualizer::Trigger::UI::S_BaseTriggerColor;
-                if (TriggerVisualizer::Trigger::UI::S_ColorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
+                int colorSource = TriggerVisualizer::Trigger::UI::S_ColorSource;
+                if (colorSource != TriggerVisualizer::Trigger::UI::COLOR_SOURCE_UNIFORM && box !is null && box.HasTriggerTypeColor) {
+                    color = box.TriggerTypeColor;
+                }
+                if (colorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
                     color = box.MediaTrackerTrackColor;
                 }
                 if (TriggerVisualizer::Trigger::UI::S_EnableDistanceFadeColor) {
@@ -391,7 +463,7 @@ namespace TriggerVisualizer {
 
             vec4 GetOutlineColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = GetColorModeColor(box, cameraPos, fade);
-                if (TriggerVisualizer::Trigger::UI::S_ColorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS) {
+                if (TriggerVisualizer::Trigger::UI::S_ColorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
                     color = ShiftColorHue(color, TriggerVisualizer::Trigger::UI::S_MediaTrackerTrackOutlineHueShift);
                 }
                 color.w *= TriggerVisualizer::Trigger::UI::S_OutlineAlpha * Math::Clamp(fade, 0.0f, 1.0f);
@@ -416,6 +488,44 @@ namespace TriggerVisualizer {
                 );
                 vec3 delta = absDelta - halfSize;
                 return vec3(Math::Max(delta.x, 0.0f), Math::Max(delta.y, 0.0f), Math::Max(delta.z, 0.0f));
+            }
+
+            float GetDistanceOutsideTriggerVolumeSq(const TriggerVolume@ box, const vec3 &in point) {
+                vec3 outside = GetDistanceOutsideTriggerVolume(box, point);
+                return outside.x * outside.x + outside.y * outside.y + outside.z * outside.z;
+            }
+
+            float GetTriggerVolumeRenderPriorityDistanceSq(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
+                int mode
+            ) {
+                float best = 1e30f;
+                bool hasCandidate = false;
+                if (RenderPriorityModeUsesCamera(mode)) {
+                    best = Math::Min(best, GetDistanceOutsideTriggerVolumeSq(box, cameraPos));
+                    hasCandidate = true;
+                }
+                if (RenderPriorityModeUsesVehicle(mode) && proximityState !is null && proximityState.HasVehiclePosition) {
+                    best = Math::Min(best, GetDistanceOutsideTriggerVolumeSq(box, proximityState.VehiclePosition));
+                    hasCandidate = true;
+                }
+                if (RenderPriorityModeUsesOrbital(mode) && proximityState !is null && proximityState.HasOrbitalPoint) {
+                    best = Math::Min(best, GetDistanceOutsideTriggerVolumeSq(box, proximityState.OrbitalPoint));
+                    hasCandidate = true;
+                }
+
+                return hasCandidate ? best : GetDistanceOutsideTriggerVolumeSq(box, cameraPos);
+            }
+
+            float GetTriggerVolumeRenderPriorityDistanceSq(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
+            ) {
+                int mode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
+                return GetTriggerVolumeRenderPriorityDistanceSq(box, cameraPos, proximityState, mode);
             }
 
             float GetAxisFadeFactor(float axisDistance, float renderDistance, float fadeBand) {
@@ -476,39 +586,53 @@ namespace TriggerVisualizer {
             float GetTriggerVolumeRenderFadeFactor(
                 const TriggerVolume@ box,
                 const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
+                int proximityMode
             ) {
-                int proximityMode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
                 float cameraFade = GetTriggerVolumeFadeFactor(box, cameraPos);
-                float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
-                float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
-
                 if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_ONLY) {
+                    float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
                     return proximityState !is null && proximityState.HasVehiclePosition ? vehicleFade : cameraFade;
                 }
 
                 if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_VEHICLE) {
+                    float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
                     return Math::Max(cameraFade, vehicleFade);
                 }
 
                 if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_ORBITAL_ONLY) {
+                    float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
                     return proximityState !is null && proximityState.HasOrbitalPoint ? orbitalFade : cameraFade;
                 }
 
                 if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_ORBITAL) {
+                    float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
                     return Math::Max(cameraFade, orbitalFade);
                 }
 
                 if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_AND_ORBITAL) {
+                    float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
+                    float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
                     float combinedFade = Math::Max(vehicleFade, orbitalFade);
                     return(proximityState !is null && (proximityState.HasVehiclePosition || proximityState.HasOrbitalPoint)) ? combinedFade : cameraFade;
                 }
 
                 if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL) {
+                    float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
+                    float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
                     return Math::Max(cameraFade, Math::Max(vehicleFade, orbitalFade));
                 }
 
                 return cameraFade;
+            }
+
+            float GetTriggerVolumeRenderFadeFactor(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
+            ) {
+                int proximityMode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
+                return GetTriggerVolumeRenderFadeFactor(box, cameraPos, proximityState, proximityMode);
             }
 
             bool IsTriggerVolumeInRenderRangeForProximity(
@@ -781,6 +905,7 @@ namespace TriggerVisualizer {
                 if (items is null) return;
                 int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
                 if (int(items.Length) >= maxFrameTiles) return;
+                if (box !is null && box.HasCustomOutlineGeometry()) return;
                 if (box !is null && box.HasChildVolumes()) {
                     if (ShouldSimplifyGroupedTriggersNow()) {
                         auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
@@ -849,6 +974,25 @@ namespace TriggerVisualizer {
                     return;
                 }
 
+                if (box.HasCustomOutlineGeometry()) {
+                    uint outlineLineCount = box.OutlineLineCount();
+                    for (uint i = 0; i < outlineLineCount; i++) {
+                        WorldOutlineEdgeDrawItem@ item = WorldOutlineEdgeDrawItem(
+                            box.OutlineLineStarts[i],
+                            box.OutlineLineEnds[i],
+                            boxIndex,
+                            i
+                        );
+                        items.InsertLast(item);
+                        AddGeometryKeyCount(
+                            edgeKeys,
+                            edgeCounts,
+                            item.GeometryKey
+                        );
+                    }
+                    return;
+                }
+
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
 
@@ -865,6 +1009,125 @@ namespace TriggerVisualizer {
                         edgeKeys,
                         edgeCounts,
                         item.GeometryKey
+                    );
+                }
+            }
+
+            void AddWorldOutlineEdgeDrawItem(
+                WorldOutlineEdgeDrawItem@ item,
+                const vec3 &in cameraPos,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
+                int proximityMode,
+                const vec4 &in color,
+                array<WorldOutlineEdgeDrawItem@> @items
+            ) {
+                if (item is null || items is null || color.w <= 0.001f) return;
+
+                item.Color = color;
+                item.SortDistanceSq = GetWorldLineRenderPriorityDistanceSq(
+                    item.Start,
+                    item.End,
+                    cameraPos,
+                    proximityState,
+                    proximityMode
+                );
+                items.InsertLast(item);
+            }
+
+            void CollectTriggerVolumeOutlineDrawItems(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
+                int proximityMode,
+                const vec4 &in color,
+                uint boxIndex,
+                array<WorldOutlineEdgeDrawItem@> @items
+            ) {
+                if (box is null || items is null || color.w <= 0.001f) return;
+
+                if (box.HasChildVolumes() && ShouldSimplifyGroupedTriggersNow()) {
+                    auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
+                    CollectTriggerVolumeOutlineDrawItems(
+                        simplifiedBox,
+                        cameraPos,
+                        proximityState,
+                        proximityMode,
+                        color,
+                        boxIndex,
+                        items
+                    );
+                    return;
+                }
+
+                auto edgeItems = array<WorldOutlineEdgeDrawItem@>();
+                auto edgeKeys = array<string>();
+                auto edgeCounts = array<uint>();
+                CollectTriggerVolumeOutlineEdgeDrawItems(
+                    box,
+                    boxIndex,
+                    edgeItems,
+                    edgeKeys,
+                    edgeCounts
+                );
+
+                for (uint i = 0; i < edgeItems.Length; i++) {
+                    if (edgeItems[i] is null) continue;
+                    if (GetGeometryKeyCount(edgeKeys, edgeCounts, edgeItems[i].GeometryKey) > 1) continue;
+                    AddWorldOutlineEdgeDrawItem(edgeItems[i], cameraPos, proximityState, proximityMode, color, items);
+                }
+            }
+
+            bool ShouldWorldOutlineEdgeSortAfter(
+                const WorldOutlineEdgeDrawItem@ left,
+                const WorldOutlineEdgeDrawItem@ right
+            ) {
+                if (left is null) return false;
+                if (right is null) return true;
+                if (left.SortDistanceSq > right.SortDistanceSq) return true;
+                if (left.SortDistanceSq < right.SortDistanceSq) return false;
+                if (left.BoxIndex > right.BoxIndex) return true;
+                if (left.BoxIndex < right.BoxIndex) return false;
+                return left.EdgeIndex > right.EdgeIndex;
+            }
+
+            void SortWorldOutlineEdgeDrawItemsByRenderPriority(array<WorldOutlineEdgeDrawItem@> @items) {
+                if (items is null || items.Length <= 1) return;
+
+                uint gap = items.Length / 2;
+                while (gap > 0) {
+                    for (uint i = gap; i < items.Length; i++) {
+                        WorldOutlineEdgeDrawItem@ item = items[i];
+                        uint j = i;
+                        while (j >= gap && ShouldWorldOutlineEdgeSortAfter(items[j - gap], item)) {
+                            @items[j] = items[j - gap];
+                            j -= gap;
+                        }
+                        @items[j] = item;
+                    }
+                    gap /= 2;
+                }
+            }
+
+            void DrawWorldOutlineEdgeDrawItems(
+                array<WorldOutlineEdgeDrawItem@> @items,
+                const vec3 &in cameraPos,
+                float strokeWidth
+            ) {
+                if (items is null || items.Length == 0) return;
+                SortWorldOutlineEdgeDrawItemsByRenderPriority(items);
+                nvg::Reset();
+                nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
+
+                for (uint i = 0; i < items.Length; i++) {
+                    if (G_WorldLineSegmentBudgetRemaining == 0) break;
+                    if (items[i] is null) continue;
+                    DrawWorldLineAdaptiveColored(
+                        items[i].Start,
+                        items[i].End,
+                        cameraPos,
+                        items[i].Color,
+                        items[i].BoxIndex,
+                        items[i].EdgeIndex
                     );
                 }
             }
@@ -892,6 +1155,7 @@ namespace TriggerVisualizer {
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
                 for (uint i = 0; i < items.Length; i++) {
+                    if (G_WorldLineSegmentBudgetRemaining == 0) break;
                     if (items[i] is null) continue;
                     if (GetGeometryKeyCount(edgeKeys, edgeCounts, items[i].GeometryKey) > 1) continue;
 
@@ -902,6 +1166,31 @@ namespace TriggerVisualizer {
                         color,
                         items[i].BoxIndex,
                         items[i].EdgeIndex
+                    );
+                }
+            }
+
+            void DrawTriggerVolumeCustomOutline(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                const vec4 &in color,
+                float strokeWidth,
+                uint boxIndex
+            ) {
+                if (box is null || !box.HasCustomOutlineGeometry()) return;
+
+                nvg::Reset();
+                nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
+                uint outlineLineCount = box.OutlineLineCount();
+                for (uint i = 0; i < outlineLineCount; i++) {
+                    if (G_WorldLineSegmentBudgetRemaining == 0) break;
+                    DrawWorldLineAdaptiveColored(
+                        box.OutlineLineStarts[i],
+                        box.OutlineLineEnds[i],
+                        cameraPos,
+                        color,
+                        boxIndex,
+                        i
                     );
                 }
             }
@@ -924,6 +1213,11 @@ namespace TriggerVisualizer {
                     return;
                 }
 
+                if (box !is null && box.HasCustomOutlineGeometry()) {
+                    DrawTriggerVolumeCustomOutline(box, cameraPos, color, strokeWidth, boxIndex);
+                    return;
+                }
+
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
 
@@ -931,6 +1225,7 @@ namespace TriggerVisualizer {
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
                 for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
+                    if (G_WorldLineSegmentBudgetRemaining == 0) break;
                     auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
                     DrawWorldLineAdaptiveColored(
                         corners[edge[0]],

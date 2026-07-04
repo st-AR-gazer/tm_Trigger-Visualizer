@@ -1,0 +1,722 @@
+namespace TriggerVisualizer {
+    namespace Trigger {
+        namespace Data {
+            namespace Sources {
+                string CrystalExpandableClipIdText(MwId id) {
+                    string text = tostring(id).ToLower().Trim();
+                    text = text.Replace(" ", "");
+                    if (text.Length == 0 || text == "0" || text == "none" || text == "<none>" || text == "mwid(0)" || text == "id:0") return "";
+                    return text;
+                }
+
+                string CrystalExpandableClipDebugIdText(MwId id) {
+                    string text = tostring(id).Trim();
+                    if (text.Length == 0) return "<empty>";
+                    return text;
+                }
+
+                string CrystalExpandableClipDebugDetail(CGameCtnBlockInfoClip@ clip) {
+                    if (clip is null) return "clip=null";
+
+                    string detail = "type=" + tostring(clip.ClipType)
+                        + " anti=" + CrystalBoolLabel(clip.IsAntiClip)
+                        + " full=" + CrystalBoolLabel(clip.IsFullFreeClip)
+                        + " exclusive=" + CrystalBoolLabel(clip.IsExclusiveFreeClip)
+                        + " delByFull=" + CrystalBoolLabel(clip.CanBeDeletedByFullFreeClip)
+                        + " alwaysVisible=" + CrystalBoolLabel(clip.IsAlwaysVisibleFreeClip)
+                        + " ignoredByVFC=" + CrystalBoolLabel(clip.IsFCTOrFCBIgnoredByVFC)
+                        + " ids=[" + CrystalExpandableClipDebugIdText(clip.ClipGroupId)
+                        + "," + CrystalExpandableClipDebugIdText(clip.ClipGroupId2)
+                        + "," + CrystalExpandableClipDebugIdText(clip.SymmetricalClipId)
+                        + "," + CrystalExpandableClipDebugIdText(clip.SymmetricalClipGroupId)
+                        + "," + CrystalExpandableClipDebugIdText(clip.SymmetricalClipGroupId2)
+                        + "]";
+                    auto vertical = cast<CGameCtnBlockInfoClipVertical>(clip);
+                    if (vertical !is null) {
+                        detail += " vertical=" + CrystalExpandableClipDebugIdText(vertical.VerticalClipGroupId);
+                    }
+
+                    auto horizontal = cast<CGameCtnBlockInfoClipHorizontal>(clip);
+                    if (horizontal !is null) {
+                        detail += " horizontal=" + CrystalExpandableClipDebugIdText(horizontal.HorizontalClipGroupId);
+                    }
+                    return detail;
+                }
+
+                string CrystalExpandableUnitClipDebugDetail(CGameCtnBlockUnitInfo@ unitInfo) {
+                    if (unitInfo is null) return "unitInfo=null";
+
+                    string detail = "";
+                    try {
+                        detail += "flatClips=" + tostring(unitInfo.Clips.Length)
+                            + " counts N/E/S/W/T/B="
+                            + tostring(unitInfo.ClipCount_North) + "/"
+                            + tostring(unitInfo.ClipCount_East) + "/"
+                            + tostring(unitInfo.ClipCount_South) + "/"
+                            + tostring(unitInfo.ClipCount_West) + "/"
+                            + tostring(unitInfo.ClipCount_Top) + "/"
+                            + tostring(unitInfo.ClipCount_Bottom);
+                        uint sampleCount = CrystalMinUint(unitInfo.Clips.Length, 4);
+                        for (uint i = 0; i < sampleCount; i++) {
+                            detail += " clip[" + tostring(i) + "] " + CrystalExpandableClipDebugDetail(unitInfo.Clips[i]);
+                        }
+                    } catch {
+                        detail += " flat clips/counts unreadable";
+                    }
+
+                    try {
+                        detail += " directionalLens N/E/S/W/T/B="
+                            + tostring(unitInfo.Clips_North.Length) + "/"
+                            + tostring(unitInfo.Clips_East.Length) + "/"
+                            + tostring(unitInfo.Clips_South.Length) + "/"
+                            + tostring(unitInfo.Clips_West.Length) + "/"
+                            + tostring(unitInfo.Clips_Top.Length) + "/"
+                            + tostring(unitInfo.Clips_Bottom.Length);
+                    } catch {
+                        detail += " directional lengths unreadable";
+                    }
+                    return detail;
+                }
+
+                bool CrystalExpandableClipKeyListContains(const string &in keys, const string &in key) {
+                    if (keys.Length == 0 || key.Length == 0) return false;
+                    return("|" + keys).IndexOf("|" + key + "|") >= 0;
+                }
+
+                string CrystalExpandableAddClipKey(const string &in keys, const string &in key) {
+                    if (key.Length == 0 || CrystalExpandableClipKeyListContains(keys, key)) return keys;
+                    return keys + key + "|";
+                }
+
+                string CrystalExpandableMergeClipKeyLists(const string &in keys, const string &in extraKeys) {
+                    string next = keys;
+                    auto parts = extraKeys.Split("|");
+                    for (uint i = 0; i < parts.Length; i++) {
+                        next = CrystalExpandableAddClipKey(next, parts[i]);
+                    }
+                    return next;
+                }
+
+                bool CrystalExpandableClipKeyListsOverlap(const string &in a, const string &in b) {
+                    if (a.Length == 0 || b.Length == 0) return false;
+                    auto parts = a.Split("|");
+                    string preparedB = "|" + b;
+                    for (uint i = 0; i < parts.Length; i++) {
+                        if (parts[i].Length == 0) continue;
+                        if (preparedB.IndexOf("|" + parts[i] + "|") >= 0) return true;
+                    }
+                    return false;
+                }
+
+                string CrystalExpandableSignatureText(const string &in rawText) {
+                    string text = rawText.ToLower().Trim();
+                    text = text.Replace(" ", "");
+                    text = text.Replace("|", "");
+                    text = text.Replace(":", "");
+                    return text;
+                }
+
+                string CrystalExpandableClipTypeSignatureText(CGameCtnBlockInfoClip@ clip) {
+                    if (clip is null) return "";
+                    string typeText = tostring(clip.ClipType).ToLower();
+                    if (typeText.IndexOf("freecliptop") >= 0 || typeText.IndexOf("freeclipbottom") >= 0) {
+                        return "freeclipvertical";
+                    }
+                    return CrystalExpandableSignatureText(tostring(clip.ClipType));
+                }
+
+                string CrystalExpandableBoolSignatureText(bool value) {
+                    return value ? "1" : "0";
+                }
+
+                string CrystalExpandableIdlessPublicClipSignature(CGameCtnBlockInfoClip@ clip) {
+                    if (!CrystalClipLooksExpandableConnection(clip)) return "";
+
+                    auto vertical = cast<CGameCtnBlockInfoClipVertical>(clip);
+                    auto horizontal = cast<CGameCtnBlockInfoClipHorizontal>(clip);
+                    return "pubclip:"
+                        + CrystalExpandableClipTypeSignatureText(clip)
+                        + ":tb=" + CrystalExpandableSignatureText(tostring(clip.TopBottomMultiDir))
+                        + ":full=" + CrystalExpandableBoolSignatureText(clip.IsFullFreeClip)
+                        + ":exclusive=" + CrystalExpandableBoolSignatureText(clip.IsExclusiveFreeClip)
+                        + ":delbyfull=" + CrystalExpandableBoolSignatureText(clip.CanBeDeletedByFullFreeClip)
+                        + ":always=" + CrystalExpandableBoolSignatureText(clip.IsAlwaysVisibleFreeClip)
+                        + ":ignoredvfc=" + CrystalExpandableBoolSignatureText(clip.IsFCTOrFCBIgnoredByVFC)
+                        + ":vertical=" + CrystalExpandableBoolSignatureText(vertical !is null)
+                        + ":horizontal=" + CrystalExpandableBoolSignatureText(horizontal !is null);
+                }
+
+                string CrystalExpandableAddClipKeysForClip(const string &in keys, CGameCtnBlockInfoClip@ clip) {
+                    if (clip is null || clip.IsAntiClip) return keys;
+
+                    string clipKeys = "";
+                    clipKeys = CrystalExpandableAddClipKey(
+                        clipKeys,
+                        CrystalExpandableClipIdText(clip.ClipGroupId)
+                    );
+                    clipKeys = CrystalExpandableAddClipKey(
+                        clipKeys,
+                        CrystalExpandableClipIdText(clip.ClipGroupId2)
+                    );
+                    clipKeys = CrystalExpandableAddClipKey(
+                        clipKeys,
+                        CrystalExpandableClipIdText(clip.SymmetricalClipId)
+                    );
+                    clipKeys = CrystalExpandableAddClipKey(
+                        clipKeys,
+                        CrystalExpandableClipIdText(clip.SymmetricalClipGroupId)
+                    );
+                    clipKeys = CrystalExpandableAddClipKey(
+                        clipKeys,
+                        CrystalExpandableClipIdText(clip.SymmetricalClipGroupId2)
+                    );
+                    auto vertical = cast<CGameCtnBlockInfoClipVertical>(clip);
+                    if (vertical !is null) {
+                        clipKeys = CrystalExpandableAddClipKey(
+                            clipKeys,
+                            CrystalExpandableClipIdText(vertical.VerticalClipGroupId)
+                        );
+                    }
+
+                    auto horizontal = cast<CGameCtnBlockInfoClipHorizontal>(clip);
+                    if (horizontal !is null) {
+                        clipKeys = CrystalExpandableAddClipKey(
+                            clipKeys,
+                            CrystalExpandableClipIdText(horizontal.HorizontalClipGroupId)
+                        );
+                    }
+                    if (clipKeys.Length == 0) {
+                        clipKeys = CrystalExpandableAddClipKey(
+                            clipKeys,
+                            CrystalExpandableIdlessPublicClipSignature(clip)
+                        );
+                    }
+                    return CrystalExpandableMergeClipKeyLists(keys, clipKeys);
+                }
+
+                bool CrystalCollectExpandableUnitFlatFaceKeysForDir(
+                    CGameCtnBlock@ block,
+                    CGameCtnBlockUnitInfo@ unitInfo,
+                    int localDir,
+                    uint clipStart,
+                    uint clipCount,
+                    uint flatClipLength,
+                    array<string> @faceKeys
+                ) {
+                    if (unitInfo is null || faceKeys is null || localDir < 0 || localDir > 5) return false;
+                    if (clipStart > flatClipLength) return false;
+                    if (faceKeys.Length < 6) faceKeys.Resize(6);
+
+                    uint readableCount = clipCount;
+                    if (clipStart + readableCount > flatClipLength) {
+                        readableCount = flatClipLength - clipStart;
+                    }
+
+                    string keys = "";
+                    try {
+                        for (uint i = 0; i < readableCount; i++) {
+                            keys = CrystalExpandableAddClipKeysForClip(keys, unitInfo.Clips[clipStart + i]);
+                        }
+                    } catch {
+                        return false;
+                    }
+
+                    int worldDir = localDir >= CRYSTAL_EXPANDABLE_DIR_TOP ?
+                        localDir : CrystalExpandableWorldFaceDir(block, localDir);
+                    faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
+                    return true;
+                }
+
+                bool CrystalCollectExpandableUnitFaceKeysFromFlatClips(
+                    CGameCtnBlock@ block,
+                    CGameCtnBlockUnitInfo@ unitInfo,
+                    array<string> @faceKeys
+                ) {
+                    if (unitInfo is null || faceKeys is null) return false;
+                    if (faceKeys.Length < 6) faceKeys.Resize(6);
+
+                    uint flatClipLength = 0;
+                    uint northCount = 0;
+                    uint eastCount = 0;
+                    uint southCount = 0;
+                    uint westCount = 0;
+                    uint topCount = 0;
+                    uint bottomCount = 0;
+                    try {
+                        flatClipLength = unitInfo.Clips.Length;
+                        northCount = unitInfo.ClipCount_North;
+                        eastCount = unitInfo.ClipCount_East;
+                        southCount = unitInfo.ClipCount_South;
+                        westCount = unitInfo.ClipCount_West;
+                        topCount = unitInfo.ClipCount_Top;
+                        bottomCount = unitInfo.ClipCount_Bottom;
+                    } catch {
+                        return false;
+                    }
+
+                    uint clipOffset = 0;
+                    bool readAnyFace = false;
+                    if (CrystalCollectExpandableUnitFlatFaceKeysForDir(block, unitInfo, CRYSTAL_EXPANDABLE_DIR_NORTH, clipOffset, northCount, flatClipLength, faceKeys)) readAnyFace = true;
+                    clipOffset += northCount;
+                    if (CrystalCollectExpandableUnitFlatFaceKeysForDir(block, unitInfo, CRYSTAL_EXPANDABLE_DIR_EAST, clipOffset, eastCount, flatClipLength, faceKeys)) readAnyFace = true;
+                    clipOffset += eastCount;
+                    if (CrystalCollectExpandableUnitFlatFaceKeysForDir(block, unitInfo, CRYSTAL_EXPANDABLE_DIR_SOUTH, clipOffset, southCount, flatClipLength, faceKeys)) readAnyFace = true;
+                    clipOffset += southCount;
+                    if (CrystalCollectExpandableUnitFlatFaceKeysForDir(block, unitInfo, CRYSTAL_EXPANDABLE_DIR_WEST, clipOffset, westCount, flatClipLength, faceKeys)) readAnyFace = true;
+                    clipOffset += westCount;
+                    if (CrystalCollectExpandableUnitFlatFaceKeysForDir(block, unitInfo, CRYSTAL_EXPANDABLE_DIR_TOP, clipOffset, topCount, flatClipLength, faceKeys)) readAnyFace = true;
+                    clipOffset += topCount;
+                    if (CrystalCollectExpandableUnitFlatFaceKeysForDir(block, unitInfo, CRYSTAL_EXPANDABLE_DIR_BOTTOM, clipOffset, bottomCount, flatClipLength, faceKeys)) readAnyFace = true;
+
+                    return readAnyFace;
+                }
+
+                bool CrystalCollectExpandableUnitFaceKeysFromDirectionalBuffers(
+                    CGameCtnBlock@ block,
+                    CGameCtnBlockUnitInfo@ unitInfo,
+                    array<string> @faceKeys
+                ) {
+                    if (unitInfo is null || faceKeys is null) return false;
+                    if (faceKeys.Length < 6) faceKeys.Resize(6);
+
+                    bool readAnyFace = false;
+                    string keys = "";
+                    int worldDir = 0;
+
+                    try {
+                        keys = "";
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_North.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            keys = CrystalExpandableAddClipKeysForClip(keys, unitInfo.Clips_North[i]);
+                        }
+                        worldDir = CrystalExpandableWorldFaceDir(block, CRYSTAL_EXPANDABLE_DIR_NORTH);
+                        faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
+                        readAnyFace = true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
+                            "UnitInfo.Clips_North was not readable."
+                        );
+                    }
+
+                    try {
+                        keys = "";
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_East.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            keys = CrystalExpandableAddClipKeysForClip(keys, unitInfo.Clips_East[i]);
+                        }
+                        worldDir = CrystalExpandableWorldFaceDir(block, CRYSTAL_EXPANDABLE_DIR_EAST);
+                        faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
+                        readAnyFace = true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
+                            "UnitInfo.Clips_East was not readable."
+                        );
+                    }
+
+                    try {
+                        keys = "";
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_South.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            keys = CrystalExpandableAddClipKeysForClip(keys, unitInfo.Clips_South[i]);
+                        }
+                        worldDir = CrystalExpandableWorldFaceDir(block, CRYSTAL_EXPANDABLE_DIR_SOUTH);
+                        faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
+                        readAnyFace = true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
+                            "UnitInfo.Clips_South was not readable."
+                        );
+                    }
+
+                    try {
+                        keys = "";
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_West.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            keys = CrystalExpandableAddClipKeysForClip(keys, unitInfo.Clips_West[i]);
+                        }
+                        worldDir = CrystalExpandableWorldFaceDir(block, CRYSTAL_EXPANDABLE_DIR_WEST);
+                        faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
+                        readAnyFace = true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
+                            "UnitInfo.Clips_West was not readable."
+                        );
+                    }
+
+                    try {
+                        keys = "";
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_Top.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            keys = CrystalExpandableAddClipKeysForClip(keys, unitInfo.Clips_Top[i]);
+                        }
+                        faceKeys[CRYSTAL_EXPANDABLE_DIR_TOP] = CrystalExpandableMergeClipKeyLists(
+                            faceKeys[CRYSTAL_EXPANDABLE_DIR_TOP],
+                            keys
+                        );
+                        readAnyFace = true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
+                            "UnitInfo.Clips_Top was not readable."
+                        );
+                    }
+
+                    try {
+                        keys = "";
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_Bottom.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            keys = CrystalExpandableAddClipKeysForClip(keys, unitInfo.Clips_Bottom[i]);
+                        }
+                        faceKeys[CRYSTAL_EXPANDABLE_DIR_BOTTOM] = CrystalExpandableMergeClipKeyLists(
+                            faceKeys[CRYSTAL_EXPANDABLE_DIR_BOTTOM],
+                            keys
+                        );
+                        readAnyFace = true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
+                            "UnitInfo.Clips_Bottom was not readable."
+                        );
+                    }
+                    return readAnyFace;
+                }
+
+                bool CrystalCollectExpandableUnitFaceKeys(
+                    CGameCtnBlock@ block,
+                    CGameCtnBlockUnitInfo@ unitInfo,
+                    array<string> @faceKeys
+                ) {
+                    if (unitInfo is null || faceKeys is null) return false;
+                    if (faceKeys.Length < 6) faceKeys.Resize(6);
+
+                    bool flatRead = CrystalCollectExpandableUnitFaceKeysFromFlatClips(block, unitInfo, faceKeys);
+                    if (flatRead && CrystalExpandableHasAnyFaceKeys(faceKeys)) return true;
+                    if (flatRead) return true;
+
+                    return CrystalCollectExpandableUnitFaceKeysFromDirectionalBuffers(block, unitInfo, faceKeys);
+                }
+
+                bool CrystalExpandableHasAnyFaceKeys(const array<string> @faceKeys) {
+                    if (faceKeys is null) return false;
+                    for (uint i = 0; i < faceKeys.Length; i++) {
+                        if (faceKeys[i].Length > 0) return true;
+                    }
+                    return false;
+                }
+
+                bool CrystalExpandableHasAnyIdlessPublicClipSignatures(const array<string> @faceKeys) {
+                    if (faceKeys is null) return false;
+                    for (uint i = 0; i < faceKeys.Length; i++) {
+                        if (faceKeys[i].Length > 0 && ("|" + faceKeys[i]).IndexOf("|pubclip:") >= 0) return true;
+                    }
+                    return false;
+                }
+
+                void CrystalClearExpandableFaceKeys(array<string> @faceKeys) {
+                    if (faceKeys is null) return;
+                    if (faceKeys.Length < 6) faceKeys.Resize(6);
+                    for (uint i = 0; i < faceKeys.Length; i++) {
+                        faceKeys[i] = "";
+                    }
+                }
+
+                bool CrystalNat3Equals(const nat3 &in a, const nat3 &in b) {
+                    return a.x == b.x && a.y == b.y && a.z == b.z;
+                }
+
+                string CrystalPlacedBlockUnitOffsetDetail(CGameCtnBlockUnit@ unit) {
+                    if (unit is null) return "<null unit>";
+                    try {
+                        return "placed off " + unit.Offset.ToString() + " abs " + unit.AbsoluteOffset.ToString();
+                    } catch {
+                        return "placed offsets unreadable";
+                    }
+                }
+
+                bool CrystalVariantUnitMatchesPlacedUnit(CGameCtnBlockUnitInfo@ unitInfo, CGameCtnBlockUnit@ unit) {
+                    if (unitInfo is null || unit is null) return false;
+                    try {
+                        if (CrystalNat3Equals(unitInfo.Offset, unit.Offset)) return true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalVariantUnitMatchesPlacedUnit",
+                            "UnitInfo.Offset or placed Unit.Offset was not readable."
+                        );
+                    }
+                    try {
+                        if (CrystalNat3Equals(unitInfo.RelativeOffset, unit.Offset)) return true;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalVariantUnitMatchesPlacedUnit",
+                            "UnitInfo.RelativeOffset or placed Unit.Offset was not readable."
+                        );
+                    }
+                    return false;
+                }
+
+                CGameCtnBlockUnitInfo@ CrystalExpandableCandidateAtIndex(
+                    CGameCtnBlockInfoVariant@ variant,
+                    uint unitIndex,
+                    bool blockUnitInfos,
+                    string &out detail
+                ) {
+                    detail = "";
+                    if (variant is null) return null;
+                    try {
+                        if (blockUnitInfos) {
+                            if (unitIndex >= variant.BlockUnitInfos.Length) return null;
+                            auto candidate = variant.BlockUnitInfos[unitIndex];
+                            if (candidate is null || !CrystalBlockUnitInfoHasExpandableClipEvidence(candidate)) return null;
+                            detail = "variant.BlockUnitInfos[" + tostring(unitIndex) + "]";
+                            return candidate;
+                        }
+                        if (unitIndex >= variant.BlockUnitModels.Length) return null;
+                        auto candidate = variant.BlockUnitModels[unitIndex];
+                        if (candidate is null || !CrystalBlockUnitInfoHasExpandableClipEvidence(candidate)) return null;
+                        detail = "variant.BlockUnitModels[" + tostring(unitIndex) + "]";
+                        return candidate;
+                    } catch {
+                        logging::HandledException(
+                            "CrystalExpandableCandidateAtIndex",
+                            blockUnitInfos ? "Variant.BlockUnitInfos candidate was not readable." : "Variant.BlockUnitModels candidate was not readable."
+                        );
+                        detail = "";
+                    }
+                    return null;
+                }
+
+                CGameCtnBlockUnitInfo@ CrystalFindVariantExpandableUnitInfoForPlacedUnit(
+                    CGameCtnBlockInfoVariant@ variant,
+                    CGameCtnBlockUnit@ unit,
+                    uint unitIndex,
+                    string &out detail
+                ) {
+                    detail = "";
+                    if (variant is null || unit is null) return null;
+
+                    CGameCtnBlockUnitInfo@ firstCandidate = null;
+                    string firstDetail = "";
+                    uint candidateCount = 0;
+
+                    try {
+                        for (uint i = 0; i < variant.BlockUnitInfos.Length; i++) {
+                            auto candidate = variant.BlockUnitInfos[i];
+                            if (candidate is null || !CrystalBlockUnitInfoHasExpandableClipEvidence(candidate)) continue;
+                            candidateCount++;
+                            if (firstCandidate is null) {
+                                @firstCandidate = candidate;
+                                firstDetail = "variant.BlockUnitInfos[" + tostring(i) + "]";
+                            }
+                            if (CrystalVariantUnitMatchesPlacedUnit(candidate, unit)) {
+                                detail = "variant.BlockUnitInfos[" + tostring(i) + "] offset match";
+                                return candidate;
+                            }
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalFindVariantExpandableUnitInfoForPlacedUnit",
+                            "Variant.BlockUnitInfos scan failed."
+                        );
+                    }
+
+                    try {
+                        for (uint i = 0; i < variant.BlockUnitModels.Length; i++) {
+                            auto candidate = variant.BlockUnitModels[i];
+                            if (candidate is null || !CrystalBlockUnitInfoHasExpandableClipEvidence(candidate)) continue;
+                            candidateCount++;
+                            if (firstCandidate is null) {
+                                @firstCandidate = candidate;
+                                firstDetail = "variant.BlockUnitModels[" + tostring(i) + "]";
+                            }
+                            if (CrystalVariantUnitMatchesPlacedUnit(candidate, unit)) {
+                                detail = "variant.BlockUnitModels[" + tostring(i) + "] offset match";
+                                return candidate;
+                            }
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalFindVariantExpandableUnitInfoForPlacedUnit",
+                            "Variant.BlockUnitModels scan failed."
+                        );
+                    }
+
+                    string indexedDetail = "";
+                    auto indexedCandidate = CrystalExpandableCandidateAtIndex(variant, unitIndex, true, indexedDetail);
+                    if (indexedCandidate !is null) {
+                        detail = indexedDetail + " placed-unit index match";
+                        return indexedCandidate;
+                    }
+
+                    @indexedCandidate = CrystalExpandableCandidateAtIndex(variant, unitIndex, false, indexedDetail);
+                    if (indexedCandidate !is null) {
+                        detail = indexedDetail + " placed-unit index match";
+                        return indexedCandidate;
+                    }
+
+                    if (candidateCount == 1 && firstCandidate !is null) {
+                        detail = firstDetail + " only expandable unit";
+                        return firstCandidate;
+                    }
+                    return null;
+                }
+
+                bool CrystalClipLooksExpandableConnection(CGameCtnBlockInfoClip@ clip) {
+                    if (clip is null || clip.IsAntiClip) return false;
+                    return clip.ClipType != CGameCtnBlockInfoClip::EnumClipType::ClassicClip
+                        || clip.IsFullFreeClip
+                        || clip.IsExclusiveFreeClip
+                        || clip.CanBeDeletedByFullFreeClip
+                        || clip.IsAlwaysVisibleFreeClip
+                        || clip.IsFCTOrFCBIgnoredByVFC;
+                }
+
+                bool CrystalBlockUnitInfoHasExpandableClipEvidence(CGameCtnBlockUnitInfo@ unitInfo) {
+                    if (unitInfo is null) return false;
+
+                    try {
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            if (CrystalClipLooksExpandableConnection(unitInfo.Clips[i])) return true;
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
+                            "UnitInfo.Clips was not readable."
+                        );
+                    }
+
+                    try {
+                        uint count = CrystalMinUint(
+                            unitInfo.AllClips.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            if (CrystalClipLooksExpandableConnection(unitInfo.AllClips[i])) return true;
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
+                            "UnitInfo.AllClips was not readable."
+                        );
+                    }
+
+                    try {
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_North.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            if (CrystalClipLooksExpandableConnection(unitInfo.Clips_North[i])) return true;
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
+                            "UnitInfo.Clips_North was not readable."
+                        );
+                    }
+
+                    try {
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_East.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            if (CrystalClipLooksExpandableConnection(unitInfo.Clips_East[i])) return true;
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
+                            "UnitInfo.Clips_East was not readable."
+                        );
+                    }
+
+                    try {
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_South.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            if (CrystalClipLooksExpandableConnection(unitInfo.Clips_South[i])) return true;
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
+                            "UnitInfo.Clips_South was not readable."
+                        );
+                    }
+
+                    try {
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_West.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            if (CrystalClipLooksExpandableConnection(unitInfo.Clips_West[i])) return true;
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
+                            "UnitInfo.Clips_West was not readable."
+                        );
+                    }
+
+                    try {
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_Top.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            if (CrystalClipLooksExpandableConnection(unitInfo.Clips_Top[i])) return true;
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
+                            "UnitInfo.Clips_Top was not readable."
+                        );
+                    }
+
+                    try {
+                        uint count = CrystalMinUint(
+                            unitInfo.Clips_Bottom.Length,
+                            MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT
+                        );
+                        for (uint i = 0; i < count; i++) {
+                            if (CrystalClipLooksExpandableConnection(unitInfo.Clips_Bottom[i])) return true;
+                        }
+                    } catch {
+                        logging::HandledException(
+                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
+                            "UnitInfo.Clips_Bottom was not readable."
+                        );
+                    }
+                    return false;
+                }
+            }
+        }
+    }
+}

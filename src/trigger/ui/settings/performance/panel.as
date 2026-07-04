@@ -23,6 +23,11 @@ namespace TriggerVisualizer {
                     S_FillTileMinSize
                 );
                 UI::SetNextItemWidth(220.0f);
+                S_MaxVisibleVolumesPerFrame = UI::InputInt(
+                    "Max visible volumes per frame##trigger-visualizer-performance",
+                    S_MaxVisibleVolumesPerFrame
+                );
+                UI::SetNextItemWidth(220.0f);
                 S_MaxFillTilesPerFrame = UI::InputInt(
                     "Max fill tiles per frame##trigger-visualizer-performance",
                     S_MaxFillTilesPerFrame

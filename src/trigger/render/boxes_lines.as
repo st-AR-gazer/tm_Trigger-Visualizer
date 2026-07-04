@@ -2,13 +2,7 @@ namespace TriggerVisualizer {
     namespace Trigger {
         namespace Render {
             float GetDistanceToWorldLineSegment(const vec3 &in point, const vec3 &in start, const vec3 &in end) {
-                vec3 line = end - start;
-                float lineLengthSq = Math::Distance2(start, end);
-                if (lineLengthSq <= 0.0001f) return Math::Distance(point, start);
-
-                float t = Math::Dot(point - start, line) / lineLengthSq;
-                t = Math::Clamp(t, 0.0f, 1.0f);
-                return Math::Distance(point, Math::Lerp(start, end, t));
+                return Math::Sqrt(GetDistanceSqToWorldLineSegment(point, start, end));
             }
 
             float SmoothStep01(float value) {
@@ -82,6 +76,19 @@ namespace TriggerVisualizer {
                     return groupCount;
                 }
 
+                if (box !is null && box.HasCustomOutlineGeometry()) {
+                    uint customCount = 0;
+                    uint outlineLineCount = box.OutlineLineCount();
+                    for (uint i = 0; i < outlineLineCount; i++) {
+                        customCount += GetAdaptiveLineSegmentCount(
+                            box.OutlineLineStarts[i],
+                            box.OutlineLineEnds[i],
+                            cameraPos
+                        );
+                    }
+                    return customCount;
+                }
+
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
@@ -125,6 +132,18 @@ namespace TriggerVisualizer {
                         );
                     }
                     return groupMaxSegments;
+                }
+
+                if (box !is null && box.HasCustomOutlineGeometry()) {
+                    uint customMaxSegments = 0;
+                    uint outlineLineCount = box.OutlineLineCount();
+                    for (uint i = 0; i < outlineLineCount; i++) {
+                        customMaxSegments = Math::Max(
+                            customMaxSegments,
+                            GetAdaptiveLineSegmentCount(box.OutlineLineStarts[i], box.OutlineLineEnds[i], cameraPos)
+                        );
+                    }
+                    return customMaxSegments;
                 }
 
                 auto corners = GetTriggerVolumeCorners(box);

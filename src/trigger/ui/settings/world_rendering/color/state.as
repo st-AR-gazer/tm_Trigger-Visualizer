@@ -7,6 +7,7 @@ namespace TriggerVisualizer {
             const int COLOR_MODE_MEDIATRACKER_TRACK_COLORS = 3;
             const int COLOR_SOURCE_UNIFORM = 0;
             const int COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS = 1;
+
             [Setting hidden name="Trigger: Color mode" min=0 max=3]
             int S_ColorMode = COLOR_MODE_MEDIATRACKER_TRACK_COLORS;
             [Setting hidden name="Trigger: Color mode migrated"]

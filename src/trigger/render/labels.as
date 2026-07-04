@@ -50,7 +50,7 @@ namespace TriggerVisualizer {
                     parts.InsertLast("#" + index);
                 }
 
-                return string::Join(parts, " | ");
+                return Text::Join(parts, " | ");
             }
 
             vec4 GetLabelTextColor(float fade) {

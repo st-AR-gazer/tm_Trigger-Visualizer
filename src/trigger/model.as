@@ -2,8 +2,41 @@ namespace TriggerVisualizer {
     namespace Trigger {
         const int TRIGGER_SOURCE_OFFZONE = 0;
         const int TRIGGER_SOURCE_MEDIATRACKER = 1;
+        const int TRIGGER_SOURCE_CRYSTAL = 2;
         const string TRIGGER_TARGET_OFFZONE = "offzone";
         const string TRIGGER_TARGET_MEDIATRACKER = "mediatracker";
+        const string TRIGGER_TARGET_CRYSTAL = "crystal";
+        const string CRYSTAL_SUBTYPE_BLOCK = "crystalblock";
+        const string CRYSTAL_SUBTYPE_BLOCK_WAYPOINT = "crystalblockwaypoint";
+        const string CRYSTAL_SUBTYPE_SCREEN_INTERACTION = "crystalscreeninteraction";
+        const string CRYSTAL_SUBTYPE_GATE = "crystalgate";
+        const string CRYSTAL_SUBTYPE_TELEPORTER = "crystalteleporter";
+        const string CRYSTAL_SUBTYPE_ITEM = "crystalitem";
+        const string CRYSTAL_SUBTYPE_BLOCK_ITEM = "crystalblockitem";
+        const string TRIGGER_TYPE_CHECKPOINT = "checkpoint";
+        const string TRIGGER_TYPE_FINISH = "finish";
+        const string TRIGGER_TYPE_MULTILAP = "startfinish";
+        const string TRIGGER_TYPE_TURBO = "turbo";
+        const string TRIGGER_TYPE_TURBO2 = "turbo2";
+        const string TRIGGER_TYPE_TURBO_ROULETTE = "turboroulette";
+        const string TRIGGER_TYPE_TURBO_ROULETTE_YELLOW = "turborouletteyellow";
+        const string TRIGGER_TYPE_TURBO_ROULETTE_CYAN = "turboroulettecyan";
+        const string TRIGGER_TYPE_TURBO_ROULETTE_PURPLE = "turboroulettepurple";
+        const string TRIGGER_TYPE_BOOST = "boost";
+        const string TRIGGER_TYPE_BOOST2 = "boost2";
+        const string TRIGGER_TYPE_CRUISE = "cruise";
+        const string TRIGGER_TYPE_NO_BRAKES = "nobrakes";
+        const string TRIGGER_TYPE_NO_ENGINE = "noengine";
+        const string TRIGGER_TYPE_NO_STEERING = "nosteering";
+        const string TRIGGER_TYPE_SLOWMO = "slowmo";
+        const string TRIGGER_TYPE_FRAGILE = "fragile";
+        const string TRIGGER_TYPE_RESET = "reset";
+        const string TRIGGER_TYPE_FORCED_ACCELERATION = "forceacceleration";
+        const string TRIGGER_TYPE_NO_GRIP = "nogrip";
+        const string TRIGGER_TYPE_VEHICLE_TRANSFORM_RESET = "vehicletransformreset";
+        const string TRIGGER_TYPE_VEHICLE_TRANSFORM_SNOW = "vehicletransformcarsnow";
+        const string TRIGGER_TYPE_VEHICLE_TRANSFORM_RALLY = "vehicletransformcarrally";
+        const string TRIGGER_TYPE_VEHICLE_TRANSFORM_DESERT = "vehicletransformcardesert";
         const string MT_SUBTYPE_CAMERA = "camera";
         const string MT_SUBTYPE_CUSTOM_CAMERA = "customcamera";
         const string MT_SUBTYPE_ORBITAL_CAMERA = "orbitalcamera";
@@ -48,9 +81,14 @@ namespace TriggerVisualizer {
         const string MT_SUBTYPE_MIXED = "mixed";
         const string MT_SUBTYPE_UNKNOWN = "unknown";
 
+        vec4 GetMissingElementColor() {
+            return vec4(1.0f, 0.0f, 0.85f, 1.0f);
+        }
+
         string GetTriggerSourceName(int source) {
             if (source == TRIGGER_SOURCE_OFFZONE) return "Offzone";
             if (source == TRIGGER_SOURCE_MEDIATRACKER) return "MediaTracker";
+            if (source == TRIGGER_SOURCE_CRYSTAL) return "Crystal";
             return "Unknown";
         }
 
@@ -59,6 +97,39 @@ namespace TriggerVisualizer {
             key = key.Replace(" ", "").Replace("-", "").Replace("_", "").Replace("/", "");
             if (key == "media" || key == "mt" || key == "mediatracker") return TRIGGER_TARGET_MEDIATRACKER;
             if (key == "offzone" || key == "offzones") return TRIGGER_TARGET_OFFZONE;
+            if (key == "crystal" || key == "crystals" || key == "itemtrigger" || key == "itemtriggers" || key == "blocktrigger" || key == "blocktriggers" || key == "waypointtrigger" || key == "triggershape" || key == "triggershapes") return TRIGGER_TARGET_CRYSTAL;
+            if (key == "crystalblock" || key == "crystalblocks") return CRYSTAL_SUBTYPE_BLOCK;
+            if (key == "crystalblockwaypoint" || key == "crystalwaypoint") return CRYSTAL_SUBTYPE_BLOCK_WAYPOINT;
+            if (key == "crystalscreeninteraction" || key == "crystalblockscreeninteraction") return CRYSTAL_SUBTYPE_SCREEN_INTERACTION;
+            if (key == "crystalgate") return CRYSTAL_SUBTYPE_GATE;
+            if (key == "crystalteleporter") return CRYSTAL_SUBTYPE_TELEPORTER;
+            if (key == "crystalitem" || key == "crystalitems") return CRYSTAL_SUBTYPE_ITEM;
+            if (key == "crystalblockitem" || key == "crystalblockitems") return CRYSTAL_SUBTYPE_BLOCK_ITEM;
+
+            if (key == "checkpoint" || key == "checkpoints" || key == "checkpointtrigger" || key == "checkpointtriggers" || key == "cp") return TRIGGER_TYPE_CHECKPOINT;
+            if (key == "finish" || key == "finishtrigger" || key == "finishtriggers") return TRIGGER_TYPE_FINISH;
+            if (key == "multilap" || key == "multilaptrigger" || key == "startfinish" || key == "startfinishtrigger") return TRIGGER_TYPE_MULTILAP;
+            if (key == "turborouletteyellow" || key == "turborandomyellow") return TRIGGER_TYPE_TURBO_ROULETTE_YELLOW;
+            if (key == "turboroulettecyan" || key == "turborandomcyan") return TRIGGER_TYPE_TURBO_ROULETTE_CYAN;
+            if (key == "turboroulettepurple" || key == "turborandompurple") return TRIGGER_TYPE_TURBO_ROULETTE_PURPLE;
+            if (key == "turboroulette" || key == "turborandom" || key == "randomturbo") return TRIGGER_TYPE_TURBO_ROULETTE;
+            if (key == "turbo2" || key == "turbored") return TRIGGER_TYPE_TURBO2;
+            if (key == "turbo" || key == "turbo1" || key == "turboyellow") return TRIGGER_TYPE_TURBO;
+            if (key == "boost2" || key == "reactorboost2" || key == "reactorboost2legacy" || key == "reactorboost2oriented") return TRIGGER_TYPE_BOOST2;
+            if (key == "boost" || key == "boost1" || key == "reactorboost" || key == "reactorboostlegacy" || key == "reactorboostoriented") return TRIGGER_TYPE_BOOST;
+            if (key == "cruise" || key == "cruisecontrol") return TRIGGER_TYPE_CRUISE;
+            if (key == "nobrakes" || key == "nobrake") return TRIGGER_TYPE_NO_BRAKES;
+            if (key == "noengine" || key == "freewheeling" || key == "freewheel") return TRIGGER_TYPE_NO_ENGINE;
+            if (key == "nosteering" || key == "nosteer") return TRIGGER_TYPE_NO_STEERING;
+            if (key == "slowmo" || key == "slowmotion" || key == "slowmotiontrigger") return TRIGGER_TYPE_SLOWMO;
+            if (key == "fragile") return TRIGGER_TYPE_FRAGILE;
+            if (key == "reset" || key == "resettrigger") return TRIGGER_TYPE_RESET;
+            if (key == "forceacceleration" || key == "forcedacceleration" || key == "forcedaccelerator") return TRIGGER_TYPE_FORCED_ACCELERATION;
+            if (key == "nogrip") return TRIGGER_TYPE_NO_GRIP;
+            if (key == "vehicletransformreset" || key == "vehicletransformcarstadium" || key == "stadiumcar" || key == "stadiumcartransformation") return TRIGGER_TYPE_VEHICLE_TRANSFORM_RESET;
+            if (key == "vehicletransformcarsnow" || key == "snowcar" || key == "snowcartransformation") return TRIGGER_TYPE_VEHICLE_TRANSFORM_SNOW;
+            if (key == "vehicletransformcarrally" || key == "rallycar" || key == "rallycartransformation") return TRIGGER_TYPE_VEHICLE_TRANSFORM_RALLY;
+            if (key == "vehicletransformcardesert" || key == "desertcar" || key == "desertcartransformation") return TRIGGER_TYPE_VEHICLE_TRANSFORM_DESERT;
 
             if (key == "cameras" || key == "camera") return MT_SUBTYPE_CAMERA;
             if (key == "customcamera" || key == "customcam" || key == "camcustom") return MT_SUBTYPE_CUSTOM_CAMERA;
@@ -103,7 +174,7 @@ namespace TriggerVisualizer {
             if (key == "vehiclelights" || key == "vehiclelight" || key == "lights") return MT_SUBTYPE_VEHICLE_LIGHTS;
             if (key == "reset" || key == "empty") return MT_SUBTYPE_RESET;
             if (key == "mixed") return MT_SUBTYPE_MIXED;
-            if (key == "unknown") return MT_SUBTYPE_UNKNOWN;
+            if (key == "unknown" || key == "missing" || key == "missingelement" || key == "unrecognized" || key == "unrecognised") return MT_SUBTYPE_UNKNOWN;
 
             return key;
         }
@@ -111,6 +182,7 @@ namespace TriggerVisualizer {
         string GetTriggerSourceTargetKey(int source) {
             if (source == TRIGGER_SOURCE_OFFZONE) return TRIGGER_TARGET_OFFZONE;
             if (source == TRIGGER_SOURCE_MEDIATRACKER) return TRIGGER_TARGET_MEDIATRACKER;
+            if (source == TRIGGER_SOURCE_CRYSTAL) return TRIGGER_TARGET_CRYSTAL;
             return "";
         }
 
@@ -132,12 +204,13 @@ namespace TriggerVisualizer {
         bool TriggerTargetListContains(const string &in targetKeys, const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
             if (key.Length == 0) return false;
+            return("|" + targetKeys).IndexOf("|" + key + "|") >= 0;
+        }
 
-            auto parts = targetKeys.Split("|");
-            for (uint i = 0; i < parts.Length; i++) {
-                if (parts[i] == key) return true;
-            }
-            return false;
+        bool PreparedTriggerTargetListContains(const string &in preparedTargetKeys, const string &in rawKey) {
+            string key = NormalizeTriggerTargetKey(rawKey);
+            if (key.Length == 0) return false;
+            return preparedTargetKeys.IndexOf("|" + key + "|") >= 0;
         }
 
         string AddTriggerTargetKey(const string &in targetKeys, const string &in rawKey) {
@@ -214,6 +287,7 @@ namespace TriggerVisualizer {
             if (key == MT_SUBTYPE_VEHICLE_LIGHTS) return "Vehicle Lights";
             if (key == MT_SUBTYPE_RESET) return "Reset";
             if (key == MT_SUBTYPE_MIXED) return "Mixed";
+            if (key == MT_SUBTYPE_UNKNOWN) return "Unknown";
             return "Unknown";
         }
 
@@ -261,7 +335,8 @@ namespace TriggerVisualizer {
             if (key == MT_SUBTYPE_VEHICLE_LIGHTS) return vec4(0.0f, 0.0f, 0.0f, 1.0f);
             if (key == MT_SUBTYPE_RESET) return vec4(0.0f, 0.75f, 1.0f, 1.0f);
             if (key == MT_SUBTYPE_MIXED) return vec4(0.92f, 0.74f, 0.26f, 1.0f);
-            return vec4(0.85f, 0.45f, 0.95f, 1.0f);
+            if (key == MT_SUBTYPE_UNKNOWN) return GetMissingElementColor();
+            return GetMissingElementColor();
         }
 
         vec4 GetMediaTrackerGpsTrackColor() {
@@ -330,6 +405,18 @@ namespace TriggerVisualizer {
             }
         }
 
+        class TriggerShapeLine {
+            vec3 Start;
+            vec3 End;
+
+            TriggerShapeLine() { }
+
+            TriggerShapeLine(const vec3 &in start, const vec3 &in end) {
+                Start = start;
+                End = end;
+            }
+        }
+
         class TriggerVolume {
             vec3 Min;
             vec3 Max;
@@ -342,12 +429,17 @@ namespace TriggerVisualizer {
             string TargetKeys = "offzone|";
             bool HasMediaTrackerTrackColor = false;
             vec4 MediaTrackerTrackColor = vec4(1.0f, 0.45f, 0.10f, 1.0f);
+            bool HasTriggerTypeColor = false;
+            vec4 TriggerTypeColor = vec4(0.85f, 0.71f, 1.0f, 1.0f);
             bool HasIslandIndex = false;
             uint IslandIndex = 0;
             uint IslandCount = 0;
             bool IsMergedGroup = false;
             uint MergedVolumeCount = 1;
             bool AllowRawRangeLabel = true;
+            string OutlineShapeKind;
+            array<vec3> OutlineLineStarts;
+            array<vec3> OutlineLineEnds;
             array<TriggerVolume@> ChildVolumes;
 
             TriggerVolume() { }
@@ -382,6 +474,15 @@ namespace TriggerVisualizer {
 
             bool HasChildVolumes() const {
                 return ChildVolumes.Length > 0;
+            }
+
+            bool HasCustomOutlineGeometry() const {
+                return OutlineLineCount() > 0;
+            }
+
+            uint OutlineLineCount() const {
+                return OutlineLineStarts.Length < OutlineLineEnds.Length ?
+                OutlineLineStarts.Length : OutlineLineEnds.Length;
             }
 
             string SourceName() const {
@@ -449,6 +550,118 @@ namespace TriggerVisualizer {
             return NormalizeTriggerTargetKey(volume.SubtypeKey) == key;
         }
 
+        bool TryGetTriggerTypeColorForTargetKeys(const string &in targetKeys, vec4 &out color) {
+            if (targetKeys.Length == 0) return false;
+            string preparedTargetKeys = "|" + targetKeys;
+
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, MT_SUBTYPE_UNKNOWN)) {
+                color = GetMissingElementColor();
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_VEHICLE_TRANSFORM_SNOW)) {
+                color = vec4(1.0f, 0.12f, 0.12f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_VEHICLE_TRANSFORM_RALLY)) {
+                color = vec4(1.0f, 0.48f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_VEHICLE_TRANSFORM_DESERT)) {
+                color = vec4(1.0f, 0.88f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_VEHICLE_TRANSFORM_RESET)) {
+                color = vec4(0.55f, 0.55f, 0.55f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_MULTILAP)) {
+                color = vec4(1.0f, 0.88f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_CHECKPOINT)) {
+                color = vec4(0.08f, 0.42f, 1.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_FINISH)) {
+                color = vec4(1.0f, 0.12f, 0.12f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE_CYAN)) {
+                color = vec4(0.0f, 0.95f, 1.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE_PURPLE)) {
+                color = vec4(0.72f, 0.22f, 1.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE_YELLOW) || PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE)) {
+                color = vec4(1.0f, 0.88f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO2)) {
+                color = vec4(1.0f, 0.12f, 0.12f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_BOOST2)) {
+                color = vec4(1.0f, 0.48f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_BOOST)) {
+                color = vec4(0.45f, 1.0f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_CRUISE)) {
+                color = vec4(0.08f, 0.42f, 1.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_NO_BRAKES)) {
+                color = vec4(1.0f, 0.88f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_NO_ENGINE)) {
+                color = vec4(1.0f, 0.12f, 0.12f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_NO_STEERING)) {
+                color = vec4(0.72f, 0.22f, 1.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_SLOWMO)) {
+                color = vec4(0.55f, 0.55f, 0.55f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_FRAGILE)) {
+                color = vec4(1.0f, 0.48f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_RESET)) {
+                color = vec4(0.0f, 0.82f, 0.10f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_FORCED_ACCELERATION)) {
+                color = vec4(1.0f, 0.88f, 0.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_NO_GRIP)) {
+                color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                return true;
+            }
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO)) {
+                color = vec4(1.0f, 0.88f, 0.0f, 1.0f);
+                return true;
+            }
+            return false;
+        }
+
+        bool TryGetTriggerTypeColor(const TriggerVolume@ volume, vec4 &out color) {
+            if (volume is null || volume.Source != TRIGGER_SOURCE_CRYSTAL) return false;
+            if (volume.HasTriggerTypeColor) {
+                color = volume.TriggerTypeColor;
+                return true;
+            }
+            return TryGetTriggerTypeColorForTargetKeys(volume.TargetKeys, color);
+        }
+
         class MediaTrackerClipTriggerSnapshot {
             uint ClipIndex = 0;
             string ClipName;
@@ -492,6 +705,53 @@ namespace TriggerVisualizer {
             }
         }
 
+        class CrystalTriggerProbeSnapshot {
+            string OwnerKind;
+            uint OwnerIndex = 0;
+            string OwnerName;
+            string ShapeKind;
+            string SurfaceKind;
+            string GmSurfKind;
+            string Detail;
+            bool HasSurface = false;
+            bool HasGmSurf = false;
+            bool CandidateForRender = false;
+            bool HasLocalBounds = false;
+            bool HasWorldBounds = false;
+            bool RenderedVolume = false;
+            vec3 LocalMin;
+            vec3 LocalMax;
+            vec3 WorldMin;
+            vec3 WorldMax;
+            array<vec3> LocalOutlineLineStarts;
+            array<vec3> LocalOutlineLineEnds;
+            string Warning;
+
+            bool HasWarning() const {
+                return Warning.Length > 0;
+            }
+
+            string DisplayName() const {
+                string label = OwnerKind;
+                if (OwnerName.Length > 0) {
+                    label += " " + OwnerName;
+                } else {
+                    label += " #" + OwnerIndex;
+                }
+                if (ShapeKind.Length > 0) label += " / " + ShapeKind;
+                return label;
+            }
+
+            bool HasLocalOutlineGeometry() const {
+                return LocalOutlineLineCount() > 0;
+            }
+
+            uint LocalOutlineLineCount() const {
+                return LocalOutlineLineStarts.Length < LocalOutlineLineEnds.Length ?
+                LocalOutlineLineStarts.Length : LocalOutlineLineEnds.Length;
+            }
+        }
+
         class TriggerSourceSnapshot {
             int Source = TRIGGER_SOURCE_OFFZONE;
             string Name = "Offzone";
@@ -504,12 +764,21 @@ namespace TriggerVisualizer {
             uint RawCoordCount = 0;
             uint ReadableTriggerCount = 0;
             uint BadTriggerCount = 0;
+            uint RawBlockCount = 0;
+            uint RawBakedBlockCount = 0;
+            uint RawAnchoredObjectCount = 0;
+            uint CandidateShapeCount = 0;
+            uint ReadableShapeCount = 0;
+            uint UnsupportedShapeCount = 0;
+            uint RenderedShapeCount = 0;
+            uint RejectedShapeCount = 0;
             nat3 MapSize;
             TriggerGridSpec@ GridSpec;
             array<TriggerRangeRaw@> RawRanges;
             array<TriggerVolume@> TriggerVolumes;
             array<string> Diagnostics;
             array<MediaTrackerClipTriggerSnapshot@> MediaTrackerClipTriggers;
+            array<CrystalTriggerProbeSnapshot@> CrystalTriggerProbes;
 
             TriggerSourceSnapshot() {
                 RawTriggerSize = nat3(1, 1, 1);
@@ -538,6 +807,10 @@ namespace TriggerVisualizer {
 
             uint MediaTrackerClipTriggerCount() const {
                 return MediaTrackerClipTriggers.Length;
+            }
+
+            uint CrystalTriggerProbeCount() const {
+                return CrystalTriggerProbes.Length;
             }
         }
 

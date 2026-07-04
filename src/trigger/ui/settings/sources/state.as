@@ -7,6 +7,7 @@ namespace TriggerVisualizer {
             const string DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING = "camera|customcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|gps|reset|";
             const string DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|2dtriangles|3dtriangles|cartrails|dirtylens|fadingtransition|fog|image|shakecamfx|gps|reset|";
             const string DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|playercamerasubtypecamhelico|playercamerasubtypecamfree|playercamerasubtypecamspectator|2dtriangles|3dtriangles|cartrails|colorsfx|colorgrading|depthoffield|dirtylens|editingcut|fadingtransition|fog|ghost|gps|hdrbloom|image|inertialtrackingcamfx|manialinkui|manialinkurl|musicvolume|opponentvisibility|shakecamfx|stereo3d|soundfx|spectators|text|time|timespeed|tonemapping|vehiclelights|reset|mixed|unknown|";
+
             [Setting hidden name="Trigger: Merge adjacent trigger volumes"]
             bool S_MergeAdjacentTriggerVolumes = true;
             [Setting hidden name="Trigger: Show offzone source"]
@@ -21,6 +22,12 @@ namespace TriggerVisualizer {
             bool S_ShowMediaTrackerSourceEditor = true;
             [Setting hidden name="Trigger: Show MediaTracker source mediatracker"]
             bool S_ShowMediaTrackerSourceMediaTracker = true;
+            [Setting hidden name="Trigger: Show crystal source"]
+            bool S_ShowCrystalSource = true;
+            [Setting hidden name="Trigger: Show crystal source editor"]
+            bool S_ShowCrystalSourceEditor = true;
+            [Setting hidden name="Trigger: Show crystal source mediatracker"]
+            bool S_ShowCrystalSourceMediaTracker = true;
             [Setting hidden name="Trigger: MediaTracker enabled subtypes playing"]
             string S_MediaTrackerEnabledSubtypesPlaying = DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
             [Setting hidden name="Trigger: MediaTracker enabled subtypes editor"]
@@ -76,6 +83,24 @@ namespace TriggerVisualizer {
                     return;
                 }
                 S_ShowMediaTrackerSource = value;
+            }
+
+            bool IsCrystalSourceEnabledForContext(int context) {
+                if (context == SOURCE_SETTINGS_EDITOR) return S_ShowCrystalSourceEditor;
+                if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_ShowCrystalSourceMediaTracker;
+                return S_ShowCrystalSource;
+            }
+
+            void SetCrystalSourceEnabledForContext(int context, bool value) {
+                if (context == SOURCE_SETTINGS_EDITOR) {
+                    S_ShowCrystalSourceEditor = value;
+                    return;
+                }
+                if (context == SOURCE_SETTINGS_MEDIATRACKER) {
+                    S_ShowCrystalSourceMediaTracker = value;
+                    return;
+                }
+                S_ShowCrystalSource = value;
             }
 
             string GetMediaTrackerEnabledSubtypesForContext(int context) {
@@ -157,6 +182,9 @@ namespace TriggerVisualizer {
                 S_ShowMediaTrackerSource = true;
                 S_ShowMediaTrackerSourceEditor = true;
                 S_ShowMediaTrackerSourceMediaTracker = true;
+                S_ShowCrystalSource = true;
+                S_ShowCrystalSourceEditor = true;
+                S_ShowCrystalSourceMediaTracker = true;
                 S_MediaTrackerEnabledSubtypesPlaying = DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
                 S_MediaTrackerEnabledSubtypesEditor = DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR;
                 S_MediaTrackerEnabledSubtypesMediaTracker = DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;

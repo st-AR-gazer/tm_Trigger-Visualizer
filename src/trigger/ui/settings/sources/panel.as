@@ -19,6 +19,17 @@ namespace TriggerVisualizer {
                 return ctx !is null && ctx.HasMap && IsMediaTrackerSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
             }
 
+            bool IsCrystalSourceSupportedForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                return ctx !is null
+                    && ctx.HasMap
+                    && (ctx.IsPlayableMap || ctx.IsEditorTestMode || ctx.IsMapEditor || ctx.IsInEditor || ctx.IsEditorMediaTracker || ctx.IsReplayEditor);
+            }
+
+            bool IsCrystalSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                return IsCrystalSourceSupportedForRuntime(ctx)
+                    && IsCrystalSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
+            }
+
             string SettingBoolKey(bool value) {
                 return value ? "1" : "0";
             }
@@ -110,6 +121,7 @@ namespace TriggerVisualizer {
                     + "|suggest:" + SettingBoolKey(S_RespectMapSuggestOff)
                     + "|offzone:" + SettingBoolKey(IsOffzoneSourceEnabledForContext(context))
                     + "|mt:" + SettingBoolKey(IsMediaTrackerSourceEnabledForContext(context))
+                    + "|crystal:" + SettingBoolKey(IsCrystalSourceEnabledForContext(context))
                     + "|mt-types:" + GetMediaTrackerEnabledSubtypesForContext(context);
             }
 
@@ -286,13 +298,21 @@ namespace TriggerVisualizer {
                     "Show Fading Transition",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_FADING_TRANSITION
                 );
-                RenderMediaTrackerSubtypeToggleUI(context, "Show Fog", TriggerVisualizer::Trigger::MT_SUBTYPE_FOG);
+                RenderMediaTrackerSubtypeToggleUI(
+                    context,
+                    "Show Fog",
+                    TriggerVisualizer::Trigger::MT_SUBTYPE_FOG
+                );
                 RenderMediaTrackerSubtypeToggleUI(
                     context,
                     "Show HDR Bloom",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_HDR_BLOOM
                 );
-                RenderMediaTrackerSubtypeToggleUI(context, "Show Image", TriggerVisualizer::Trigger::MT_SUBTYPE_IMAGE);
+                RenderMediaTrackerSubtypeToggleUI(
+                    context,
+                    "Show Image",
+                    TriggerVisualizer::Trigger::MT_SUBTYPE_IMAGE
+                );
                 RenderMediaTrackerSubtypeToggleUI(
                     context,
                     "Show Inertial Tracking CamFX",
@@ -340,7 +360,11 @@ namespace TriggerVisualizer {
                     "Show Car Trails",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CAR_TRAILS
                 );
-                RenderMediaTrackerSubtypeToggleUI(context, "Show Ghost", TriggerVisualizer::Trigger::MT_SUBTYPE_GHOST);
+                RenderMediaTrackerSubtypeToggleUI(
+                    context,
+                    "Show Ghost",
+                    TriggerVisualizer::Trigger::MT_SUBTYPE_GHOST
+                );
                 RenderMediaTrackerSubtypeToggleUI(
                     context,
                     "Show ManiaLink UI",
@@ -371,8 +395,16 @@ namespace TriggerVisualizer {
                     "Show Spectators",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_SPECTATORS
                 );
-                RenderMediaTrackerSubtypeToggleUI(context, "Show Text", TriggerVisualizer::Trigger::MT_SUBTYPE_TEXT);
-                RenderMediaTrackerSubtypeToggleUI(context, "Show Time", TriggerVisualizer::Trigger::MT_SUBTYPE_TIME);
+                RenderMediaTrackerSubtypeToggleUI(
+                    context,
+                    "Show Text",
+                    TriggerVisualizer::Trigger::MT_SUBTYPE_TEXT
+                );
+                RenderMediaTrackerSubtypeToggleUI(
+                    context,
+                    "Show Time",
+                    TriggerVisualizer::Trigger::MT_SUBTYPE_TIME
+                );
                 RenderMediaTrackerSubtypeToggleUI(
                     context,
                     "Show Time Speed",
@@ -389,7 +421,11 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_UNKNOWN
                 };
                 RenderMediaTrackerSubtypeToolbarUI(context, keys, "other");
-                RenderMediaTrackerSubtypeToggleUI(context, "Show GPS", TriggerVisualizer::Trigger::MT_SUBTYPE_GPS);
+                RenderMediaTrackerSubtypeToggleUI(
+                    context,
+                    "Show GPS",
+                    TriggerVisualizer::Trigger::MT_SUBTYPE_GPS
+                );
                 RenderMediaTrackerSubtypeToggleUI(
                     context,
                     "Show Editing Cut",
@@ -400,7 +436,11 @@ namespace TriggerVisualizer {
                     "Show Reset / empty clips",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_RESET
                 );
-                RenderMediaTrackerSubtypeToggleUI(context, "Show Mixed", TriggerVisualizer::Trigger::MT_SUBTYPE_MIXED);
+                RenderMediaTrackerSubtypeToggleUI(
+                    context,
+                    "Show Mixed",
+                    TriggerVisualizer::Trigger::MT_SUBTYPE_MIXED
+                );
                 RenderMediaTrackerSubtypeToggleUI(
                     context,
                     "Show Unknown",
@@ -523,6 +563,16 @@ namespace TriggerVisualizer {
                     if (next != value) SetMediaTrackerSourceEnabledForContext(context, next);
                     UI::Separator();
                     RenderMediaTrackerSubtypeSettingsUI(context);
+                    UI::EndTabItem();
+                }
+                if (UI::BeginTabItem("Crystal")) {
+                    bool value = IsCrystalSourceEnabledForContext(context);
+                    bool next = RenderSourceProfileToggleUI(
+                        "Show Crystal",
+                        "crystal-profile-" + tostring(context),
+                        value
+                    );
+                    if (next != value) SetCrystalSourceEnabledForContext(context, next);
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();
