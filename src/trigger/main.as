@@ -457,7 +457,7 @@ namespace TriggerVisualizer {
             log(
                 "Crystal source cache refresh published expandable partial cache with " + tostring(source.TriggerVolumeCount()) + " trigger volumes.",
                 LogLevel::Info,
-                466,
+                457,
                 "TriggerVisualizer::Trigger::RefreshCrystalSourceCacheAsync"
             );
             TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalBlocks(source, ctx.RootMap);

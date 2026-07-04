@@ -18,8 +18,8 @@ namespace TriggerVisualizer {
                         log(
                             noPluginMapDiagnostic,
                             LogLevel::Info,
-                            32,
-                            "TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalExpandableEditorScriptClipTriggers"
+                            18,
+                            "UnknownFunction"
                         );
                         return false;
                     }
@@ -112,7 +112,6 @@ namespace TriggerVisualizer {
                             }
                             editorStats.SpecialMaterialCarryAreaCandidates++;
                         }
-
                         editorStats.BlocksScanned++;
                         string targetKeys = "";
                         string targetDetail = "";
@@ -146,8 +145,8 @@ namespace TriggerVisualizer {
                         log(
                             noSeedsDiagnostic,
                             LogLevel::Info,
-                            304,
-                            "TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalExpandableEditorScriptClipTriggers"
+                            146,
+                            "UnknownFunction"
                         );
                         return false;
                     }
@@ -196,8 +195,8 @@ namespace TriggerVisualizer {
                         log(
                             noUnitsDiagnostic,
                             LogLevel::Info,
-                            354,
-                            "TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalExpandableEditorScriptClipTriggers"
+                            196,
+                            "UnknownFunction"
                         );
                         return false;
                     }
@@ -261,7 +260,7 @@ namespace TriggerVisualizer {
                             for (uint j = 0; j < neighbors[currentIndex].Length; j++) {
                                 uint neighborIndex = neighbors[currentIndex][j];
                                 if (neighborIndex >= units.Length || units[neighborIndex] is null) continue;
-                                int dir = j < neighborDirs[currentIndex].Length ? neighborDirs[currentIndex][j] : -1;
+                                int dir = j < neighborDirs[currentIndex].Length ? neighborDirs[currentIndex][j] :-1;
                                 if (currentIndex < neighborIndex) {
                                     if (dir == CRYSTAL_EXPANDABLE_DIR_NORTH || dir == CRYSTAL_EXPANDABLE_DIR_SOUTH) {
                                         northSouthEdges++;
@@ -371,8 +370,8 @@ namespace TriggerVisualizer {
                     log(
                         diagnostic,
                         LogLevel::Info,
-                        568,
-                        "TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalExpandableEditorScriptClipTriggers"
+                        371,
+                        "UnknownFunction"
                     );
                     return renderStats.RectanglesRendered > 0;
                 }

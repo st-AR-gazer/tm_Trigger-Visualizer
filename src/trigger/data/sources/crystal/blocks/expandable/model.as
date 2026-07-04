@@ -233,8 +233,7 @@ namespace TriggerVisualizer {
                     if (!CrystalTargetKeysHaveGameplaySpecial(keys)) return false;
 
                     targetKeys = keys;
-                    detail = modelSlot
-                        + ".Phy.TriggerShape actual cached mobil trigger surface";
+                    detail = modelSlot + ".Phy.TriggerShape actual cached mobil trigger surface";
                     if (!CrystalTargetKeysHaveGameplaySpecial(surfaceKeys)) detail += " with MaterialModifier target after shape proof";
                     if (dataRefFilename.Length > 0) detail += " dataRef " + dataRefFilename;
                     if (dataRefDetail.Length > 0) detail += " | " + dataRefDetail;
