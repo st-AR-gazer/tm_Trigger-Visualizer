@@ -145,7 +145,7 @@ namespace TriggerVisualizer {
                         log(
                             noSeedsDiagnostic,
                             LogLevel::Info,
-                            146,
+                            145,
                             "UnknownFunction"
                         );
                         return false;
@@ -195,7 +195,7 @@ namespace TriggerVisualizer {
                         log(
                             noUnitsDiagnostic,
                             LogLevel::Info,
-                            196,
+                            195,
                             "UnknownFunction"
                         );
                         return false;
@@ -370,7 +370,7 @@ namespace TriggerVisualizer {
                     log(
                         diagnostic,
                         LogLevel::Info,
-                        371,
+                        370,
                         "UnknownFunction"
                     );
                     return renderStats.RectanglesRendered > 0;

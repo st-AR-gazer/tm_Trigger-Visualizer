@@ -17,7 +17,6 @@ namespace TriggerVisualizer {
             }
 
             uint GetAdaptiveLineSegmentCount(const vec3 &in start, const vec3 &in end, const vec3 &in cameraPos) {
-                if (IsFastDrivingPerformanceModeActive()) return 1;
                 if (!TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting) return 1;
 
                 float lineLength = Math::Distance(start, end);

@@ -24,17 +24,31 @@ namespace TriggerVisualizer {
             TriggerVisualizer::Trigger::RenderWorld();
         }
 
-        bool ShouldRenderWithUiVisibility() {
-            auto ctx = TriggerVisualizer::Trigger::GetCurrentRuntimeContext();
+        bool ShouldRenderWithUiVisibility(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
             bool isEditorContext = ctx !is null && ctx.IsInEditor;
             if (S_HideWithGame && !isEditorContext && !UI::IsGameUIVisible()) return false;
             if (S_HideWithOP && !UI::IsOverlayShown()) return false;
             return true;
         }
 
+        bool ShouldRenderWithUiVisibility() {
+            return ShouldRenderWithUiVisibility(TriggerVisualizer::Trigger::Data::GetRuntimeContext());
+        }
+
+        bool ShouldSkipWorldRenderForFastViewedCar(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+            if (!TriggerVisualizer::Trigger::UI::S_FastDrivingPerformanceMode) return false;
+            if (ctx is null || (!ctx.IsPlayableMap && !ctx.IsEditorTestMode)) return false;
+
+            auto proximityState = TriggerVisualizer::Trigger::Data::GetProximityReferenceState(ctx);
+            return TriggerVisualizer::Trigger::Render::ShouldSkipWorldRenderForSpeed(ctx, proximityState);
+        }
+
         bool ShouldRenderWorld() {
             if (!TriggerVisualizer::Trigger::UI::S_RenderWorld) return false;
-            return ShouldRenderWithUiVisibility();
+            auto ctx = TriggerVisualizer::Trigger::Data::GetRuntimeContext();
+            if (!ShouldRenderWithUiVisibility(ctx)) return false;
+            if (ShouldSkipWorldRenderForFastViewedCar(ctx)) return false;
+            return true;
         }
 
         bool ShouldRenderWindow() {

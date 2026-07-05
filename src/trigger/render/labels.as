@@ -58,11 +58,6 @@ namespace TriggerVisualizer {
                 return vec4(1.0f, 1.0f, 1.0f, alpha);
             }
 
-            vec4 GetLabelBackgroundColor(float fade) {
-                float alpha = TriggerVisualizer::Trigger::UI::S_LabelBackgroundAlpha * Math::Clamp(fade, 0.0f, 1.0f);
-                return vec4(0.0f, 0.0f, 0.0f, alpha);
-            }
-
             bool ShouldDrawTriggerVolumeLabel(const TriggerVolume@ box, const vec3 &in cameraPos) {
                 if (!TriggerVisualizer::Trigger::UI::S_ShowLabels) return false;
                 if (box is null) return false;
@@ -71,24 +66,14 @@ namespace TriggerVisualizer {
                 return screenPos.z < 0 && IsScreenPositionVisible(screenPos.xy);
             }
 
-            void DrawLabelCard(const vec2 &in screenPos, const string &in label, float fade) {
+            void DrawLabelText(const vec2 &in screenPos, const string &in label, float fade) {
                 if (label.Length == 0) return;
 
                 nvg::Reset();
                 nvg::FontSize(TriggerVisualizer::Trigger::UI::S_LabelFontSize);
                 nvg::TextAlign(nvg::Align::Left | nvg::Align::Top);
                 vec2 textSize = nvg::TextBounds(label);
-                vec2 padding = vec2(6.0f, 4.0f);
-                vec2 cardSize = textSize + padding * 2.0f;
-                vec2 cardPos = screenPos - vec2(cardSize.x * 0.5f, cardSize.y + 8.0f);
-                vec2 textPos = cardPos + padding;
-                nvg::BeginPath();
-                nvg::RoundedRect(cardPos, cardSize, 4.0f);
-                nvg::FillColor(GetLabelBackgroundColor(fade));
-                nvg::Fill();
-                nvg::ClosePath();
-                nvg::FillColor(vec4(0.0f, 0.0f, 0.0f, 0.65f * Math::Clamp(fade, 0.0f, 1.0f)));
-                nvg::Text(textPos + vec2(1.0f, 1.0f), label);
+                vec2 textPos = screenPos - vec2(textSize.x * 0.5f, textSize.y + 12.0f);
                 nvg::FillColor(GetLabelTextColor(fade));
                 nvg::Text(textPos, label);
             }
@@ -104,7 +89,7 @@ namespace TriggerVisualizer {
                 if (!IsVisibleFadeFactor(fade)) return;
 
                 vec3 screenPos = Camera::ToScreen(GetTriggerVolumeLabelPosition(box));
-                DrawLabelCard(screenPos.xy, BuildTriggerVolumeLabelText(index, rawRange, box), fade);
+                DrawLabelText(screenPos.xy, BuildTriggerVolumeLabelText(index, rawRange, box), fade);
             }
 
             uint CountVisibleTriggerVolumeLabels(

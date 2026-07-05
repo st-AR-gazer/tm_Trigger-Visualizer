@@ -36,13 +36,6 @@
                 S_LabelFontSize = UI::InputFloat("Font size##trigger-visualizer-labels", S_LabelFontSize);
                 UI::SetNextItemWidth(220.0f);
                 S_LabelAlpha = UI::SliderFloat("Text alpha##trigger-visualizer-labels", S_LabelAlpha, 0.0f, 1.0f);
-                UI::SetNextItemWidth(220.0f);
-                S_LabelBackgroundAlpha = UI::SliderFloat(
-                    "Background alpha##trigger-visualizer-labels",
-                    S_LabelBackgroundAlpha,
-                    0.0f,
-                    1.0f
-                );
                 ClampLabelSettings();
             }
         }

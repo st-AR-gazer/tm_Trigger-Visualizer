@@ -21,8 +21,6 @@
             float S_LabelFontSize = 16.0f;
             [Setting hidden name="Trigger: Label alpha" min=0 max=1]
             float S_LabelAlpha = 0.95f;
-            [Setting hidden name="Trigger: Label background alpha" min=0 max=1]
-            float S_LabelBackgroundAlpha = 0.20f;
         }
     }
 }

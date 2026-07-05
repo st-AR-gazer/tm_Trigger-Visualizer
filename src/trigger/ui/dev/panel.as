@@ -138,11 +138,8 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Max Subdivisions", tostring(UI::S_TileIconMaxSubdivisions)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Editor Refresh", tostring(UI::S_OffzoneEditorRefreshIntervalMs) + " ms"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MT Editor Refresh", tostring(UI::S_MediaTrackerEditorRefreshIntervalMs) + " ms"));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Driving Mode", OnOff(UI::S_FastDrivingPerformanceMode)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Speed Threshold", Text::Format("%.1f km/h", UI::S_FastDrivingSpeedThresholdKmh)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Visible Budget", tostring(UI::S_FastDrivingMaxVisibleVolumes)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Fill Budget", tostring(UI::S_FastDrivingMaxFillTilesPerFrame)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Outline Budget", tostring(UI::S_FastDrivingMaxOutlineSegmentsPerFrame)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Render Skip", OnOff(UI::S_FastDrivingPerformanceMode)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Skip Threshold", Text::Format("%.1f km/h", UI::S_FastDrivingSpeedThresholdKmh)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Alpha", Text::Format("%.2f", UI::S_OutlineAlpha)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Alpha", Text::Format("%.2f", UI::S_FillAlpha)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Width", Text::Format("%.1f px", UI::S_OutlineWidth)));
@@ -208,7 +205,7 @@ namespace TriggerVisualizer {
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Camera Pos", cameraPos.ToString()));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Pos", proximityState.HasVehiclePosition ? proximityState.VehiclePosition.ToString() : "<none>"));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Speed", proximityState.HasVehicleSpeed ? Text::Format("%.1f km/h", proximityState.VehicleSpeedKmh) : "<none>"));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fast Render Active", OnOff(TriggerVisualizer::Trigger::Render::ShouldUseFastDrivingPerformanceMode(ctx, proximityState))));
+                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Render Skipped", OnOff(TriggerVisualizer::Trigger::Render::ShouldSkipWorldRenderForSpeed(ctx, proximityState))));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Visible Volumes", tostring(visibleCount)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fading Volumes", tostring(fadingCount)));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culled Volumes", tostring(culledCount)));

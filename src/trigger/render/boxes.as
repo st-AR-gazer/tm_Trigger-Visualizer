@@ -37,62 +37,45 @@ namespace TriggerVisualizer {
             uint G_TileIconPatchBudgetRemaining = 1600;
             uint G_FillTileTraversalBudgetRemaining = 4096;
             uint G_WorldLineSegmentBudgetRemaining = 1536;
-            bool G_FastDrivingPerformanceModeActive = false;
+            bool G_SpeedRenderSkipActive = false;
             WorldFrustumState G_WorldFrustumState;
 
-            bool IsFastDrivingPerformanceModeActive() {
-                return G_FastDrivingPerformanceModeActive;
-            }
-
-            bool ShouldUseFastDrivingPerformanceMode(
+            bool ShouldSkipWorldRenderForSpeed(
                 const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
                 const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
                 if (!TriggerVisualizer::Trigger::UI::S_FastDrivingPerformanceMode) return false;
                 if (ctx is null || (!ctx.IsPlayableMap && !ctx.IsEditorTestMode)) return false;
                 if (proximityState is null || !proximityState.HasVehicleSpeed) return false;
-                return proximityState.VehicleSpeedKmh >= TriggerVisualizer::Trigger::UI::S_FastDrivingSpeedThresholdKmh;
+                return proximityState.VehicleSpeedKmh > TriggerVisualizer::Trigger::UI::S_FastDrivingSpeedThresholdKmh;
             }
 
             int GetEffectiveMaxFillTilesPerFrame() {
-                if (IsFastDrivingPerformanceModeActive()) {
-                    return Math::Max(TriggerVisualizer::Trigger::UI::S_FastDrivingMaxFillTilesPerFrame, 0);
-                }
                 return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
             }
 
             int GetEffectiveMaxOutlineSegmentsPerFrame() {
-                if (IsFastDrivingPerformanceModeActive()) {
-                    return Math::Max(TriggerVisualizer::Trigger::UI::S_FastDrivingMaxOutlineSegmentsPerFrame, 0);
-                }
                 return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxOutlineSegmentsPerFrame, 1);
             }
 
             int GetEffectiveMaxTileIconPatchesPerFrame() {
-                if (IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_FastDrivingDisableTileIcons) {
-                    return 0;
-                }
                 return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame, 0);
             }
 
             bool ShouldRenderWorldFillNow() {
-                return TriggerVisualizer::Trigger::UI::S_ShowFill
-                    && !(IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_FastDrivingDisableFill);
+                return TriggerVisualizer::Trigger::UI::S_ShowFill;
             }
 
             bool ShouldRenderWorldLabelsNow() {
-                return TriggerVisualizer::Trigger::UI::S_ShowLabels
-                    && !(IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_FastDrivingDisableLabels);
+                return TriggerVisualizer::Trigger::UI::S_ShowLabels;
             }
 
             bool ShouldRenderWorldTileIconsNow() {
-                return TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons
-                    && !(IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_FastDrivingDisableTileIcons);
+                return TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons;
             }
 
             bool ShouldSimplifyGroupedTriggersNow() {
-                return IsFastDrivingPerformanceModeActive()
-                    && TriggerVisualizer::Trigger::UI::S_FastDrivingSimplifyGroupedTriggers;
+                return false;
             }
 
             void ResetWorldRenderPerformanceBudgets() {
@@ -420,7 +403,6 @@ namespace TriggerVisualizer {
             }
 
             float GetTriggerVolumeLineSplitDensityFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
-                if (IsFastDrivingPerformanceModeActive()) return 0.0f;
                 if (!TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting) return 0.0f;
 
                 int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitMaxSegmentsPerEdge, 1);
@@ -712,7 +694,7 @@ namespace TriggerVisualizer {
 
             bool ShouldRenderTriggerVolumeFillTiles(const TriggerVolume@ box) {
                 if (box is null) return false;
-                return(!IsFastDrivingPerformanceModeActive() && TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting)
+                return TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting
                     || ShouldRenderWorldTileIconsNow()
                     || TriggerVisualizer::Trigger::UI::S_RandomFillTileColors;
             }

@@ -59,9 +59,6 @@
                 S_MediaTrackerEditorRefreshIntervalMs = Math::Clamp(S_MediaTrackerEditorRefreshIntervalMs, 100, 5000);
                 S_OffzoneEditorRefreshIntervalMs = Math::Clamp(S_OffzoneEditorRefreshIntervalMs, 100, 5000);
                 S_FastDrivingSpeedThresholdKmh = Math::Clamp(S_FastDrivingSpeedThresholdKmh, 0.0f, 1000.0f);
-                S_FastDrivingMaxVisibleVolumes = Math::Clamp(S_FastDrivingMaxVisibleVolumes, 1, 512);
-                S_FastDrivingMaxFillTilesPerFrame = Math::Clamp(S_FastDrivingMaxFillTilesPerFrame, 0, 8192);
-                S_FastDrivingMaxOutlineSegmentsPerFrame = Math::Clamp(S_FastDrivingMaxOutlineSegmentsPerFrame, 0, 8192);
             }
 
             vec4 ClampColor(const vec4 &in color) {
@@ -105,7 +102,6 @@
             void ClampLabelSettings() {
                 S_LabelFontSize = Math::Clamp(S_LabelFontSize, 8.0f, 48.0f);
                 S_LabelAlpha = Math::Clamp(S_LabelAlpha, 0.0f, 1.0f);
-                S_LabelBackgroundAlpha = Math::Clamp(S_LabelBackgroundAlpha, 0.0f, 1.0f);
             }
 
             void ResetGeneralTriggerSettingsToDefaults() {
@@ -126,7 +122,6 @@
             void ResetLabelAppearanceSettingsToDefaults() {
                 S_LabelFontSize = 16.0f;
                 S_LabelAlpha = 0.95f;
-                S_LabelBackgroundAlpha = 0.20f;
                 ClampLabelSettings();
             }
 
@@ -240,23 +235,16 @@
                 ClampPerformanceSettings();
             }
 
-            void ResetPerformanceFastDrivingSettingsToDefaults() {
+            void ResetPerformanceSpeedRenderSkipSettingsToDefaults() {
                 S_FastDrivingPerformanceMode = true;
                 S_FastDrivingSpeedThresholdKmh = 60.0f;
-                S_FastDrivingMaxVisibleVolumes = 24;
-                S_FastDrivingMaxFillTilesPerFrame = 128;
-                S_FastDrivingMaxOutlineSegmentsPerFrame = 256;
-                S_FastDrivingDisableFill = true;
-                S_FastDrivingDisableLabels = true;
-                S_FastDrivingDisableTileIcons = true;
-                S_FastDrivingSimplifyGroupedTriggers = true;
                 ClampPerformanceSettings();
             }
 
             void ResetPerformanceSettingsToDefaults() {
                 ResetPerformanceBudgetSettingsToDefaults();
                 ResetPerformanceRefreshSettingsToDefaults();
-                ResetPerformanceFastDrivingSettingsToDefaults();
+                ResetPerformanceSpeedRenderSkipSettingsToDefaults();
             }
 
             void ResetSettingsToDefaults() {

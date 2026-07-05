@@ -3,9 +3,7 @@
 
 # Trigger Visualizer
 
-Displays map trigger volumes without having to select the specific tool in editor 
-(i.e offzone, or a specific layer in the mediatracker), as well as in the normal 
-game mode.
+Displays map trigger volumes without having to select the specific tool in  play, editor, mediatracker mesh modeller.
 
 ## Layout
 
@@ -14,6 +12,16 @@ Core code lives in `src/trigger/`.
 - `data/sources/*` reads trigger data from the map.
 - `render/` projects trigger volumes, outlines, fills, labels, and tile icons.
 - `ui/` contains settings and the developer diagnostics panel.
+
+## Trigger Sources
+
+- Offzone volumes from map offzone data.
+- MediaTracker trigger volumes from tracks, clips, and clip-specific trigger metadata.
+- Crystal trigger shapes from public block/item trigger surfaces and models.
+
+Crystal support includes all triggers in all nadeo blocks/items as well as custom blocks/items (for those pesky hidden trigger volumes that some mappers hide).
+
+*Note, due to how nadeo has stored the expandable effect blocks (boost/turbo/cruis/freewheel/etc) those are my best approximations based on the 'Expandable_Trigger.Shape.Gbx' file extracted from the runtime. Whenever I tried to access the `BlockInfo[...]Mobils*.PrefabFid.Ents[...]NPlugTrigger_SSpecial.TriggerShape` runtime object for the expandable blocks the game always seemed to crash no matter what I did, so I just threw in the towl after a while xdd
 
 ## Mapper Commands
 
@@ -37,20 +45,62 @@ supported.
 `suggest-off` asks Trigger Visualizer to start matching triggers hidden when the
 user respects map suggestions. `force-off` always hides matching triggers.
 Without a trigger type, these commands apply to all world rendering. With a
-trigger type, they only apply to matching sources or MediaTracker subtypes.
+trigger type, they only apply to matching sources, MediaTracker subtypes, Crystal subtypes, or gameplay trigger types.
 
 Examples:
 
 ```text
-/trigger-visualizer camera,offzone suggest-off
+/trigger-visualizer camera,offzone,crystal suggest-off
 /trigger-visualizer cam3 force-off
 /trigger-visualizer fog,cartrails suggest-off
+/trigger-visualizer crystal suggest-off
+/trigger-visualizer boost2 force-off
+/trigger-visualizer crystalgate,checkpoint suggest-off
 ```
+*Note, these are read from the maps 'map comment'
 
 Supported source targets:
 
 - `MediaTracker`
 - `Offzone`
+- `Crystal`
+
+Supported Crystal subtype targets:
+
+- `CrystalBlock`
+- `CrystalBlockWaypoint`
+- `CrystalScreenInteraction`
+- `CrystalGate`
+- `CrystalTeleporter`
+- `CrystalItem`
+- `CrystalBlockItem`
+
+Supported gameplay trigger targets:
+
+- `Checkpoint`
+- `Finish`
+- `StartFinish`
+- `Turbo`
+- `Turbo2`
+- `TurboRoulette`
+- `TurboRouletteYellow`
+- `TurboRouletteCyan`
+- `TurboRoulettePurple`
+- `Boost`
+- `Boost2`
+- `Cruise`
+- `NoBrakes`
+- `NoEngine`
+- `NoSteering`
+- `Slowmo`
+- `Fragile`
+- `Reset`
+- `ForceAcceleration`
+- `NoGrip`
+- `VehicleTransformReset`
+- `VehicleTransformCarSnow`
+- `VehicleTransformCarRally`
+- `VehicleTransformCarDesert`
 
 Supported MediaTracker subtype targets:
 

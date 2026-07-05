@@ -49,7 +49,7 @@ namespace TriggerVisualizer {
             }
 
             void RenderWorld() {
-                G_FastDrivingPerformanceModeActive = false;
+                G_SpeedRenderSkipActive = false;
                 if (!TriggerVisualizer::Trigger::UI::S_RenderWorld) return;
                 if (!TriggerVisualizer::Trigger::UI::S_ShowOutline && !TriggerVisualizer::Trigger::UI::S_ShowFill && !TriggerVisualizer::Trigger::UI::S_ShowLabels && !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
 
@@ -63,11 +63,11 @@ namespace TriggerVisualizer {
                 vec3 cameraPos = Camera::GetCurrentPosition();
                 auto proximityState = TriggerVisualizer::Trigger::Data::GetProximityReferenceState(ctx);
                 int proximityMode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(ctx);
-                G_FastDrivingPerformanceModeActive = ShouldUseFastDrivingPerformanceMode(ctx, proximityState);
+                G_SpeedRenderSkipActive = ShouldSkipWorldRenderForSpeed(ctx, proximityState);
+                if (G_SpeedRenderSkipActive) return;
                 if (!TriggerVisualizer::Trigger::UI::S_ShowOutline && !ShouldRenderWorldFillNow() && !ShouldRenderWorldLabelsNow() && !ShouldRenderWorldTileIconsNow()) return;
                 ResetWorldRenderPerformanceBudgets();
-                int maxVisibleVolumeCount = IsFastDrivingPerformanceModeActive() ?
-                    TriggerVisualizer::Trigger::UI::S_FastDrivingMaxVisibleVolumes : TriggerVisualizer::Trigger::UI::S_MaxVisibleVolumesPerFrame;
+                int maxVisibleVolumeCount = TriggerVisualizer::Trigger::UI::S_MaxVisibleVolumesPerFrame;
                 uint maxVisibleVolumes = uint(Math::Max(maxVisibleVolumeCount, 1));
                 auto visibleVolumes = array<TriggerVolume@>();
                 auto visibleFades = array<float>();
@@ -148,35 +148,15 @@ namespace TriggerVisualizer {
                 DrawWorldFillTileDrawItems(fillTileItems);
 
                 if (TriggerVisualizer::Trigger::UI::S_ShowOutline) {
-                    if (IsFastDrivingPerformanceModeActive()) {
-                        auto outlineItems = array<WorldOutlineEdgeDrawItem@>();
-                        for (uint i = 0; i < visibleVolumes.Length; i++) {
-                            CollectTriggerVolumeOutlineDrawItems(
-                                visibleVolumes[i],
-                                cameraPos,
-                                proximityState,
-                                proximityMode,
-                                GetOutlineColor(visibleVolumes[i], cameraPos, visibleFades[i]),
-                                visibleIndices[i],
-                                outlineItems
-                            );
-                        }
-                        DrawWorldOutlineEdgeDrawItems(
-                            outlineItems,
+                    for (uint i = 0; i < visibleVolumes.Length; i++) {
+                        if (G_WorldLineSegmentBudgetRemaining == 0) break;
+                        DrawTriggerVolumeOutline(
+                            visibleVolumes[i],
                             cameraPos,
-                            TriggerVisualizer::Trigger::UI::S_OutlineWidth
+                            GetOutlineColor(visibleVolumes[i], cameraPos, visibleFades[i]),
+                            TriggerVisualizer::Trigger::UI::S_OutlineWidth,
+                            visibleIndices[i]
                         );
-                    } else {
-                        for (uint i = 0; i < visibleVolumes.Length; i++) {
-                            if (G_WorldLineSegmentBudgetRemaining == 0) break;
-                            DrawTriggerVolumeOutline(
-                                visibleVolumes[i],
-                                cameraPos,
-                                GetOutlineColor(visibleVolumes[i], cameraPos, visibleFades[i]),
-                                TriggerVisualizer::Trigger::UI::S_OutlineWidth,
-                                visibleIndices[i]
-                            );
-                        }
                     }
                 }
 
