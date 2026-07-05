@@ -32,10 +32,13 @@ namespace TriggerVisualizer {
                     return false;
                 }
 
-                bool CrystalBlockHasWaypointTarget(CGameCtnBlock@ block) {
+                bool CrystalBlockHasExpandableWaypointTriggerTarget(CGameCtnBlock@ block) {
                     if (block is null || block.BlockInfo is null) return false;
                     auto waypointType = block.BlockInfo.WaypointType;
-                    return waypointType != CGameCtnBlockInfo::EWayPointType::None;
+                    return waypointType == CGameCtnBlockInfo::EWayPointType::Checkpoint
+                        || waypointType == CGameCtnBlockInfo::EWayPointType::Finish
+                        || waypointType == CGameCtnBlockInfo::EWayPointType::StartFinish
+                        || waypointType == CGameCtnBlockInfo::EWayPointType::Dispenser;
                 }
 
                 string CrystalBlockInfoNameText(CGameCtnBlock@ block) {
@@ -113,9 +116,7 @@ namespace TriggerVisualizer {
                     if (block is null || block.BlockInfo is null) return next;
 
                     auto waypointType = block.BlockInfo.WaypointType;
-                    if (waypointType == CGameCtnBlockInfo::EWayPointType::Start) {
-                        next = AddTriggerTargetKey(next, "start");
-                    } else if (waypointType == CGameCtnBlockInfo::EWayPointType::Checkpoint) {
+                    if (waypointType == CGameCtnBlockInfo::EWayPointType::Checkpoint) {
                         next = AddTriggerTargetKey(next, "checkpoint");
                     } else if (waypointType == CGameCtnBlockInfo::EWayPointType::Finish) {
                         next = AddTriggerTargetKey(next, "finish");

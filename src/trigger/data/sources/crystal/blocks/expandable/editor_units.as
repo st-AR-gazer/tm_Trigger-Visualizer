@@ -16,7 +16,7 @@ namespace TriggerVisualizer {
                     detail = "";
                     if (!CrystalExpandableEditorBlockCanParticipate(block, variant)) return false;
 
-                    if (allowWaypointTargets && CrystalBlockHasWaypointTarget(block)) {
+                    if (allowWaypointTargets && CrystalBlockHasExpandableWaypointTriggerTarget(block)) {
                         targetKeys = AddCrystalBlockWaypointTargetKeysNoMaterial(
                             GetTriggerSourceTargetKeys(TRIGGER_SOURCE_CRYSTAL),
                             block

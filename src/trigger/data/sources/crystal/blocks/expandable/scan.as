@@ -72,7 +72,7 @@ namespace TriggerVisualizer {
                             continue;
                         }
 
-                        bool hasWaypointTarget = CrystalBlockHasWaypointTarget(block);
+                        bool hasWaypointTarget = CrystalBlockHasExpandableWaypointTriggerTarget(block);
                         bool canCarryTriggerArea = CrystalExpandableEditorBlockCanCarryTriggerArea(block);
                         bool hasSpecialMaterialTarget = canCarryTriggerArea
                             && CrystalBlockHasGameplaySpecialMaterialModifier(block);

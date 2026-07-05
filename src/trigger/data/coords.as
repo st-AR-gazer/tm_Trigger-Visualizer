@@ -29,41 +29,56 @@ namespace TriggerVisualizer {
                 return int(map.Collection.CollectionId);
             }
 
+            bool TryGetKnownVistaBlockGridWorldYAnchor(
+                const string &in rawCollectionName,
+                int collectionId,
+                float &out worldYAnchor,
+                string &out vistaName
+            ) {
+                string key = NormalizeMapCollectionName(rawCollectionName);
+
+                if (key == "stadium" || key == "stadium2020") {
+                    worldYAnchor = 8.0f;
+                    vistaName = "Stadium";
+                    return true;
+                }
+                if (key == "bluebay" || collectionId == 28) {
+                    worldYAnchor = 5.0f;
+                    vistaName = "BlueBay";
+                    return true;
+                }
+                if (key == "greencoast" || collectionId == 15) {
+                    worldYAnchor = 5.0f;
+                    vistaName = "GreenCoast";
+                    return true;
+                }
+                if (key == "redisland" || collectionId == 16) {
+                    worldYAnchor = 15.0f;
+                    vistaName = "RedIsland";
+                    return true;
+                }
+                if (key == "whiteshore" || collectionId == 29) {
+                    worldYAnchor = 15.0f;
+                    vistaName = "WhiteShore";
+                    return true;
+                }
+
+                return false;
+            }
+
             bool TryGetKnownVistaTriggerWorldYAnchor(
                 const string &in rawCollectionName,
                 int collectionId,
                 float &out worldYAnchor,
                 string &out source
             ) {
-                string key = NormalizeMapCollectionName(rawCollectionName);
-
-                if (key == "stadium" || key == "stadium2020") {
-                    worldYAnchor = 8.0f;
-                    source = "vista:Stadium";
-                    return true;
-                }
-                if (key == "bluebay" || collectionId == 28) {
-                    worldYAnchor = 5.0f;
-                    source = "vista:BlueBay";
-                    return true;
-                }
-                if (key == "greencoast" || collectionId == 15) {
-                    worldYAnchor = 4.0f;
-                    source = "vista:GreenCoast";
-                    return true;
-                }
-                if (key == "redisland" || collectionId == 16) {
-                    worldYAnchor = 4.0f;
-                    source = "vista:RedIsland";
-                    return true;
-                }
-                if (key == "whiteshore" || collectionId == 29) {
-                    worldYAnchor = 4.0f;
-                    source = "vista:WhiteShore";
-                    return true;
+                string vistaName = "";
+                if (!TryGetKnownVistaBlockGridWorldYAnchor(rawCollectionName, collectionId, worldYAnchor, vistaName)) {
+                    return false;
                 }
 
-                return false;
+                source = "vista:" + vistaName;
+                return true;
             }
 
             bool TryGetKnownCrystalPlacedBlockWorldYAnchor(
@@ -72,35 +87,13 @@ namespace TriggerVisualizer {
                 float &out worldYAnchor,
                 string &out source
             ) {
-                string key = NormalizeMapCollectionName(rawCollectionName);
-
-                if (key == "stadium" || key == "stadium2020") {
-                    worldYAnchor = 8.0f;
-                    source = "crystal-block-calibration:Stadium";
-                    return true;
-                }
-                if (key == "bluebay" || collectionId == 28) {
-                    worldYAnchor = 5.0f;
-                    source = "crystal-block-calibration:BlueBay";
-                    return true;
-                }
-                if (key == "greencoast" || collectionId == 15) {
-                    worldYAnchor = 5.0f;
-                    source = "crystal-block-calibration:GreenCoast";
-                    return true;
-                }
-                if (key == "redisland" || collectionId == 16) {
-                    worldYAnchor = 15.0f;
-                    source = "crystal-block-calibration:RedIsland";
-                    return true;
-                }
-                if (key == "whiteshore" || collectionId == 29) {
-                    worldYAnchor = 15.0f;
-                    source = "crystal-block-calibration:WhiteShore";
-                    return true;
+                string vistaName = "";
+                if (!TryGetKnownVistaBlockGridWorldYAnchor(rawCollectionName, collectionId, worldYAnchor, vistaName)) {
+                    return false;
                 }
 
-                return false;
+                source = "crystal-block-calibration:" + vistaName;
+                return true;
             }
 
             float GetMapTriggerWorldYAnchor(
