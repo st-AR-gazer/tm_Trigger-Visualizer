@@ -2,22 +2,11 @@ namespace TriggerVisualizer {
     namespace Trigger {
         namespace Data {
             namespace Sources {
-                bool CrystalShouldUseExpandableScriptClipGeometryOnly(
+                bool CrystalShouldSkipExpandableMobilGeometry(
                     CGameCtnBlock@ block,
                     CGameCtnBlockInfoVariant@ variant
                 ) {
-                    string targetKeys = "";
-                    string targetDetail = "";
-                    return CrystalTryGetExpandableEditorScriptClipTargetKeys(
-                        null,
-                        block,
-                        variant,
-                        targetKeys,
-                        targetDetail,
-                        true,
-                        false,
-                        null
-                    );
+                    return CrystalExpandableBlockShouldUseRectangle(block, variant);
                 }
 
                 bool ProbeCrystalBlockHelperPrefabResolvedSurface(

@@ -15,12 +15,6 @@ namespace TriggerVisualizer {
                             source,
                             noPluginMapDiagnostic
                         );
-                        log(
-                            noPluginMapDiagnostic,
-                            LogLevel::Info,
-                            18,
-                            "UnknownFunction"
-                        );
                         return false;
                     }
 
@@ -142,12 +136,6 @@ namespace TriggerVisualizer {
                             source,
                             noSeedsDiagnostic
                         );
-                        log(
-                            noSeedsDiagnostic,
-                            LogLevel::Info,
-                            145,
-                            "UnknownFunction"
-                        );
                         return false;
                     }
 
@@ -191,12 +179,6 @@ namespace TriggerVisualizer {
                         AddCrystalDiagnostic(
                             source,
                             noUnitsDiagnostic
-                        );
-                        log(
-                            noUnitsDiagnostic,
-                            LogLevel::Info,
-                            195,
-                            "UnknownFunction"
                         );
                         return false;
                     }
@@ -277,22 +259,27 @@ namespace TriggerVisualizer {
                         renderStats.ComponentsSeen++;
                         string targetKeys = GetTriggerSourceTargetKeys(TRIGGER_SOURCE_CRYSTAL);
                         bool componentHasTriggerTarget = false;
+                        auto targetMemberIndices = array<uint>();
                         for (uint j = 0; j < memberIndices.Length; j++) {
                             uint unitIndex = memberIndices[j];
                             if (unitIndex >= units.Length || units[unitIndex] is null) continue;
                             if (!units[unitIndex].HasTriggerTarget) continue;
 
                             componentHasTriggerTarget = true;
+                            targetMemberIndices.InsertLast(unitIndex);
                             targetKeys = MergeTriggerTargetKeys(targetKeys, units[unitIndex].TargetKeys);
                         }
                         if (!componentHasTriggerTarget) continue;
+                        if (targetMemberIndices.Length < memberIndices.Length) {
+                            renderStats.ConnectedNonTargetUnitsSkipped += memberIndices.Length - targetMemberIndices.Length;
+                        }
 
                         renderStats.ComponentsEligible++;
                         AddCrystalExpandableComponentVolumes(
                             source,
                             map,
                             units,
-                            memberIndices,
+                            targetMemberIndices,
                             connectedMasks,
                             targetKeys,
                             northSouthEdges,
@@ -326,6 +313,9 @@ namespace TriggerVisualizer {
                         + " rectangles from "
                         + tostring(renderStats.ComponentsEligible)
                         + " eligible components. Geometry comes from CGameEditorMapScriptClipList public clip endpoints, offsets, and Clip.GetConnectableCoord as equal-sized cell rectangles, not block names or raw BlockUnitInfo clip buffers.";
+                    if (renderStats.ConnectedNonTargetUnitsSkipped > 0) diagnostic += " Connected non-target cells skipped "
+                        + tostring(renderStats.ConnectedNonTargetUnitsSkipped)
+                        + ".";
                     if (editorStats.SeedLimitHit) diagnostic += " Seed limit hit " + tostring(MAX_CRYSTAL_EXPANDABLE_EDITOR_SCRIPT_CLIP_SEEDS) + ".";
                     if (editorStats.BlockLimitHit) diagnostic += " Connected block limit hit " + tostring(MAX_CRYSTAL_EXPANDABLE_EDITOR_SCRIPT_CLIP_BLOCKS) + ".";
                     if (editorStats.ClipLimitHit) diagnostic += " Per-block script clip limit hit " + tostring(MAX_CRYSTAL_EXPANDABLE_EDITOR_SCRIPT_CLIPS_PER_BLOCK) + ".";
@@ -366,12 +356,6 @@ namespace TriggerVisualizer {
                     AddCrystalDiagnostic(
                         source,
                         diagnostic
-                    );
-                    log(
-                        diagnostic,
-                        LogLevel::Info,
-                        370,
-                        "UnknownFunction"
                     );
                     return renderStats.RectanglesRendered > 0;
                 }

@@ -21,7 +21,7 @@ Core code lives in `src/trigger/`.
 
 Crystal support includes all triggers in all nadeo blocks/items as well as custom blocks/items (for those pesky hidden trigger volumes that some mappers hide).
 
-*Note, due to how nadeo has stored the expandable effect blocks (boost/turbo/cruis/freewheel/etc) those are my best approximations based on the 'Expandable_Trigger.Shape.Gbx' file extracted from the runtime. Whenever I tried to access the `BlockInfo[...]Mobils*.PrefabFid.Ents[...]NPlugTrigger_SSpecial.TriggerShape` runtime object for the expandable blocks the game always seemed to crash no matter what I did, so I just threw in the towl after a while xdd
+*Note, `GateExpandableSpecial*` blocks (boost/turbo/cruise/freewheel/etc) are drawn as approximate rectangles from public block placement, direction, variant size, and material modifier metadata. Other expandable blocks use the normal Crystal discovery paths. Runtime expandable clip connectivity and trigger objects are intentionally not probed because those paths were unstable in-game; the old investigation code is kept under `discoveries/expandable/` for reference.
 
 ## Mapper Commands
 
@@ -46,6 +46,8 @@ supported.
 user respects map suggestions. `force-off` always hides matching triggers.
 Without a trigger type, these commands apply to all world rendering. With a
 trigger type, they only apply to matching sources, MediaTracker subtypes, Crystal subtypes, or gameplay trigger types.
+An empty target list, `<>`, `*`, `all`, or `everything` is treated as the same
+wildcard as no trigger type.
 
 Examples:
 
@@ -56,6 +58,7 @@ Examples:
 /trigger-visualizer crystal suggest-off
 /trigger-visualizer boost2 force-off
 /trigger-visualizer crystalgate,checkpoint suggest-off
+/trigger-visualizer * force-off
 ```
 *Note, these are read from the maps 'map comment'
 
@@ -143,12 +146,10 @@ Supported MediaTracker subtype targets:
 - `TimeSpeed`
 - `ToneMapping`
 - `VehicleLights`
-- `Reset`
+- `MediaTrackerReset`
 - `Unknown`
 
-Target names are case-insensitive. Use no spaces inside the comma-separated
-target list; hyphens and underscores are accepted. Legacy aliases such as
-`CamCustom`, `Cam1`, and `CarTrail` are still accepted.
+Target names are case-insensitive. Use no spaces inside the comma-separated target list; hyphens and underscores are accepted. Use `Reset` for Crystal/gameplay reset triggers, and `MediaTrackerReset`, `MTReset`, or `Empty` for empty MediaTracker clips that reset camera switches.
 
 ## Build
 

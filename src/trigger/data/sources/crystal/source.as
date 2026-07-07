@@ -9,7 +9,7 @@ namespace TriggerVisualizer {
                     for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
                         auto volume = source.TriggerVolumes[i];
                         if (volume is null) continue;
-                        if (volume.DetectedLabel.StartsWith("ExpandableClip.") || volume.Label.StartsWith("Expandable Crystal ")) {
+                        if (volume.DetectedLabel.StartsWith("ExpandableRectangle.") || volume.Label.StartsWith("Expandable Crystal ")) {
                             count++;
                         }
                     }
@@ -23,12 +23,6 @@ namespace TriggerVisualizer {
                     AddCrystalDiagnostic(
                         source,
                         countsDiagnostic
-                    );
-                    log(
-                        countsDiagnostic,
-                        LogLevel::Info,
-                        27,
-                        "TriggerVisualizer::Trigger::Data::Sources::AddCrystalFinalCountsDiagnostic"
                     );
                 }
 
@@ -71,7 +65,7 @@ namespace TriggerVisualizer {
                     );
                     AddCrystalDiagnostic(
                         source,
-                        "Expandable block areas are rendered from public editor script-clip endpoints and Clip.GetConnectableCoord as equal-sized cell rectangles. Gameplay-special MaterialModifier can label a component only when the placed expandable block also exposes public expandable clip evidence; MaterialModifier alone never creates geometry."
+                        "GateExpandableSpecial* areas use one approximate local rectangle per matching block from public Coord/Dir/variant-size placement plus MaterialModifier target metadata. Other expandable Crystal blocks use the normal block/item trigger discovery paths."
                     );
                     AddCrystalDiagnostic(
                         source,
@@ -103,7 +97,7 @@ namespace TriggerVisualizer {
                     );
                     AddCrystalDiagnostic(
                         source,
-                        "Performance: full crystal probing is cached per RootMap and reused across contexts; use the dev panel refresh button after same-count editor changes."
+                        "Performance: full crystal probing is cached per RootMap/context and periodically refreshed only in the Mesh Modeler when enabled in Performance > Refresh."
                     );
 
                     if (ctx is null) {

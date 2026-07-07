@@ -36,6 +36,7 @@ namespace TriggerVisualizer {
                     uint ComponentsSeen = 0;
                     uint ComponentsEligible = 0;
                     uint ComponentsOversizedSkipped = 0;
+                    uint ConnectedNonTargetUnitsSkipped = 0;
                     uint RectanglesRendered = 0;
                     uint RectanglesRejected = 0;
                     string FirstRenderedBoundsDetail;

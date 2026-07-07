@@ -296,10 +296,7 @@ namespace TriggerVisualizer {
                         faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
                         readAnyFace = true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
-                            "UnitInfo.Clips_North was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_North");
                     }
 
                     try {
@@ -315,10 +312,7 @@ namespace TriggerVisualizer {
                         faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
                         readAnyFace = true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
-                            "UnitInfo.Clips_East was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_East");
                     }
 
                     try {
@@ -334,10 +328,7 @@ namespace TriggerVisualizer {
                         faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
                         readAnyFace = true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
-                            "UnitInfo.Clips_South was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_South");
                     }
 
                     try {
@@ -353,10 +344,7 @@ namespace TriggerVisualizer {
                         faceKeys[worldDir] = CrystalExpandableMergeClipKeyLists(faceKeys[worldDir], keys);
                         readAnyFace = true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
-                            "UnitInfo.Clips_West was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_West");
                     }
 
                     try {
@@ -374,10 +362,7 @@ namespace TriggerVisualizer {
                         );
                         readAnyFace = true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
-                            "UnitInfo.Clips_Top was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_Top");
                     }
 
                     try {
@@ -395,12 +380,17 @@ namespace TriggerVisualizer {
                         );
                         readAnyFace = true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalCollectExpandableUnitDirectionalFaceKeys",
-                            "UnitInfo.Clips_Bottom was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_Bottom");
                     }
                     return readAnyFace;
+                }
+
+                void CrystalIgnoreUnreadableOptionalUnitClipBuffer(const string &in bufferName) {
+                    // Many normal block units do not expose every clip buffer; absence is evidence, not an error.
+                }
+
+                void CrystalIgnoreUnreadableOptionalProbeField(const string &in fieldName) {
+                    // Crystal metadata differs by block kind; unreadable optional fields simply make that probe inconclusive.
                 }
 
                 bool CrystalCollectExpandableUnitFaceKeys(
@@ -460,18 +450,12 @@ namespace TriggerVisualizer {
                     try {
                         if (CrystalNat3Equals(unitInfo.Offset, unit.Offset)) return true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalVariantUnitMatchesPlacedUnit",
-                            "UnitInfo.Offset or placed Unit.Offset was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalProbeField("UnitInfo.Offset");
                     }
                     try {
                         if (CrystalNat3Equals(unitInfo.RelativeOffset, unit.Offset)) return true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalVariantUnitMatchesPlacedUnit",
-                            "UnitInfo.RelativeOffset or placed Unit.Offset was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalProbeField("UnitInfo.RelativeOffset");
                     }
                     return false;
                 }
@@ -498,10 +482,7 @@ namespace TriggerVisualizer {
                         detail = "variant.BlockUnitModels[" + tostring(unitIndex) + "]";
                         return candidate;
                     } catch {
-                        logging::HandledException(
-                            "CrystalExpandableCandidateAtIndex",
-                            blockUnitInfos ? "Variant.BlockUnitInfos candidate was not readable." : "Variant.BlockUnitModels candidate was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalProbeField(blockUnitInfos ? "Variant.BlockUnitInfos" : "Variant.BlockUnitModels");
                         detail = "";
                     }
                     return null;
@@ -535,10 +516,7 @@ namespace TriggerVisualizer {
                             }
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalFindVariantExpandableUnitInfoForPlacedUnit",
-                            "Variant.BlockUnitInfos scan failed."
-                        );
+                        CrystalIgnoreUnreadableOptionalProbeField("Variant.BlockUnitInfos");
                     }
 
                     try {
@@ -556,10 +534,7 @@ namespace TriggerVisualizer {
                             }
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalFindVariantExpandableUnitInfoForPlacedUnit",
-                            "Variant.BlockUnitModels scan failed."
-                        );
+                        CrystalIgnoreUnreadableOptionalProbeField("Variant.BlockUnitModels");
                     }
 
                     string indexedDetail = "";
@@ -604,10 +579,7 @@ namespace TriggerVisualizer {
                             if (CrystalClipLooksExpandableConnection(unitInfo.Clips[i])) return true;
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
-                            "UnitInfo.Clips was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips");
                     }
 
                     try {
@@ -619,10 +591,7 @@ namespace TriggerVisualizer {
                             if (CrystalClipLooksExpandableConnection(unitInfo.AllClips[i])) return true;
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
-                            "UnitInfo.AllClips was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("AllClips");
                     }
 
                     try {
@@ -634,10 +603,7 @@ namespace TriggerVisualizer {
                             if (CrystalClipLooksExpandableConnection(unitInfo.Clips_North[i])) return true;
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
-                            "UnitInfo.Clips_North was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_North");
                     }
 
                     try {
@@ -649,10 +615,7 @@ namespace TriggerVisualizer {
                             if (CrystalClipLooksExpandableConnection(unitInfo.Clips_East[i])) return true;
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
-                            "UnitInfo.Clips_East was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_East");
                     }
 
                     try {
@@ -664,10 +627,7 @@ namespace TriggerVisualizer {
                             if (CrystalClipLooksExpandableConnection(unitInfo.Clips_South[i])) return true;
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
-                            "UnitInfo.Clips_South was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_South");
                     }
 
                     try {
@@ -679,10 +639,7 @@ namespace TriggerVisualizer {
                             if (CrystalClipLooksExpandableConnection(unitInfo.Clips_West[i])) return true;
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
-                            "UnitInfo.Clips_West was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_West");
                     }
 
                     try {
@@ -694,10 +651,7 @@ namespace TriggerVisualizer {
                             if (CrystalClipLooksExpandableConnection(unitInfo.Clips_Top[i])) return true;
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
-                            "UnitInfo.Clips_Top was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_Top");
                     }
 
                     try {
@@ -709,10 +663,7 @@ namespace TriggerVisualizer {
                             if (CrystalClipLooksExpandableConnection(unitInfo.Clips_Bottom[i])) return true;
                         }
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockUnitInfoHasExpandableClipEvidence",
-                            "UnitInfo.Clips_Bottom was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalUnitClipBuffer("Clips_Bottom");
                     }
                     return false;
                 }

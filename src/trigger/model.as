@@ -77,7 +77,7 @@ namespace TriggerVisualizer {
         const string MT_SUBTYPE_TIME_SPEED = "timespeed";
         const string MT_SUBTYPE_TONE_MAPPING = "tonemapping";
         const string MT_SUBTYPE_VEHICLE_LIGHTS = "vehiclelights";
-        const string MT_SUBTYPE_RESET = "reset";
+        const string MT_SUBTYPE_RESET = "mediatrackerreset";
         const string MT_SUBTYPE_MIXED = "mixed";
         const string MT_SUBTYPE_UNKNOWN = "unknown";
 
@@ -172,7 +172,7 @@ namespace TriggerVisualizer {
             if (key == "timespeed") return MT_SUBTYPE_TIME_SPEED;
             if (key == "tonemapping") return MT_SUBTYPE_TONE_MAPPING;
             if (key == "vehiclelights" || key == "vehiclelight" || key == "lights") return MT_SUBTYPE_VEHICLE_LIGHTS;
-            if (key == "reset" || key == "empty") return MT_SUBTYPE_RESET;
+            if (key == "mediatrackerreset" || key == "mtreset" || key == "mediareset" || key == "clipreset" || key == "empty" || key == "emptyclip" || key == "emptyclips") return MT_SUBTYPE_RESET;
             if (key == "mixed") return MT_SUBTYPE_MIXED;
             if (key == "unknown" || key == "missing" || key == "missingelement" || key == "unrecognized" || key == "unrecognised") return MT_SUBTYPE_UNKNOWN;
 
@@ -417,6 +417,20 @@ namespace TriggerVisualizer {
             }
         }
 
+        const uint[][] TRIGGER_VOLUME_BOX_EDGE_INDICES = {
+            {0, 1}, {1, 2}, {2, 3}, {3, 0},
+            {4, 5}, {5, 6}, {6, 7}, {7, 4},
+            {0, 4}, {1, 5}, {2, 6}, {3, 7}
+        };
+        const uint[][] TRIGGER_VOLUME_BOX_FACE_INDICES = {
+            {0, 4, 7, 3},
+            {1, 2, 6, 5},
+            {0, 1, 5, 4},
+            {3, 7, 6, 2},
+            {0, 3, 2, 1},
+            {4, 5, 6, 7}
+        };
+
         class TriggerVolume {
             vec3 Min;
             vec3 Max;
@@ -441,6 +455,21 @@ namespace TriggerVisualizer {
             array<vec3> OutlineLineStarts;
             array<vec3> OutlineLineEnds;
             array<TriggerVolume@> ChildVolumes;
+            bool GroupGeometryCacheReady = false;
+            array<string> CachedGroupFaceKeys;
+            array<uint> CachedGroupFaceCounts;
+            array<vec3> CachedGroupOutlineEdgeStarts;
+            array<vec3> CachedGroupOutlineEdgeEnds;
+            array<uint> CachedGroupOutlineEdgeBoxIndices;
+            array<uint> CachedGroupOutlineEdgeIndices;
+            array<string> CachedGroupOutlineEdgeKeys;
+            array<string> CachedGroupOutlineEdgeCountKeys;
+            array<uint> CachedGroupOutlineEdgeCounts;
+            bool StaticOutlineCacheReady = false;
+            array<vec3> CachedStaticOutlineStarts;
+            array<vec3> CachedStaticOutlineEnds;
+            array<uint> CachedStaticOutlineBoxIndices;
+            array<uint> CachedStaticOutlineEdgeIndices;
 
             TriggerVolume() { }
 
@@ -474,6 +503,31 @@ namespace TriggerVisualizer {
 
             bool HasChildVolumes() const {
                 return ChildVolumes.Length > 0;
+            }
+
+            bool HasCachedGroupGeometry() const {
+                return GroupGeometryCacheReady && HasChildVolumes();
+            }
+
+            bool HasStaticOutlineCache() const {
+                return StaticOutlineCacheReady;
+            }
+
+            uint CachedGroupOutlineEdgeCount() const {
+                uint count = CachedGroupOutlineEdgeStarts.Length;
+                count = Math::Min(count, CachedGroupOutlineEdgeEnds.Length);
+                count = Math::Min(count, CachedGroupOutlineEdgeBoxIndices.Length);
+                count = Math::Min(count, CachedGroupOutlineEdgeIndices.Length);
+                count = Math::Min(count, CachedGroupOutlineEdgeKeys.Length);
+                return count;
+            }
+
+            uint CachedStaticOutlineCount() const {
+                uint count = CachedStaticOutlineStarts.Length;
+                count = Math::Min(count, CachedStaticOutlineEnds.Length);
+                count = Math::Min(count, CachedStaticOutlineBoxIndices.Length);
+                count = Math::Min(count, CachedStaticOutlineEdgeIndices.Length);
+                return count;
             }
 
             bool HasCustomOutlineGeometry() const {
@@ -536,6 +590,97 @@ namespace TriggerVisualizer {
                 }
                 return label;
             }
+        }
+
+        int GetTriggerGeometryCoordKey(float value) {
+            float scaled = value * 1000.0f;
+            if (scaled >= 0.0f) return int(Math::Floor(scaled + 0.5f));
+            return int(Math::Ceil(scaled - 0.5f));
+        }
+
+        string GetTriggerGeometryPointKey(const vec3 &in point) {
+            return tostring(GetTriggerGeometryCoordKey(point.x))
+                + "," + tostring(GetTriggerGeometryCoordKey(point.y))
+                + "," + tostring(GetTriggerGeometryCoordKey(point.z));
+        }
+
+        void SortTriggerGeometryCornerKeys(array<string> @keys) {
+            if (keys is null || keys.Length <= 1) return;
+
+            for (uint i = 1; i < keys.Length; i++) {
+                string key = keys[i];
+                uint j = i;
+                while (j > 0 && keys[j - 1] > key) {
+                    keys[j] = keys[j - 1];
+                    j--;
+                }
+                keys[j] = key;
+            }
+        }
+
+        string GetTriggerQuadGeometryKey(
+            const vec3 &in p0,
+            const vec3 &in p1,
+            const vec3 &in p2,
+            const vec3 &in p3
+        ) {
+            auto keys = array<string>();
+            keys.InsertLast(GetTriggerGeometryPointKey(p0));
+            keys.InsertLast(GetTriggerGeometryPointKey(p1));
+            keys.InsertLast(GetTriggerGeometryPointKey(p2));
+            keys.InsertLast(GetTriggerGeometryPointKey(p3));
+            SortTriggerGeometryCornerKeys(keys);
+            return keys[0] + "|" + keys[1] + "|" + keys[2] + "|" + keys[3];
+        }
+
+        string GetTriggerLineGeometryKey(const vec3 &in start, const vec3 &in end) {
+            string a = GetTriggerGeometryPointKey(start);
+            string b = GetTriggerGeometryPointKey(end);
+            return a < b ? a + "|" + b : b + "|" + a;
+        }
+
+        int FindTriggerGeometryKeyIndex(const array<string> @keys, const string &in key) {
+            if (keys is null) return -1;
+            for (uint i = 0; i < keys.Length; i++) {
+                if (keys[i] == key) return int(i);
+            }
+            return -1;
+        }
+
+        void AddTriggerGeometryKeyCount(array<string> @keys, array<uint> @counts, const string &in key) {
+            if (keys is null || counts is null || key.Length == 0) return;
+
+            int index = FindTriggerGeometryKeyIndex(keys, key);
+            if (index < 0) {
+                keys.InsertLast(key);
+                counts.InsertLast(1);
+                return;
+            }
+
+            counts[uint(index)]++;
+        }
+
+        uint GetTriggerGeometryKeyCount(const array<string> @keys, const array<uint> @counts, const string &in key) {
+            if (keys is null || counts is null) return 0;
+
+            int index = FindTriggerGeometryKeyIndex(keys, key);
+            if (index < 0 || uint(index) >= counts.Length) return 0;
+            return counts[uint(index)];
+        }
+
+        vec3 GetTriggerVolumeCorner(const TriggerVolume@ box, uint index) {
+            if (box is null) return vec3();
+
+            vec3 min = box.Min;
+            vec3 max = box.Max;
+            if (index == 0) return vec3(min.x, min.y, min.z);
+            if (index == 1) return vec3(max.x, min.y, min.z);
+            if (index == 2) return vec3(max.x, max.y, min.z);
+            if (index == 3) return vec3(min.x, max.y, min.z);
+            if (index == 4) return vec3(min.x, min.y, max.z);
+            if (index == 5) return vec3(max.x, min.y, max.z);
+            if (index == 6) return vec3(max.x, max.y, max.z);
+            return vec3(min.x, max.y, max.z);
         }
 
         bool TriggerVolumeMatchesTargetKey(const TriggerVolume@ volume, const string &in rawKey) {
@@ -814,6 +959,17 @@ namespace TriggerVisualizer {
             }
         }
 
+        class TriggerSpatialIndexCell {
+            string Key;
+            array<uint> VolumeIndices;
+
+            TriggerSpatialIndexCell() { }
+
+            TriggerSpatialIndexCell(const string &in key) {
+                Key = key;
+            }
+        }
+
         class MapSnapshot {
             string MapUid;
             string MapComments;
@@ -824,6 +980,12 @@ namespace TriggerVisualizer {
             array<TriggerRangeRaw@> RawRanges;
             array<TriggerSourceSnapshot@> Sources;
             array<TriggerVolume@> TriggerVolumes;
+            bool SpatialIndexReady = false;
+            float SpatialIndexCellSize = 128.0f;
+            dictionary SpatialIndexCellLookup;
+            array<TriggerSpatialIndexCell@> SpatialIndexCells;
+            array<uint> SpatialIndexLargeVolumeIndices;
+            uint SpatialIndexVolumeReferenceCount = 0;
 
             MapSnapshot() {
                 RawTriggerSize = nat3(1, 1, 1);

@@ -143,11 +143,11 @@ namespace TriggerVisualizer {
                             transformWarning
                         );
                     }
-                    bool useExpandableScriptClipGeometryOnly = CrystalShouldUseExpandableScriptClipGeometryOnly(
+                    bool skipExpandableMobilGeometry = CrystalShouldSkipExpandableMobilGeometry(
                         block,
                         variant
                     );
-                    if (!useExpandableScriptClipGeometryOnly) {
+                    if (!skipExpandableMobilGeometry) {
                         ProbeCrystalBlockMobilTriggerSurfaces(
                             source,
                             block,

@@ -76,25 +76,6 @@ namespace TriggerVisualizer {
                 );
             }
 
-            bool GetProjectedQuadScreenBounds(
-                const vec3 &in s0,
-                const vec3 &in s1,
-                const vec3 &in s2,
-                const vec3 &in s3,
-                float &out minX,
-                float &out maxX,
-                float &out minY,
-                float &out maxY
-            ) {
-                if (s0.z >= 0 || s1.z >= 0 || s2.z >= 0 || s3.z >= 0) return false;
-
-                minX = Math::Min(Math::Min(s0.x, s1.x), Math::Min(s2.x, s3.x));
-                maxX = Math::Max(Math::Max(s0.x, s1.x), Math::Max(s2.x, s3.x));
-                minY = Math::Min(Math::Min(s0.y, s1.y), Math::Min(s2.y, s3.y));
-                maxY = Math::Max(Math::Max(s0.y, s1.y), Math::Max(s2.y, s3.y));
-                return true;
-            }
-
             bool UpdateWorldFillTileScreenProjection(WorldFillTileDrawItem@ item) {
                 if (item is null) return false;
                 item.Screen0 = Camera::ToScreen(item.Origin);
@@ -109,63 +90,6 @@ namespace TriggerVisualizer {
                     item.Screen3,
                     SCREEN_QUAD_VISIBILITY_MARGIN
                 );
-            }
-
-            float GetScreenTriangleSide(const vec2 &in point, const vec2 &in a, const vec2 &in b) {
-                vec2 ab = b - a;
-                vec2 ap = point - a;
-                return ab.x * ap.y - ab.y * ap.x;
-            }
-
-            bool IsPointInsideScreenTriangle(
-                const vec2 &in point,
-                const vec2 &in a,
-                const vec2 &in b,
-                const vec2 &in c
-            ) {
-                float d0 = GetScreenTriangleSide(point, a, b);
-                float d1 = GetScreenTriangleSide(point, b, c);
-                float d2 = GetScreenTriangleSide(point, c, a);
-                bool hasNegative = d0 < 0.0f || d1 < 0.0f || d2 < 0.0f;
-                bool hasPositive = d0 > 0.0f || d1 > 0.0f || d2 > 0.0f;
-                return !(hasNegative && hasPositive);
-            }
-
-            bool IsPointInsideProjectedQuad(
-                const vec2 &in point,
-                const vec3 &in s0,
-                const vec3 &in s1,
-                const vec3 &in s2,
-                const vec3 &in s3
-            ) {
-                return IsPointInsideScreenTriangle(point, s0.xy, s1.xy, s2.xy)
-                    || IsPointInsideScreenTriangle(point, s0.xy, s2.xy, s3.xy);
-            }
-
-            bool IsCellCoveredByProjectedQuad(
-                int x,
-                int y,
-                int cellSize,
-                const vec3 &in s0,
-                const vec3 &in s1,
-                const vec3 &in s2,
-                const vec3 &in s3
-            ) {
-                float left = float(x * cellSize);
-                float top = float(y * cellSize);
-                float right = left + float(cellSize);
-                float bottom = top + float(cellSize);
-                vec2 center = vec2((left + right) * 0.5f, (top + bottom) * 0.5f);
-                if (IsPointInsideProjectedQuad(center, s0, s1, s2, s3)) return true;
-                if (IsPointInsideProjectedQuad(vec2(left, top), s0, s1, s2, s3)) return true;
-                if (IsPointInsideProjectedQuad(vec2(right, top), s0, s1, s2, s3)) return true;
-                if (IsPointInsideProjectedQuad(vec2(right, bottom), s0, s1, s2, s3)) return true;
-                if (IsPointInsideProjectedQuad(vec2(left, bottom), s0, s1, s2, s3)) return true;
-                return false;
-            }
-
-            int GetScreenOcclusionCellIndex(int x, int y, int columns) {
-                return y * columns + x;
             }
 
             float GetProjectedQuadMaxScreenEdge(

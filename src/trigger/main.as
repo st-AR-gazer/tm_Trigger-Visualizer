@@ -75,41 +75,61 @@ namespace TriggerVisualizer {
             if (ctx.IsEditorTestMode) return key + "|editor-test";
             if (ctx.IsMapEditor) return key + "|map-editor";
             if (ctx.IsPlayableMap) return key + "|playable";
+            if (ctx.IsMeshModeler) return key + "|mesh-modeler";
             if (ctx.IsInEditor) return key + "|editor";
             if (ctx.IsInMenu) return key + "|menu";
             return key + "|unknown";
         }
 
-        uint GetMediaTrackerEditorRefreshIntervalMs() {
-            return uint(Math::Clamp(TriggerVisualizer::Trigger::UI::S_MediaTrackerEditorRefreshIntervalMs, 100, 5000));
+        uint GetMediaTrackerRefreshIntervalMs(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+            return uint(TriggerVisualizer::Trigger::UI::GetMediaTrackerRefreshIntervalMsForRuntime(ctx));
         }
 
-        uint GetOffzoneEditorRefreshIntervalMs() {
-            return uint(Math::Clamp(TriggerVisualizer::Trigger::UI::S_OffzoneEditorRefreshIntervalMs, 100, 5000));
+        uint GetOffzoneRefreshIntervalMs(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+            return uint(TriggerVisualizer::Trigger::UI::GetOffzoneRefreshIntervalMsForRuntime(ctx));
         }
 
-        bool UsesPeriodicOffzoneEditorRefresh(
+        uint GetCrystalRefreshIntervalMs(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+            return uint(TriggerVisualizer::Trigger::UI::GetCrystalRefreshIntervalMsForRuntime(ctx));
+        }
+
+        bool UsesPeriodicOffzoneRefresh(
             const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
             bool offzoneEnabled
         ) {
-            return offzoneEnabled && ctx !is null && ctx.IsMapEditor;
+            return offzoneEnabled && ctx !is null && GetOffzoneRefreshIntervalMs(ctx) > 0;
         }
 
-        bool UsesPeriodicMediaTrackerEditorRefresh(
+        bool UsesPeriodicMediaTrackerRefresh(
             const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
             bool mediaTrackerEnabled
         ) {
-            return mediaTrackerEnabled && ctx !is null && ctx.IsEditorMediaTracker;
+            return mediaTrackerEnabled && ctx !is null && GetMediaTrackerRefreshIntervalMs(ctx) > 0;
         }
 
-        bool IsOffzoneEditorRefreshDue(uint lastRefreshTime) {
-            if (lastRefreshTime == 0) return true;
-            return Time::Now - lastRefreshTime >= GetOffzoneEditorRefreshIntervalMs();
+        bool UsesPeriodicCrystalRefresh(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            bool crystalEnabled
+        ) {
+            return crystalEnabled && ctx !is null && GetCrystalRefreshIntervalMs(ctx) > 0;
         }
 
-        bool IsMediaTrackerEditorRefreshDue(uint lastRefreshTime) {
+        bool IsOffzoneRefreshDue(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx, uint lastRefreshTime) {
             if (lastRefreshTime == 0) return true;
-            return Time::Now - lastRefreshTime >= GetMediaTrackerEditorRefreshIntervalMs();
+            return Time::Now - lastRefreshTime >= GetOffzoneRefreshIntervalMs(ctx);
+        }
+
+        bool IsMediaTrackerRefreshDue(
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+            uint lastRefreshTime
+        ) {
+            if (lastRefreshTime == 0) return true;
+            return Time::Now - lastRefreshTime >= GetMediaTrackerRefreshIntervalMs(ctx);
+        }
+
+        bool IsCrystalRefreshDue(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx, uint lastRefreshTime) {
+            if (lastRefreshTime == 0) return true;
+            return Time::Now - lastRefreshTime >= GetCrystalRefreshIntervalMs(ctx);
         }
 
         bool CanReuseMapSnapshot(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -118,10 +138,13 @@ namespace TriggerVisualizer {
             bool offzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
             bool mediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
             bool crystalEnabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForRuntime(ctx);
-            if (UsesPeriodicOffzoneEditorRefresh(ctx, offzoneEnabled) && IsOffzoneEditorRefreshDue(g_CachedOffzoneSourceRefreshTime)) {
+            if (UsesPeriodicOffzoneRefresh(ctx, offzoneEnabled) && IsOffzoneRefreshDue(ctx, g_CachedOffzoneSourceRefreshTime)) {
                 return false;
             }
-            if (UsesPeriodicMediaTrackerEditorRefresh(ctx, mediaTrackerEnabled) && IsMediaTrackerEditorRefreshDue(g_CachedMediaTrackerSourceRefreshTime)) {
+            if (UsesPeriodicMediaTrackerRefresh(ctx, mediaTrackerEnabled) && IsMediaTrackerRefreshDue(ctx, g_CachedMediaTrackerSourceRefreshTime)) {
+                return false;
+            }
+            if (UsesPeriodicCrystalRefresh(ctx, crystalEnabled) && IsCrystalRefreshDue(ctx, g_CachedCrystalSourceRefreshTime) && !IsCrystalSourceRefreshInProgressFor(ctx)) {
                 return false;
             }
 
@@ -176,6 +199,8 @@ namespace TriggerVisualizer {
             bool crystalEnabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForRuntime(ctx);
             auto crystalSource = GetCrystalTriggerSource(ctx, crystalEnabled);
             AddSourceToMapSnapshot(snapshot, crystalSource, ctx);
+            TriggerVisualizer::Trigger::Data::BuildMapSnapshotStaticOutlineCache(snapshot);
+            TriggerVisualizer::Trigger::Data::BuildMapSnapshotSpatialIndex(snapshot);
 
             return snapshot;
         }
@@ -269,8 +294,8 @@ namespace TriggerVisualizer {
                 return TriggerVisualizer::Trigger::Data::Sources::ReadOffzoneTriggerSource(null, enabled);
             }
 
-            bool forceRefresh = UsesPeriodicOffzoneEditorRefresh(ctx, enabled)
-                && IsOffzoneEditorRefreshDue(g_CachedOffzoneSourceRefreshTime);
+            bool forceRefresh = UsesPeriodicOffzoneRefresh(ctx, enabled)
+                && IsOffzoneRefreshDue(ctx, g_CachedOffzoneSourceRefreshTime);
 
             if (forceRefresh || g_CachedOffzoneSource is null || ctx.RootMap !is g_CachedOffzoneRootMap) {
                 @g_CachedOffzoneSource = TriggerVisualizer::Trigger::Data::Sources::ReadOffzoneTriggerSource(
@@ -311,13 +336,23 @@ namespace TriggerVisualizer {
             }
         }
 
+        bool IsCrystalSourceRefreshInProgressFor(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+            if (!g_CrystalSourceRefreshInProgress || ctx is null || ctx.RootMap is null) return false;
+            return ctx.RootMap is g_PendingCrystalRootMap
+                && g_PendingCrystalContextKey == GetMapSnapshotContextKey(ctx)
+                && g_PendingCrystalBlockCount == GetCrystalMapBlockCount(ctx.RootMap)
+                && g_PendingCrystalBakedBlockCount == GetCrystalMapBakedBlockCount(ctx.RootMap)
+                && g_PendingCrystalAnchoredObjectCount == GetCrystalMapAnchoredObjectCount(ctx.RootMap)
+                && g_PendingCrystalSourceCacheVersion == g_CrystalSourceCacheVersion;
+        }
+
         bool CanReuseCrystalTriggerSource(
             const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
             bool enabled
         ) {
             if (!enabled) return true;
             if (ctx is null || ctx.RootMap is null) return false;
-            if (g_CrystalSourceRefreshInProgress && ctx.RootMap is g_PendingCrystalRootMap && g_PendingCrystalContextKey == GetMapSnapshotContextKey(ctx) && g_PendingCrystalBlockCount == GetCrystalMapBlockCount(ctx.RootMap) && g_PendingCrystalBakedBlockCount == GetCrystalMapBakedBlockCount(ctx.RootMap) && g_PendingCrystalAnchoredObjectCount == GetCrystalMapAnchoredObjectCount(ctx.RootMap) && g_PendingCrystalSourceCacheVersion == g_CrystalSourceCacheVersion) {
+            if (IsCrystalSourceRefreshInProgressFor(ctx)) {
                 return true;
             }
             if (g_CachedCrystalSource is null) return false;
@@ -454,12 +489,6 @@ namespace TriggerVisualizer {
                 g_CrystalSourceRefreshInProgress = false;
                 return;
             }
-            log(
-                "Crystal source cache refresh published expandable partial cache with " + tostring(source.TriggerVolumeCount()) + " trigger volumes.",
-                LogLevel::Info,
-                457,
-                "TriggerVisualizer::Trigger::RefreshCrystalSourceCacheAsync"
-            );
             TriggerVisualizer::Trigger::Data::Sources::ProbeCrystalBlocks(source, ctx.RootMap);
             frameStart = TriggerVisualizer::Trigger::Data::Sources::CrystalSourceBuildCheckpoint(frameStart);
             if (!CrystalSourceRefreshRequestMatches(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion)) {
@@ -494,6 +523,17 @@ namespace TriggerVisualizer {
             uint blockCount = GetCrystalMapBlockCount(ctx.RootMap);
             uint bakedBlockCount = GetCrystalMapBakedBlockCount(ctx.RootMap);
             uint anchoredObjectCount = GetCrystalMapAnchoredObjectCount(ctx.RootMap);
+            bool forceRefresh = UsesPeriodicCrystalRefresh(ctx, enabled)
+                && IsCrystalRefreshDue(ctx, g_CachedCrystalSourceRefreshTime);
+
+            if (forceRefresh) {
+                QueueCrystalSourceRefresh(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount);
+                if (g_CachedCrystalSource !is null) {
+                    g_CachedCrystalSource.Enabled = enabled;
+                    return g_CachedCrystalSource;
+                }
+                return CreateCrystalRefreshingSource(ctx, enabled);
+            }
 
             if (g_CachedCrystalSource !is null && ctx.RootMap is g_CachedCrystalRootMap && g_CachedCrystalContextKey == contextKey && g_CachedCrystalBlockCount == blockCount && g_CachedCrystalBakedBlockCount == bakedBlockCount && g_CachedCrystalAnchoredObjectCount == anchoredObjectCount && g_CachedCrystalSourceCacheVersion == g_CrystalSourceCacheVersion) {
                 g_CachedCrystalSource.Enabled = enabled;
@@ -532,8 +572,8 @@ namespace TriggerVisualizer {
             uint64 groupBufferPtr = 0;
             @clipGroup = GetRuntimeMediaTrackerClipGroup(ctx, groupName);
             groupBufferPtr = TriggerVisualizer::Trigger::Data::Sources::ReadMediaTrackerClipGroupTriggerBufferPtr(clipGroup);
-            bool forceRefresh = UsesPeriodicMediaTrackerEditorRefresh(ctx, enabled)
-                && IsMediaTrackerEditorRefreshDue(g_CachedMediaTrackerSourceRefreshTime);
+            bool forceRefresh = UsesPeriodicMediaTrackerRefresh(ctx, enabled)
+                && IsMediaTrackerRefreshDue(ctx, g_CachedMediaTrackerSourceRefreshTime);
 
             if (!forceRefresh && g_CachedMediaTrackerSource !is null && ctx !is null && ctx.RootMap is g_CachedMediaTrackerRootMap && g_CachedMediaTrackerContextKey == contextKey && g_CachedMediaTrackerCellRendering == MEDIATRACKER_RENDER_CELLS && g_CachedMediaTrackerGroupName == groupName && g_CachedMediaTrackerGroupBufferPtr == groupBufferPtr) {
                 g_CachedMediaTrackerSource.Enabled = true;

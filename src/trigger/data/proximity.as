@@ -19,11 +19,6 @@ namespace TriggerVisualizer {
                 }
             }
 
-            bool G_HasPreviousVehiclePosition = false;
-            vec3 G_PreviousVehiclePosition = vec3();
-            int64 G_PreviousVehiclePositionTime = 0;
-            float G_LastVehicleSpeedKmh = 0.0f;
-
             bool TrySetOrbitalPoint(ProximityReferenceState@ state, CGameControlCameraEditorOrbital@ orbitalCamera) {
                 if (state is null || orbitalCamera is null) return false;
 
@@ -48,31 +43,12 @@ namespace TriggerVisualizer {
                 if (state is null) return;
 
                 auto vehicleState = VehicleState::ViewingPlayerState();
-                if (vehicleState is null) {
-                    G_HasPreviousVehiclePosition = false;
-                    G_PreviousVehiclePositionTime = 0;
-                    G_LastVehicleSpeedKmh = 0.0f;
-                    return;
-                }
+                if (vehicleState is null) return;
 
                 state.HasVehiclePosition = true;
                 state.VehiclePosition = vehicleState.Position;
                 state.HasVehicleSpeed = true;
-                int64 now = Time::Now;
-                if (G_HasPreviousVehiclePosition && G_PreviousVehiclePositionTime > 0) {
-                    int64 deltaMs = now - G_PreviousVehiclePositionTime;
-                    if (deltaMs > 0 && deltaMs < 2000) {
-                        float deltaSeconds = float(deltaMs) / 1000.0f;
-                        G_LastVehicleSpeedKmh = Math::Distance(
-                            vehicleState.Position,
-                            G_PreviousVehiclePosition
-                        ) / deltaSeconds * 3.6f;
-                    }
-                }
-                G_HasPreviousVehiclePosition = true;
-                G_PreviousVehiclePosition = vehicleState.Position;
-                G_PreviousVehiclePositionTime = now;
-                state.VehicleSpeedKmh = G_LastVehicleSpeedKmh;
+                state.VehicleSpeedKmh = vehicleState.FrontSpeed * 3.6f;
             }
 
             ProximityReferenceState@ GetProximityReferenceState(const RuntimeContext@ ctx) {

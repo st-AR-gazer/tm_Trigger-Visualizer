@@ -59,18 +59,12 @@ namespace TriggerVisualizer {
                     try {
                         if (block.BlockInfo.MaterialModifier !is null) return true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockHasAnyMaterialModifier",
-                            "BlockInfo.MaterialModifier was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalProbeField("BlockInfo.MaterialModifier");
                     }
                     try {
                         if (block.BlockInfo.MaterialModifier2 !is null) return true;
                     } catch {
-                        logging::HandledException(
-                            "CrystalBlockHasAnyMaterialModifier",
-                            "BlockInfo.MaterialModifier2 was not readable."
-                        );
+                        CrystalIgnoreUnreadableOptionalProbeField("BlockInfo.MaterialModifier2");
                     }
                     return false;
                 }

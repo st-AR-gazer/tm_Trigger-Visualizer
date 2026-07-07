@@ -58,12 +58,18 @@ namespace TriggerVisualizer {
                 return vec4(1.0f, 1.0f, 1.0f, alpha);
             }
 
-            bool ShouldDrawTriggerVolumeLabel(const TriggerVolume@ box, const vec3 &in cameraPos) {
+            bool TryGetTriggerVolumeLabelScreenPosition(const TriggerVolume@ box, vec3 &out screenPos) {
+                screenPos = vec3();
                 if (!TriggerVisualizer::Trigger::UI::S_ShowLabels) return false;
                 if (box is null) return false;
 
-                vec3 screenPos = Camera::ToScreen(GetTriggerVolumeLabelPosition(box));
+                screenPos = Camera::ToScreen(GetTriggerVolumeLabelPosition(box));
                 return screenPos.z < 0 && IsScreenPositionVisible(screenPos.xy);
+            }
+
+            bool ShouldDrawTriggerVolumeLabel(const TriggerVolume@ box, const vec3 &in cameraPos) {
+                vec3 screenPos;
+                return TryGetTriggerVolumeLabelScreenPosition(box, screenPos);
             }
 
             void DrawLabelText(const vec2 &in screenPos, const string &in label, float fade) {
@@ -85,10 +91,10 @@ namespace TriggerVisualizer {
                 const vec3 &in cameraPos,
                 float fade
             ) {
-                if (!ShouldDrawTriggerVolumeLabel(box, cameraPos)) return;
                 if (!IsVisibleFadeFactor(fade)) return;
 
-                vec3 screenPos = Camera::ToScreen(GetTriggerVolumeLabelPosition(box));
+                vec3 screenPos;
+                if (!TryGetTriggerVolumeLabelScreenPosition(box, screenPos)) return;
                 DrawLabelText(screenPos.xy, BuildTriggerVolumeLabelText(index, rawRange, box), fade);
             }
 

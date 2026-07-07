@@ -38,8 +38,10 @@ namespace TriggerVisualizer {
         bool ShouldSkipWorldRenderForFastViewedCar(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
             if (!TriggerVisualizer::Trigger::UI::S_FastDrivingPerformanceMode) return false;
             if (ctx is null || (!ctx.IsPlayableMap && !ctx.IsEditorTestMode)) return false;
+            if (!TriggerVisualizer::Trigger::UI::ShouldSpeedRenderSkipHideAllRuntimeSources(ctx)) return false;
 
             auto proximityState = TriggerVisualizer::Trigger::Data::GetProximityReferenceState(ctx);
+            TriggerVisualizer::Trigger::Render::UpdateSpeedRenderSkipActiveForSpeed(ctx, proximityState);
             return TriggerVisualizer::Trigger::Render::ShouldSkipWorldRenderForSpeed(ctx, proximityState);
         }
 

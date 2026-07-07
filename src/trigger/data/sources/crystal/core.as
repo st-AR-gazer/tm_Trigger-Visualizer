@@ -31,8 +31,6 @@ namespace TriggerVisualizer {
                 const float CRYSTAL_MAX_VOLUME_AXIS_SIZE = 8192.0f;
                 const float CRYSTAL_MAX_ABS_WORLD_COORD = 100000.0f;
                 const float CRYSTAL_EXPANDABLE_TRIGGER_THICKNESS = 0.125f;
-                const float CRYSTAL_EXPANDABLE_TRIGGER_BOTTOM_INSET = 2.0f;
-                const float CRYSTAL_EXPANDABLE_TRIGGER_TOP_INSET = 0.1f;
 
                 uint CrystalMinUint(uint a, uint b) {
                     return a < b ? a : b;

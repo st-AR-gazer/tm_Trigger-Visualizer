@@ -44,12 +44,35 @@ namespace TriggerVisualizer {
                 return false;
             }
 
+            bool IsMapHintWildcardTarget(const string &in rawTarget) {
+                string target = rawTarget.Trim().ToLower();
+                return target == "*"
+                    || target == "<>"
+                    || target == "all"
+                    || target == "everything";
+            }
+
             bool AddMapHintDisableTargets(MapRenderHints@ hints, const string &in rawTargets, bool forceOff) {
                 if (hints is null) return false;
 
                 bool addedAny = false;
+                bool hadEmptyTarget = false;
                 auto targets = rawTargets.Split(",");
                 for (uint i = 0; i < targets.Length; i++) {
+                    if (targets[i].Trim().Length == 0) {
+                        hadEmptyTarget = true;
+                        continue;
+                    }
+
+                    if (IsMapHintWildcardTarget(targets[i])) {
+                        if (forceOff) {
+                            hints.ForceOff = true;
+                        } else {
+                            hints.SuggestOff = true;
+                        }
+                        return true;
+                    }
+
                     string key = NormalizeTriggerTargetKey(targets[i]);
                     if (key.Length == 0) continue;
 
@@ -63,6 +86,14 @@ namespace TriggerVisualizer {
                     addedAny = true;
                 }
 
+                if (!addedAny && hadEmptyTarget) {
+                    if (forceOff) {
+                        hints.ForceOff = true;
+                    } else {
+                        hints.SuggestOff = true;
+                    }
+                    return true;
+                }
                 return addedAny;
             }
 

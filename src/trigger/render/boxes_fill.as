@@ -268,6 +268,8 @@ namespace TriggerVisualizer {
 
                 nvg::FillColor(color);
                 for (uint i = startIndex; i < endIndex && i < items.Length; i++) {
+                    if (items[i] is null || items[i].Occluded) continue;
+
                     nvg::BeginPath();
                     if (AddWorldFillTilePath(items[i])) {
                         nvg::Fill();
@@ -325,82 +327,6 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void MarkScreenOccludedWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
-                if (items is null || items.Length <= 1) return;
-                if (!TriggerVisualizer::Trigger::UI::S_CullScreenOccludedWorldTiles) return;
-
-                int displayWidth = Display::GetWidth();
-                int displayHeight = Display::GetHeight();
-                if (displayWidth <= 0 || displayHeight <= 0) return;
-
-                int cellSize = Math::Clamp(TriggerVisualizer::Trigger::UI::S_ScreenOcclusionCellSize, 8, 256);
-                int columns = Math::Max(1, int(Math::Ceil(float(displayWidth) / float(cellSize))));
-                int rows = Math::Max(1, int(Math::Ceil(float(displayHeight) / float(cellSize))));
-                auto occupied = array<bool>(uint(columns * rows), false);
-                for (int i = int(items.Length) - 1; i >= 0; i--) {
-                    WorldFillTileDrawItem@ item = items[uint(i)];
-                    if (item is null) continue;
-
-                    item.Occluded = false;
-                    float minX = 0.0f;
-                    float maxX = 0.0f;
-                    float minY = 0.0f;
-                    float maxY = 0.0f;
-                    vec3 s0 = vec3();
-                    vec3 s1 = vec3();
-                    vec3 s2 = vec3();
-                    vec3 s3 = vec3();
-                    if (!item.HasScreenProjection && !UpdateWorldFillTileScreenProjection(item)) {
-                        item.Occluded = true;
-                        continue;
-                    }
-                    s0 = item.Screen0;
-                    s1 = item.Screen1;
-                    s2 = item.Screen2;
-                    s3 = item.Screen3;
-
-                    if (!GetProjectedQuadScreenBounds(s0, s1, s2, s3, minX, maxX, minY, maxY)) {
-                        item.Occluded = true;
-                        continue;
-                    }
-
-                    if (maxX < 0.0f || minX > float(displayWidth) || maxY < 0.0f || minY > float(displayHeight)) {
-                        item.Occluded = true;
-                        continue;
-                    }
-
-                    int minCellX = Math::Clamp(int(Math::Floor(minX / float(cellSize))), 0, columns - 1);
-                    int maxCellX = Math::Clamp(int(Math::Floor(maxX / float(cellSize))), 0, columns - 1);
-                    int minCellY = Math::Clamp(int(Math::Floor(minY / float(cellSize))), 0, rows - 1);
-                    int maxCellY = Math::Clamp(int(Math::Floor(maxY / float(cellSize))), 0, rows - 1);
-                    bool hasCell = false;
-                    bool fullyCovered = true;
-                    for (int y = minCellY; y <= maxCellY; y++) {
-                        for (int x = minCellX; x <= maxCellX; x++) {
-                            if (!IsCellCoveredByProjectedQuad(x, y, cellSize, s0, s1, s2, s3)) continue;
-
-                            hasCell = true;
-                            if (!occupied[uint(GetScreenOcclusionCellIndex(x, y, columns))]) {
-                                fullyCovered = false;
-                            }
-                        }
-                    }
-
-                    if (hasCell && fullyCovered) {
-                        item.Occluded = true;
-                        continue;
-                    }
-
-                    for (int y = minCellY; y <= maxCellY; y++) {
-                        for (int x = minCellX; x <= maxCellX; x++) {
-                            if (!IsCellCoveredByProjectedQuad(x, y, cellSize, s0, s1, s2, s3)) continue;
-
-                            occupied[uint(GetScreenOcclusionCellIndex(x, y, columns))] = true;
-                        }
-                    }
-                }
-            }
-
             void DrawWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
                 if (items is null || items.Length == 0) return;
 
@@ -409,7 +335,6 @@ namespace TriggerVisualizer {
                     SortWorldFillTileDrawItemsBackToFront(items);
                 }
                 MarkDuplicateWorldFillTileDrawItems(items);
-                MarkScreenOccludedWorldFillTileDrawItems(items);
                 nvg::Reset();
                 uint groupStart = 0;
                 while (groupStart < items.Length) {

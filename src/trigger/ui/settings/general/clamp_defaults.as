@@ -50,15 +50,18 @@
             }
 
             void ClampPerformanceSettings() {
-                S_ScreenOcclusionCellSize = Math::Clamp(S_ScreenOcclusionCellSize, 8, 256);
                 S_FillTileMinSize = Math::Clamp(S_FillTileMinSize, 2.0f, 64.0f);
                 S_MaxFillTilesPerFrame = Math::Clamp(S_MaxFillTilesPerFrame, 128, 65536);
                 S_MaxOutlineSegmentsPerFrame = Math::Clamp(S_MaxOutlineSegmentsPerFrame, 64, 65536);
+                S_MaxCrystalOutlineSegmentsPerFrame = Math::Clamp(S_MaxCrystalOutlineSegmentsPerFrame, 0, 65536);
                 S_MaxTileIconPatchesPerFrame = Math::Clamp(S_MaxTileIconPatchesPerFrame, 0, 65536);
                 S_TileIconMaxSubdivisions = Math::Clamp(S_TileIconMaxSubdivisions, 1, 12);
-                S_MediaTrackerEditorRefreshIntervalMs = Math::Clamp(S_MediaTrackerEditorRefreshIntervalMs, 100, 5000);
-                S_OffzoneEditorRefreshIntervalMs = Math::Clamp(S_OffzoneEditorRefreshIntervalMs, 100, 5000);
-                S_FastDrivingSpeedThresholdKmh = Math::Clamp(S_FastDrivingSpeedThresholdKmh, 0.0f, 1000.0f);
+                S_MediaTrackerEditorRefreshIntervalMs = NormalizeRefreshIntervalMs(S_MediaTrackerEditorRefreshIntervalMs);
+                S_OffzoneEditorRefreshIntervalMs = NormalizeRefreshIntervalMs(S_OffzoneEditorRefreshIntervalMs);
+                S_CrystalMeshModelerRefreshIntervalMs = NormalizeRefreshIntervalMs(S_CrystalMeshModelerRefreshIntervalMs);
+                S_FastDrivingSpeedThresholdKmh = GetFastDrivingForwardSpeedThresholdKmh();
+                S_FastDrivingReverseSpeedThresholdKmh = GetFastDrivingReverseSpeedThresholdKmh();
+                MigrateSpeedRenderKeepTargetsIfNeeded();
             }
 
             vec4 ClampColor(const vec4 &in color) {
@@ -219,11 +222,11 @@
 
             void ResetPerformanceBudgetSettingsToDefaults() {
                 S_CullOffscreenWorldTiles = true;
-                S_CullScreenOccludedWorldTiles = false;
-                S_ScreenOcclusionCellSize = 32;
                 S_FillTileMinSize = 4.0f;
                 S_MaxFillTilesPerFrame = 4096;
                 S_MaxOutlineSegmentsPerFrame = 1536;
+                S_MaxCrystalOutlineSegmentsPerFrame = 768;
+                S_SplitCrystalOutlineEdges = false;
                 S_MaxTileIconPatchesPerFrame = 1600;
                 S_TileIconMaxSubdivisions = 6;
                 ClampPerformanceSettings();
@@ -232,12 +235,15 @@
             void ResetPerformanceRefreshSettingsToDefaults() {
                 S_MediaTrackerEditorRefreshIntervalMs = 500;
                 S_OffzoneEditorRefreshIntervalMs = 500;
+                S_CrystalMeshModelerRefreshIntervalMs = 500;
                 ClampPerformanceSettings();
             }
 
             void ResetPerformanceSpeedRenderSkipSettingsToDefaults() {
                 S_FastDrivingPerformanceMode = true;
                 S_FastDrivingSpeedThresholdKmh = 60.0f;
+                S_FastDrivingReverseSpeedThresholdKmh = -20.0f;
+                S_SpeedRenderKeepTargetKeys = DEFAULT_SPEED_RENDER_KEEP_TARGETS;
                 ClampPerformanceSettings();
             }
 

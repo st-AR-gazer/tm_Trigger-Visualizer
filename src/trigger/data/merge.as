@@ -128,6 +128,142 @@ namespace TriggerVisualizer {
                 );
             }
 
+            string GetTriggerVolumeCachedFaceGeometryKey(const TriggerVolume@ box, const uint[]@ face) {
+                if (box is null || face is null || face.Length != 4) return "";
+
+                return GetTriggerQuadGeometryKey(
+                    GetTriggerVolumeCorner(box, face[0]),
+                    GetTriggerVolumeCorner(box, face[1]),
+                    GetTriggerVolumeCorner(box, face[2]),
+                    GetTriggerVolumeCorner(box, face[3])
+                );
+            }
+
+            void AddTriggerVolumeGroupFaceGeometryCounts(
+                const TriggerVolume@ box,
+                array<string> @keys,
+                array<uint> @counts
+            ) {
+                if (box is null || keys is null || counts is null) return;
+
+                if (box.HasChildVolumes()) {
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        AddTriggerVolumeGroupFaceGeometryCounts(
+                            box.ChildVolumes[i],
+                            keys,
+                            counts
+                        );
+                    }
+                    return;
+                }
+
+                for (uint i = 0; i < TRIGGER_VOLUME_BOX_FACE_INDICES.Length; i++) {
+                    AddTriggerGeometryKeyCount(
+                        keys,
+                        counts,
+                        GetTriggerVolumeCachedFaceGeometryKey(box, TRIGGER_VOLUME_BOX_FACE_INDICES[i])
+                    );
+                }
+            }
+
+            void AddTriggerVolumeCachedGroupOutlineEdge(
+                TriggerVolume@ group,
+                const vec3 &in start,
+                const vec3 &in end,
+                uint relativeBoxIndex,
+                uint edgeIndex
+            ) {
+                if (group is null) return;
+
+                string key = GetTriggerLineGeometryKey(start, end);
+                group.CachedGroupOutlineEdgeStarts.InsertLast(start);
+                group.CachedGroupOutlineEdgeEnds.InsertLast(end);
+                group.CachedGroupOutlineEdgeBoxIndices.InsertLast(relativeBoxIndex);
+                group.CachedGroupOutlineEdgeIndices.InsertLast(edgeIndex);
+                group.CachedGroupOutlineEdgeKeys.InsertLast(key);
+                AddTriggerGeometryKeyCount(
+                    group.CachedGroupOutlineEdgeCountKeys,
+                    group.CachedGroupOutlineEdgeCounts,
+                    key
+                );
+            }
+
+            void AddTriggerVolumeGroupOutlineGeometryCache(
+                TriggerVolume@ group,
+                const TriggerVolume@ box,
+                uint relativeBoxIndex
+            ) {
+                if (group is null || box is null) return;
+
+                if (box.HasChildVolumes()) {
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        AddTriggerVolumeGroupOutlineGeometryCache(
+                            group,
+                            box.ChildVolumes[i],
+                            relativeBoxIndex + i + 1
+                        );
+                    }
+                    return;
+                }
+
+                if (box.HasCustomOutlineGeometry()) {
+                    uint outlineLineCount = box.OutlineLineCount();
+                    for (uint i = 0; i < outlineLineCount; i++) {
+                        AddTriggerVolumeCachedGroupOutlineEdge(
+                            group,
+                            box.OutlineLineStarts[i],
+                            box.OutlineLineEnds[i],
+                            relativeBoxIndex,
+                            i
+                        );
+                    }
+                    return;
+                }
+
+                for (uint i = 0; i < TRIGGER_VOLUME_BOX_EDGE_INDICES.Length; i++) {
+                    auto edge = TRIGGER_VOLUME_BOX_EDGE_INDICES[i];
+                    AddTriggerVolumeCachedGroupOutlineEdge(
+                        group,
+                        GetTriggerVolumeCorner(box, edge[0]),
+                        GetTriggerVolumeCorner(box, edge[1]),
+                        relativeBoxIndex,
+                        i
+                    );
+                }
+            }
+
+            void ResetTriggerVolumeGroupGeometryCache(TriggerVolume@ group) {
+                if (group is null) return;
+
+                group.GroupGeometryCacheReady = false;
+                group.CachedGroupFaceKeys.Resize(0);
+                group.CachedGroupFaceCounts.Resize(0);
+                group.CachedGroupOutlineEdgeStarts.Resize(0);
+                group.CachedGroupOutlineEdgeEnds.Resize(0);
+                group.CachedGroupOutlineEdgeBoxIndices.Resize(0);
+                group.CachedGroupOutlineEdgeIndices.Resize(0);
+                group.CachedGroupOutlineEdgeKeys.Resize(0);
+                group.CachedGroupOutlineEdgeCountKeys.Resize(0);
+                group.CachedGroupOutlineEdgeCounts.Resize(0);
+            }
+
+            void BuildTriggerVolumeGroupGeometryCache(TriggerVolume@ group) {
+                ResetTriggerVolumeGroupGeometryCache(group);
+                if (group is null || !group.HasChildVolumes()) return;
+
+                AddTriggerVolumeGroupFaceGeometryCounts(
+                    group,
+                    group.CachedGroupFaceKeys,
+                    group.CachedGroupFaceCounts
+                );
+                AddTriggerVolumeGroupOutlineGeometryCache(
+                    group,
+                    group,
+                    0
+                );
+                group.GroupGeometryCacheReady = true;
+            }
+
             TriggerVolume@ MergeTriggerVolumePair(const TriggerVolume@ a, const TriggerVolume@ b) {
                 auto merged = CloneTriggerVolumeForMerge(a);
                 ExpandTriggerVolumeBounds(merged, b);
@@ -191,6 +327,7 @@ namespace TriggerVisualizer {
                 if (group.MergedVolumeCount == 0) {
                     group.MergedVolumeCount = uint(group.ChildVolumes.Length);
                 }
+                BuildTriggerVolumeGroupGeometryCache(group);
 
                 return group;
             }
