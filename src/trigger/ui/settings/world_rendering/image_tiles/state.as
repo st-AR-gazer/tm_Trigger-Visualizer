@@ -7,6 +7,8 @@ namespace TriggerVisualizer {
             float S_SkullTileIconScale = 0.45f;
             [Setting hidden name="Trigger: Skull tile icon alpha" min=0 max=1]
             float S_SkullTileIconAlpha = 0.85f;
+            [Setting hidden name="Trigger: Repeat tile icons on split fill tiles"]
+            bool S_RepeatTileIconsOnSplitFillTiles = false;
             [Setting hidden name="Trigger: Custom tile icon storage path"]
             string S_CustomTileIconStoragePath = "";
             [Setting hidden name="Trigger: Show offzone tile icon"]

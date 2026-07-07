@@ -201,6 +201,7 @@
                 S_ShowSkullTileIcons = false;
                 S_SkullTileIconScale = 0.45f;
                 S_SkullTileIconAlpha = 0.85f;
+                S_RepeatTileIconsOnSplitFillTiles = false;
                 ResetTileIconSettingsToDefaults();
                 G_TileIconImportStatus = "";
                 TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();

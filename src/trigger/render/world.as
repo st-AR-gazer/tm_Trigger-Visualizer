@@ -174,7 +174,9 @@ namespace TriggerVisualizer {
                     selection.PriorityDistances
                 );
                 auto fillTileItems = array<WorldFillTileDrawItem@>();
-                bool shouldCollectFillItems = ShouldRenderWorldFillNow() || ShouldRenderWorldTileIconsNow();
+                auto tileIconItems = array<WorldTileIconDrawItem@>();
+                bool shouldCollectFillItems = ShouldRenderWorldFillNow() || ShouldRepeatTileIconsOnSplitFillTilesNow();
+                bool shouldCollectTileIcons = ShouldCollectTileIconsSeparatelyNow();
                 if (shouldCollectFillItems) {
                     uint maxFrameFillItems = uint(Math::Max(GetEffectiveMaxFillTilesPerFrame(), 0));
                     for (uint i = 0; i < selection.Volumes.Length; i++) {
@@ -192,7 +194,17 @@ namespace TriggerVisualizer {
                         );
                     }
                 }
+                if (shouldCollectTileIcons) {
+                    for (uint i = 0; i < selection.Volumes.Length; i++) {
+                        CollectTriggerVolumeTileIconDrawItems(
+                            selection.Volumes[i],
+                            cameraPos,
+                            tileIconItems
+                        );
+                    }
+                }
                 DrawWorldFillTileDrawItems(fillTileItems);
+                DrawWorldTileIconDrawItems(tileIconItems);
 
                 if (TriggerVisualizer::Trigger::UI::S_ShowOutline) {
                     for (uint i = 0; i < selection.Volumes.Length; i++) {

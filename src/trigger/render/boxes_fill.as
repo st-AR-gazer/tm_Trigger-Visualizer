@@ -279,7 +279,7 @@ namespace TriggerVisualizer {
             }
 
             void DrawWorldFillTileIconBatch(array<WorldFillTileDrawItem@> @items, uint startIndex, uint endIndex) {
-                if (items is null || !ShouldRenderWorldTileIconsNow()) return;
+                if (items is null || !ShouldRepeatTileIconsOnSplitFillTilesNow()) return;
 
                 for (uint i = startIndex; i < endIndex && i < items.Length; i++) {
                     if (items[i] is null || items[i].Occluded || !items[i].AllowTileIcon) continue;
@@ -349,6 +349,74 @@ namespace TriggerVisualizer {
                     DrawWorldFillTileFillBatch(items, groupStart, groupEnd, groupColor);
                     DrawWorldFillTileIconBatch(items, groupStart, groupEnd);
                     groupStart = groupEnd;
+                }
+            }
+
+            bool ShouldSortWorldTileIconDrawItems(array<WorldTileIconDrawItem@> @items) {
+                return items !is null && items.Length > 1;
+            }
+
+            bool ShouldWorldTileIconSortAfter(
+                const WorldTileIconDrawItem@ left,
+                const WorldTileIconDrawItem@ right
+            ) {
+                if (left is null) return false;
+                if (right is null) return true;
+                return left.SortDistanceSq < right.SortDistanceSq;
+            }
+
+            void SortWorldTileIconDrawItemsBackToFront(array<WorldTileIconDrawItem@> @items) {
+                if (items is null || items.Length <= 1) return;
+
+                uint gap = items.Length / 2;
+                while (gap > 0) {
+                    for (uint i = gap; i < items.Length; i++) {
+                        WorldTileIconDrawItem@ item = items[i];
+                        uint j = i;
+                        while (j >= gap && ShouldWorldTileIconSortAfter(items[j - gap], item)) {
+                            @items[j] = items[j - gap];
+                            j -= gap;
+                        }
+                        @items[j] = item;
+                    }
+                    gap /= 2;
+                }
+            }
+
+            void MarkDuplicateWorldTileIconDrawItems(array<WorldTileIconDrawItem@> @items) {
+                if (items is null || items.Length <= 1) return;
+
+                dictionary seenGeometry;
+                for (int i = int(items.Length) - 1; i >= 0; i--) {
+                    WorldTileIconDrawItem@ item = items[uint(i)];
+                    if (item is null || item.Occluded || item.GeometryKey.Length == 0) continue;
+
+                    if (seenGeometry.Exists(item.GeometryKey)) {
+                        item.Occluded = true;
+                        continue;
+                    }
+
+                    seenGeometry.Set(item.GeometryKey, true);
+                }
+            }
+
+            void DrawWorldTileIconDrawItems(array<WorldTileIconDrawItem@> @items) {
+                if (items is null || items.Length == 0 || !ShouldRenderWorldTileIconsNow()) return;
+
+                if (ShouldSortWorldTileIconDrawItems(items)) {
+                    SortWorldTileIconDrawItemsBackToFront(items);
+                }
+                MarkDuplicateWorldTileIconDrawItems(items);
+                nvg::Reset();
+                for (uint i = 0; i < items.Length; i++) {
+                    if (G_TileIconPatchBudgetRemaining == 0) return;
+                    if (items[i] is null || items[i].Occluded || items[i].TextureKey.Length == 0) continue;
+                    DrawTileIconOnWorldTile(
+                        items[i].Origin,
+                        items[i].UEdge,
+                        items[i].VEdge,
+                        Assets::GetTileIconTextureByKey(items[i].TextureKey)
+                    );
                 }
             }
 

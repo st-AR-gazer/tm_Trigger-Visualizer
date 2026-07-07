@@ -193,7 +193,10 @@ namespace TriggerVisualizer {
                     bool enabled = MediaTrackerSubtypeTargetListContains(targetKeys, keys[i]);
                     targetKeys = SetMediaTrackerSubtypeTargetListKeyEnabled(targetKeys, keys[i], !enabled);
                 }
-                SetMediaTrackerEnabledSubtypesForContext(context, targetKeys);
+                SetMediaTrackerEnabledSubtypesForContext(
+                    context,
+                    targetKeys
+                );
             }
 
             void SetMediaTrackerSubtypeKeysForContext(int context, const array<string> &in keys, bool enabled) {
@@ -201,7 +204,10 @@ namespace TriggerVisualizer {
                 for (uint i = 0; i < keys.Length; i++) {
                     targetKeys = SetMediaTrackerSubtypeTargetListKeyEnabled(targetKeys, keys[i], enabled);
                 }
-                SetMediaTrackerEnabledSubtypesForContext(context, targetKeys);
+                SetMediaTrackerEnabledSubtypesForContext(
+                    context,
+                    targetKeys
+                );
             }
 
             void ResetSourceGroupingSettingsToDefaults() {

@@ -131,6 +131,16 @@ namespace TriggerVisualizer {
                 return TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons;
             }
 
+            bool ShouldRepeatTileIconsOnSplitFillTilesNow() {
+                return ShouldRenderWorldTileIconsNow()
+                    && TriggerVisualizer::Trigger::UI::S_RepeatTileIconsOnSplitFillTiles;
+            }
+
+            bool ShouldCollectTileIconsSeparatelyNow() {
+                return ShouldRenderWorldTileIconsNow()
+                    && !TriggerVisualizer::Trigger::UI::S_RepeatTileIconsOnSplitFillTiles;
+            }
+
             bool ShouldSimplifyGroupedTriggersNow() {
                 return false;
             }
@@ -239,6 +249,33 @@ namespace TriggerVisualizer {
                     VEdge = vEdge;
                     Color = color;
                     TileSeed = tileSeed;
+                    SortDistanceSq = sortDistanceSq;
+                    GeometryKey = GetWorldFillTileGeometryKey(origin, uEdge, vEdge);
+                }
+            }
+
+            class WorldTileIconDrawItem {
+                vec3 Origin;
+                vec3 UEdge;
+                vec3 VEdge;
+                string TextureKey;
+                string GeometryKey;
+                float SortDistanceSq = 0.0f;
+                bool Occluded = false;
+
+                WorldTileIconDrawItem() { }
+
+                WorldTileIconDrawItem(
+                    const vec3 &in origin,
+                    const vec3 &in uEdge,
+                    const vec3 &in vEdge,
+                    const string &in textureKey,
+                    float sortDistanceSq
+                ) {
+                    Origin = origin;
+                    UEdge = uEdge;
+                    VEdge = vEdge;
+                    TextureKey = textureKey;
                     SortDistanceSq = sortDistanceSq;
                     GeometryKey = GetWorldFillTileGeometryKey(origin, uEdge, vEdge);
                 }
@@ -746,7 +783,7 @@ namespace TriggerVisualizer {
             bool ShouldRenderTriggerVolumeFillTiles(const TriggerVolume@ box) {
                 if (box is null) return false;
                 return TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting
-                    || ShouldRenderWorldTileIconsNow()
+                    || ShouldRepeatTileIconsOnSplitFillTilesNow()
                     || TriggerVisualizer::Trigger::UI::S_RandomFillTileColors;
             }
 
@@ -855,6 +892,128 @@ namespace TriggerVisualizer {
                 ) > 1;
             }
 
+            void AddTriggerVolumeTileIconDrawItem(
+                const TriggerVolume@ box,
+                const array<vec3> @corners,
+                const uint[]@ face,
+                uint faceIndex,
+                const vec3 &in cameraPos,
+                array<WorldTileIconDrawItem@> @items
+            ) {
+                if (box is null || corners is null || face is null || face.Length != 4 || items is null) return;
+                if (!IsTriggerVolumeFaceCameraFacing(corners, face, faceIndex, cameraPos)) return;
+
+                string textureKey = Assets::GetTileIconTextureKeyForVolume(box);
+                if (textureKey.Length == 0) return;
+
+                vec3 origin = corners[face[0]];
+                vec3 uEdge = corners[face[1]] - origin;
+                vec3 vEdge = corners[face[3]] - origin;
+                WorldTileIconDrawItem@ item = WorldTileIconDrawItem(
+                    origin,
+                    uEdge,
+                    vEdge,
+                    textureKey,
+                    GetWorldFillTileSortDistanceSq(origin, uEdge, vEdge, cameraPos)
+                );
+                items.InsertLast(item);
+            }
+
+            void CollectTriggerVolumeTileIconDrawItemsFiltered(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                array<WorldTileIconDrawItem@> @items,
+                const array<string> @hiddenFaceKeys,
+                const array<uint> @hiddenFaceCounts
+            ) {
+                if (!ShouldCollectTileIconsSeparatelyNow() || box is null || items is null) return;
+
+                if (box.HasChildVolumes()) {
+                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
+                        CollectTriggerVolumeTileIconDrawItemsFiltered(
+                            box.ChildVolumes[i],
+                            cameraPos,
+                            items,
+                            hiddenFaceKeys,
+                            hiddenFaceCounts
+                        );
+                    }
+                    return;
+                }
+
+                if (box.HasCustomOutlineGeometry()) return;
+
+                auto corners = GetTriggerVolumeCorners(box);
+                if (corners.Length != 8) return;
+
+                for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                    auto face = TRIGGER_VOLUME_FACE_INDICES[i];
+                    if (IsDuplicateGroupFaceGeometry(corners, face, hiddenFaceKeys, hiddenFaceCounts)) continue;
+                    AddTriggerVolumeTileIconDrawItem(
+                        box,
+                        corners,
+                        face,
+                        i,
+                        cameraPos,
+                        items
+                    );
+                }
+            }
+
+            void CollectTriggerVolumeTileIconDrawItems(
+                const TriggerVolume@ box,
+                const vec3 &in cameraPos,
+                array<WorldTileIconDrawItem@> @items
+            ) {
+                if (!ShouldCollectTileIconsSeparatelyNow() || box is null || items is null) return;
+                if (box.HasCustomOutlineGeometry()) return;
+
+                if (box.HasChildVolumes()) {
+                    if (ShouldSimplifyGroupedTriggersNow()) {
+                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
+                        CollectTriggerVolumeTileIconDrawItems(simplifiedBox, cameraPos, items);
+                        return;
+                    }
+
+                    if (box.HasCachedGroupGeometry()) {
+                        CollectTriggerVolumeTileIconDrawItemsFiltered(
+                            box,
+                            cameraPos,
+                            items,
+                            box.CachedGroupFaceKeys,
+                            box.CachedGroupFaceCounts
+                        );
+                        return;
+                    }
+
+                    auto hiddenFaceKeys = array<string>();
+                    auto hiddenFaceCounts = array<uint>();
+                    AddTriggerVolumeFaceGeometryCounts(box, hiddenFaceKeys, hiddenFaceCounts);
+                    CollectTriggerVolumeTileIconDrawItemsFiltered(
+                        box,
+                        cameraPos,
+                        items,
+                        hiddenFaceKeys,
+                        hiddenFaceCounts
+                    );
+                    return;
+                }
+
+                auto corners = GetTriggerVolumeCorners(box);
+                if (corners.Length != 8) return;
+
+                for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
+                    AddTriggerVolumeTileIconDrawItem(
+                        box,
+                        corners,
+                        TRIGGER_VOLUME_FACE_INDICES[i],
+                        i,
+                        cameraPos,
+                        items
+                    );
+                }
+            }
+
             void CollectTriggerVolumeFillDrawItemsFiltered(
                 const TriggerVolume@ box,
                 const vec3 &in cameraPos,
@@ -922,7 +1081,7 @@ namespace TriggerVisualizer {
                 if (!ShouldRenderTriggerVolumeFillTiles(box)) return;
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
-                if (color.w <= 0.001f && !ShouldRenderWorldTileIconsNow()) return;
+                if (color.w <= 0.001f && !ShouldRepeatTileIconsOnSplitFillTilesNow()) return;
 
                 for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
                     auto face = TRIGGER_VOLUME_FACE_INDICES[i];
@@ -993,7 +1152,7 @@ namespace TriggerVisualizer {
                 if (!ShouldRenderTriggerVolumeFillTiles(box)) return;
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
-                if (color.w <= 0.001f && !ShouldRenderWorldTileIconsNow()) return;
+                if (color.w <= 0.001f && !ShouldRepeatTileIconsOnSplitFillTilesNow()) return;
 
                 for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
                     auto face = TRIGGER_VOLUME_FACE_INDICES[i];

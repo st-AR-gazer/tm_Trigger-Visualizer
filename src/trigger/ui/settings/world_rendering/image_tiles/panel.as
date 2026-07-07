@@ -408,6 +408,10 @@
                 );
                 UI::SameLine();
                 UI::TextDisabled("~20 fps performance drop! (e.g. 90 fps -> 70 fps)");
+                S_RepeatTileIconsOnSplitFillTiles = UI::Checkbox(
+                    "Repeat icons on split fill tiles##trigger-visualizer-image-tiles",
+                    S_RepeatTileIconsOnSplitFillTiles
+                );
                 UI::SetNextItemWidth(220.0f);
                 S_SkullTileIconScale = UI::SliderFloat(
                     "Tile icon scale##trigger-visualizer-image-tiles",
