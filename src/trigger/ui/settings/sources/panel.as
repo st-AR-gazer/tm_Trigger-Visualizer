@@ -6,6 +6,7 @@ namespace TriggerVisualizer {
                 if (ctx.IsReplayEditor) return "Replay Editor";
                 if (ctx.IsEditorMediaTracker) return "Editor MediaTracker";
                 if (ctx.IsEditorTestMode) return "Editor Test Mode";
+                if (ctx.IsMeshModeler) return "Mesh Modeller";
                 if (ctx.IsInEditor) return "Editor";
                 if (ctx.IsPlayableMap) return "Playable Map";
                 return "Loaded RootMap";
@@ -22,7 +23,7 @@ namespace TriggerVisualizer {
             bool IsCrystalSourceSupportedForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 return ctx !is null
                     && ctx.HasMap
-                    && (ctx.IsPlayableMap || ctx.IsEditorTestMode || ctx.IsMapEditor || ctx.IsInEditor || ctx.IsEditorMediaTracker || ctx.IsReplayEditor);
+                    && (ctx.IsPlayableMap || ctx.IsEditorTestMode || ctx.IsMapEditor || ctx.IsMeshModeler || ctx.IsInEditor || ctx.IsEditorMediaTracker || ctx.IsReplayEditor);
             }
 
             bool IsCrystalSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -538,65 +539,54 @@ namespace TriggerVisualizer {
                 UI::EndTabBar();
             }
 
-            void RenderSourceProfileSettingsUI(
-                int context,
-                const TriggerVisualizer::Trigger::Data::RuntimeContext@ runtimeCtx
-            ) {
-                UI::BeginTabBar("trigger-visualizer-source-profile-tabs-" + tostring(context));
-                if (UI::BeginTabItem("Offzone")) {
-                    bool value = IsOffzoneSourceEnabledForContext(context);
-                    bool next = RenderSourceProfileToggleUI(
-                        "Show Offzone",
-                        "offzone-profile-" + tostring(context),
-                        value
-                    );
-                    if (next != value) SetOffzoneSourceEnabledForContext(context, next);
-                    UI::EndTabItem();
-                }
-                if (UI::BeginTabItem("MediaTracker")) {
-                    bool value = IsMediaTrackerSourceEnabledForContext(context);
-                    bool next = RenderSourceProfileToggleUI(
-                        "Show MediaTracker",
-                        "mediatracker-profile-" + tostring(context),
-                        value
-                    );
-                    if (next != value) SetMediaTrackerSourceEnabledForContext(context, next);
+            void RenderSourceProfileSettingsUI(int context) {
+                bool offzoneValue = IsOffzoneSourceEnabledForContext(context);
+                bool offzoneNext = RenderSourceProfileToggleUI(
+                    "Show Offzone",
+                    "offzone-profile-" + tostring(context),
+                    offzoneValue
+                );
+                if (offzoneNext != offzoneValue) SetOffzoneSourceEnabledForContext(context, offzoneNext);
+
+                bool mediaTrackerValue = IsMediaTrackerSourceEnabledForContext(context);
+                bool mediaTrackerNext = RenderSourceProfileToggleUI(
+                    "Show MediaTracker",
+                    "mediatracker-profile-" + tostring(context),
+                    mediaTrackerValue
+                );
+                if (mediaTrackerNext != mediaTrackerValue) SetMediaTrackerSourceEnabledForContext(context, mediaTrackerNext);
+
+                bool crystalValue = IsCrystalSourceEnabledForContext(context);
+                bool crystalNext = RenderSourceProfileToggleUI(
+                    "Show Crystal",
+                    "crystal-profile-" + tostring(context),
+                    crystalValue
+                );
+                if (crystalNext != crystalValue) SetCrystalSourceEnabledForContext(context, crystalNext);
+
+                if (IsMediaTrackerSourceEnabledForContext(context)) {
                     UI::Separator();
+                    UI::Text("MediaTracker Types");
                     RenderMediaTrackerSubtypeSettingsUI(context);
-                    UI::EndTabItem();
                 }
-                if (UI::BeginTabItem("Crystal")) {
-                    bool value = IsCrystalSourceEnabledForContext(context);
-                    bool next = RenderSourceProfileToggleUI(
-                        "Show Crystal",
-                        "crystal-profile-" + tostring(context),
-                        value
-                    );
-                    if (next != value) SetCrystalSourceEnabledForContext(context, next);
-                    UI::EndTabItem();
-                }
-                UI::EndTabBar();
             }
 
             void RenderSourcesSettingsUI() {
-                UI::Text("Trigger Sources");
-                auto ctx = TriggerVisualizer::Trigger::GetCurrentRuntimeContext();
-                S_MergeAdjacentTriggerVolumes = UI::Checkbox(
-                    "Merge adjacent compatible trigger volumes##trigger-visualizer-sources-merge-adjacent",
-                    S_MergeAdjacentTriggerVolumes
-                );
-                UI::Separator();
                 UI::BeginTabBar("trigger-visualizer-source-major-tabs");
                 if (UI::BeginTabItem("Playing")) {
-                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_PLAYING, ctx);
+                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_PLAYING);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Editor")) {
-                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_EDITOR, ctx);
+                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_EDITOR);
+                    UI::EndTabItem();
+                }
+                if (UI::BeginTabItem("Mesh Modeller")) {
+                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_MESH_MODELLER);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("MediaTracker")) {
-                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_MEDIATRACKER, ctx);
+                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_MEDIATRACKER);
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();

@@ -401,7 +401,6 @@
             }
 
             void RenderTileIconGlobalSettingsUI() {
-                UI::Text("Tile Icons");
                 S_ShowSkullTileIcons = UI::Checkbox(
                     "Show tile icon at tile centers##trigger-visualizer-image-tiles",
                     S_ShowSkullTileIcons

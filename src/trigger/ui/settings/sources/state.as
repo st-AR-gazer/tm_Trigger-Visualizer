@@ -4,41 +4,50 @@ namespace TriggerVisualizer {
             const int SOURCE_SETTINGS_PLAYING = 0;
             const int SOURCE_SETTINGS_EDITOR = 1;
             const int SOURCE_SETTINGS_MEDIATRACKER = 2;
+            const int SOURCE_SETTINGS_MESH_MODELLER = 3;
             const string DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING = "camera|customcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|gps|mediatrackerreset|";
             const string DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|2dtriangles|3dtriangles|cartrails|dirtylens|fadingtransition|fog|image|shakecamfx|gps|mediatrackerreset|";
             const string DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|playercamerasubtypecamhelico|playercamerasubtypecamfree|playercamerasubtypecamspectator|2dtriangles|3dtriangles|cartrails|colorsfx|colorgrading|depthoffield|dirtylens|editingcut|fadingtransition|fog|ghost|gps|hdrbloom|image|inertialtrackingcamfx|manialinkui|manialinkurl|musicvolume|opponentvisibility|shakecamfx|stereo3d|soundfx|spectators|text|time|timespeed|tonemapping|vehiclelights|mediatrackerreset|mixed|unknown|";
+            const string DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|2dtriangles|3dtriangles|cartrails|dirtylens|fadingtransition|fog|image|shakecamfx|gps|mediatrackerreset|";
 
-            [Setting hidden name="Trigger: Merge adjacent trigger volumes"]
-            bool S_MergeAdjacentTriggerVolumes = true;
             [Setting hidden name="Trigger: Show offzone source"]
             bool S_ShowOffzoneSource = true;
             [Setting hidden name="Trigger: Show offzone source editor"]
             bool S_ShowOffzoneSourceEditor = true;
             [Setting hidden name="Trigger: Show offzone source mediatracker"]
-            bool S_ShowOffzoneSourceMediaTracker = true;
+            bool S_ShowOffzoneSourceMediaTracker = false;
+            [Setting hidden name="Trigger: Show offzone source mesh modeler"]
+            bool S_ShowOffzoneSourceMeshModeler = false;
             [Setting hidden name="Trigger: Show MediaTracker source"]
             bool S_ShowMediaTrackerSource = true;
             [Setting hidden name="Trigger: Show MediaTracker source editor"]
             bool S_ShowMediaTrackerSourceEditor = true;
             [Setting hidden name="Trigger: Show MediaTracker source mediatracker"]
             bool S_ShowMediaTrackerSourceMediaTracker = true;
+            [Setting hidden name="Trigger: Show MediaTracker source mesh modeler"]
+            bool S_ShowMediaTrackerSourceMeshModeler = false;
             [Setting hidden name="Trigger: Show crystal source"]
-            bool S_ShowCrystalSource = true;
+            bool S_ShowCrystalSource = false;
             [Setting hidden name="Trigger: Show crystal source editor"]
             bool S_ShowCrystalSourceEditor = true;
             [Setting hidden name="Trigger: Show crystal source mediatracker"]
-            bool S_ShowCrystalSourceMediaTracker = true;
+            bool S_ShowCrystalSourceMediaTracker = false;
+            [Setting hidden name="Trigger: Show crystal source mesh modeler"]
+            bool S_ShowCrystalSourceMeshModeler = true;
             [Setting hidden name="Trigger: MediaTracker enabled subtypes playing"]
             string S_MediaTrackerEnabledSubtypesPlaying = DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
             [Setting hidden name="Trigger: MediaTracker enabled subtypes editor"]
             string S_MediaTrackerEnabledSubtypesEditor = DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR;
             [Setting hidden name="Trigger: MediaTracker enabled subtypes mediatracker"]
             string S_MediaTrackerEnabledSubtypesMediaTracker = DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;
+            [Setting hidden name="Trigger: MediaTracker enabled subtypes mesh modeler"]
+            string S_MediaTrackerEnabledSubtypesMeshModeler = DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER;
 
             int GetSourceSettingsContextForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 if (ctx is null) return SOURCE_SETTINGS_PLAYING;
                 if (ctx.IsReplayEditor || ctx.IsEditorMediaTracker) return SOURCE_SETTINGS_MEDIATRACKER;
                 if (ctx.IsEditorTestMode || ctx.IsPlayableMap) return SOURCE_SETTINGS_PLAYING;
+                if (ctx.IsMeshModeler) return SOURCE_SETTINGS_MESH_MODELLER;
                 if (ctx.IsInEditor) return SOURCE_SETTINGS_EDITOR;
                 return SOURCE_SETTINGS_PLAYING;
             }
@@ -46,12 +55,14 @@ namespace TriggerVisualizer {
             string GetSourceSettingsContextLabel(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return "Editor";
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return "MediaTracker";
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) return "Mesh Modeller";
                 return "Playing";
             }
 
             bool IsOffzoneSourceEnabledForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return S_ShowOffzoneSourceEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_ShowOffzoneSourceMediaTracker;
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_ShowOffzoneSourceMeshModeler;
                 return S_ShowOffzoneSource;
             }
 
@@ -64,12 +75,17 @@ namespace TriggerVisualizer {
                     S_ShowOffzoneSourceMediaTracker = value;
                     return;
                 }
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) {
+                    S_ShowOffzoneSourceMeshModeler = value;
+                    return;
+                }
                 S_ShowOffzoneSource = value;
             }
 
             bool IsMediaTrackerSourceEnabledForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return S_ShowMediaTrackerSourceEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_ShowMediaTrackerSourceMediaTracker;
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_ShowMediaTrackerSourceMeshModeler;
                 return S_ShowMediaTrackerSource;
             }
 
@@ -82,12 +98,17 @@ namespace TriggerVisualizer {
                     S_ShowMediaTrackerSourceMediaTracker = value;
                     return;
                 }
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) {
+                    S_ShowMediaTrackerSourceMeshModeler = value;
+                    return;
+                }
                 S_ShowMediaTrackerSource = value;
             }
 
             bool IsCrystalSourceEnabledForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return S_ShowCrystalSourceEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_ShowCrystalSourceMediaTracker;
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_ShowCrystalSourceMeshModeler;
                 return S_ShowCrystalSource;
             }
 
@@ -100,12 +121,17 @@ namespace TriggerVisualizer {
                     S_ShowCrystalSourceMediaTracker = value;
                     return;
                 }
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) {
+                    S_ShowCrystalSourceMeshModeler = value;
+                    return;
+                }
                 S_ShowCrystalSource = value;
             }
 
             string GetMediaTrackerEnabledSubtypesForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return S_MediaTrackerEnabledSubtypesEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_MediaTrackerEnabledSubtypesMediaTracker;
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_MediaTrackerEnabledSubtypesMeshModeler;
                 return S_MediaTrackerEnabledSubtypesPlaying;
             }
 
@@ -118,12 +144,17 @@ namespace TriggerVisualizer {
                     S_MediaTrackerEnabledSubtypesMediaTracker = value;
                     return;
                 }
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) {
+                    S_MediaTrackerEnabledSubtypesMeshModeler = value;
+                    return;
+                }
                 S_MediaTrackerEnabledSubtypesPlaying = value;
             }
 
             string GetDefaultMediaTrackerEnabledSubtypesForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;
+                if (context == SOURCE_SETTINGS_MESH_MODELLER) return DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER;
                 return DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
             }
 
@@ -210,27 +241,26 @@ namespace TriggerVisualizer {
                 );
             }
 
-            void ResetSourceGroupingSettingsToDefaults() {
-                S_MergeAdjacentTriggerVolumes = true;
-            }
-
             void ResetSourceProfileSettingsToDefaults() {
                 S_ShowOffzoneSource = true;
                 S_ShowOffzoneSourceEditor = true;
-                S_ShowOffzoneSourceMediaTracker = true;
+                S_ShowOffzoneSourceMediaTracker = false;
+                S_ShowOffzoneSourceMeshModeler = false;
                 S_ShowMediaTrackerSource = true;
                 S_ShowMediaTrackerSourceEditor = true;
                 S_ShowMediaTrackerSourceMediaTracker = true;
-                S_ShowCrystalSource = true;
+                S_ShowMediaTrackerSourceMeshModeler = false;
+                S_ShowCrystalSource = false;
                 S_ShowCrystalSourceEditor = true;
-                S_ShowCrystalSourceMediaTracker = true;
+                S_ShowCrystalSourceMediaTracker = false;
+                S_ShowCrystalSourceMeshModeler = true;
                 S_MediaTrackerEnabledSubtypesPlaying = DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
                 S_MediaTrackerEnabledSubtypesEditor = DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR;
                 S_MediaTrackerEnabledSubtypesMediaTracker = DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;
+                S_MediaTrackerEnabledSubtypesMeshModeler = DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER;
             }
 
             void ResetSourceSettingsToDefaults() {
-                ResetSourceGroupingSettingsToDefaults();
                 ResetSourceProfileSettingsToDefaults();
             }
         }

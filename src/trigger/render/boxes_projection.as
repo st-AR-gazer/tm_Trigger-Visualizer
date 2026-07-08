@@ -24,7 +24,7 @@ namespace TriggerVisualizer {
                 float margin
             ) {
                 if (s0.z >= 0 || s1.z >= 0 || s2.z >= 0 || s3.z >= 0) return false;
-                if (!TriggerVisualizer::Trigger::UI::S_CullOffscreenWorldTiles) return true;
+                if (!TriggerVisualizer::Trigger::UI::ShouldCullOffscreenWorldTiles()) return true;
 
                 int displayWidth = Display::GetWidth();
                 int displayHeight = Display::GetHeight();
@@ -43,7 +43,7 @@ namespace TriggerVisualizer {
 
             bool IsProjectedLinePotentiallyVisible(const vec3 &in s0, const vec3 &in s1, float margin) {
                 if (s0.z >= 0 || s1.z >= 0) return false;
-                if (!TriggerVisualizer::Trigger::UI::S_CullOffscreenWorldTiles) return true;
+                if (!TriggerVisualizer::Trigger::UI::ShouldCullOffscreenWorldTiles()) return true;
 
                 int displayWidth = Display::GetWidth();
                 int displayHeight = Display::GetHeight();
@@ -204,10 +204,11 @@ namespace TriggerVisualizer {
 
                 uint subdivisions = GetTexturedWorldQuadSubdivisionCount(p0, p1, p2, p3);
                 if (subdivisions == 0) return false;
-                if (G_TileIconPatchBudgetRemaining == 0) return false;
+                bool budgetsEnabled = TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled();
+                if (budgetsEnabled && G_TileIconPatchBudgetRemaining == 0) return false;
 
                 uint patchCount = subdivisions * subdivisions;
-                if (patchCount > G_TileIconPatchBudgetRemaining) {
+                if (budgetsEnabled && patchCount > G_TileIconPatchBudgetRemaining) {
                     uint budgetedSubdivisions = uint(Math::Floor(Math::Sqrt(float(G_TileIconPatchBudgetRemaining))));
                     if (budgetedSubdivisions == 0) return false;
                     if (subdivisions > budgetedSubdivisions) {
@@ -242,10 +243,12 @@ namespace TriggerVisualizer {
                         ) || drewAny;
                     }
                 }
-                if (patchCount >= G_TileIconPatchBudgetRemaining) {
-                    G_TileIconPatchBudgetRemaining = 0;
-                } else {
-                    G_TileIconPatchBudgetRemaining -= patchCount;
+                if (budgetsEnabled) {
+                    if (patchCount >= G_TileIconPatchBudgetRemaining) {
+                        G_TileIconPatchBudgetRemaining = 0;
+                    } else {
+                        G_TileIconPatchBudgetRemaining -= patchCount;
+                    }
                 }
 
                 return drewAny;

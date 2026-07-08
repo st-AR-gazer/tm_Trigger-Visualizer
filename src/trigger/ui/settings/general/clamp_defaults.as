@@ -51,6 +51,7 @@
 
             void ClampPerformanceSettings() {
                 S_FillTileMinSize = Math::Clamp(S_FillTileMinSize, 2.0f, 64.0f);
+                S_MaxVisibleVolumesPerFrame = Math::Clamp(S_MaxVisibleVolumesPerFrame, 16, 4096);
                 S_MaxFillTilesPerFrame = Math::Clamp(S_MaxFillTilesPerFrame, 128, 65536);
                 S_MaxOutlineSegmentsPerFrame = Math::Clamp(S_MaxOutlineSegmentsPerFrame, 64, 65536);
                 S_MaxCrystalOutlineSegmentsPerFrame = Math::Clamp(S_MaxCrystalOutlineSegmentsPerFrame, 0, 65536);
@@ -117,9 +118,13 @@
                 S_LabelShowRawRange = false;
                 S_LabelShowWorldSize = false;
                 S_LabelShowIslandIndex = false;
+                S_LabelShowJoinedCount = false;
                 S_LabelShowSourcePrefix = false;
                 S_LabelUseDetectedTriggerName = true;
                 S_LabelShowDetectedTriggerName = false;
+                S_LabelTargetKeys = DEFAULT_LABEL_TARGET_KEYS;
+                S_LabelTargetOverrideTexts = DEFAULT_LABEL_TARGET_OVERRIDE_TEXTS;
+                G_LabelTargetOverrideInputs.DeleteAll();
             }
 
             void ResetLabelAppearanceSettingsToDefaults() {
@@ -222,8 +227,9 @@
             }
 
             void ResetPerformanceBudgetSettingsToDefaults() {
-                S_CullOffscreenWorldTiles = true;
+                S_PerformanceBudgetsEnabled = true;
                 S_FillTileMinSize = 4.0f;
+                S_MaxVisibleVolumesPerFrame = 512;
                 S_MaxFillTilesPerFrame = 4096;
                 S_MaxOutlineSegmentsPerFrame = 1536;
                 S_MaxCrystalOutlineSegmentsPerFrame = 768;
@@ -233,7 +239,14 @@
                 ClampPerformanceSettings();
             }
 
+            void ResetPerformanceCullingSettingsToDefaults() {
+                S_MergeAdjacentTriggerVolumes = true;
+                S_PerformanceCullingEnabled = true;
+                S_CullOffscreenWorldTiles = true;
+            }
+
             void ResetPerformanceRefreshSettingsToDefaults() {
+                S_PerformanceRefreshEnabled = true;
                 S_MediaTrackerEditorRefreshIntervalMs = 500;
                 S_OffzoneEditorRefreshIntervalMs = 500;
                 S_CrystalMeshModelerRefreshIntervalMs = 500;
@@ -250,6 +263,7 @@
 
             void ResetPerformanceSettingsToDefaults() {
                 ResetPerformanceBudgetSettingsToDefaults();
+                ResetPerformanceCullingSettingsToDefaults();
                 ResetPerformanceRefreshSettingsToDefaults();
                 ResetPerformanceSpeedRenderSkipSettingsToDefaults();
             }

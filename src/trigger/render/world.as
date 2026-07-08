@@ -135,7 +135,7 @@ namespace TriggerVisualizer {
                 ResetWorldRenderPerformanceBudgets();
                 int maxVisibleVolumeCount = TriggerVisualizer::Trigger::UI::S_MaxVisibleVolumesPerFrame;
                 uint maxVisibleVolumes = uint(Math::Max(maxVisibleVolumeCount, 1));
-                if (IsSpatialCandidateQueryUnlimited(GetEffectiveRenderDistanceWorld())) {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) {
                     maxVisibleVolumes = Math::Max(snapshot.TriggerVolumes.Length, 1);
                 }
                 auto selection = VisibleTriggerVolumeSelection();
@@ -219,8 +219,8 @@ namespace TriggerVisualizer {
                     }
                 }
 
-                for (uint i = 0; i < selection.Volumes.Length; i++) {
-                    if (ShouldRenderWorldLabelsNow()) {
+                if (ShouldRenderWorldLabelsNow()) {
+                    for (uint i = 0; i < selection.Volumes.Length; i++) {
                         TriggerRangeRaw@ rawRange = null;
                         auto volume = selection.Volumes[i];
                         if (volume !is null && volume.Source == TRIGGER_SOURCE_OFFZONE && volume.AllowRawRangeLabel && volume.SourceIndex < snapshot.RawRanges.Length) {

@@ -2,7 +2,6 @@
     namespace Trigger {
         namespace UI {
             void RenderWorldRenderingSettingsUI() {
-                UI::Text("World Rendering");
                 S_RenderWorld = UI::Checkbox("Enable world render##trigger-visualizer-settings", S_RenderWorld);
                 S_ShowOutline = UI::Checkbox("Show outlines##trigger-visualizer-settings", S_ShowOutline);
                 S_ShowFill = UI::Checkbox("Show face fill##trigger-visualizer-settings", S_ShowFill);

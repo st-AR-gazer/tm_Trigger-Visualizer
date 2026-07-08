@@ -32,13 +32,32 @@ namespace TriggerVisualizer {
                     + " m";
             }
 
+            string BuildCustomTriggerVolumeLabelName(const TriggerVolume@ box, const string &in customText) {
+                if (box is null || customText.Length == 0) return "";
+
+                string label = customText;
+                if (TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix) {
+                    label = box.SourceIndexLabel() + ": " + label;
+                }
+                if (TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex && box.HasIslandIndex && box.IslandCount > 1) {
+                    label += " island " + tostring(box.IslandIndex + 1) + "/" + tostring(box.IslandCount);
+                }
+                if (TriggerVisualizer::Trigger::UI::S_LabelShowJoinedCount && box.IsMergedGroup && box.MergedVolumeCount > 1) {
+                    label += " (" + tostring(box.MergedVolumeCount) + " joined)";
+                }
+                return label;
+            }
+
             string BuildTriggerVolumeLabelText(uint index, const TriggerRangeRaw@ rawRange, const TriggerVolume@ box) {
                 array<string> parts;
                 if (TriggerVisualizer::Trigger::UI::S_LabelShowIndex) {
                     parts.InsertLast("#" + index);
                 }
-                if (box !is null && (box.Source == TRIGGER_SOURCE_MEDIATRACKER || box.IsMergedGroup || TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix)) {
-                    parts.InsertLast(box.DisplayLabelWithOptions(TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix, TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex, TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName, TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName));
+                string customLabelText = TriggerVisualizer::Trigger::UI::GetCustomLabelTextForVolume(box);
+                if (customLabelText.Length > 0) {
+                    parts.InsertLast(BuildCustomTriggerVolumeLabelName(box, customLabelText));
+                } else if (box !is null && (box.Source == TRIGGER_SOURCE_MEDIATRACKER || box.IsMergedGroup || TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix)) {
+                    parts.InsertLast(box.DisplayLabelWithOptions(TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix, TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex, TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName, TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName, TriggerVisualizer::Trigger::UI::S_LabelShowJoinedCount));
                 }
                 if (TriggerVisualizer::Trigger::UI::S_LabelShowRawRange && rawRange !is null) {
                     parts.InsertLast(FormatRawRangeLabel(rawRange));
@@ -62,6 +81,7 @@ namespace TriggerVisualizer {
                 screenPos = vec3();
                 if (!TriggerVisualizer::Trigger::UI::S_ShowLabels) return false;
                 if (box is null) return false;
+                if (!TriggerVisualizer::Trigger::UI::ShouldShowLabelForVolume(box)) return false;
 
                 screenPos = Camera::ToScreen(GetTriggerVolumeLabelPosition(box));
                 return screenPos.z < 0 && IsScreenPositionVisible(screenPos.xy);

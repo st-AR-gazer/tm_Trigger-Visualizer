@@ -78,9 +78,7 @@
                 return RenderProximityComboEditor("Render based on", id, value);
             }
 
-            void RenderDistanceProfileSettingsUI(int context, const string &in id, const string &in description) {
-                UI::Text(GetDistanceSettingsContextLabel(context) + " Distance");
-                UI::TextDisabled(description);
+            void RenderDistanceProfileSettingsUI(int context, const string &in id) {
                 int proximityMode = GetRenderProximityModeForDistanceContext(context);
                 proximityMode = RenderProximityComboForDistanceContext(
                     context,
@@ -148,24 +146,21 @@
                 if (UI::BeginTabItem("Playing")) {
                     RenderDistanceProfileSettingsUI(
                         DISTANCE_SETTINGS_PLAYING,
-                        "playing",
-                        "Used in playable maps and editor test mode."
+                        "playing"
                     );
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Editor")) {
                     RenderDistanceProfileSettingsUI(
                         DISTANCE_SETTINGS_EDITOR,
-                        "editor",
-                        "Used in the normal map editor."
+                        "editor"
                     );
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("MediaTracker")) {
                     RenderDistanceProfileSettingsUI(
                         DISTANCE_SETTINGS_MEDIATRACKER,
-                        "mediatracker",
-                        "Used in Editor MediaTracker and Replay Editor."
+                        "mediatracker"
                     );
                     UI::EndTabItem();
                 }

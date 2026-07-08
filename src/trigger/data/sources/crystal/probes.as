@@ -163,19 +163,11 @@ namespace TriggerVisualizer {
                         next = AddTriggerTargetKey(next, TRIGGER_TYPE_VEHICLE_TRANSFORM_DESERT);
                     }
 
-                    bool isTurboRoulette = false;
-                    if (text.IndexOf("turborouletteyellow") >= 0 || text.IndexOf("turborandomyellow") >= 0) {
-                        next = AddTriggerTargetKey(next, TRIGGER_TYPE_TURBO_ROULETTE_YELLOW);
-                        isTurboRoulette = true;
-                    } else if (text.IndexOf("turboroulettecyan") >= 0 || text.IndexOf("turborandomcyan") >= 0) {
-                        next = AddTriggerTargetKey(next, TRIGGER_TYPE_TURBO_ROULETTE_CYAN);
-                        isTurboRoulette = true;
-                    } else if (text.IndexOf("turboroulettepurple") >= 0 || text.IndexOf("turborandompurple") >= 0) {
-                        next = AddTriggerTargetKey(next, TRIGGER_TYPE_TURBO_ROULETTE_PURPLE);
-                        isTurboRoulette = true;
-                    } else if (text.IndexOf("turboroulette") >= 0 || text.IndexOf("turborandom") >= 0 || text.IndexOf("randomturbo") >= 0) {
+                    bool isTurboRoulette = text.IndexOf("turboroulette") >= 0
+                        || text.IndexOf("turborandom") >= 0
+                        || text.IndexOf("randomturbo") >= 0;
+                    if (isTurboRoulette) {
                         next = AddTriggerTargetKey(next, TRIGGER_TYPE_TURBO_ROULETTE);
-                        isTurboRoulette = true;
                     }
                     if (!isTurboRoulette && text.IndexOf("turbo2") >= 0) {
                         next = AddTriggerTargetKey(next, TRIGGER_TYPE_TURBO2);

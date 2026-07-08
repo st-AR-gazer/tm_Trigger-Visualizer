@@ -9,7 +9,6 @@ namespace TriggerVisualizer {
         bool G_ResetDefaultsWorldImageTiles = true;
         bool G_ResetDefaultsWorldMapHints = true;
         bool G_ResetDefaultsPerformance = true;
-        bool G_ResetDefaultsSourcesGrouping = true;
         bool G_ResetDefaultsSourcesProfiles = true;
         bool G_ResetDefaultsLabels = true;
 
@@ -41,15 +40,14 @@ namespace TriggerVisualizer {
         }
 
         bool HasSourcesRestoreDefaultsSelection() {
-            return G_ResetDefaultsSourcesGrouping || G_ResetDefaultsSourcesProfiles;
+            return G_ResetDefaultsSourcesProfiles;
         }
 
         bool IsSourcesRestoreDefaultsFullySelected() {
-            return G_ResetDefaultsSourcesGrouping && G_ResetDefaultsSourcesProfiles;
+            return G_ResetDefaultsSourcesProfiles;
         }
 
         void SetSourcesRestoreDefaultsSelection(bool value) {
-            G_ResetDefaultsSourcesGrouping = value;
             G_ResetDefaultsSourcesProfiles = value;
         }
 
@@ -94,9 +92,6 @@ namespace TriggerVisualizer {
             }
             if (G_ResetDefaultsPerformance) {
                 TriggerVisualizer::Trigger::UI::ResetPerformanceSettingsToDefaults();
-            }
-            if (G_ResetDefaultsSourcesGrouping) {
-                TriggerVisualizer::Trigger::UI::ResetSourceGroupingSettingsToDefaults();
             }
             if (G_ResetDefaultsSourcesProfiles) {
                 TriggerVisualizer::Trigger::UI::ResetSourceProfileSettingsToDefaults();
@@ -151,10 +146,6 @@ namespace TriggerVisualizer {
                 UI::TextDisabled("(partial)");
             }
             UI::Indent();
-            G_ResetDefaultsSourcesGrouping = UI::Checkbox(
-                "Grouping##trigger-visualizer-restore-defaults-sources-grouping",
-                G_ResetDefaultsSourcesGrouping
-            );
             G_ResetDefaultsSourcesProfiles = UI::Checkbox(
                 "Context visibility profiles##trigger-visualizer-restore-defaults-sources-profiles",
                 G_ResetDefaultsSourcesProfiles

@@ -100,14 +100,17 @@ namespace TriggerVisualizer {
             }
 
             int GetEffectiveMaxFillTilesPerFrame() {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return 65536;
                 return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
             }
 
             int GetEffectiveMaxOutlineSegmentsPerFrame() {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX);
                 return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxOutlineSegmentsPerFrame, 1);
             }
 
             int GetEffectiveMaxCrystalOutlineSegmentsPerFrame() {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX);
                 return Math::Clamp(
                     TriggerVisualizer::Trigger::UI::S_MaxCrystalOutlineSegmentsPerFrame,
                     0,
@@ -116,6 +119,7 @@ namespace TriggerVisualizer {
             }
 
             int GetEffectiveMaxTileIconPatchesPerFrame() {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return 65536;
                 return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame, 0);
             }
 
@@ -159,12 +163,14 @@ namespace TriggerVisualizer {
             }
 
             bool ConsumeWorldFillTileTraversalBudget() {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return true;
                 if (G_FillTileTraversalBudgetRemaining == 0) return false;
                 G_FillTileTraversalBudgetRemaining--;
                 return true;
             }
 
             bool ConsumeWorldLineSegmentBudget() {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return true;
                 if (G_WorldLineSegmentBudgetRemaining == 0) return false;
                 G_WorldLineSegmentBudgetRemaining--;
                 return true;
@@ -175,11 +181,13 @@ namespace TriggerVisualizer {
             }
 
             bool HasWorldLineSegmentBudgetForVolume(const TriggerVolume@ box) {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return true;
                 if (G_WorldLineSegmentBudgetRemaining == 0) return false;
                 return !UsesCrystalOutlineBudget(box) || G_CrystalWorldLineSegmentBudgetRemaining > 0;
             }
 
             bool ConsumeWorldLineSegmentBudgetForVolume(const TriggerVolume@ box) {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return true;
                 if (!HasWorldLineSegmentBudgetForVolume(box)) return false;
 
                 G_WorldLineSegmentBudgetRemaining--;
@@ -1290,6 +1298,40 @@ namespace TriggerVisualizer {
                 items.InsertLast(item);
             }
 
+            void PrepareWorldOutlineEdgeDrawItemsForCameraPriority(
+                array<WorldOutlineEdgeDrawItem@> @items,
+                const vec3 &in cameraPos
+            ) {
+                if (items is null) return;
+                for (uint i = 0; i < items.Length; i++) {
+                    if (items[i] is null) continue;
+                    items[i].SortDistanceSq = GetDistanceSqToWorldLineSegment(
+                        cameraPos,
+                        items[i].Start,
+                        items[i].End
+                    );
+                }
+                SortWorldOutlineEdgeDrawItemsByRenderPriority(items);
+            }
+
+            uint GetWorldLineSegmentBudgetRemainingForVolume(const TriggerVolume@ box) {
+                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) {
+                    return WORLD_LINE_SEGMENT_BUDGET_HARD_MAX;
+                }
+
+                uint remaining = G_WorldLineSegmentBudgetRemaining;
+                if (UsesCrystalOutlineBudget(box) && G_CrystalWorldLineSegmentBudgetRemaining < remaining) {
+                    remaining = G_CrystalWorldLineSegmentBudgetRemaining;
+                }
+                return remaining;
+            }
+
+            bool ShouldPrioritizeWorldOutlineEdgesForBudget(const TriggerVolume@ box, uint edgeCount) {
+                if (edgeCount <= 1) return false;
+                uint remaining = GetWorldLineSegmentBudgetRemainingForVolume(box);
+                return remaining > 0 && edgeCount > remaining;
+            }
+
             void CollectTriggerVolumeOutlineDrawItems(
                 const TriggerVolume@ box,
                 const vec3 &in cameraPos,
@@ -1409,6 +1451,9 @@ namespace TriggerVisualizer {
                         edgeCounts
                     );
                     if (items.Length == 0) return;
+                    if (ShouldPrioritizeWorldOutlineEdgesForBudget(box, items.Length)) {
+                        PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
+                    }
 
                     nvg::Reset();
                     nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
@@ -1435,20 +1480,57 @@ namespace TriggerVisualizer {
                 uint cachedEdgeCount = box.CachedGroupOutlineEdgeCount();
                 if (cachedEdgeCount == 0) return;
 
+                if (!ShouldPrioritizeWorldOutlineEdgesForBudget(box, cachedEdgeCount)) {
+                    nvg::Reset();
+                    nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
+
+                    for (uint i = 0; i < cachedEdgeCount; i++) {
+                        if (!HasWorldLineSegmentBudgetForVolume(box)) break;
+                        if (IsCachedGroupOutlineEdgeDuplicate(box, i)) continue;
+
+                        DrawWorldLineAdaptiveColoredForVolume(
+                            box.CachedGroupOutlineEdgeStarts[i],
+                            box.CachedGroupOutlineEdgeEnds[i],
+                            cameraPos,
+                            color,
+                            boxIndex + box.CachedGroupOutlineEdgeBoxIndices[i],
+                            box.CachedGroupOutlineEdgeIndices[i],
+                            box,
+                            ShouldSplitTriggerVolumeOutlineEdges(box)
+                        );
+                    }
+                    return;
+                }
+
+                auto items = array<WorldOutlineEdgeDrawItem@>();
+                for (uint i = 0; i < cachedEdgeCount; i++) {
+                    if (IsCachedGroupOutlineEdgeDuplicate(box, i)) continue;
+
+                    WorldOutlineEdgeDrawItem@ item = WorldOutlineEdgeDrawItem();
+                    item.Start = box.CachedGroupOutlineEdgeStarts[i];
+                    item.End = box.CachedGroupOutlineEdgeEnds[i];
+                    item.BoxIndex = boxIndex + box.CachedGroupOutlineEdgeBoxIndices[i];
+                    item.EdgeIndex = box.CachedGroupOutlineEdgeIndices[i];
+                    item.GeometryKey = box.CachedGroupOutlineEdgeKeys[i];
+                    items.InsertLast(item);
+                }
+                if (items.Length == 0) return;
+                PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
+
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
-                for (uint i = 0; i < cachedEdgeCount; i++) {
+                for (uint i = 0; i < items.Length; i++) {
                     if (!HasWorldLineSegmentBudgetForVolume(box)) break;
-                    if (IsCachedGroupOutlineEdgeDuplicate(box, i)) continue;
+                    if (items[i] is null) continue;
 
                     DrawWorldLineAdaptiveColoredForVolume(
-                        box.CachedGroupOutlineEdgeStarts[i],
-                        box.CachedGroupOutlineEdgeEnds[i],
+                        items[i].Start,
+                        items[i].End,
                         cameraPos,
                         color,
-                        boxIndex + box.CachedGroupOutlineEdgeBoxIndices[i],
-                        box.CachedGroupOutlineEdgeIndices[i],
+                        items[i].BoxIndex,
+                        items[i].EdgeIndex,
                         box,
                         ShouldSplitTriggerVolumeOutlineEdges(box)
                     );
@@ -1472,6 +1554,21 @@ namespace TriggerVisualizer {
                 uint count = box.CachedStaticOutlineCount();
                 if (count == 0) return;
 
+                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(box, count);
+                array<WorldOutlineEdgeDrawItem@>@ items = null;
+                if (prioritizeEdges) {
+                    @items = array<WorldOutlineEdgeDrawItem@>();
+                    for (uint i = 0; i < count; i++) {
+                        items.InsertLast(WorldOutlineEdgeDrawItem(
+                            box.CachedStaticOutlineStarts[i],
+                            box.CachedStaticOutlineEnds[i],
+                            boxIndex + box.CachedStaticOutlineBoxIndices[i],
+                            box.CachedStaticOutlineEdgeIndices[i]
+                        ));
+                    }
+                    PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
+                }
+
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
                 bool allowAdaptiveSplitting = ShouldSplitTriggerVolumeOutlineEdges(box);
@@ -1479,11 +1576,19 @@ namespace TriggerVisualizer {
                     nvg::BeginPath();
                     nvg::StrokeColor(color);
                     bool drewAny = false;
-                    for (uint i = 0; i < count; i++) {
+                    uint drawCount = count;
+                    if (prioritizeEdges) drawCount = items.Length;
+                    for (uint i = 0; i < drawCount; i++) {
                         if (!HasWorldLineSegmentBudgetForVolume(box)) break;
+                        vec3 start = box.CachedStaticOutlineStarts[i];
+                        vec3 end = box.CachedStaticOutlineEnds[i];
+                        if (prioritizeEdges) {
+                            start = items[i].Start;
+                            end = items[i].End;
+                        }
                         drewAny = DrawWorldLineAdaptiveToCurrentPathForVolume(
-                            box.CachedStaticOutlineStarts[i],
-                            box.CachedStaticOutlineEnds[i],
+                            start,
+                            end,
                             cameraPos,
                             box,
                             allowAdaptiveSplitting
@@ -1496,15 +1601,27 @@ namespace TriggerVisualizer {
                     return;
                 }
 
-                for (uint i = 0; i < count; i++) {
+                uint drawCount = count;
+                if (prioritizeEdges) drawCount = items.Length;
+                for (uint i = 0; i < drawCount; i++) {
                     if (!HasWorldLineSegmentBudgetForVolume(box)) break;
+                    vec3 start = box.CachedStaticOutlineStarts[i];
+                    vec3 end = box.CachedStaticOutlineEnds[i];
+                    uint itemBoxIndex = boxIndex + box.CachedStaticOutlineBoxIndices[i];
+                    uint edgeIndex = box.CachedStaticOutlineEdgeIndices[i];
+                    if (prioritizeEdges) {
+                        start = items[i].Start;
+                        end = items[i].End;
+                        itemBoxIndex = items[i].BoxIndex;
+                        edgeIndex = items[i].EdgeIndex;
+                    }
                     DrawWorldLineAdaptiveColoredForVolume(
-                        box.CachedStaticOutlineStarts[i],
-                        box.CachedStaticOutlineEnds[i],
+                        start,
+                        end,
                         cameraPos,
                         color,
-                        boxIndex + box.CachedStaticOutlineBoxIndices[i],
-                        box.CachedStaticOutlineEdgeIndices[i],
+                        itemBoxIndex,
+                        edgeIndex,
                         box,
                         allowAdaptiveSplitting
                     );
@@ -1529,15 +1646,38 @@ namespace TriggerVisualizer {
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
                 uint outlineLineCount = box.OutlineLineCount();
                 bool allowAdaptiveSplitting = ShouldSplitTriggerVolumeOutlineEdges(box);
+                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(box, outlineLineCount);
+                array<WorldOutlineEdgeDrawItem@>@ items = null;
+                if (prioritizeEdges) {
+                    @items = array<WorldOutlineEdgeDrawItem@>();
+                    for (uint i = 0; i < outlineLineCount; i++) {
+                        items.InsertLast(WorldOutlineEdgeDrawItem(
+                            box.OutlineLineStarts[i],
+                            box.OutlineLineEnds[i],
+                            boxIndex,
+                            i
+                        ));
+                    }
+                    PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
+                }
+
                 if (CanBatchTriggerVolumeCustomOutline(box)) {
                     nvg::BeginPath();
                     nvg::StrokeColor(color);
                     bool drewAny = false;
-                    for (uint i = 0; i < outlineLineCount; i++) {
+                    uint drawCount = outlineLineCount;
+                    if (prioritizeEdges) drawCount = items.Length;
+                    for (uint i = 0; i < drawCount; i++) {
                         if (!HasWorldLineSegmentBudgetForVolume(box)) break;
+                        vec3 start = box.OutlineLineStarts[i];
+                        vec3 end = box.OutlineLineEnds[i];
+                        if (prioritizeEdges) {
+                            start = items[i].Start;
+                            end = items[i].End;
+                        }
                         drewAny = DrawWorldLineAdaptiveToCurrentPathForVolume(
-                            box.OutlineLineStarts[i],
-                            box.OutlineLineEnds[i],
+                            start,
+                            end,
                             cameraPos,
                             box,
                             allowAdaptiveSplitting
@@ -1550,15 +1690,25 @@ namespace TriggerVisualizer {
                     return;
                 }
 
-                for (uint i = 0; i < outlineLineCount; i++) {
+                uint drawCount = outlineLineCount;
+                if (prioritizeEdges) drawCount = items.Length;
+                for (uint i = 0; i < drawCount; i++) {
                     if (!HasWorldLineSegmentBudgetForVolume(box)) break;
+                    vec3 start = box.OutlineLineStarts[i];
+                    vec3 end = box.OutlineLineEnds[i];
+                    uint edgeIndex = i;
+                    if (prioritizeEdges) {
+                        start = items[i].Start;
+                        end = items[i].End;
+                        edgeIndex = items[i].EdgeIndex;
+                    }
                     DrawWorldLineAdaptiveColoredForVolume(
-                        box.OutlineLineStarts[i],
-                        box.OutlineLineEnds[i],
+                        start,
+                        end,
                         cameraPos,
                         color,
                         boxIndex,
-                        i,
+                        edgeIndex,
                         box,
                         allowAdaptiveSplitting
                     );
@@ -1603,19 +1753,45 @@ namespace TriggerVisualizer {
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
 
+                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(box, TRIGGER_VOLUME_EDGE_INDICES.Length);
+                array<WorldOutlineEdgeDrawItem@>@ items = null;
+                if (prioritizeEdges) {
+                    @items = array<WorldOutlineEdgeDrawItem@>();
+                    for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
+                        auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
+                        items.InsertLast(WorldOutlineEdgeDrawItem(
+                            corners[edge[0]],
+                            corners[edge[1]],
+                            boxIndex,
+                            i
+                        ));
+                    }
+                    PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
+                }
+
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
-                for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
+                uint drawCount = TRIGGER_VOLUME_EDGE_INDICES.Length;
+                if (prioritizeEdges) drawCount = items.Length;
+                for (uint i = 0; i < drawCount; i++) {
                     if (!HasWorldLineSegmentBudgetForVolume(box)) break;
                     auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
+                    vec3 start = corners[edge[0]];
+                    vec3 end = corners[edge[1]];
+                    uint edgeIndex = i;
+                    if (prioritizeEdges) {
+                        start = items[i].Start;
+                        end = items[i].End;
+                        edgeIndex = items[i].EdgeIndex;
+                    }
                     DrawWorldLineAdaptiveColoredForVolume(
-                        corners[edge[0]],
-                        corners[edge[1]],
+                        start,
+                        end,
                         cameraPos,
                         color,
                         boxIndex,
-                        i,
+                        edgeIndex,
                         box,
                         ShouldSplitTriggerVolumeOutlineEdges(box)
                     );

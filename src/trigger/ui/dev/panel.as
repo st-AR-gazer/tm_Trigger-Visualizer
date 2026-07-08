@@ -129,7 +129,9 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Tile Colors", OnOff(UI::S_RandomFillTileColors)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Tile Icons", OnOff(UI::S_ShowSkullTileIcons)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Skull Icon Scale", Text::Format("%.2f", UI::S_SkullTileIconScale)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offscreen Tile Culling", OnOff(UI::S_CullOffscreenWorldTiles)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Budget System", OnOff(UI::S_PerformanceBudgetsEnabled)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culling System", OnOff(UI::S_PerformanceCullingEnabled)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offscreen Tile Culling", OnOff(UI::ShouldCullOffscreenWorldTiles())));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tile Min Size", Text::Format("%.1f m", UI::S_FillTileMinSize)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tile Budget", tostring(UI::S_MaxFillTilesPerFrame)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Segment Budget", tostring(UI::S_MaxOutlineSegmentsPerFrame)));
@@ -137,6 +139,7 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Split Crystal Outlines", OnOff(UI::S_SplitCrystalOutlineEdges)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Patch Budget", tostring(UI::S_MaxTileIconPatchesPerFrame)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Max Subdivisions", tostring(UI::S_TileIconMaxSubdivisions)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Refresh System", OnOff(UI::S_PerformanceRefreshEnabled)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Editor Refresh", tostring(UI::S_OffzoneEditorRefreshIntervalMs) + " ms"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MT Editor Refresh", tostring(UI::S_MediaTrackerEditorRefreshIntervalMs) + " ms"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Render Skip", OnOff(UI::S_FastDrivingPerformanceMode)));

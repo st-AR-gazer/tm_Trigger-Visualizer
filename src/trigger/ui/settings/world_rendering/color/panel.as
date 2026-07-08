@@ -2,14 +2,12 @@
     namespace Trigger {
         namespace UI {
             void RenderColorSettingsUI() {
-                UI::Text("Trigger Volume Color");
                 if (UI::BeginCombo("Base color source##trigger-visualizer-color", GetColorSourceLabel(S_ColorSource))) {
                     RenderColorSourceOption(COLOR_SOURCE_UNIFORM);
                     RenderColorSourceOption(COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS);
                     UI::EndCombo();
                 }
                 UI::Separator();
-                UI::Text("Base");
                 S_BaseTriggerColor = UI::InputColor4(
                     "Uniform base color##trigger-visualizer-color",
                     S_BaseTriggerColor
@@ -25,7 +23,6 @@
                     );
                 }
                 UI::Separator();
-                UI::Text("Color Effects");
                 S_EnableDistanceFadeColor = UI::Checkbox(
                     "Tint by render distance fade##trigger-visualizer-color",
                     S_EnableDistanceFadeColor
@@ -47,7 +44,6 @@
                 );
                 UI::EndDisabled();
                 UI::Separator();
-                UI::Text("Appearance");
                 UI::SetNextItemWidth(220.0f);
                 S_OutlineAlpha = UI::SliderFloat("Outline alpha##trigger-visualizer-color", S_OutlineAlpha, 0.0f, 1.0f);
                 UI::SetNextItemWidth(220.0f);
@@ -61,7 +57,6 @@
                     "%.1f px"
                 );
                 UI::Separator();
-                UI::Text("Stable Random Colors");
                 S_RandomOutlineSegmentColors = UI::Checkbox(
                     "Random color per outline segment##trigger-visualizer-color",
                     S_RandomOutlineSegmentColors

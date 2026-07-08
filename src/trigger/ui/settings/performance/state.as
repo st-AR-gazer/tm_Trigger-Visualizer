@@ -1,6 +1,14 @@
 namespace TriggerVisualizer {
     namespace Trigger {
         namespace UI {
+            [Setting hidden name="Trigger: Performance budgets enabled"]
+            bool S_PerformanceBudgetsEnabled = true;
+            [Setting hidden name="Trigger: Performance culling enabled"]
+            bool S_PerformanceCullingEnabled = true;
+            [Setting hidden name="Trigger: Performance refresh enabled"]
+            bool S_PerformanceRefreshEnabled = true;
+            [Setting hidden name="Trigger: Merge adjacent trigger volumes"]
+            bool S_MergeAdjacentTriggerVolumes = true;
             [Setting hidden name="Trigger: Cull offscreen world tiles"]
             bool S_CullOffscreenWorldTiles = true;
             [Setting hidden name="Trigger: Fill tile minimum size" min=2 max=64]
@@ -41,22 +49,74 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: Speed render keep target keys"]
             string S_SpeedRenderKeepTargetKeys = DEFAULT_SPEED_RENDER_KEEP_TARGETS;
 
+            bool ArePerformanceBudgetsEnabled() {
+                return S_PerformanceBudgetsEnabled;
+            }
+
+            bool IsPerformanceCullingEnabled() {
+                return S_PerformanceCullingEnabled;
+            }
+
+            bool ShouldCullOffscreenWorldTiles() {
+                return S_PerformanceCullingEnabled && S_CullOffscreenWorldTiles;
+            }
+
+            bool IsPerformanceRefreshEnabled() {
+                return S_PerformanceRefreshEnabled;
+            }
+
+            void ApplyPerformanceDrawBudgetValues(
+                float fillTileMinSize,
+                int maxVisibleVolumes,
+                int maxFillTiles,
+                int maxOutlineSegments,
+                int maxCrystalOutlineSegments,
+                bool splitCrystalOutlineEdges,
+                int maxTileIconPatches,
+                int tileIconMaxSubdivisions
+            ) {
+                S_FillTileMinSize = fillTileMinSize;
+                S_MaxVisibleVolumesPerFrame = maxVisibleVolumes;
+                S_MaxFillTilesPerFrame = maxFillTiles;
+                S_MaxOutlineSegmentsPerFrame = maxOutlineSegments;
+                S_MaxCrystalOutlineSegmentsPerFrame = maxCrystalOutlineSegments;
+                S_SplitCrystalOutlineEdges = splitCrystalOutlineEdges;
+                S_MaxTileIconPatchesPerFrame = maxTileIconPatches;
+                S_TileIconMaxSubdivisions = tileIconMaxSubdivisions;
+                ClampPerformanceSettings();
+            }
+
+            void ApplyLowPerformanceDrawBudgetPreset() {
+                ApplyPerformanceDrawBudgetValues(6.0f, 256, 2048, 768, 256, false, 512, 4);
+            }
+
+            void ApplyMediumPerformanceDrawBudgetPreset() {
+                ApplyPerformanceDrawBudgetValues(4.0f, 512, 4096, 1536, 768, false, 1600, 6);
+            }
+
+            void ApplyHighPerformanceDrawBudgetPreset() {
+                ApplyPerformanceDrawBudgetValues(3.0f, 2048, 8192, 8192, 4096, true, 6400, 8);
+            }
+
             int NormalizeRefreshIntervalMs(int value) {
                 if (value <= 0) return REFRESH_INTERVAL_DISABLED;
                 return Math::Clamp(value, REFRESH_INTERVAL_MIN_ACTIVE_MS, REFRESH_INTERVAL_MAX_MS);
             }
 
             int GetOffzoneRefreshIntervalMsForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                if (!S_PerformanceRefreshEnabled) return REFRESH_INTERVAL_DISABLED;
                 if (ctx is null || !ctx.IsMapEditor) return REFRESH_INTERVAL_DISABLED;
                 return NormalizeRefreshIntervalMs(S_OffzoneEditorRefreshIntervalMs);
             }
 
             int GetMediaTrackerRefreshIntervalMsForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                if (!S_PerformanceRefreshEnabled) return REFRESH_INTERVAL_DISABLED;
                 if (ctx is null || !ctx.IsEditorMediaTracker) return REFRESH_INTERVAL_DISABLED;
                 return NormalizeRefreshIntervalMs(S_MediaTrackerEditorRefreshIntervalMs);
             }
 
             int GetCrystalRefreshIntervalMsForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                if (!S_PerformanceRefreshEnabled) return REFRESH_INTERVAL_DISABLED;
                 if (ctx is null || !ctx.IsMeshModeler) return REFRESH_INTERVAL_DISABLED;
                 return NormalizeRefreshIntervalMs(S_CrystalMeshModelerRefreshIntervalMs);
             }

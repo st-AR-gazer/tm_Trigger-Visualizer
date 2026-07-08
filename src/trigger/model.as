@@ -19,9 +19,6 @@ namespace TriggerVisualizer {
         const string TRIGGER_TYPE_TURBO = "turbo";
         const string TRIGGER_TYPE_TURBO2 = "turbo2";
         const string TRIGGER_TYPE_TURBO_ROULETTE = "turboroulette";
-        const string TRIGGER_TYPE_TURBO_ROULETTE_YELLOW = "turborouletteyellow";
-        const string TRIGGER_TYPE_TURBO_ROULETTE_CYAN = "turboroulettecyan";
-        const string TRIGGER_TYPE_TURBO_ROULETTE_PURPLE = "turboroulettepurple";
         const string TRIGGER_TYPE_BOOST = "boost";
         const string TRIGGER_TYPE_BOOST2 = "boost2";
         const string TRIGGER_TYPE_CRUISE = "cruise";
@@ -109,10 +106,17 @@ namespace TriggerVisualizer {
             if (key == "checkpoint" || key == "checkpoints" || key == "checkpointtrigger" || key == "checkpointtriggers" || key == "cp") return TRIGGER_TYPE_CHECKPOINT;
             if (key == "finish" || key == "finishtrigger" || key == "finishtriggers") return TRIGGER_TYPE_FINISH;
             if (key == "multilap" || key == "multilaptrigger" || key == "startfinish" || key == "startfinishtrigger") return TRIGGER_TYPE_MULTILAP;
-            if (key == "turborouletteyellow" || key == "turborandomyellow") return TRIGGER_TYPE_TURBO_ROULETTE_YELLOW;
-            if (key == "turboroulettecyan" || key == "turborandomcyan") return TRIGGER_TYPE_TURBO_ROULETTE_CYAN;
-            if (key == "turboroulettepurple" || key == "turborandompurple") return TRIGGER_TYPE_TURBO_ROULETTE_PURPLE;
-            if (key == "turboroulette" || key == "turborandom" || key == "randomturbo") return TRIGGER_TYPE_TURBO_ROULETTE;
+            if (
+                key == "turboroulette"
+                || key == "turborouletteyellow"
+                || key == "turboroulettecyan"
+                || key == "turboroulettepurple"
+                || key == "turborandom"
+                || key == "turborandomyellow"
+                || key == "turborandomcyan"
+                || key == "turborandompurple"
+                || key == "randomturbo"
+            ) return TRIGGER_TYPE_TURBO_ROULETTE;
             if (key == "turbo2" || key == "turbored") return TRIGGER_TYPE_TURBO2;
             if (key == "turbo" || key == "turbo1" || key == "turboyellow") return TRIGGER_TYPE_TURBO;
             if (key == "boost2" || key == "reactorboost2" || key == "reactorboost2legacy" || key == "reactorboost2oriented") return TRIGGER_TYPE_BOOST2;
@@ -204,13 +208,25 @@ namespace TriggerVisualizer {
         bool TriggerTargetListContains(const string &in targetKeys, const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
             if (key.Length == 0) return false;
-            return("|" + targetKeys).IndexOf("|" + key + "|") >= 0;
+            if (("|" + targetKeys).IndexOf("|" + key + "|") >= 0) return true;
+
+            auto parts = targetKeys.Split("|");
+            for (uint i = 0; i < parts.Length; i++) {
+                if (NormalizeTriggerTargetKey(parts[i]) == key) return true;
+            }
+            return false;
         }
 
         bool PreparedTriggerTargetListContains(const string &in preparedTargetKeys, const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
             if (key.Length == 0) return false;
-            return preparedTargetKeys.IndexOf("|" + key + "|") >= 0;
+            if (preparedTargetKeys.IndexOf("|" + key + "|") >= 0) return true;
+
+            auto parts = preparedTargetKeys.Split("|");
+            for (uint i = 0; i < parts.Length; i++) {
+                if (NormalizeTriggerTargetKey(parts[i]) == key) return true;
+            }
+            return false;
         }
 
         string AddTriggerTargetKey(const string &in targetKeys, const string &in rawKey) {
@@ -567,6 +583,22 @@ namespace TriggerVisualizer {
                 bool useDetectedLabel,
                 bool appendDetectedLabel
             ) const {
+                return DisplayLabelWithOptions(
+                    includeSourcePrefix,
+                    includeIslandIndex,
+                    useDetectedLabel,
+                    appendDetectedLabel,
+                    true
+                );
+            }
+
+            string DisplayLabelWithOptions(
+                bool includeSourcePrefix,
+                bool includeIslandIndex,
+                bool useDetectedLabel,
+                bool appendDetectedLabel,
+                bool includeMergedCount
+            ) const {
                 string label = SourceIndexLabel();
                 bool hasCustomLabel = Label.Length > 0;
                 bool hasDetectedLabel = DetectedLabel.Length > 0;
@@ -585,7 +617,7 @@ namespace TriggerVisualizer {
                 if (includeIslandIndex && HasIslandIndex && IslandCount > 1) {
                     label += " island " + tostring(IslandIndex + 1) + "/" + tostring(IslandCount);
                 }
-                if (IsMergedGroup && MergedVolumeCount > 1) {
+                if (includeMergedCount && IsMergedGroup && MergedVolumeCount > 1) {
                     label += " (" + tostring(MergedVolumeCount) + " joined)";
                 }
                 return label;
@@ -731,15 +763,7 @@ namespace TriggerVisualizer {
                 color = vec4(1.0f, 0.12f, 0.12f, 1.0f);
                 return true;
             }
-            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE_CYAN)) {
-                color = vec4(0.0f, 0.95f, 1.0f, 1.0f);
-                return true;
-            }
-            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE_PURPLE)) {
-                color = vec4(0.72f, 0.22f, 1.0f, 1.0f);
-                return true;
-            }
-            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE_YELLOW) || PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE)) {
+            if (PreparedTriggerTargetListContains(preparedTargetKeys, TRIGGER_TYPE_TURBO_ROULETTE)) {
                 color = vec4(1.0f, 0.88f, 0.0f, 1.0f);
                 return true;
             }
