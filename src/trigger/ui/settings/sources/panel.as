@@ -123,6 +123,7 @@ namespace TriggerVisualizer {
                     + "|offzone:" + SettingBoolKey(IsOffzoneSourceEnabledForContext(context))
                     + "|mt:" + SettingBoolKey(IsMediaTrackerSourceEnabledForContext(context))
                     + "|crystal:" + SettingBoolKey(IsCrystalSourceEnabledForContext(context))
+                    + "|crystal-custom-items:" + SettingBoolKey(S_CrystalCustomItemsAndBlockItemsOnly)
                     + "|mt-types:" + GetMediaTrackerEnabledSubtypesForContext(context);
             }
 
@@ -554,16 +555,30 @@ namespace TriggerVisualizer {
                     "mediatracker-profile-" + tostring(context),
                     mediaTrackerValue
                 );
-                if (mediaTrackerNext != mediaTrackerValue) SetMediaTrackerSourceEnabledForContext(context, mediaTrackerNext);
+                if (mediaTrackerNext != mediaTrackerValue) SetMediaTrackerSourceEnabledForContext(
+                    context,
+                    mediaTrackerNext
+                );
 
                 bool crystalValue = IsCrystalSourceEnabledForContext(context);
+                UI::BeginDisabled(S_CrystalCustomItemsAndBlockItemsOnly);
                 bool crystalNext = RenderSourceProfileToggleUI(
                     "Show Crystal",
                     "crystal-profile-" + tostring(context),
                     crystalValue
                 );
-                if (crystalNext != crystalValue) SetCrystalSourceEnabledForContext(context, crystalNext);
+                UI::EndDisabled();
+                if (!S_CrystalCustomItemsAndBlockItemsOnly && crystalNext != crystalValue) {
+                    SetCrystalSourceEnabledForContext(context, crystalNext);
+                }
 
+                bool customOnlyNext = UI::Checkbox(
+                    "Only scan custom blocks/items##trigger-visualizer-sources-crystal-custom-items",
+                    S_CrystalCustomItemsAndBlockItemsOnly
+                );
+                if (customOnlyNext != S_CrystalCustomItemsAndBlockItemsOnly) {
+                    SetCrystalCustomItemsAndBlockItemsOnly(customOnlyNext);
+                }
                 if (IsMediaTrackerSourceEnabledForContext(context)) {
                     UI::Separator();
                     UI::Text("MediaTracker Types");

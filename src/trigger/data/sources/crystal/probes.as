@@ -149,17 +149,22 @@ namespace TriggerVisualizer {
                     bool isVehicleTransformReset = text.IndexOf("vehicletransformreset") >= 0;
                     isVehicleTransformReset = isVehicleTransformReset || text.IndexOf("vehicletransformcarstadium") >= 0;
                     isVehicleTransformReset = isVehicleTransformReset || text.IndexOf("stadiumcar") >= 0;
+                    isVehicleTransformReset = isVehicleTransformReset || text.IndexOf("vehicletransformcarsport") >= 0;
+                    isVehicleTransformReset = isVehicleTransformReset || text.IndexOf("sportcar") >= 0;
                     isVehicleTransformReset = isVehicleTransformReset || text.IndexOf("gategameplaystadium") >= 0;
+                    isVehicleTransformReset = isVehicleTransformReset || text.IndexOf("gategameplaysport") >= 0;
+                    isVehicleTransformReset = isVehicleTransformReset || text.IndexOf("gameplaystadium") >= 0;
+                    isVehicleTransformReset = isVehicleTransformReset || text.IndexOf("gameplaysport") >= 0;
                     if (isVehicleTransformReset) {
                         next = AddTriggerTargetKey(next, TRIGGER_TYPE_VEHICLE_TRANSFORM_RESET);
                     }
-                    if (text.IndexOf("vehicletransformcarsnow") >= 0 || text.IndexOf("snowcar") >= 0 || text.IndexOf("gategameplaysnow") >= 0) {
+                    if (text.IndexOf("vehicletransformcarsnow") >= 0 || text.IndexOf("snowcar") >= 0 || text.IndexOf("gategameplaysnow") >= 0 || text.IndexOf("gameplaysnow") >= 0) {
                         next = AddTriggerTargetKey(next, TRIGGER_TYPE_VEHICLE_TRANSFORM_SNOW);
                     }
-                    if (text.IndexOf("vehicletransformcarrally") >= 0 || text.IndexOf("rallycar") >= 0 || text.IndexOf("gategameplayrally") >= 0) {
+                    if (text.IndexOf("vehicletransformcarrally") >= 0 || text.IndexOf("rallycar") >= 0 || text.IndexOf("gategameplayrally") >= 0 || text.IndexOf("gameplayrally") >= 0) {
                         next = AddTriggerTargetKey(next, TRIGGER_TYPE_VEHICLE_TRANSFORM_RALLY);
                     }
-                    if (text.IndexOf("vehicletransformcardesert") >= 0 || text.IndexOf("desertcar") >= 0 || text.IndexOf("gategameplaydesert") >= 0) {
+                    if (text.IndexOf("vehicletransformcardesert") >= 0 || text.IndexOf("desertcar") >= 0 || text.IndexOf("gategameplaydesert") >= 0 || text.IndexOf("gameplaydesert") >= 0) {
                         next = AddTriggerTargetKey(next, TRIGGER_TYPE_VEHICLE_TRANSFORM_DESERT);
                     }
 

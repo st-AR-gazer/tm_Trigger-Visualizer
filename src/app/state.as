@@ -3,7 +3,7 @@ namespace TriggerVisualizer {
 
     namespace App {
         [Setting hidden name="Dev panel open"]
-        bool S_DevPanelOpen = true;
+        bool S_DevPanelOpen = false;
         [Setting hidden name="Hide with game UI"]
         bool S_HideWithGame = true;
         [Setting hidden name="Hide with Openplanet UI"]
@@ -17,7 +17,7 @@ namespace TriggerVisualizer {
         }
 
         void ResetGeneralDeveloperSettingsToDefaults() {
-            S_DevPanelOpen = true;
+            S_DevPanelOpen = false;
         }
 
         void ResetGeneralSettingsToDefaults() {

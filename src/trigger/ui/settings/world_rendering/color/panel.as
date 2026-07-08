@@ -23,6 +23,33 @@
                     );
                 }
                 UI::Separator();
+                S_AnimateTurboRouletteColor = UI::Checkbox(
+                    "Animate turbo roulette color##trigger-visualizer-color",
+                    S_AnimateTurboRouletteColor
+                );
+                UI::BeginDisabled(!S_AnimateTurboRouletteColor);
+                UI::SetNextItemWidth(160.0f);
+                S_TurboRouletteYellowDurationMs = UI::InputInt(
+                    "Roulette yellow ms##trigger-visualizer-color",
+                    S_TurboRouletteYellowDurationMs
+                );
+                UI::SetNextItemWidth(160.0f);
+                S_TurboRouletteCyanDurationMs = UI::InputInt(
+                    "Roulette cyan ms##trigger-visualizer-color",
+                    S_TurboRouletteCyanDurationMs
+                );
+                UI::SetNextItemWidth(160.0f);
+                S_TurboRoulettePurpleDurationMs = UI::InputInt(
+                    "Roulette purple ms##trigger-visualizer-color",
+                    S_TurboRoulettePurpleDurationMs
+                );
+                UI::SetNextItemWidth(160.0f);
+                S_TurboRoulettePhaseOffsetMs = UI::InputInt(
+                    "Roulette phase offset ms##trigger-visualizer-color",
+                    S_TurboRoulettePhaseOffsetMs
+                );
+                UI::EndDisabled();
+                UI::Separator();
                 S_EnableDistanceFadeColor = UI::Checkbox(
                     "Tint by render distance fade##trigger-visualizer-color",
                     S_EnableDistanceFadeColor

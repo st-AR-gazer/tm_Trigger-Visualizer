@@ -99,6 +99,10 @@
                 S_DistanceFadeColor = ClampColor(S_DistanceFadeColor);
                 S_DenseLineSplitColor = ClampColor(S_DenseLineSplitColor);
                 S_MediaTrackerTrackOutlineHueShift = Math::Clamp(S_MediaTrackerTrackOutlineHueShift, -1.0f, 1.0f);
+                S_TurboRouletteYellowDurationMs = Math::Clamp(S_TurboRouletteYellowDurationMs, 50, 5000);
+                S_TurboRouletteCyanDurationMs = Math::Clamp(S_TurboRouletteCyanDurationMs, 50, 5000);
+                S_TurboRoulettePurpleDurationMs = Math::Clamp(S_TurboRoulettePurpleDurationMs, 50, 5000);
+                S_TurboRoulettePhaseOffsetMs = Math::Clamp(S_TurboRoulettePhaseOffsetMs, -10000, 10000);
                 S_SkullTileIconScale = Math::Clamp(S_SkullTileIconScale, 0.05f, 1.0f);
                 S_SkullTileIconAlpha = Math::Clamp(S_SkullTileIconAlpha, 0.0f, 1.0f);
             }
@@ -193,6 +197,11 @@
                 S_DistanceFadeColor = vec4(1.0f, 0.90f, 0.20f, 1.0f);
                 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
                 S_MediaTrackerTrackOutlineHueShift = 0.06f;
+                S_AnimateTurboRouletteColor = true;
+                S_TurboRouletteYellowDurationMs = 1000;
+                S_TurboRouletteCyanDurationMs = 1000;
+                S_TurboRoulettePurpleDurationMs = 1000;
+                S_TurboRoulettePhaseOffsetMs = 0;
                 S_OutlineAlpha = 0.20f;
                 S_FillAlpha = 0.03f;
                 S_OutlineWidth = 2.0f;
@@ -227,7 +236,7 @@
             }
 
             void ResetPerformanceBudgetSettingsToDefaults() {
-                S_PerformanceBudgetsEnabled = true;
+                S_PerformanceBudgetsEnabled = false;
                 S_FillTileMinSize = 4.0f;
                 S_MaxVisibleVolumesPerFrame = 512;
                 S_MaxFillTilesPerFrame = 4096;

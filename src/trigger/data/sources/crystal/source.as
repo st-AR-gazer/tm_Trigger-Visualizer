@@ -26,7 +26,7 @@ namespace TriggerVisualizer {
                     );
                 }
 
-                const uint CRYSTAL_SOURCE_BUILD_FRAME_BUDGET_MS = 4;
+                const uint CRYSTAL_SOURCE_BUILD_FRAME_BUDGET_MS = 1;
 
                 uint CrystalSourceBuildCheckpoint(uint frameStart) {
                     if (Time::Now - frameStart < CRYSTAL_SOURCE_BUILD_FRAME_BUDGET_MS) return frameStart;
@@ -65,7 +65,7 @@ namespace TriggerVisualizer {
                     );
                     AddCrystalDiagnostic(
                         source,
-                        "GateExpandableSpecial* areas use one approximate local rectangle per matching block from public Coord/Dir/variant-size placement plus MaterialModifier target metadata. Other expandable Crystal blocks use the normal block/item trigger discovery paths."
+                        "GateExpandableSpecial* and GateExpandableGameplay* areas use one approximate local rectangle per matching block from public Coord/Dir/variant-size placement plus material/name target metadata. Other expandable Crystal blocks use the normal block/item trigger discovery paths."
                     );
                     AddCrystalDiagnostic(
                         source,
@@ -90,6 +90,10 @@ namespace TriggerVisualizer {
                     AddCrystalDiagnostic(
                         source,
                         "Item CGameGateModel Shape and CGameTeleporterModel TriggerShape are rendered when exposed through EntityModel, EntityModelEdition, PhyModel, or prefab entries."
+                    );
+                    AddCrystalDiagnostic(
+                        source,
+                        "Item CGameObjectPhyModel TriggerShape DataRefs are resolved through Fids::Preload and rendered through anchored-object placement when exposed."
                     );
                     AddCrystalDiagnostic(
                         source,
@@ -140,12 +144,19 @@ namespace TriggerVisualizer {
                     if (ctx is null || !ctx.HasMap || ctx.RootMap is null || !enabled) return source;
 
                     uint frameStart = Time::Now;
-                    ProbeCrystalExpandableBlockUnitTriggers(source, ctx.RootMap);
-                    frameStart = CrystalSourceBuildCheckpoint(frameStart);
-                    ProbeCrystalBlocks(source, ctx.RootMap);
-                    frameStart = CrystalSourceBuildCheckpoint(frameStart);
                     ProbeCrystalAnchoredObjects(source, ctx.RootMap);
                     frameStart = CrystalSourceBuildCheckpoint(frameStart);
+                    if (TriggerVisualizer::Trigger::UI::S_CrystalCustomItemsAndBlockItemsOnly) {
+                        AddCrystalDiagnostic(
+                            source,
+                            "Crystal custom item/block-item mode is enabled; placed/baked Nadeo block and expandable rectangle probing is skipped."
+                        );
+                    } else {
+                        ProbeCrystalExpandableBlockUnitTriggers(source, ctx.RootMap);
+                        frameStart = CrystalSourceBuildCheckpoint(frameStart);
+                        ProbeCrystalBlocks(source, ctx.RootMap);
+                        frameStart = CrystalSourceBuildCheckpoint(frameStart);
+                    }
                     AddCrystalFinalCountsDiagnostic(source);
 
                     return source;

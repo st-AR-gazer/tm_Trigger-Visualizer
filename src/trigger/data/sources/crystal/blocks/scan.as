@@ -163,21 +163,68 @@ namespace TriggerVisualizer {
                     }
                 }
 
-                void ProbeCrystalBlocks(TriggerSourceSnapshot@ source, CGameCtnChallenge@ map) {
-                    if (source is null || map is null) return;
+                bool CrystalBlockVariantHasEarlyTriggerSurface(CGameCtnBlockInfoVariant@ variant) {
+                    if (variant is null) return false;
+                    if (variant.WaypointTriggerShape !is null) return true;
+                    if (variant.ScreenInteractionTriggerShape !is null) return true;
+                    if (variant.Gate !is null && variant.Gate.Shape !is null) return true;
+                    if (variant.Teleporter !is null && variant.Teleporter.TriggerShape !is null) return true;
+                    if (variant.WaypointTriggerShape is null && variant.DeprecWaypointTriggerSolid !is null) return true;
+                    if (variant.ScreenInteractionTriggerShape is null && variant.DeprecScreenInteractionTriggerSolid !is null) return true;
+                    return false;
+                }
+
+                bool CrystalBlockShouldProbeEarly(CGameCtnBlock@ block) {
+                    if (block is null) return false;
+                    return CrystalBlockVariantHasEarlyTriggerSurface(GetCrystalBlockVariantWithBaseFallback(block));
+                }
+
+                bool ProbeCrystalBlocksWithProgress(
+                    TriggerSourceSnapshot@ source,
+                    CGameCtnChallenge@ map,
+                    const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                    const string &in contextKey,
+                    uint blockCount,
+                    uint bakedBlockCount,
+                    uint anchoredObjectCount,
+                    uint cacheVersion
+                ) {
+                    if (source is null || map is null) return true;
 
                     source.RawBlockCount = map.Blocks.Length;
                     source.RawBakedBlockCount = map.BakedBlocks.Length;
                     uint frameStart = Time::Now;
 
                     for (uint i = 0; i < map.Blocks.Length; i++) {
+                        if (!CrystalBlockShouldProbeEarly(map.Blocks[i])) continue;
                         ProbeCrystalBlockVariant(source, map, map.Blocks[i], i, "Block");
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
+                        if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) return false;
                     }
                     for (uint i = 0; i < map.BakedBlocks.Length; i++) {
+                        if (!CrystalBlockShouldProbeEarly(map.BakedBlocks[i])) continue;
                         ProbeCrystalBlockVariant(source, map, map.BakedBlocks[i], i, "BakedBlock");
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
+                        if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) return false;
                     }
+                    if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source, true)) return false;
+                    for (uint i = 0; i < map.Blocks.Length; i++) {
+                        if (CrystalBlockShouldProbeEarly(map.Blocks[i])) continue;
+                        ProbeCrystalBlockVariant(source, map, map.Blocks[i], i, "Block");
+                        frameStart = CrystalSourceBuildCheckpoint(frameStart);
+                        if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) return false;
+                    }
+                    for (uint i = 0; i < map.BakedBlocks.Length; i++) {
+                        if (CrystalBlockShouldProbeEarly(map.BakedBlocks[i])) continue;
+                        ProbeCrystalBlockVariant(source, map, map.BakedBlocks[i], i, "BakedBlock");
+                        frameStart = CrystalSourceBuildCheckpoint(frameStart);
+                        if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) return false;
+                    }
+                    return true;
+                }
+
+                void ProbeCrystalBlocks(TriggerSourceSnapshot@ source, CGameCtnChallenge@ map) {
+                    ProbeCrystalBlocksWithProgress(source, map, null, "", 0, 0, 0, 0);
                 }
             }
         }

@@ -64,7 +64,6 @@ namespace TriggerVisualizer {
 
                 UI::TableNextColumn();
                 UI::Text(label);
-
                 if (mode != TARGET_SELECTION_MODE_LABELS) return;
 
                 UI::TableNextColumn();
@@ -82,13 +81,20 @@ namespace TriggerVisualizer {
             ) {
                 int columns = mode == TARGET_SELECTION_MODE_LABELS ? 3 : 2;
                 if (UI::BeginTable("trigger-visualizer-target-selection-table-" + id, columns, UI::TableFlags::SizingStretchProp | UI::TableFlags::BordersInnerV | UI::TableFlags::RowBg)) {
-                    UI::TableSetupColumn(TargetSelectionPrimaryColumnLabel(mode), UI::TableColumnFlags::WidthFixed, 54.0f);
-                    UI::TableSetupColumn("Target", mode == TARGET_SELECTION_MODE_LABELS ? UI::TableColumnFlags::WidthFixed : UI::TableColumnFlags::None, 170.0f);
+                    UI::TableSetupColumn(
+                        TargetSelectionPrimaryColumnLabel(mode),
+                        UI::TableColumnFlags::WidthFixed,
+                        54.0f
+                    );
+                    UI::TableSetupColumn(
+                        "Target",
+                        mode == TARGET_SELECTION_MODE_LABELS ? UI::TableColumnFlags::WidthFixed : UI::TableColumnFlags::None,
+                        170.0f
+                    );
                     if (mode == TARGET_SELECTION_MODE_LABELS) {
                         UI::TableSetupColumn("Label Override");
                     }
                     UI::TableHeadersRow();
-
                     uint count = labels.Length;
                     if (keys.Length < count) count = keys.Length;
                     for (uint i = 0; i < count; i++) {

@@ -25,11 +25,14 @@
             float S_LabelAlpha = 0.95f;
             const string DEFAULT_LABEL_TARGET_KEYS = "offzone|mediatracker|crystal|checkpoint|finish|startfinish|turbo|turbo2|turboroulette|boost|boost2|cruise|nobrakes|noengine|nosteering|slowmo|fragile|reset|forceacceleration|nogrip|vehicletransformreset|vehicletransformcarsnow|vehicletransformcarrally|vehicletransformcardesert|camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|playercamerasubtypecamhelico|playercamerasubtypecamfree|playercamerasubtypecamspectator|2dtriangles|3dtriangles|colorsfx|colorgrading|depthoffield|dirtylens|fadingtransition|fog|hdrbloom|image|inertialtrackingcamfx|shakecamfx|stereo3d|tonemapping|vehiclelights|cartrails|ghost|manialinkui|manialinkurl|musicvolume|opponentvisibility|soundfx|spectators|text|time|timespeed|gps|editingcut|mediatrackerreset|mixed|unknown|crystalblock|crystalblockwaypoint|crystalscreeninteraction|crystalgate|crystalteleporter|crystalitem|crystalblockitem|";
             const string DEFAULT_LABEL_TARGET_OVERRIDE_TEXTS = "checkpoint=Checkpoint|finish=Finish|startfinish=Multilap|turbo=Turbo|turbo2=Turbo2|turboroulette=TurboR|boost=Boost|boost2=Boost2|cruise=Cruise|nobrakes=No%20Brakes|noengine=No%20Engine|nosteering=No%20Steering|slowmo=Slowmo|fragile=Fragile|reset=Reset|forceacceleration=Forced%20Acceleration|nogrip=No%20Grip|vehicletransformreset=Stadium%20Car|vehicletransformcarsnow=Snow%20Car|vehicletransformcarrally=Rally%20Car|vehicletransformcardesert=Desert%20Car|";
+
             [Setting hidden name="Trigger: Label target keys"]
             string S_LabelTargetKeys = DEFAULT_LABEL_TARGET_KEYS;
             [Setting hidden name="Trigger: Label target override texts"]
             string S_LabelTargetOverrideTexts = DEFAULT_LABEL_TARGET_OVERRIDE_TEXTS;
             dictionary G_LabelTargetOverrideInputs;
+            string G_LabelTargetKeyCacheSource;
+            array<string> G_LabelTargetKeyCache;
 
             string EncodeLabelTargetOverrideText(const string &in value) {
                 return Net::UrlEncode(value);
@@ -96,6 +99,19 @@
                 SetLabelTargetOverrideText(key, value);
             }
 
+            void RebuildLabelTargetKeyCacheIfNeeded() {
+                if (G_LabelTargetKeyCacheSource == S_LabelTargetKeys) return;
+
+                G_LabelTargetKeyCacheSource = S_LabelTargetKeys;
+                G_LabelTargetKeyCache.Resize(0);
+                auto parts = S_LabelTargetKeys.Split("|");
+                for (uint i = 0; i < parts.Length; i++) {
+                    string key = TriggerVisualizer::Trigger::NormalizeTriggerTargetKey(parts[i]);
+                    if (key.Length == 0 || IsLabelSourceTargetKey(key)) continue;
+                    G_LabelTargetKeyCache.InsertLast(key);
+                }
+            }
+
             bool IsLabelTargetEnabled(const string &in rawKey) {
                 return TriggerVisualizer::Trigger::TriggerTargetListContains(S_LabelTargetKeys, rawKey);
             }
@@ -120,11 +136,12 @@
                 if (volume is null) return false;
                 if (S_LabelTargetKeys.Length == 0) return false;
 
-                auto parts = S_LabelTargetKeys.Split("|");
-                for (uint i = 0; i < parts.Length; i++) {
-                    string key = TriggerVisualizer::Trigger::NormalizeTriggerTargetKey(parts[i]);
-                    if (key.Length == 0) continue;
-                    if (TriggerVisualizer::Trigger::TriggerVolumeMatchesTargetKey(volume, key)) return true;
+                string sourceKey = TriggerVisualizer::Trigger::GetTriggerSourceTargetKey(volume.Source);
+                if (sourceKey.Length > 0 && TriggerVisualizer::Trigger::TriggerTargetListContains(S_LabelTargetKeys, sourceKey)) return true;
+
+                RebuildLabelTargetKeyCacheIfNeeded();
+                for (uint i = 0; i < G_LabelTargetKeyCache.Length; i++) {
+                    if (TriggerVisualizer::Trigger::TriggerVolumeMatchesTargetKey(volume, G_LabelTargetKeyCache[i])) return true;
                 }
                 return false;
             }

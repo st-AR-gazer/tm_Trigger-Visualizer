@@ -29,67 +29,6 @@ namespace TriggerVisualizer {
                 UI::EndDisabled();
             }
 
-            void RenderPerformanceBudgetSettingsUI() {
-                S_PerformanceBudgetsEnabled = UI::Checkbox(
-                    "Enable draw budgets##trigger-visualizer-performance",
-                    S_PerformanceBudgetsEnabled
-                );
-                UI::BeginDisabled(!S_PerformanceBudgetsEnabled);
-                UI::Text("Budget Presets");
-                if (TriggerVisualizer::Shared::StyledButton("Low##trigger-visualizer-performance-budget-preset-low")) {
-                    ApplyLowPerformanceDrawBudgetPreset();
-                }
-                UI::SameLine();
-                if (TriggerVisualizer::Shared::StyledButton("Medium##trigger-visualizer-performance-budget-preset-medium")) {
-                    ApplyMediumPerformanceDrawBudgetPreset();
-                }
-                UI::SameLine();
-                if (TriggerVisualizer::Shared::StyledButton("High##trigger-visualizer-performance-budget-preset-high")) {
-                    ApplyHighPerformanceDrawBudgetPreset();
-                }
-                UI::Separator();
-                UI::SetNextItemWidth(220.0f);
-                S_FillTileMinSize = UI::InputFloat(
-                    "Fill tile minimum size##trigger-visualizer-performance",
-                    S_FillTileMinSize
-                );
-                UI::SetNextItemWidth(220.0f);
-                S_MaxVisibleVolumesPerFrame = UI::InputInt(
-                    "Max visible volumes per frame##trigger-visualizer-performance",
-                    S_MaxVisibleVolumesPerFrame
-                );
-                UI::SetNextItemWidth(220.0f);
-                S_MaxFillTilesPerFrame = UI::InputInt(
-                    "Max fill tiles per frame##trigger-visualizer-performance",
-                    S_MaxFillTilesPerFrame
-                );
-                UI::SetNextItemWidth(220.0f);
-                S_MaxOutlineSegmentsPerFrame = UI::InputInt(
-                    "Max outline segments per frame##trigger-visualizer-performance",
-                    S_MaxOutlineSegmentsPerFrame
-                );
-                UI::SetNextItemWidth(220.0f);
-                S_MaxCrystalOutlineSegmentsPerFrame = UI::InputInt(
-                    "Max Crystal outline segments per frame##trigger-visualizer-performance",
-                    S_MaxCrystalOutlineSegmentsPerFrame
-                );
-                S_SplitCrystalOutlineEdges = UI::Checkbox(
-                    "Split Crystal outline edges##trigger-visualizer-performance",
-                    S_SplitCrystalOutlineEdges
-                );
-                UI::SetNextItemWidth(220.0f);
-                S_MaxTileIconPatchesPerFrame = UI::InputInt(
-                    "Max tile icon patches per frame##trigger-visualizer-performance",
-                    S_MaxTileIconPatchesPerFrame
-                );
-                UI::SetNextItemWidth(220.0f);
-                S_TileIconMaxSubdivisions = UI::InputInt(
-                    "Tile icon max subdivisions##trigger-visualizer-performance",
-                    S_TileIconMaxSubdivisions
-                );
-                UI::EndDisabled();
-            }
-
             int RenderRefreshIntervalInput(const string &in id, int value) {
                 UI::SetNextItemWidth(120.0f);
                 return NormalizeRefreshIntervalMs(UI::InputInt("##trigger-visualizer-performance-refresh-" + id, value));
@@ -162,10 +101,6 @@ namespace TriggerVisualizer {
 
             void RenderPerformanceSettingsUI() {
                 UI::BeginTabBar("trigger-visualizer-performance-tabs");
-                if (UI::BeginTabItem("Budgets")) {
-                    RenderPerformanceBudgetSettingsUI();
-                    UI::EndTabItem();
-                }
                 if (UI::BeginTabItem("Culling")) {
                     RenderPerformanceCullingSettingsUI();
                     UI::EndTabItem();

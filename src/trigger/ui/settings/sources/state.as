@@ -34,6 +34,16 @@ namespace TriggerVisualizer {
             bool S_ShowCrystalSourceMediaTracker = false;
             [Setting hidden name="Trigger: Show crystal source mesh modeler"]
             bool S_ShowCrystalSourceMeshModeler = true;
+            [Setting hidden name="Trigger: Crystal custom items and block-items only"]
+            bool S_CrystalCustomItemsAndBlockItemsOnly = false;
+            [Setting hidden name="Trigger: Show crystal source before custom-only"]
+            bool S_ShowCrystalSourceBeforeCustomOnly = false;
+            [Setting hidden name="Trigger: Show crystal source editor before custom-only"]
+            bool S_ShowCrystalSourceEditorBeforeCustomOnly = true;
+            [Setting hidden name="Trigger: Show crystal source mediatracker before custom-only"]
+            bool S_ShowCrystalSourceMediaTrackerBeforeCustomOnly = false;
+            [Setting hidden name="Trigger: Show crystal source mesh modeler before custom-only"]
+            bool S_ShowCrystalSourceMeshModelerBeforeCustomOnly = true;
             [Setting hidden name="Trigger: MediaTracker enabled subtypes playing"]
             string S_MediaTrackerEnabledSubtypesPlaying = DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
             [Setting hidden name="Trigger: MediaTracker enabled subtypes editor"]
@@ -106,13 +116,43 @@ namespace TriggerVisualizer {
             }
 
             bool IsCrystalSourceEnabledForContext(int context) {
+                if (S_CrystalCustomItemsAndBlockItemsOnly) return false;
                 if (context == SOURCE_SETTINGS_EDITOR) return S_ShowCrystalSourceEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_ShowCrystalSourceMediaTracker;
                 if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_ShowCrystalSourceMeshModeler;
                 return S_ShowCrystalSource;
             }
 
+            void SetAllCrystalSourceContextsEnabled(bool value) {
+                S_ShowCrystalSource = value;
+                S_ShowCrystalSourceEditor = value;
+                S_ShowCrystalSourceMediaTracker = value;
+                S_ShowCrystalSourceMeshModeler = value;
+            }
+
+            void SaveCrystalSourceContextsBeforeCustomOnly() {
+                S_ShowCrystalSourceBeforeCustomOnly = S_ShowCrystalSource;
+                S_ShowCrystalSourceEditorBeforeCustomOnly = S_ShowCrystalSourceEditor;
+                S_ShowCrystalSourceMediaTrackerBeforeCustomOnly = S_ShowCrystalSourceMediaTracker;
+                S_ShowCrystalSourceMeshModelerBeforeCustomOnly = S_ShowCrystalSourceMeshModeler;
+            }
+
+            void RestoreCrystalSourceContextsBeforeCustomOnly() {
+                S_ShowCrystalSource = S_ShowCrystalSourceBeforeCustomOnly;
+                S_ShowCrystalSourceEditor = S_ShowCrystalSourceEditorBeforeCustomOnly;
+                S_ShowCrystalSourceMediaTracker = S_ShowCrystalSourceMediaTrackerBeforeCustomOnly;
+                S_ShowCrystalSourceMeshModeler = S_ShowCrystalSourceMeshModelerBeforeCustomOnly;
+            }
+
+            void ResetCrystalSourceContextsBeforeCustomOnlyToDefaults() {
+                S_ShowCrystalSourceBeforeCustomOnly = false;
+                S_ShowCrystalSourceEditorBeforeCustomOnly = true;
+                S_ShowCrystalSourceMediaTrackerBeforeCustomOnly = false;
+                S_ShowCrystalSourceMeshModelerBeforeCustomOnly = true;
+            }
+
             void SetCrystalSourceEnabledForContext(int context, bool value) {
+                if (S_CrystalCustomItemsAndBlockItemsOnly) value = false;
                 if (context == SOURCE_SETTINGS_EDITOR) {
                     S_ShowCrystalSourceEditor = value;
                     return;
@@ -126,6 +166,18 @@ namespace TriggerVisualizer {
                     return;
                 }
                 S_ShowCrystalSource = value;
+            }
+
+            void SetCrystalCustomItemsAndBlockItemsOnly(bool value) {
+                if (value == S_CrystalCustomItemsAndBlockItemsOnly) return;
+                if (value) {
+                    SaveCrystalSourceContextsBeforeCustomOnly();
+                    S_CrystalCustomItemsAndBlockItemsOnly = true;
+                    SetAllCrystalSourceContextsEnabled(false);
+                    return;
+                }
+                S_CrystalCustomItemsAndBlockItemsOnly = value;
+                RestoreCrystalSourceContextsBeforeCustomOnly();
             }
 
             string GetMediaTrackerEnabledSubtypesForContext(int context) {
@@ -254,6 +306,8 @@ namespace TriggerVisualizer {
                 S_ShowCrystalSourceEditor = true;
                 S_ShowCrystalSourceMediaTracker = false;
                 S_ShowCrystalSourceMeshModeler = true;
+                S_CrystalCustomItemsAndBlockItemsOnly = false;
+                ResetCrystalSourceContextsBeforeCustomOnlyToDefaults();
                 S_MediaTrackerEnabledSubtypesPlaying = DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
                 S_MediaTrackerEnabledSubtypesEditor = DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR;
                 S_MediaTrackerEnabledSubtypesMediaTracker = DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;

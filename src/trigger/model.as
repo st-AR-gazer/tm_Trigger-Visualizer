@@ -106,17 +106,7 @@ namespace TriggerVisualizer {
             if (key == "checkpoint" || key == "checkpoints" || key == "checkpointtrigger" || key == "checkpointtriggers" || key == "cp") return TRIGGER_TYPE_CHECKPOINT;
             if (key == "finish" || key == "finishtrigger" || key == "finishtriggers") return TRIGGER_TYPE_FINISH;
             if (key == "multilap" || key == "multilaptrigger" || key == "startfinish" || key == "startfinishtrigger") return TRIGGER_TYPE_MULTILAP;
-            if (
-                key == "turboroulette"
-                || key == "turborouletteyellow"
-                || key == "turboroulettecyan"
-                || key == "turboroulettepurple"
-                || key == "turborandom"
-                || key == "turborandomyellow"
-                || key == "turborandomcyan"
-                || key == "turborandompurple"
-                || key == "randomturbo"
-            ) return TRIGGER_TYPE_TURBO_ROULETTE;
+            if (key == "turboroulette" || key == "turborouletteyellow" || key == "turboroulettecyan" || key == "turboroulettepurple" || key == "turborandom" || key == "turborandomyellow" || key == "turborandomcyan" || key == "turborandompurple" || key == "randomturbo") return TRIGGER_TYPE_TURBO_ROULETTE;
             if (key == "turbo2" || key == "turbored") return TRIGGER_TYPE_TURBO2;
             if (key == "turbo" || key == "turbo1" || key == "turboyellow") return TRIGGER_TYPE_TURBO;
             if (key == "boost2" || key == "reactorboost2" || key == "reactorboost2legacy" || key == "reactorboost2oriented") return TRIGGER_TYPE_BOOST2;
@@ -208,25 +198,26 @@ namespace TriggerVisualizer {
         bool TriggerTargetListContains(const string &in targetKeys, const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
             if (key.Length == 0) return false;
-            if (("|" + targetKeys).IndexOf("|" + key + "|") >= 0) return true;
+            string preparedTargetKeys = "|" + targetKeys;
+            if (preparedTargetKeys.IndexOf("|" + key + "|") >= 0) return true;
+            return PreparedTriggerTargetListContainsLegacyAlias(preparedTargetKeys, key);
+        }
 
-            auto parts = targetKeys.Split("|");
-            for (uint i = 0; i < parts.Length; i++) {
-                if (NormalizeTriggerTargetKey(parts[i]) == key) return true;
-            }
-            return false;
+        bool PreparedTriggerTargetListContainsLegacyAlias(const string &in preparedTargetKeys, const string &in key) {
+            if (key != TRIGGER_TYPE_TURBO_ROULETTE) return false;
+            return preparedTargetKeys.IndexOf("|turborouletteyellow|") >= 0
+                || preparedTargetKeys.IndexOf("|turboroulettecyan|") >= 0
+                || preparedTargetKeys.IndexOf("|turboroulettepurple|") >= 0
+                || preparedTargetKeys.IndexOf("|turborandomyellow|") >= 0
+                || preparedTargetKeys.IndexOf("|turborandomcyan|") >= 0
+                || preparedTargetKeys.IndexOf("|turborandompurple|") >= 0;
         }
 
         bool PreparedTriggerTargetListContains(const string &in preparedTargetKeys, const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
             if (key.Length == 0) return false;
             if (preparedTargetKeys.IndexOf("|" + key + "|") >= 0) return true;
-
-            auto parts = preparedTargetKeys.Split("|");
-            for (uint i = 0; i < parts.Length; i++) {
-                if (NormalizeTriggerTargetKey(parts[i]) == key) return true;
-            }
-            return false;
+            return PreparedTriggerTargetListContainsLegacyAlias(preparedTargetKeys, key);
         }
 
         string AddTriggerTargetKey(const string &in targetKeys, const string &in rawKey) {
@@ -725,6 +716,14 @@ namespace TriggerVisualizer {
             string sourceKey = GetTriggerSourceTargetKey(volume.Source);
             if (sourceKey.Length > 0 && sourceKey == key) return true;
             return NormalizeTriggerTargetKey(volume.SubtypeKey) == key;
+        }
+
+        bool TriggerTargetKeysHaveTurboRoulette(const string &in targetKeys) {
+            return TriggerTargetListContains(targetKeys, TRIGGER_TYPE_TURBO_ROULETTE);
+        }
+
+        bool TriggerVolumeIsTurboRoulette(const TriggerVolume@ volume) {
+            return volume !is null && TriggerTargetKeysHaveTurboRoulette(volume.TargetKeys);
         }
 
         bool TryGetTriggerTypeColorForTargetKeys(const string &in targetKeys, vec4 &out color) {

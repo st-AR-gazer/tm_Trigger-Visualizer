@@ -26,6 +26,16 @@ namespace TriggerVisualizer {
             vec4 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
             [Setting hidden name="Trigger: MediaTracker track outline hue shift" min=-1 max=1]
             float S_MediaTrackerTrackOutlineHueShift = 0.06f;
+            [Setting hidden name="Trigger: Animate turbo roulette color"]
+            bool S_AnimateTurboRouletteColor = true;
+            [Setting hidden name="Trigger: Turbo roulette yellow duration ms" min=50 max=5000]
+            int S_TurboRouletteYellowDurationMs = 800;
+            [Setting hidden name="Trigger: Turbo roulette cyan duration ms" min=50 max=5000]
+            int S_TurboRouletteCyanDurationMs = 350;
+            [Setting hidden name="Trigger: Turbo roulette purple duration ms" min=50 max=5000]
+            int S_TurboRoulettePurpleDurationMs = 350;
+            [Setting hidden name="Trigger: Turbo roulette phase offset ms" min=-10000 max=10000]
+            int S_TurboRoulettePhaseOffsetMs = 0;
             [Setting hidden name="Trigger: Outline alpha" min=0 max=1]
             float S_OutlineAlpha = 0.20f;
             [Setting hidden name="Trigger: Fill alpha" min=0 max=1]

@@ -10,7 +10,7 @@ namespace TriggerVisualizer {
                 class CrystalExpandableRectangleStats {
                     uint BlocksScanned = 0;
                     uint ExpandableCandidates = 0;
-                    uint NamedSpecialGateCandidates = 0;
+                    uint NamedRectangleGateCandidates = 0;
                     uint TargetBlocks = 0;
                     uint RectanglesRendered = 0;
                     uint RectanglesMerged = 0;
@@ -101,9 +101,10 @@ namespace TriggerVisualizer {
                     return "";
                 }
 
-                bool CrystalExpandableBlockNameLooksSpecialGate(CGameCtnBlock@ block) {
+                bool CrystalExpandableBlockNameLooksRectangleGate(CGameCtnBlock@ block) {
                     string name = CrystalExpandableBlockInfoName(block).ToLower();
-                    return name.StartsWith("gateexpandablespecial");
+                    return name.StartsWith("gateexpandablespecial")
+                        || name.StartsWith("gateexpandablegameplay");
                 }
 
                 bool CrystalExpandableBlockCanCarryRectangle(CGameCtnBlock@ block) {
@@ -122,9 +123,9 @@ namespace TriggerVisualizer {
                 bool CrystalExpandableBlockShouldUseRectangle(CGameCtnBlock@ block, CGameCtnBlockInfoVariant@ variant) {
                     if (block is null || block.BlockInfo is null || variant is null) return false;
                     if (!CrystalExpandableVariantHasFreeClips(variant)) return false;
-                    if (!CrystalExpandableBlockNameLooksSpecialGate(block)) return false;
+                    if (!CrystalExpandableBlockNameLooksRectangleGate(block)) return false;
                     if (!CrystalExpandableBlockCanCarryRectangle(block)) return false;
-                    return CrystalBlockHasGameplaySpecialMaterialModifier(block);
+                    return CrystalTargetKeysHaveGameplaySpecial(GetCrystalExpandableRectangleTargetKeys(block));
                 }
 
                 string GetCrystalExpandableSpecialGateBaseTargetKeys() {
@@ -136,9 +137,13 @@ namespace TriggerVisualizer {
                 }
 
                 string GetCrystalExpandableSpecialGateTargetKeys(CGameCtnBlock@ block) {
-                    return AddCrystalBlockMaterialModifierTargetKeys(
+                    string keys = AddCrystalBlockMaterialModifierTargetKeys(
                         GetCrystalExpandableSpecialGateBaseTargetKeys(),
                         block
+                    );
+                    return AddCrystalTriggerTypeTargetKeysFromText(
+                        keys,
+                        CrystalExpandableBlockInfoName(block)
                     );
                 }
 
@@ -465,6 +470,7 @@ namespace TriggerVisualizer {
                     if (source is null || rectangles is null || stats is null) return;
 
                     auto consumed = array<bool>(rectangles.Length, false);
+                    uint frameStart = Time::Now;
                     for (uint i = 0; i < rectangles.Length; i++) {
                         if (consumed[i] || rectangles[i] is null) continue;
 
@@ -484,7 +490,9 @@ namespace TriggerVisualizer {
 
                                 consumed[j] = true;
                                 pending.InsertLast(j);
+                                frameStart = CrystalSourceBuildCheckpoint(frameStart);
                             }
+                            frameStart = CrystalSourceBuildCheckpoint(frameStart);
                         }
 
                         auto grouped = BuildCrystalExpandableRectangleGroup(rectangles, memberIndices);
@@ -495,6 +503,7 @@ namespace TriggerVisualizer {
                         if (memberIndices.Length > 1) {
                             stats.ConnectedRectanglesGrouped += memberIndices.Length;
                         }
+                        frameStart = CrystalSourceBuildCheckpoint(frameStart);
                     }
                 }
 
@@ -517,8 +526,8 @@ namespace TriggerVisualizer {
                         auto variant = GetCrystalBlockVariantWithBaseFallback(block);
                         if (CrystalExpandableVariantHasFreeClips(variant)) {
                             stats.ExpandableCandidates++;
-                            if (CrystalExpandableBlockNameLooksSpecialGate(block)) {
-                                stats.NamedSpecialGateCandidates++;
+                            if (CrystalExpandableBlockNameLooksRectangleGate(block)) {
+                                stats.NamedRectangleGateCandidates++;
                             }
                         }
                         if (!CrystalExpandableBlockShouldUseRectangle(block, variant)) {
@@ -569,8 +578,8 @@ namespace TriggerVisualizer {
                         + " placed blocks, saw "
                         + tostring(stats.ExpandableCandidates)
                         + " expandable candidates, saw "
-                        + tostring(stats.NamedSpecialGateCandidates)
-                        + " GateExpandableSpecial name candidates, matched "
+                        + tostring(stats.NamedRectangleGateCandidates)
+                        + " GateExpandableSpecial/Gameplay name candidates, matched "
                         + tostring(stats.TargetBlocks)
                         + " gameplay-special expandable gate blocks, rendered "
                         + tostring(stats.RectanglesRendered)
@@ -582,7 +591,7 @@ namespace TriggerVisualizer {
                         + tostring(stats.RectanglesMerged)
                         + " duplicate-position rectangles, rejected "
                         + tostring(stats.RectanglesRejected)
-                        + ". Geometry is one approximate local rectangle per GateExpandableSpecial* block with public expandable/free-clip support and gameplay-special MaterialModifier metadata; other expandable blocks use the normal Crystal trigger paths. Script-clip connectivity and runtime trigger objects are intentionally not probed.";
+                        + ". Geometry is one approximate local rectangle per GateExpandableSpecial* or GateExpandableGameplay* block with public expandable/free-clip support and gameplay-special material/name metadata; other expandable blocks use the normal Crystal trigger paths. Script-clip connectivity and runtime trigger objects are intentionally not probed.";
                     if (stats.RectangleLimitSkipped > 0) {
                         diagnostic += " Rectangle limit skipped " + tostring(stats.RectangleLimitSkipped) + ".";
                     }

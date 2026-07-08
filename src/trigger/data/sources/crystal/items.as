@@ -163,6 +163,63 @@ namespace TriggerVisualizer {
                     }
                 }
 
+                bool ProbeCrystalItemPhyModelTriggerShape(
+                    TriggerSourceSnapshot@ source,
+                    uint objectIndex,
+                    const string &in ownerName,
+                    CGameItemModel@ itemModel,
+                    CGameObjectPhyModel@ phyModel,
+                    const string &in modelSlot,
+                    const string &in itemDetail,
+                    const mat4 &in itemTransform
+                ) {
+                    if (source is null || phyModel is null) return false;
+
+                    string dataRefFilename = "";
+                    string dataRefDetail = "";
+                    string dataRefWarning = "";
+                    CPlugSurface@ surface = ResolveCrystalPhyModelTriggerShapeSurface(
+                        phyModel,
+                        dataRefFilename,
+                        dataRefDetail,
+                        dataRefWarning
+                    );
+                    string detail = itemDetail
+                        + " modelSlot " + modelSlot
+                        + " triggerActions " + tostring(phyModel.Triggers.Length)
+                        + " triggerDataRef " + dataRefFilename;
+                    if (dataRefDetail.Length > 0) detail += " | " + dataRefDetail;
+                    if (dataRefWarning.Length > 0) detail += " | " + dataRefWarning;
+
+                    auto probe = AddCrystalSurfaceProbe(
+                        source,
+                        "Item",
+                        objectIndex,
+                        ownerName,
+                        modelSlot + ".CGameObjectPhyModel.TriggerShape",
+                        surface,
+                        detail
+                    );
+                    if (probe is null) return false;
+                    if (surface is null) {
+                        probe.Warning = CrystalAppendWarning(probe.Warning, dataRefWarning);
+                        return false;
+                    }
+
+                    string targetKeys = AddCrystalSurfaceGameplayTargetKeys(
+                        GetCrystalItemTargetKeys(itemModel),
+                        surface
+                    );
+                    targetKeys = AddCrystalMaterialModifierTargetKeys(targetKeys, itemModel);
+                    TryAddCrystalVolumeFromProbe(
+                        source,
+                        probe,
+                        itemTransform,
+                        targetKeys
+                    );
+                    return true;
+                }
+
                 bool ProbeCrystalSpecialTriggerModel(
                     TriggerSourceSnapshot@ source,
                     uint objectIndex,
@@ -360,6 +417,20 @@ namespace TriggerVisualizer {
                     if (source is null || model is null) return false;
 
                     bool found = false;
+                    auto objectPhyModel = cast<CGameObjectPhyModel>(model);
+                    if (objectPhyModel !is null) {
+                        found = ProbeCrystalItemPhyModelTriggerShape(
+                            source,
+                            objectIndex,
+                            ownerName,
+                            itemModel,
+                            objectPhyModel,
+                            modelSlot,
+                            itemDetail,
+                            modelTransform
+                        ) || found;
+                    }
+
                     auto waypointTrigger = cast<NPlugTrigger_SWaypoint>(model);
                     if (waypointTrigger !is null) {
                         string waypointDetail = itemDetail
@@ -811,9 +882,15 @@ namespace TriggerVisualizer {
 
                     auto phyModel = cast<CGameObjectPhyModel>(itemModel.PhyModel);
                     if (phyModel !is null) {
-                        AddCrystalDiagnostic(
+                        ProbeCrystalItemPhyModelTriggerShape(
                             source,
-                            "Item " + ownerName + " phy model trigger actions: " + tostring(phyModel.Triggers.Length) + ". TriggerShape is a DataRef and is not dereferenced yet."
+                            objectIndex,
+                            ownerName,
+                            itemModel,
+                            phyModel,
+                            "PhyModel",
+                            itemDetail + " triggerShapeSpace phy",
+                            itemTransform
                         );
                     }
                 }
@@ -872,15 +949,30 @@ namespace TriggerVisualizer {
                     );
                 }
 
-                void ProbeCrystalAnchoredObjects(TriggerSourceSnapshot@ source, CGameCtnChallenge@ map) {
-                    if (source is null || map is null) return;
+                bool ProbeCrystalAnchoredObjectsWithProgress(
+                    TriggerSourceSnapshot@ source,
+                    CGameCtnChallenge@ map,
+                    const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                    const string &in contextKey,
+                    uint blockCount,
+                    uint bakedBlockCount,
+                    uint anchoredObjectCount,
+                    uint cacheVersion
+                ) {
+                    if (source is null || map is null) return true;
 
                     source.RawAnchoredObjectCount = map.AnchoredObjects.Length;
                     uint frameStart = Time::Now;
                     for (uint i = 0; i < map.AnchoredObjects.Length; i++) {
                         ProbeCrystalAnchoredObjectAt(source, map, i);
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
+                        if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) return false;
                     }
+                    return true;
+                }
+
+                void ProbeCrystalAnchoredObjects(TriggerSourceSnapshot@ source, CGameCtnChallenge@ map) {
+                    ProbeCrystalAnchoredObjectsWithProgress(source, map, null, "", 0, 0, 0, 0);
                 }
             }
         }

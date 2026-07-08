@@ -129,16 +129,8 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Tile Colors", OnOff(UI::S_RandomFillTileColors)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Tile Icons", OnOff(UI::S_ShowSkullTileIcons)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Skull Icon Scale", Text::Format("%.2f", UI::S_SkullTileIconScale)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Budget System", OnOff(UI::S_PerformanceBudgetsEnabled)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culling System", OnOff(UI::S_PerformanceCullingEnabled)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offscreen Tile Culling", OnOff(UI::ShouldCullOffscreenWorldTiles())));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tile Min Size", Text::Format("%.1f m", UI::S_FillTileMinSize)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tile Budget", tostring(UI::S_MaxFillTilesPerFrame)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Segment Budget", tostring(UI::S_MaxOutlineSegmentsPerFrame)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Crystal Outline Budget", tostring(UI::S_MaxCrystalOutlineSegmentsPerFrame)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Split Crystal Outlines", OnOff(UI::S_SplitCrystalOutlineEdges)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Patch Budget", tostring(UI::S_MaxTileIconPatchesPerFrame)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Icon Max Subdivisions", tostring(UI::S_TileIconMaxSubdivisions)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Refresh System", OnOff(UI::S_PerformanceRefreshEnabled)));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Editor Refresh", tostring(UI::S_OffzoneEditorRefreshIntervalMs) + " ms"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MT Editor Refresh", tostring(UI::S_MediaTrackerEditorRefreshIntervalMs) + " ms"));
@@ -164,102 +156,105 @@ namespace TriggerVisualizer {
                         if (proximityState.HasOrbitalPoint) {
                             UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Orbital Point", proximityState.OrbitalPoint.ToString()));
                         }
-                        uint visibleCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesInRenderRangeForProximity(
-                            snapshot.TriggerVolumes,
-                            cameraPos,
-                            proximityState
-                        );
-                        uint fadingCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesInFadeBandForProximity(
-                            snapshot.TriggerVolumes,
-                            cameraPos,
-                            proximityState
-                        );
-                        uint culledCount = snapshot.TriggerVolumes.Length - visibleCount;
-                        uint fillFaceCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesCameraFacingFacesForProximity(
-                            snapshot.TriggerVolumes,
-                            cameraPos,
-                            proximityState
-                        );
-                        uint fillTileCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesFillTilesForProximity(
-                            snapshot.TriggerVolumes,
-                            cameraPos,
-                            proximityState
-                        );
-                        uint labelCount = TriggerVisualizer::Trigger::Render::CountVisibleTriggerVolumeLabels(
-                            snapshot.TriggerVolumes,
-                            cameraPos,
-                            proximityState
-                        );
-                        uint outlineSegmentCount = 0;
-                        uint maxEdgeSegments = 0;
-                        for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
-                            auto box = snapshot.TriggerVolumes[i];
-                            if (!TriggerVisualizer::Trigger::Render::IsTriggerVolumeInRenderRangeForProximity(box, cameraPos, proximityState)) continue;
-
-                            outlineSegmentCount += TriggerVisualizer::Trigger::Render::CountTriggerVolumeOutlineSegments(
-                                box,
-                                cameraPos
-                            );
-                            uint edgeSegments = TriggerVisualizer::Trigger::Render::GetMaxTriggerVolumeOutlineEdgeSegments(
-                                box,
-                                cameraPos
-                            );
-                            if (edgeSegments > maxEdgeSegments) {
-                                maxEdgeSegments = edgeSegments;
-                            }
-                        }
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Camera Pos", cameraPos.ToString()));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Pos", proximityState.HasVehiclePosition ? proximityState.VehiclePosition.ToString() : "<none>"));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Vehicle Speed", proximityState.HasVehicleSpeed ? Text::Format("%.1f km/h", proximityState.VehicleSpeedKmh) : "<none>"));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Skip Active", OnOff(TriggerVisualizer::Trigger::Render::IsSpeedRenderSkipActive())));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Over Threshold", OnOff(TriggerVisualizer::Trigger::Render::IsSpeedRenderSkipActiveForSpeed(ctx, proximityState))));
                         UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Skips All Sources", OnOff(TriggerVisualizer::Trigger::Render::ShouldSkipWorldRenderForSpeed(ctx, proximityState))));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Visible Volumes", tostring(visibleCount)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fading Volumes", tostring(fadingCount)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culled Volumes", tostring(culledCount)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Faces", tostring(fillFaceCount)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tiles", tostring(fillTileCount)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Visible Labels", tostring(labelCount)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Adaptive Splitting", OnOff(UI::S_AdaptiveLineSplitting)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Segments", tostring(outlineSegmentCount)));
-                        UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Max Edge Segments", tostring(maxEdgeSegments)));
-
-                        if (snapshot.TriggerVolumes.Length > 0 && UI::TreeNode("Per-Volume Render Fade##trigger-render-fade")) {
-                            for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
-                                float fade = TriggerVisualizer::Trigger::Render::GetTriggerVolumeRenderFadeFactor(
-                                    snapshot.TriggerVolumes[i],
-                                    cameraPos,
-                                    proximityState
-                                );
-                                UI::Text("#" + i + ": " + Text::Format("%.3f", fade));
-                            }
-                            UI::TreePop();
-                        }
-
-                        if (snapshot.TriggerVolumes.Length > 0 && UI::TreeNode("Per-Volume Outline Segments##trigger-render-segments")) {
-                            for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
-                                auto box = snapshot.TriggerVolumes[i];
-                                uint boxSegments = TriggerVisualizer::Trigger::Render::CountTriggerVolumeOutlineSegments(
-                                    box,
-                                    cameraPos
-                                );
-                                uint boxMaxEdgeSegments = TriggerVisualizer::Trigger::Render::GetMaxTriggerVolumeOutlineEdgeSegments(
-                                    box,
-                                    cameraPos
-                                );
-                                UI::Text("#" + i + ": total " + boxSegments + " | max edge " + boxMaxEdgeSegments);
-                            }
-                            UI::TreePop();
-                        }
-
-                        if (snapshot.TriggerVolumes.Length > 0 && UI::TreeNode("Per-Volume Fill Tiles##trigger-fill-tiles")) {
+                        if (UI::TreeNode("Render Metrics (expensive)##trigger-render-metrics")) {
+                            uint visibleCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesInRenderRangeForProximity(
+                                snapshot.TriggerVolumes,
+                                cameraPos,
+                                proximityState
+                            );
+                            uint fadingCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesInFadeBandForProximity(
+                                snapshot.TriggerVolumes,
+                                cameraPos,
+                                proximityState
+                            );
+                            uint culledCount = snapshot.TriggerVolumes.Length - visibleCount;
+                            uint fillFaceCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesCameraFacingFacesForProximity(
+                                snapshot.TriggerVolumes,
+                                cameraPos,
+                                proximityState
+                            );
+                            uint fillTileCount = TriggerVisualizer::Trigger::Render::CountTriggerVolumesFillTilesForProximity(
+                                snapshot.TriggerVolumes,
+                                cameraPos,
+                                proximityState
+                            );
+                            uint labelCount = TriggerVisualizer::Trigger::Render::CountVisibleTriggerVolumeLabels(
+                                snapshot.TriggerVolumes,
+                                cameraPos,
+                                proximityState
+                            );
+                            uint outlineSegmentCount = 0;
+                            uint maxEdgeSegments = 0;
                             for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
                                 auto box = snapshot.TriggerVolumes[i];
-                                uint boxFillTiles = TriggerVisualizer::Trigger::Render::CountTriggerVolumeFillTiles(
+                                if (!TriggerVisualizer::Trigger::Render::IsTriggerVolumeInRenderRangeForProximity(box, cameraPos, proximityState)) continue;
+
+                                outlineSegmentCount += TriggerVisualizer::Trigger::Render::CountTriggerVolumeOutlineSegments(
                                     box,
                                     cameraPos
                                 );
-                                UI::Text("#" + i + ": " + boxFillTiles + " fill tiles");
+                                uint edgeSegments = TriggerVisualizer::Trigger::Render::GetMaxTriggerVolumeOutlineEdgeSegments(
+                                    box,
+                                    cameraPos
+                                );
+                                if (edgeSegments > maxEdgeSegments) {
+                                    maxEdgeSegments = edgeSegments;
+                                }
+                            }
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Visible Volumes", tostring(visibleCount)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fading Volumes", tostring(fadingCount)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culled Volumes", tostring(culledCount)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Faces", tostring(fillFaceCount)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tiles", tostring(fillTileCount)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Visible Labels", tostring(labelCount)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Adaptive Splitting", OnOff(UI::S_AdaptiveLineSplitting)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Segments", tostring(outlineSegmentCount)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Max Edge Segments", tostring(maxEdgeSegments)));
+
+                            if (snapshot.TriggerVolumes.Length > 0 && UI::TreeNode("Per-Volume Render Fade##trigger-render-fade")) {
+                                for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
+                                    float fade = TriggerVisualizer::Trigger::Render::GetTriggerVolumeRenderFadeFactor(
+                                        snapshot.TriggerVolumes[i],
+                                        cameraPos,
+                                        proximityState
+                                    );
+                                    UI::Text("#" + i + ": " + Text::Format("%.3f", fade));
+                                }
+                                UI::TreePop();
+                            }
+
+                            if (snapshot.TriggerVolumes.Length > 0 && UI::TreeNode("Per-Volume Outline Segments##trigger-render-segments")) {
+                                for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
+                                    auto box = snapshot.TriggerVolumes[i];
+                                    uint boxSegments = TriggerVisualizer::Trigger::Render::CountTriggerVolumeOutlineSegments(
+                                        box,
+                                        cameraPos
+                                    );
+                                    uint boxMaxEdgeSegments = TriggerVisualizer::Trigger::Render::GetMaxTriggerVolumeOutlineEdgeSegments(
+                                        box,
+                                        cameraPos
+                                    );
+                                    UI::Text("#" + i + ": total " + boxSegments + " | max edge " + boxMaxEdgeSegments);
+                                }
+                                UI::TreePop();
+                            }
+
+                            if (snapshot.TriggerVolumes.Length > 0 && UI::TreeNode("Per-Volume Fill Tiles##trigger-fill-tiles")) {
+                                for (uint i = 0; i < snapshot.TriggerVolumes.Length; i++) {
+                                    auto box = snapshot.TriggerVolumes[i];
+                                    uint boxFillTiles = TriggerVisualizer::Trigger::Render::CountTriggerVolumeFillTiles(
+                                        box,
+                                        cameraPos
+                                    );
+                                    UI::Text("#" + i + ": " + boxFillTiles + " fill tiles");
+                                }
+                                UI::TreePop();
                             }
                             UI::TreePop();
                         }

@@ -1,67 +1,15 @@
 namespace TriggerVisualizer {
     namespace Trigger {
         namespace Render {
-            void SortVisibleTriggerVolumesByRenderPriority(
-                array<TriggerVolume@> @volumes,
-                array<float> @fades,
-                array<uint> @indices,
-                array<float> @priorityDistances
-            ) {
-                if (volumes is null || fades is null || indices is null || priorityDistances is null || volumes.Length <= 1) return;
-
-                uint gap = volumes.Length / 2;
-                while (gap > 0) {
-                    for (uint i = gap; i < volumes.Length; i++) {
-                        TriggerVolume@ volume = volumes[i];
-                        float fade = fades[i];
-                        uint index = indices[i];
-                        float sortDistanceSq = priorityDistances[i];
-                        uint j = i;
-
-                        while (j >= gap && priorityDistances[j - gap] > sortDistanceSq) {
-                            @volumes[j] = volumes[j - gap];
-                            fades[j] = fades[j - gap];
-                            indices[j] = indices[j - gap];
-                            priorityDistances[j] = priorityDistances[j - gap];
-                            j -= gap;
-                        }
-                        @volumes[j] = volume;
-                        fades[j] = fade;
-                        indices[j] = index;
-                        priorityDistances[j] = sortDistanceSq;
-                    }
-                    gap /= 2;
-                }
-            }
-
-            uint FindWorstVisibleTriggerVolumePriorityIndex(array<float> @priorityDistances) {
-                if (priorityDistances is null || priorityDistances.Length == 0) return 0;
-
-                uint worstIndex = 0;
-                float worstDistance = priorityDistances[0];
-                for (uint i = 1; i < priorityDistances.Length; i++) {
-                    if (priorityDistances[i] > worstDistance) {
-                        worstDistance = priorityDistances[i];
-                        worstIndex = i;
-                    }
-                }
-                return worstIndex;
-            }
-
             class VisibleTriggerVolumeSelection {
                 array<TriggerVolume@> Volumes;
                 array<float> Fades;
                 array<uint> Indices;
-                array<float> PriorityDistances;
-                bool HasWorstPriority = false;
-                uint WorstPriorityIndex = 0;
-                float WorstPriorityDistance = 0.0f;
 
                 void Reserve(uint count) {
                     Volumes.Reserve(count);
                     Fades.Reserve(count);
                     Indices.Reserve(count);
-                    PriorityDistances.Reserve(count);
                 }
             }
 
@@ -71,7 +19,6 @@ namespace TriggerVisualizer {
                 const vec3 &in cameraPos,
                 const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
                 int proximityMode,
-                uint maxVisibleVolumes,
                 VisibleTriggerVolumeSelection@ selection
             ) {
                 if (snapshot is null || selection is null || volumeIndex >= snapshot.TriggerVolumes.Length) return;
@@ -81,38 +28,9 @@ namespace TriggerVisualizer {
                 float fade = GetTriggerVolumeRenderFadeFactor(volume, cameraPos, proximityState, proximityMode);
                 if (!IsVisibleFadeFactor(fade)) return;
 
-                float priorityDistance = GetTriggerVolumeRenderPriorityDistanceSq(
-                    volume,
-                    cameraPos,
-                    proximityState,
-                    proximityMode
-                );
-                if (selection.Volumes.Length < maxVisibleVolumes) {
-                    selection.Volumes.InsertLast(volume);
-                    selection.Fades.InsertLast(fade);
-                    selection.Indices.InsertLast(volumeIndex);
-                    selection.PriorityDistances.InsertLast(priorityDistance);
-                    if (selection.Volumes.Length == maxVisibleVolumes) {
-                        selection.WorstPriorityIndex = FindWorstVisibleTriggerVolumePriorityIndex(selection.PriorityDistances);
-                        selection.WorstPriorityDistance = selection.PriorityDistances[selection.WorstPriorityIndex];
-                        selection.HasWorstPriority = true;
-                    }
-                    return;
-                }
-
-                if (!selection.HasWorstPriority) {
-                    selection.WorstPriorityIndex = FindWorstVisibleTriggerVolumePriorityIndex(selection.PriorityDistances);
-                    selection.WorstPriorityDistance = selection.PriorityDistances[selection.WorstPriorityIndex];
-                    selection.HasWorstPriority = true;
-                }
-                if (priorityDistance >= selection.WorstPriorityDistance) return;
-
-                @selection.Volumes[selection.WorstPriorityIndex] = volume;
-                selection.Fades[selection.WorstPriorityIndex] = fade;
-                selection.Indices[selection.WorstPriorityIndex] = volumeIndex;
-                selection.PriorityDistances[selection.WorstPriorityIndex] = priorityDistance;
-                selection.WorstPriorityIndex = FindWorstVisibleTriggerVolumePriorityIndex(selection.PriorityDistances);
-                selection.WorstPriorityDistance = selection.PriorityDistances[selection.WorstPriorityIndex];
+                selection.Volumes.InsertLast(volume);
+                selection.Fades.InsertLast(fade);
+                selection.Indices.InsertLast(volumeIndex);
             }
 
             void RenderWorld() {
@@ -133,13 +51,8 @@ namespace TriggerVisualizer {
                 if (ShouldSkipWorldRenderForSpeed(ctx, proximityState)) return;
                 if (!TriggerVisualizer::Trigger::UI::S_ShowOutline && !ShouldRenderWorldFillNow() && !ShouldRenderWorldLabelsNow() && !ShouldRenderWorldTileIconsNow()) return;
                 ResetWorldRenderPerformanceBudgets();
-                int maxVisibleVolumeCount = TriggerVisualizer::Trigger::UI::S_MaxVisibleVolumesPerFrame;
-                uint maxVisibleVolumes = uint(Math::Max(maxVisibleVolumeCount, 1));
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) {
-                    maxVisibleVolumes = Math::Max(snapshot.TriggerVolumes.Length, 1);
-                }
                 auto selection = VisibleTriggerVolumeSelection();
-                selection.Reserve(maxVisibleVolumes);
+                selection.Reserve(snapshot.TriggerVolumes.Length);
                 auto candidateIndices = array<uint>();
                 if (TryCollectSpatialTriggerVolumeCandidateIndices(snapshot, cameraPos, proximityState, proximityMode, candidateIndices)) {
                     for (uint i = 0; i < candidateIndices.Length; i++) {
@@ -149,7 +62,6 @@ namespace TriggerVisualizer {
                             cameraPos,
                             proximityState,
                             proximityMode,
-                            maxVisibleVolumes,
                             selection
                         );
                     }
@@ -161,18 +73,11 @@ namespace TriggerVisualizer {
                             cameraPos,
                             proximityState,
                             proximityMode,
-                            maxVisibleVolumes,
                             selection
                         );
                     }
                 }
                 if (selection.Volumes.Length == 0) return;
-                SortVisibleTriggerVolumesByRenderPriority(
-                    selection.Volumes,
-                    selection.Fades,
-                    selection.Indices,
-                    selection.PriorityDistances
-                );
                 auto fillTileItems = array<WorldFillTileDrawItem@>();
                 auto tileIconItems = array<WorldTileIconDrawItem@>();
                 bool shouldCollectFillItems = ShouldRenderWorldFillNow() || ShouldRepeatTileIconsOnSplitFillTilesNow();

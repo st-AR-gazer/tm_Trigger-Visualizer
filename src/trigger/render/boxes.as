@@ -512,11 +512,39 @@ namespace TriggerVisualizer {
                 );
             }
 
+            int GetTurboRouletteColorPhase() {
+                int yellowMs = Math::Max(TriggerVisualizer::Trigger::UI::S_TurboRouletteYellowDurationMs, 50);
+                int cyanMs = Math::Max(TriggerVisualizer::Trigger::UI::S_TurboRouletteCyanDurationMs, 50);
+                int purpleMs = Math::Max(TriggerVisualizer::Trigger::UI::S_TurboRoulettePurpleDurationMs, 50);
+                int cycleMs = yellowMs + cyanMs + purpleMs;
+                int phaseMs = int(Time::Now % uint64(cycleMs)) + TriggerVisualizer::Trigger::UI::S_TurboRoulettePhaseOffsetMs;
+                phaseMs %= cycleMs;
+                if (phaseMs < 0) phaseMs += cycleMs;
+                if (phaseMs < yellowMs) return 0;
+                if (phaseMs < yellowMs + cyanMs) return 1;
+                return 2;
+            }
+
+            vec4 GetTurboRouletteRenderColor() {
+                int phase = GetTurboRouletteColorPhase();
+                if (phase == 1) return vec4(0.0f, 0.95f, 1.0f, 1.0f);
+                if (phase == 2) return vec4(0.72f, 0.22f, 1.0f, 1.0f);
+                return vec4(1.0f, 0.88f, 0.0f, 1.0f);
+            }
+
+            bool ShouldUseAnimatedTurboRouletteColor(const TriggerVolume@ box) {
+                return TriggerVisualizer::Trigger::UI::S_AnimateTurboRouletteColor
+                    && TriggerVisualizer::Trigger::TriggerVolumeIsTurboRoulette(box);
+            }
+
             vec4 GetColorModeColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = TriggerVisualizer::Trigger::UI::S_BaseTriggerColor;
                 int colorSource = TriggerVisualizer::Trigger::UI::S_ColorSource;
                 if (colorSource != TriggerVisualizer::Trigger::UI::COLOR_SOURCE_UNIFORM && box !is null && box.HasTriggerTypeColor) {
                     color = box.TriggerTypeColor;
+                }
+                if (colorSource != TriggerVisualizer::Trigger::UI::COLOR_SOURCE_UNIFORM && ShouldUseAnimatedTurboRouletteColor(box)) {
+                    color = GetTurboRouletteRenderColor();
                 }
                 if (colorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
                     color = box.MediaTrackerTrackColor;
@@ -620,14 +648,6 @@ namespace TriggerVisualizer {
             }
 
             float GetTriggerVolumeFadeFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
-                if (box !is null && box.HasChildVolumes() && !ShouldSimplifyGroupedTriggersNow()) {
-                    float groupFade = 0.0f;
-                    for (uint i = 0; i < box.ChildVolumes.Length; i++) {
-                        groupFade = Math::Max(groupFade, GetTriggerVolumeFadeFactor(box.ChildVolumes[i], cameraPos));
-                    }
-                    return groupFade;
-                }
-
                 vec3 renderDistance = GetEffectiveRenderDistanceWorld();
                 vec3 fadeBand = TriggerVisualizer::Trigger::UI::GetRenderFadeBandWorld();
                 vec3 outside = GetDistanceOutsideTriggerVolume(box, cameraPos);
@@ -1320,7 +1340,7 @@ namespace TriggerVisualizer {
                 }
 
                 uint remaining = G_WorldLineSegmentBudgetRemaining;
-                if (UsesCrystalOutlineBudget(box) && G_CrystalWorldLineSegmentBudgetRemaining < remaining) {
+                if (UsesCrystalOutlineBudget(box) && G_CrystalWorldLineSegmentBudgetRemaining<remaining) {
                     remaining = G_CrystalWorldLineSegmentBudgetRemaining;
                 }
                 return remaining;
@@ -1329,7 +1349,7 @@ namespace TriggerVisualizer {
             bool ShouldPrioritizeWorldOutlineEdgesForBudget(const TriggerVolume@ box, uint edgeCount) {
                 if (edgeCount <= 1) return false;
                 uint remaining = GetWorldLineSegmentBudgetRemainingForVolume(box);
-                return remaining > 0 && edgeCount > remaining;
+                return remaining> 0 && edgeCount > remaining;
             }
 
             void CollectTriggerVolumeOutlineDrawItems(
@@ -1454,7 +1474,6 @@ namespace TriggerVisualizer {
                     if (ShouldPrioritizeWorldOutlineEdgesForBudget(box, items.Length)) {
                         PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
                     }
-
                     nvg::Reset();
                     nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
@@ -1516,7 +1535,6 @@ namespace TriggerVisualizer {
                 }
                 if (items.Length == 0) return;
                 PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
-
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
@@ -1555,20 +1573,14 @@ namespace TriggerVisualizer {
                 if (count == 0) return;
 
                 bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(box, count);
-                array<WorldOutlineEdgeDrawItem@>@ items = null;
+                array<WorldOutlineEdgeDrawItem@> @items = null;
                 if (prioritizeEdges) {
                     @items = array<WorldOutlineEdgeDrawItem@>();
                     for (uint i = 0; i < count; i++) {
-                        items.InsertLast(WorldOutlineEdgeDrawItem(
-                            box.CachedStaticOutlineStarts[i],
-                            box.CachedStaticOutlineEnds[i],
-                            boxIndex + box.CachedStaticOutlineBoxIndices[i],
-                            box.CachedStaticOutlineEdgeIndices[i]
-                        ));
+                        items.InsertLast(WorldOutlineEdgeDrawItem(box.CachedStaticOutlineStarts[i], box.CachedStaticOutlineEnds[i], boxIndex + box.CachedStaticOutlineBoxIndices[i], box.CachedStaticOutlineEdgeIndices[i]));
                     }
                     PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
                 }
-
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
                 bool allowAdaptiveSplitting = ShouldSplitTriggerVolumeOutlineEdges(box);
@@ -1647,16 +1659,11 @@ namespace TriggerVisualizer {
                 uint outlineLineCount = box.OutlineLineCount();
                 bool allowAdaptiveSplitting = ShouldSplitTriggerVolumeOutlineEdges(box);
                 bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(box, outlineLineCount);
-                array<WorldOutlineEdgeDrawItem@>@ items = null;
+                array<WorldOutlineEdgeDrawItem@> @items = null;
                 if (prioritizeEdges) {
                     @items = array<WorldOutlineEdgeDrawItem@>();
                     for (uint i = 0; i < outlineLineCount; i++) {
-                        items.InsertLast(WorldOutlineEdgeDrawItem(
-                            box.OutlineLineStarts[i],
-                            box.OutlineLineEnds[i],
-                            boxIndex,
-                            i
-                        ));
+                        items.InsertLast(WorldOutlineEdgeDrawItem(box.OutlineLineStarts[i], box.OutlineLineEnds[i], boxIndex, i));
                     }
                     PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
                 }
@@ -1753,25 +1760,21 @@ namespace TriggerVisualizer {
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
 
-                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(box, TRIGGER_VOLUME_EDGE_INDICES.Length);
-                array<WorldOutlineEdgeDrawItem@>@ items = null;
+                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(
+                    box,
+                    TRIGGER_VOLUME_EDGE_INDICES.Length
+                );
+                array<WorldOutlineEdgeDrawItem@> @items = null;
                 if (prioritizeEdges) {
                     @items = array<WorldOutlineEdgeDrawItem@>();
                     for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
                         auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
-                        items.InsertLast(WorldOutlineEdgeDrawItem(
-                            corners[edge[0]],
-                            corners[edge[1]],
-                            boxIndex,
-                            i
-                        ));
+                        items.InsertLast(WorldOutlineEdgeDrawItem(corners[edge[0]], corners[edge[1]], boxIndex, i));
                     }
                     PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
                 }
-
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
-
                 uint drawCount = TRIGGER_VOLUME_EDGE_INDICES.Length;
                 if (prioritizeEdges) drawCount = items.Length;
                 for (uint i = 0; i < drawCount; i++) {

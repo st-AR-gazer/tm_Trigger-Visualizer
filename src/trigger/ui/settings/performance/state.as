@@ -2,7 +2,7 @@ namespace TriggerVisualizer {
     namespace Trigger {
         namespace UI {
             [Setting hidden name="Trigger: Performance budgets enabled"]
-            bool S_PerformanceBudgetsEnabled = true;
+            bool S_PerformanceBudgetsEnabled = false;
             [Setting hidden name="Trigger: Performance culling enabled"]
             bool S_PerformanceCullingEnabled = true;
             [Setting hidden name="Trigger: Performance refresh enabled"]
@@ -50,7 +50,7 @@ namespace TriggerVisualizer {
             string S_SpeedRenderKeepTargetKeys = DEFAULT_SPEED_RENDER_KEEP_TARGETS;
 
             bool ArePerformanceBudgetsEnabled() {
-                return S_PerformanceBudgetsEnabled;
+                return false;
             }
 
             bool IsPerformanceCullingEnabled() {
