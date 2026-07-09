@@ -924,7 +924,7 @@ namespace TriggerVisualizer {
                         );
                         return;
                     }
-                    if (customOnly && !CrystalCollectorLooksCustomContent(itemModel)) {
+                    if (customOnly && !CrystalItemModelLooksCustomContent(itemModel)) {
                         return;
                     }
 

@@ -572,10 +572,12 @@ namespace TriggerVisualizer {
                     SetCrystalSourceEnabledForContext(context, crystalNext);
                 }
 
+                UI::Indent(18.0f);
                 bool customOnlyNext = UI::Checkbox(
                     "Only scan custom blocks/items##trigger-visualizer-sources-crystal-custom-items",
                     S_CrystalCustomItemsAndBlockItemsOnly
                 );
+                UI::Unindent(18.0f);
                 if (customOnlyNext != S_CrystalCustomItemsAndBlockItemsOnly) {
                     SetCrystalCustomItemsAndBlockItemsOnly(customOnlyNext);
                 }

@@ -313,39 +313,44 @@ namespace TriggerVisualizer {
                     return CrystalFidFileText(fid);
                 }
 
-                string CrystalCollectorAuthorName(CMwNod@ nod) {
-                    if (nod is null) return "";
+                bool CrystalCollectorAuthorLooksNadeo(const string &in rawAuthor) {
+                    return NormalizeCrystalTriggerTypeSearchText(rawAuthor) == "nadeo";
+                }
 
-                    auto collector = cast<CGameCtnCollector>(nod);
-                    if (collector is null) return "";
+                string CrystalBlockInfoAuthorName(CGameCtnBlockInfo@ blockInfo) {
+                    if (blockInfo is null) return "";
                     try {
-                        return collector.Author.GetName();
+                        return blockInfo.Author.GetName();
                     } catch {
                         logging::HandledException(
-                            "CrystalCollectorAuthorName",
-                            "Collector.Author was not readable."
+                            "CrystalBlockInfoAuthorName",
+                            "BlockInfo.Author was not readable."
                         );
                     }
                     return "";
                 }
 
-                bool CrystalCollectorAuthorLooksNadeo(const string &in rawAuthor) {
-                    string author = NormalizeCrystalTriggerTypeSearchText(rawAuthor);
-                    return author == "nadeo"
-                        || author == "ubisoftnadeo";
+                string CrystalItemModelAuthorName(CGameItemModel@ itemModel) {
+                    if (itemModel is null) return "";
+                    try {
+                        return itemModel.Author.GetName();
+                    } catch {
+                        logging::HandledException(
+                            "CrystalItemModelAuthorName",
+                            "ItemModel.Author was not readable."
+                        );
+                    }
+                    return "";
                 }
 
-                bool CrystalCollectorLooksCustomContent(CMwNod@ nod) {
-                    if (nod is null) return false;
+                bool CrystalBlockInfoLooksCustomContent(CGameCtnBlockInfo@ blockInfo) {
+                    if (blockInfo is null) return false;
+                    return !CrystalCollectorAuthorLooksNadeo(CrystalBlockInfoAuthorName(blockInfo));
+                }
 
-                    string author = CrystalCollectorAuthorName(nod);
-                    if (author.Length > 0 && !CrystalCollectorAuthorLooksNadeo(author)) return true;
-
-                    string fidText = NormalizeCrystalTriggerTypeSearchText(CrystalNodFidText(nod));
-                    if (fidText.Length == 0) return author.Length == 0;
-                    if (fidText.IndexOf("gamedata") >= 0) return false;
-                    if (CrystalCollectorAuthorLooksNadeo(author) && fidText.IndexOf("nadeo") >= 0) return false;
-                    return true;
+                bool CrystalItemModelLooksCustomContent(CGameItemModel@ itemModel) {
+                    if (itemModel is null) return false;
+                    return !CrystalCollectorAuthorLooksNadeo(CrystalItemModelAuthorName(itemModel));
                 }
 
                 bool CrystalSurfaceLooksLikeTriggerShape(CPlugSurface@ surface) {

@@ -183,7 +183,7 @@ namespace TriggerVisualizer {
                     if (!customOnly) return true;
                     return block !is null
                         && block.BlockInfo !is null
-                        && CrystalCollectorLooksCustomContent(block.BlockInfo);
+                        && CrystalBlockInfoLooksCustomContent(block.BlockInfo);
                 }
 
                 bool ProbeCrystalBlocksWithProgress(
