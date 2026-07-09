@@ -944,6 +944,7 @@ namespace TriggerVisualizer {
             TriggerGridSpec@ GridSpec;
             array<TriggerRangeRaw@> RawRanges;
             array<TriggerVolume@> TriggerVolumes;
+            array<TriggerVolume@> CachedExpandableMergeSourceVolumes;
             array<string> Diagnostics;
             array<MediaTrackerClipTriggerSnapshot@> MediaTrackerClipTriggers;
             array<CrystalTriggerProbeSnapshot@> CrystalTriggerProbes;

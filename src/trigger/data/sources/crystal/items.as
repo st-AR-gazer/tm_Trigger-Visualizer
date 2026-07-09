@@ -898,7 +898,8 @@ namespace TriggerVisualizer {
                 void ProbeCrystalAnchoredObjectAt(
                     TriggerSourceSnapshot@ source,
                     CGameCtnChallenge@ map,
-                    uint objectIndex
+                    uint objectIndex,
+                    bool customOnly = false
                 ) {
                     if (source is null || map is null || objectIndex >= map.AnchoredObjects.Length) return;
 
@@ -921,6 +922,9 @@ namespace TriggerVisualizer {
                             source,
                             "AnchoredObject #" + tostring(objectIndex) + " has no ItemModel."
                         );
+                        return;
+                    }
+                    if (customOnly && !CrystalCollectorLooksCustomContent(itemModel)) {
                         return;
                     }
 
@@ -957,22 +961,27 @@ namespace TriggerVisualizer {
                     uint blockCount,
                     uint bakedBlockCount,
                     uint anchoredObjectCount,
-                    uint cacheVersion
+                    uint cacheVersion,
+                    bool customOnly = false
                 ) {
                     if (source is null || map is null) return true;
 
                     source.RawAnchoredObjectCount = map.AnchoredObjects.Length;
                     uint frameStart = Time::Now;
                     for (uint i = 0; i < map.AnchoredObjects.Length; i++) {
-                        ProbeCrystalAnchoredObjectAt(source, map, i);
+                        ProbeCrystalAnchoredObjectAt(source, map, i, customOnly);
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
                         if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) return false;
                     }
                     return true;
                 }
 
-                void ProbeCrystalAnchoredObjects(TriggerSourceSnapshot@ source, CGameCtnChallenge@ map) {
-                    ProbeCrystalAnchoredObjectsWithProgress(source, map, null, "", 0, 0, 0, 0);
+                void ProbeCrystalAnchoredObjects(
+                    TriggerSourceSnapshot@ source,
+                    CGameCtnChallenge@ map,
+                    bool customOnly = false
+                ) {
+                    ProbeCrystalAnchoredObjectsWithProgress(source, map, null, "", 0, 0, 0, 0, customOnly);
                 }
             }
         }

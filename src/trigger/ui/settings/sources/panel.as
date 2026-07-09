@@ -28,7 +28,7 @@ namespace TriggerVisualizer {
 
             bool IsCrystalSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 return IsCrystalSourceSupportedForRuntime(ctx)
-                    && IsCrystalSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
+                    && (S_CrystalCustomItemsAndBlockItemsOnly || IsCrystalSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx)));
             }
 
             string SettingBoolKey(bool value) {

@@ -45,6 +45,9 @@ namespace TriggerVisualizer {
                 for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
                     copy.TriggerVolumes.InsertLast(CloneTriggerVolumeForSnapshotCache(source.TriggerVolumes[i]));
                 }
+                for (uint i = 0; i < source.CachedExpandableMergeSourceVolumes.Length; i++) {
+                    copy.CachedExpandableMergeSourceVolumes.InsertLast(CloneTriggerVolumeForSnapshotCache(source.CachedExpandableMergeSourceVolumes[i]));
+                }
                 for (uint i = 0; i < source.Diagnostics.Length; i++) {
                     copy.Diagnostics.InsertLast(source.Diagnostics[i]);
                 }

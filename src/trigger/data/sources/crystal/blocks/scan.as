@@ -179,6 +179,13 @@ namespace TriggerVisualizer {
                     return CrystalBlockVariantHasEarlyTriggerSurface(GetCrystalBlockVariantWithBaseFallback(block));
                 }
 
+                bool CrystalBlockShouldProbeForCustomOnly(CGameCtnBlock@ block, bool customOnly) {
+                    if (!customOnly) return true;
+                    return block !is null
+                        && block.BlockInfo !is null
+                        && CrystalCollectorLooksCustomContent(block.BlockInfo);
+                }
+
                 bool ProbeCrystalBlocksWithProgress(
                     TriggerSourceSnapshot@ source,
                     CGameCtnChallenge@ map,
@@ -187,7 +194,8 @@ namespace TriggerVisualizer {
                     uint blockCount,
                     uint bakedBlockCount,
                     uint anchoredObjectCount,
-                    uint cacheVersion
+                    uint cacheVersion,
+                    bool customOnly = false
                 ) {
                     if (source is null || map is null) return true;
 
@@ -196,12 +204,14 @@ namespace TriggerVisualizer {
                     uint frameStart = Time::Now;
 
                     for (uint i = 0; i < map.Blocks.Length; i++) {
+                        if (!CrystalBlockShouldProbeForCustomOnly(map.Blocks[i], customOnly)) continue;
                         if (!CrystalBlockShouldProbeEarly(map.Blocks[i])) continue;
                         ProbeCrystalBlockVariant(source, map, map.Blocks[i], i, "Block");
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
                         if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) return false;
                     }
                     for (uint i = 0; i < map.BakedBlocks.Length; i++) {
+                        if (!CrystalBlockShouldProbeForCustomOnly(map.BakedBlocks[i], customOnly)) continue;
                         if (!CrystalBlockShouldProbeEarly(map.BakedBlocks[i])) continue;
                         ProbeCrystalBlockVariant(source, map, map.BakedBlocks[i], i, "BakedBlock");
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
@@ -209,12 +219,14 @@ namespace TriggerVisualizer {
                     }
                     if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source, true)) return false;
                     for (uint i = 0; i < map.Blocks.Length; i++) {
+                        if (!CrystalBlockShouldProbeForCustomOnly(map.Blocks[i], customOnly)) continue;
                         if (CrystalBlockShouldProbeEarly(map.Blocks[i])) continue;
                         ProbeCrystalBlockVariant(source, map, map.Blocks[i], i, "Block");
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
                         if (!TriggerVisualizer::Trigger::PublishCrystalSourceBuildProgressIfDue(ctx, contextKey, blockCount, bakedBlockCount, anchoredObjectCount, cacheVersion, source)) return false;
                     }
                     for (uint i = 0; i < map.BakedBlocks.Length; i++) {
+                        if (!CrystalBlockShouldProbeForCustomOnly(map.BakedBlocks[i], customOnly)) continue;
                         if (CrystalBlockShouldProbeEarly(map.BakedBlocks[i])) continue;
                         ProbeCrystalBlockVariant(source, map, map.BakedBlocks[i], i, "BakedBlock");
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
@@ -223,8 +235,12 @@ namespace TriggerVisualizer {
                     return true;
                 }
 
-                void ProbeCrystalBlocks(TriggerSourceSnapshot@ source, CGameCtnChallenge@ map) {
-                    ProbeCrystalBlocksWithProgress(source, map, null, "", 0, 0, 0, 0);
+                void ProbeCrystalBlocks(
+                    TriggerSourceSnapshot@ source,
+                    CGameCtnChallenge@ map,
+                    bool customOnly = false
+                ) {
+                    ProbeCrystalBlocksWithProgress(source, map, null, "", 0, 0, 0, 0, customOnly);
                 }
             }
         }

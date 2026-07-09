@@ -313,6 +313,41 @@ namespace TriggerVisualizer {
                     return CrystalFidFileText(fid);
                 }
 
+                string CrystalCollectorAuthorName(CMwNod@ nod) {
+                    if (nod is null) return "";
+
+                    auto collector = cast<CGameCtnCollector>(nod);
+                    if (collector is null) return "";
+                    try {
+                        return collector.Author.GetName();
+                    } catch {
+                        logging::HandledException(
+                            "CrystalCollectorAuthorName",
+                            "Collector.Author was not readable."
+                        );
+                    }
+                    return "";
+                }
+
+                bool CrystalCollectorAuthorLooksNadeo(const string &in rawAuthor) {
+                    string author = NormalizeCrystalTriggerTypeSearchText(rawAuthor);
+                    return author == "nadeo"
+                        || author == "ubisoftnadeo";
+                }
+
+                bool CrystalCollectorLooksCustomContent(CMwNod@ nod) {
+                    if (nod is null) return false;
+
+                    string author = CrystalCollectorAuthorName(nod);
+                    if (author.Length > 0 && !CrystalCollectorAuthorLooksNadeo(author)) return true;
+
+                    string fidText = NormalizeCrystalTriggerTypeSearchText(CrystalNodFidText(nod));
+                    if (fidText.Length == 0) return author.Length == 0;
+                    if (fidText.IndexOf("gamedata") >= 0) return false;
+                    if (CrystalCollectorAuthorLooksNadeo(author) && fidText.IndexOf("nadeo") >= 0) return false;
+                    return true;
+                }
+
                 bool CrystalSurfaceLooksLikeTriggerShape(CPlugSurface@ surface) {
                     if (surface is null) return false;
                     if (CrystalSurfaceGameplayDetail(surface).Length > 0) return true;

@@ -1572,7 +1572,10 @@ namespace TriggerVisualizer {
                 uint count = box.CachedStaticOutlineCount();
                 if (count == 0) return;
 
-                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(box, count);
+                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(
+                    box,
+                    count
+                );
                 array<WorldOutlineEdgeDrawItem@> @items = null;
                 if (prioritizeEdges) {
                     @items = array<WorldOutlineEdgeDrawItem@>();
@@ -1658,7 +1661,10 @@ namespace TriggerVisualizer {
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
                 uint outlineLineCount = box.OutlineLineCount();
                 bool allowAdaptiveSplitting = ShouldSplitTriggerVolumeOutlineEdges(box);
-                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(box, outlineLineCount);
+                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(
+                    box,
+                    outlineLineCount
+                );
                 array<WorldOutlineEdgeDrawItem@> @items = null;
                 if (prioritizeEdges) {
                     @items = array<WorldOutlineEdgeDrawItem@>();

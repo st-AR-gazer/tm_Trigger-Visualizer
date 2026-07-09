@@ -299,24 +299,28 @@ namespace TriggerVisualizer {
                     const vec3 &in worldMax,
                     const string &in targetKeys,
                     dictionary@ rectangleIndexByBounds,
-                    CrystalExpandableRectangleStats@ stats
+                    CrystalExpandableRectangleStats@ stats,
+                    bool mergeAdjacent
                 ) {
                     if (rectangles is null || rectangleIndexByBounds is null || stats is null) return false;
 
-                    string boundsKey = GetCrystalExpandableRectangleMergeKey(
-                        worldMin,
-                        worldMax,
-                        targetKeys
-                    );
-                    int existingIndex = -1;
-                    if (rectangleIndexByBounds.Get(boundsKey, existingIndex)) {
-                        if (existingIndex >= 0 && existingIndex < int(rectangles.Length)) {
-                            auto existing = rectangles[uint(existingIndex)];
-                            if (existing !is null) {
-                                existing.MergedVolumeCount++;
-                                existing.IsMergedGroup = existing.MergedVolumeCount > 1;
-                                stats.RectanglesMerged++;
-                                return true;
+                    string boundsKey = "";
+                    if (mergeAdjacent) {
+                        boundsKey = GetCrystalExpandableRectangleMergeKey(
+                            worldMin,
+                            worldMax,
+                            targetKeys
+                        );
+                        int existingIndex = -1;
+                        if (rectangleIndexByBounds.Get(boundsKey, existingIndex)) {
+                            if (existingIndex >= 0 && existingIndex < int(rectangles.Length)) {
+                                auto existing = rectangles[uint(existingIndex)];
+                                if (existing !is null) {
+                                    existing.MergedVolumeCount++;
+                                    existing.IsMergedGroup = existing.MergedVolumeCount > 1;
+                                    stats.RectanglesMerged++;
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -335,7 +339,9 @@ namespace TriggerVisualizer {
                     );
                     RefreshCrystalExpandableRectangleMetadata(volume, targetKeys);
                     rectangles.InsertLast(volume);
-                    rectangleIndexByBounds.Set(boundsKey, int(rectangles.Length - 1));
+                    if (mergeAdjacent) {
+                        rectangleIndexByBounds.Set(boundsKey, int(rectangles.Length - 1));
+                    }
                     stats.RectanglesRendered++;
                     return true;
                 }
@@ -462,6 +468,19 @@ namespace TriggerVisualizer {
                     return group;
                 }
 
+                void AppendCrystalExpandableRectanglesUnmerged(
+                    TriggerSourceSnapshot@ source,
+                    const array<TriggerVolume@> @rectangles
+                ) {
+                    if (source is null || rectangles is null) return;
+
+                    for (uint i = 0; i < rectangles.Length; i++) {
+                        if (rectangles[i] is null) continue;
+                        rectangles[i].SourceIndex = source.TriggerVolumes.Length;
+                        source.TriggerVolumes.InsertLast(rectangles[i]);
+                    }
+                }
+
                 void AppendCrystalExpandableRectangleGroups(
                     TriggerSourceSnapshot@ source,
                     const array<TriggerVolume@> @rectangles,
@@ -507,7 +526,11 @@ namespace TriggerVisualizer {
                     }
                 }
 
-                void ProbeCrystalExpandableBlockUnitTriggers(TriggerSourceSnapshot@ source, CGameCtnChallenge@ map) {
+                void ProbeCrystalExpandableBlockUnitTriggers(
+                    TriggerSourceSnapshot@ source,
+                    CGameCtnChallenge@ map,
+                    bool mergeAdjacent = true
+                ) {
                     if (source is null || map is null) return;
 
                     auto stats = CrystalExpandableRectangleStats();
@@ -559,7 +582,8 @@ namespace TriggerVisualizer {
                             worldMax,
                             targetKeys,
                             rectangleIndexByBounds,
-                            stats
+                            stats,
+                            mergeAdjacent
                         );
                         if (added) {
                             source.CandidateShapeCount++;
@@ -568,11 +592,16 @@ namespace TriggerVisualizer {
                         }
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
                     }
-                    AppendCrystalExpandableRectangleGroups(
-                        source,
-                        rectangles,
-                        stats
-                    );
+                    StoreCrystalExpandableMergeSourceVolumes(source, rectangles);
+                    if (mergeAdjacent) {
+                        AppendCrystalExpandableRectangleGroups(
+                            source,
+                            rectangles,
+                            stats
+                        );
+                    } else {
+                        AppendCrystalExpandableRectanglesUnmerged(source, rectangles);
+                    }
                     string diagnostic = "Expandable rectangle scan: scanned "
                         + tostring(stats.BlocksScanned)
                         + " placed blocks, saw "
@@ -592,6 +621,9 @@ namespace TriggerVisualizer {
                         + " duplicate-position rectangles, rejected "
                         + tostring(stats.RectanglesRejected)
                         + ". Geometry is one approximate local rectangle per GateExpandableSpecial* or GateExpandableGameplay* block with public expandable/free-clip support and gameplay-special material/name metadata; other expandable blocks use the normal Crystal trigger paths. Script-clip connectivity and runtime trigger objects are intentionally not probed.";
+                    if (!mergeAdjacent) {
+                        diagnostic += " Adjacent/duplicate expandable rectangle merging is disabled by the performance setting.";
+                    }
                     if (stats.RectangleLimitSkipped > 0) {
                         diagnostic += " Rectangle limit skipped " + tostring(stats.RectangleLimitSkipped) + ".";
                     }

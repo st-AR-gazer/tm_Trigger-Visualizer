@@ -21,7 +21,7 @@ Core code lives in `src/trigger/`.
 
 Crystal support includes all triggers in all nadeo blocks/items as well as custom blocks/items (for those pesky hidden trigger volumes that some mappers hide).
 
-*Note, `GateExpandableSpecial*` blocks (boost/turbo/cruise/freewheel/etc) are drawn as approximate rectangles from public block placement, direction, variant size, and material modifier metadata. Other expandable blocks use the normal Crystal discovery paths. Runtime expandable clip connectivity and trigger objects are intentionally not probed because those paths were unstable in-game; the old investigation code is kept under `discoveries/expandable/` for reference.
+*Note, `GateExpandableSpecial*` and `GateExpandableGameplay*` blocks are drawn as approximate rectangles, data used is block placement, direction, variant size, and material/name metadata. `GateExpandableFinish*` uses a different method for getting the TriggerShape that is not exposed through the "Special" or "Gameplay" expandables, so it is still correct. Runtime expandable clip connectivity and trigger objects are intentionally not probed because those paths were unstable in-game... If any1 is interested the old investigation code is kept under `discoveries/expandable/` for reference.
 
 ## Mapper Commands
 
