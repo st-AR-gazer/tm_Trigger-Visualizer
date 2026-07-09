@@ -3,7 +3,7 @@
 
 # Trigger Visualizer
 
-Displays map trigger volumes without having to select the specific tool in  play, editor, mediatracker mesh modeller.
+Displays trigger volumes that appears in the current render context.
 
 ## Layout
 
@@ -11,17 +11,17 @@ Core code lives in `src/trigger/`.
 
 - `data/sources/*` reads trigger data from the map.
 - `render/` projects trigger volumes, outlines, fills, labels, and tile icons.
-- `ui/` contains settings and the developer diagnostics panel.
+- `ui/` contains settings that the project uses.
 
 ## Trigger Sources
 
 - Offzone volumes from map offzone data.
-- MediaTracker trigger volumes from tracks, clips, and clip-specific trigger metadata.
-- Crystal trigger shapes from public block/item trigger surfaces and models.
+- MediaTracker trigger volumes from the different MT tracks embedded in the map data.
+- Crystal trigger shapes from block/item trigger data.
 
-Crystal support includes all triggers in all nadeo blocks/items as well as custom blocks/items (for those pesky hidden trigger volumes that some mappers hide).
+Crystal support includes all triggers in all nadeo blocks/items as well as custom blocks/items (for those pesky hidden trigger volumes that some mappers hide xdd).
 
-*Note, `GateExpandableSpecial*` and `GateExpandableGameplay*` blocks are drawn as approximate rectangles, data used is block placement, direction, variant size, and material/name metadata. `GateExpandableFinish*` uses a different method for getting the TriggerShape that is not exposed through the "Special" or "Gameplay" expandables, so it is still correct. Runtime expandable clip connectivity and trigger objects are intentionally not probed because those paths were unstable in-game... If any1 is interested the old investigation code is kept under `discoveries/expandable/` for reference.
+*Note, `GateExpandableSpecial*` and `GateExpandableGameplay*` blocks are drawn as approximate rectangles. `GateExpandableFinish*` uses a different method for getting the TriggerShape that is not exposed through the "Special" or "Gameplay" expandables, so it is still correct (the shape of the triggers are the same tho).
 
 ## Mapper Commands
 
@@ -38,16 +38,13 @@ Map comments can include Trigger Visualizer commands:
 /trigger-visualizer suggest-draw-distance-y !<blocks>
 ```
 
-`!<blocks>` converts block counts to world units. X/Z uses 32 units per block;
-Y uses 8 units per block. The old offzone command prefix is intentionally not
-supported.
+`!<blocks>` converts block counts to world units automatically, as an example `/trigger-visualizer suggest-draw-distance-y !2` would set the draw-distance to 32*2 on the x/y axis, and 8\*2 on the y axis.
 
-`suggest-off` asks Trigger Visualizer to start matching triggers hidden when the
-user respects map suggestions. `force-off` always hides matching triggers.
-Without a trigger type, these commands apply to all world rendering. With a
-trigger type, they only apply to matching sources, MediaTracker subtypes, Crystal subtypes, or gameplay trigger types.
-An empty target list, `<>`, `*`, `all`, or `everything` is treated as the same
-wildcard as no trigger type.
+`suggest-off` asks Trigger Visualizer to start matching triggers hidden when the user respects map suggestions.
+`force-off` always hides matching triggers.
+Without a trigger type, these commands apply to all world rendering. With a trigger type, they only apply to matching sources, MediaTracker subtypes, Crystal subtypes, or gameplay trigger types.
+
+An empty target list, `<>`, `*`, `all`, or `everything` is treated as the same as assigning no specification, so all types are affected.
 
 Examples:
 
@@ -60,7 +57,13 @@ Examples:
 /trigger-visualizer crystalgate,checkpoint suggest-off
 /trigger-visualizer * force-off
 ```
-*Note, these are read from the maps 'map comment'
+*Note, these are read from the maps 'map comment', to set a map comment go to:
+![Scredriver and Wrench Icon on the bottom most area on the tool bar in the editor](meta/image.png)
+
+![Map Options menu showcasing the Edit Map Comment button](meta/image-1.png)
+
+![Map comments menu showcasing some examples of what you can enter into the comment and have the plugin accept](meta/image-2.png)
+
 
 Supported source targets:
 
