@@ -137,7 +137,7 @@ namespace TriggerVisualizer {
                 int context = GetSourceSettingsContextForRuntime(ctx);
                 return "src-profile:" + tostring(context)
                     + "|merge:" + SettingBoolKey(S_MergeAdjacentTriggerVolumes)
-                    + "|suggest:" + SettingBoolKey(S_RespectMapSuggestOff)
+                    + "|suggest:" + SettingBoolKey(RespectMapSuggestOffForRuntime(ctx))
                     + "|offzone:" + SettingBoolKey(IsOffzoneSourceEnabledForRuntime(ctx))
                     + "|mt:" + SettingBoolKey(IsMediaTrackerSourceEnabledForRuntime(ctx))
                     + "|crystal:" + SettingBoolKey(IsCrystalSourceEnabledForRuntime(ctx))

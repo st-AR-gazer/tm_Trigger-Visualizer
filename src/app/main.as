@@ -82,7 +82,11 @@ namespace TriggerVisualizer {
         bool RenderSubmenuSelectable(const string &in label, bool checked = false) {
             int flags = UI::SelectableFlags::NoAutoClosePopups | UI::SelectableFlags::SpanAllColumns;
             string displayLabel = checked ? "\\$5df" + Icons::Check + " " + label + "\\$z" : label;
-            bool clicked = UI::Selectable(displayLabel + "##" + label, false, flags);
+            bool clicked = UI::Selectable(
+                displayLabel + "###trigger-visualizer-submenu-" + label,
+                false,
+                flags
+            );
             if (clicked && !IsRenderMenuShiftHeld()) {
                 UI::CloseCurrentPopup();
             }
@@ -134,7 +138,11 @@ namespace TriggerVisualizer {
         ) {
             bool canUseMap = TriggerVisualizer::Trigger::UI::GetMapOnlyOverrideMapKey(ctx).Length > 0;
             bool value = false;
-            bool hasOverride = TriggerVisualizer::Trigger::UI::TryGetMapOnlyOverride(ctx, key, value);
+            bool hasOverride = TriggerVisualizer::Trigger::UI::TryGetMapOnlyOverride(
+                ctx,
+                key,
+                value
+            );
             string menuLabel = label + " " + MapOverrideStateSuffix(ctx, key);
             if (!canUseMap) UI::BeginDisabled();
             if (UI::BeginMenu(menuLabel + "###trigger-visualizer-map-override-" + key)) {
@@ -223,7 +231,39 @@ namespace TriggerVisualizer {
             }
         }
 
+        bool RenderMapHintMenuOptions(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+            auto snapshot = TriggerVisualizer::Trigger::GetCurrentMapSnapshot();
+            if (snapshot is null || snapshot.RenderHints is null) return false;
+
+            auto hints = snapshot.RenderHints;
+            if (hints.ForceOff) {
+                UI::TextDisabled("Map hint: forced hide");
+                return true;
+            }
+            if (!hints.SuggestOff) return false;
+
+            UI::TextDisabled("Map hint: suggestion only");
+            bool overrideValue = true;
+            bool hasOverride = TriggerVisualizer::Trigger::UI::TryGetMapOnlyOverride(
+                ctx,
+                TriggerVisualizer::Trigger::UI::MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF,
+                overrideValue
+            );
+            bool ignoresSuggestion = hasOverride && !overrideValue;
+            if (RenderSubmenuSelectable("Show despite this map's suggestion", ignoresSuggestion)) {
+                if (ignoresSuggestion) {
+                    TriggerVisualizer::Trigger::UI::ClearMapSuggestOffOverride(ctx);
+                } else {
+                    TriggerVisualizer::Trigger::UI::IgnoreMapSuggestOffForCurrentMap(ctx);
+                }
+            }
+            return true;
+        }
+
         void RenderMenuOptions(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+            if (RenderMapHintMenuOptions(ctx)) {
+                UI::Separator();
+            }
             RenderGlobalRenderMenuOptions(ctx);
             UI::Separator();
             RenderMapOnlyRenderMenuOptions(ctx);
@@ -233,9 +273,21 @@ namespace TriggerVisualizer {
             }
         }
 
-        string RenderMenuRootTitle(bool hiddenByMapComment) {
-            return hiddenByMapComment ?
-                "\\$888" + MenuIcon() + " " + TriggerVisualizer::PluginMeta.Name + " (hidden by map)\\$z" : MenuTitle();
+        string RenderMenuRootTitle(
+            bool forceOff,
+            bool suggestOff,
+            bool respectSuggestion
+        ) {
+            if (forceOff) {
+                return "\\$888" + MenuIcon() + " " + TriggerVisualizer::PluginMeta.Name
+                    + " (hidden by map)\\$z";
+            }
+            if (suggestOff) {
+                string status = respectSuggestion ? " (map suggests hiding)" : " (map hide suggestion ignored)";
+                return "\\$fc8" + MenuIcon() + " " + TriggerVisualizer::PluginMeta.Name
+                    + status + "\\$z";
+            }
+            return MenuTitle();
         }
 
         void RenderMenuRootCheck(
@@ -259,17 +311,28 @@ namespace TriggerVisualizer {
 
         void RenderMenu() {
             auto ctx = TriggerVisualizer::Trigger::Data::GetRuntimeContext();
-            string mapCommentHideSummary = TriggerVisualizer::Trigger::GetWorldRenderingHiddenByMapCommentSummary();
-            bool hiddenByMapComment = mapCommentHideSummary.Length > 0;
+            auto snapshot = TriggerVisualizer::Trigger::GetCurrentMapSnapshot();
+            bool forceOff = snapshot !is null
+                && snapshot.RenderHints !is null
+                && snapshot.RenderHints.ForceOff;
+            bool suggestOff = snapshot !is null
+                && snapshot.RenderHints !is null
+                && snapshot.RenderHints.SuggestOff;
+            bool respectSuggestion = TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx);
             vec2 rowStart = UI::GetCursorScreenPos();
             float contentRight = rowStart.x + UI::GetContentRegionAvail().x;
             UI::DrawList@ parentDrawList = UI::GetWindowDrawList();
-            bool menuOpen = UI::BeginMenu(RenderMenuRootTitle(hiddenByMapComment) + "##trigger-visualizer-render-menu-root");
+            bool menuOpen = UI::BeginMenu(RenderMenuRootTitle(forceOff, suggestOff, respectSuggestion) + "###trigger-visualizer-render-menu-root");
             bool toggleClicked = UI::IsItemClicked(UI::MouseButton::Left);
             bool settingsClicked = UI::IsItemClicked(UI::MouseButton::Right);
             vec4 rowRect = UI::GetItemRect();
-            if (hiddenByMapComment) {
-                UI::SetItemTooltip("Rendering is hidden by current map comment: " + mapCommentHideSummary);
+            if (forceOff) {
+                UI::SetItemTooltip("Rendering is forcibly hidden by a map-authored hide command.");
+            } else if (suggestOff) {
+                string tooltip = "This map suggests hiding Trigger Visualizer via "
+                    + "/trigger-visualizer suggest-off. This is only a suggestion.";
+                if (!respectSuggestion) tooltip += " The suggestion is currently ignored.";
+                UI::SetItemTooltip(tooltip);
             }
             if (settingsClicked) {
                 Meta::OpenSettings(TriggerVisualizer::PluginMeta);

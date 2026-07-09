@@ -21,6 +21,17 @@ namespace TriggerVisualizer {
                 return tokens;
             }
 
+            bool IsSharedForcedHideCommand(const array<string> &in tokens) {
+                if (tokens.Length < 2) return false;
+
+                for (uint i = 0; i + 1 < tokens.Length; i++) {
+                    string prefix = tokens[i].ToLower();
+                    if (prefix != "/fx" && prefix != "/uci") continue;
+                    if (tokens[i + 1].ToLower() == "hide") return true;
+                }
+                return false;
+            }
+
             bool TryParseMapHintDistance(const string &in rawValue, float blockSize, float &out value) {
                 string token = rawValue.Trim();
                 if (token.Length == 0) return false;
@@ -103,10 +114,17 @@ namespace TriggerVisualizer {
                 string trimmed = line.Trim();
                 if (trimmed.Length == 0) return;
 
+                auto tokens = SplitMapHintTokens(trimmed);
+                if (IsSharedForcedHideCommand(tokens)) {
+                    hints.HasAnyCommand = true;
+                    hints.ForceOff = true;
+                    hints.Commands.InsertLast(trimmed);
+                    return;
+                }
+
                 string lower = trimmed.ToLower();
                 if (!lower.StartsWith(TRIGGER_VISUALIZER_MAP_COMMAND_PREFIX)) return;
 
-                auto tokens = SplitMapHintTokens(trimmed);
                 if (tokens.Length < 2) return;
                 if (tokens[0].ToLower() != TRIGGER_VISUALIZER_MAP_COMMAND_PREFIX) return;
 

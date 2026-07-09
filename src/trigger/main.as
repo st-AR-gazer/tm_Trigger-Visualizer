@@ -212,22 +212,34 @@ namespace TriggerVisualizer {
             return snapshot;
         }
 
-        bool IsMapHintTargetDisabled(const MapRenderHints@ hints, const string &in targetKey) {
+        bool IsMapHintTargetDisabled(
+            const MapRenderHints@ hints,
+            const string &in targetKey,
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx
+        ) {
             if (hints is null || targetKey.Length == 0) return false;
             if (hints.HasForceOffTarget(targetKey)) return true;
-            return hints.HasSuggestOffTarget(targetKey) && TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff;
+            return hints.HasSuggestOffTarget(targetKey)
+                && TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx);
         }
 
-        bool IsGlobalWorldRenderingDisabledByMapHints(const MapRenderHints@ hints) {
+        bool IsGlobalWorldRenderingDisabledByMapHints(
+            const MapRenderHints@ hints,
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx
+        ) {
             if (hints is null) return false;
             if (hints.ForceOff) return true;
-            return hints.SuggestOff && TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff;
+            return hints.SuggestOff
+                && TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx);
         }
 
-        string GetGlobalWorldRenderingMapHintDisableSummary(const MapRenderHints@ hints) {
+        string GetGlobalWorldRenderingMapHintDisableSummary(
+            const MapRenderHints@ hints,
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx
+        ) {
             if (hints is null) return "";
-            if (hints.ForceOff) return "/trigger-visualizer force-off";
-            if (hints.SuggestOff && TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff) {
+            if (hints.ForceOff) return "map-authored forced hide";
+            if (hints.SuggestOff && TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx)) {
                 return "/trigger-visualizer suggest-off";
             }
             return "";
@@ -236,24 +248,35 @@ namespace TriggerVisualizer {
         string GetWorldRenderingHiddenByMapCommentSummary() {
             auto snapshot = GetCurrentMapSnapshot();
             if (snapshot is null) return "";
-            return GetGlobalWorldRenderingMapHintDisableSummary(snapshot.RenderHints);
+            return GetGlobalWorldRenderingMapHintDisableSummary(
+                snapshot.RenderHints,
+                GetCurrentRuntimeContext()
+            );
         }
 
         bool IsWorldRenderingHiddenByMapComment() {
             return GetWorldRenderingHiddenByMapCommentSummary().Length > 0;
         }
 
-        bool IsSourceDisabledByMapHints(const MapRenderHints@ hints, int source) {
-            return IsMapHintTargetDisabled(hints, GetTriggerSourceTargetKey(source));
+        bool IsSourceDisabledByMapHints(
+            const MapRenderHints@ hints,
+            int source,
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx
+        ) {
+            return IsMapHintTargetDisabled(hints, GetTriggerSourceTargetKey(source), ctx);
         }
 
-        bool IsTriggerVolumeDisabledByMapHints(const MapRenderHints@ hints, const TriggerVolume@ volume) {
+        bool IsTriggerVolumeDisabledByMapHints(
+            const MapRenderHints@ hints,
+            const TriggerVolume@ volume,
+            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx
+        ) {
             if (hints is null || volume is null) return false;
 
             for (uint i = 0; i < hints.ForceOffTargets.Length; i++) {
                 if (TriggerVolumeMatchesTargetKey(volume, hints.ForceOffTargets[i])) return true;
             }
-            if (!TriggerVisualizer::Trigger::UI::S_RespectMapSuggestOff) return false;
+            if (!TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx)) return false;
             for (uint i = 0; i < hints.SuggestOffTargets.Length; i++) {
                 if (TriggerVolumeMatchesTargetKey(volume, hints.SuggestOffTargets[i])) return true;
             }
@@ -270,12 +293,12 @@ namespace TriggerVisualizer {
 
             snapshot.Sources.InsertLast(source);
             if (!source.Enabled) return;
-            if (IsSourceDisabledByMapHints(snapshot.RenderHints, source.Source)) return;
+            if (IsSourceDisabledByMapHints(snapshot.RenderHints, source.Source, ctx)) return;
 
             auto filteredVolumes = array<TriggerVolume@>();
             for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
                 auto volume = source.TriggerVolumes[i];
-                if (IsTriggerVolumeDisabledByMapHints(snapshot.RenderHints, volume)) continue;
+                if (IsTriggerVolumeDisabledByMapHints(snapshot.RenderHints, volume, ctx)) continue;
                 if (!TriggerVisualizer::Trigger::UI::IsTriggerVolumeEnabledBySubtypeSettings(volume, ctx)) continue;
                 filteredVolumes.InsertLast(volume);
             }

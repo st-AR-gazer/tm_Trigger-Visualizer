@@ -28,6 +28,8 @@ Crystal support includes all triggers in all nadeo blocks/items as well as custo
 Map comments can include Trigger Visualizer commands:
 
 ```text
+/trigger-visualizer suggest-off
+/trigger-visualizer force-off
 /trigger-visualizer <trigger-type>,<> suggest-off
 /trigger-visualizer <trigger-type>,<> force-off
 /trigger-visualizer <trigger-type>[,<trigger-type>...] suggest-off
@@ -36,6 +38,8 @@ Map comments can include Trigger Visualizer commands:
 /trigger-visualizer suggest-draw-distance-xz !<blocks>
 /trigger-visualizer suggest-draw-distance-y <units>
 /trigger-visualizer suggest-draw-distance-y !<blocks>
+/fx hide
+/uci hide
 ```
 
 `!<blocks>` converts block counts to world units automatically, as an example `/trigger-visualizer suggest-draw-distance-y !2` would set the draw-distance to 32*2 on the x/y axis, and 8\*2 on the y axis.
@@ -43,6 +47,8 @@ Map comments can include Trigger Visualizer commands:
 `suggest-off` asks Trigger Visualizer to start matching triggers hidden when the user respects map suggestions.
 `force-off` always hides matching triggers.
 Without a trigger type, these commands apply to all world rendering. With a trigger type, they only apply to matching sources, MediaTracker subtypes, Crystal subtypes, or gameplay trigger types.
+
+`/fx hide` and `/uci hide` are established compatibility commands. Either command forces all Trigger Visualizer rendering off and cannot be overridden for that map, equivalent to `/trigger-visualizer force-off`.
 
 An empty target list, `<>`, `*`, `all`, or `everything` is treated as the same as assigning no specification, so all types are affected.
 

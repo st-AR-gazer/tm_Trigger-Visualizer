@@ -58,6 +58,7 @@ namespace TriggerVisualizer {
             const string MAP_ONLY_OVERRIDE_SOURCE_MEDIATRACKER = "source-mediatracker";
             const string MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL = "source-crystal";
             const string MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY = "crystal-custom-only";
+            const string MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF = "respect-suggest-off";
             dictionary G_MapOnlyOverrides;
 
             int GetSourceSettingsContextForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -139,6 +140,7 @@ namespace TriggerVisualizer {
                 ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_MEDIATRACKER);
                 ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL);
                 ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY);
+                ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF);
             }
 
             string MapOnlyOverrideBoolKey(bool value) {
@@ -158,6 +160,8 @@ namespace TriggerVisualizer {
                 key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL, value) ? MapOnlyOverrideBoolKey(value) : "-";
                 key += "|cco:";
                 key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += "|rso:";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF, value) ? MapOnlyOverrideBoolKey(value) : "-";
                 return key;
             }
 
@@ -284,6 +288,26 @@ namespace TriggerVisualizer {
                 bool value = false;
                 if (TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RENDER_WORLD, value)) return value;
                 return S_RenderWorld;
+            }
+
+            bool RespectMapSuggestOffForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                bool value = false;
+                if (TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF, value)) {
+                    return value;
+                }
+                return S_RespectMapSuggestOff;
+            }
+
+            bool HasMapSuggestOffOverride(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                return HasMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF);
+            }
+
+            void IgnoreMapSuggestOffForCurrentMap(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                SetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF, false);
+            }
+
+            void ClearMapSuggestOffOverride(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF);
             }
 
             bool IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {

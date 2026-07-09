@@ -5,7 +5,10 @@ namespace TriggerVisualizer {
 
             bool IsWorldRenderingDisabledByMapHint(const MapSnapshot@ snapshot) {
                 if (snapshot is null || snapshot.RenderHints is null) return false;
-                return TriggerVisualizer::Trigger::IsGlobalWorldRenderingDisabledByMapHints(snapshot.RenderHints);
+                return TriggerVisualizer::Trigger::IsGlobalWorldRenderingDisabledByMapHints(
+                    snapshot.RenderHints,
+                    GetCurrentRuntimeContext()
+                );
             }
 
             vec3 GetEffectiveRenderDistanceWorld() {

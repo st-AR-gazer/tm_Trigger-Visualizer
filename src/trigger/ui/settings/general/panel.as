@@ -213,10 +213,15 @@ namespace TriggerVisualizer {
                     "Enable all rendering##trigger-visualizer-settings-general",
                     TriggerVisualizer::Trigger::UI::S_RenderWorld
                 );
-                string mapCommentHideSummary = TriggerVisualizer::Trigger::GetWorldRenderingHiddenByMapCommentSummary();
-                if (mapCommentHideSummary.Length > 0) {
+                auto snapshot = TriggerVisualizer::Trigger::GetCurrentMapSnapshot();
+                auto hints = snapshot is null ? null : snapshot.RenderHints;
+                bool forceOff = hints !is null && hints.ForceOff;
+                bool suggestOff = hints !is null
+                    && hints.SuggestOff
+                    && TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(TriggerVisualizer::Trigger::GetCurrentRuntimeContext());
+                if (forceOff || suggestOff) {
                     UI::PushStyleColor(UI::Col::Text, vec4(0.72f, 0.72f, 0.72f, 1.0f));
-                    UI::TextWrapped("Hidden by current map comment: " + mapCommentHideSummary + ". Disable map suggest-off handling or remove the map command to render again.");
+                    UI::TextWrapped(forceOff ? "Rendering is forcibly hidden by the current map's forced-hide command." : "The current map suggests hiding Trigger Visualizer. This is only a suggestion and can be overridden for this map.");
                     UI::PopStyleColor();
                 }
                 UI::Separator();
