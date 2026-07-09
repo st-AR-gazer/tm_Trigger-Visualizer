@@ -529,7 +529,7 @@ namespace TriggerVisualizer {
                     if (ctx is null || !ctx.HasMap || ctx.RootMap is null || !enabled) return source;
 
                     uint frameStart = Time::Now;
-                    bool customOnly = TriggerVisualizer::Trigger::UI::S_CrystalCustomItemsAndBlockItemsOnly;
+                    bool customOnly = TriggerVisualizer::Trigger::UI::IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(ctx);
                     ProbeCrystalAnchoredObjects(source, ctx.RootMap, customOnly);
                     frameStart = CrystalSourceBuildCheckpoint(frameStart);
                     if (customOnly) {

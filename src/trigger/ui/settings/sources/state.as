@@ -53,6 +53,13 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: MediaTracker enabled subtypes mesh modeler"]
             string S_MediaTrackerEnabledSubtypesMeshModeler = DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER;
 
+            const string MAP_ONLY_OVERRIDE_RENDER_WORLD = "render-world";
+            const string MAP_ONLY_OVERRIDE_SOURCE_OFFZONE = "source-offzone";
+            const string MAP_ONLY_OVERRIDE_SOURCE_MEDIATRACKER = "source-mediatracker";
+            const string MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL = "source-crystal";
+            const string MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY = "crystal-custom-only";
+            dictionary G_MapOnlyOverrides;
+
             int GetSourceSettingsContextForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 if (ctx is null) return SOURCE_SETTINGS_PLAYING;
                 if (ctx.IsReplayEditor || ctx.IsEditorMediaTracker) return SOURCE_SETTINGS_MEDIATRACKER;
@@ -60,6 +67,98 @@ namespace TriggerVisualizer {
                 if (ctx.IsMeshModeler) return SOURCE_SETTINGS_MESH_MODELLER;
                 if (ctx.IsInEditor) return SOURCE_SETTINGS_EDITOR;
                 return SOURCE_SETTINGS_PLAYING;
+            }
+
+            string GetMapOnlyOverrideMapKey(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                if (ctx is null || !ctx.HasMapUid()) return "";
+                return ctx.MapUid;
+            }
+
+            string GetMapOnlyOverrideStorageKey(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                const string &in settingKey
+            ) {
+                string mapKey = GetMapOnlyOverrideMapKey(ctx);
+                if (mapKey.Length == 0 || settingKey.Length == 0) return "";
+                return mapKey + "|" + settingKey;
+            }
+
+            bool TryGetMapOnlyOverride(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                const string &in settingKey,
+                bool &out value
+            ) {
+                string storageKey = GetMapOnlyOverrideStorageKey(ctx, settingKey);
+                if (storageKey.Length == 0) return false;
+
+                int raw = 0;
+                if (!G_MapOnlyOverrides.Get(storageKey, raw)) return false;
+                value = raw != 0;
+                return true;
+            }
+
+            bool HasMapOnlyOverride(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                const string &in settingKey
+            ) {
+                string storageKey = GetMapOnlyOverrideStorageKey(ctx, settingKey);
+                return storageKey.Length > 0 && G_MapOnlyOverrides.Exists(storageKey);
+            }
+
+            void SetMapOnlyOverride(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                const string &in settingKey,
+                bool value
+            ) {
+                string storageKey = GetMapOnlyOverrideStorageKey(ctx, settingKey);
+                if (storageKey.Length == 0) return;
+                bool previous = false;
+                bool changed = !TryGetMapOnlyOverride(ctx, settingKey, previous) || previous != value;
+                G_MapOnlyOverrides.Set(storageKey, value ? 1 : 0);
+                if (changed && settingKey == MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY) {
+                    TriggerVisualizer::Trigger::RefreshCrystalSourceCache();
+                }
+            }
+
+            void ClearMapOnlyOverride(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                const string &in settingKey
+            ) {
+                string storageKey = GetMapOnlyOverrideStorageKey(ctx, settingKey);
+                if (storageKey.Length == 0) return;
+                bool existed = G_MapOnlyOverrides.Exists(storageKey);
+                if (existed) G_MapOnlyOverrides.Delete(storageKey);
+                if (existed && settingKey == MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY) {
+                    TriggerVisualizer::Trigger::RefreshCrystalSourceCache();
+                }
+            }
+
+            void ClearCurrentMapOnlyOverrides(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RENDER_WORLD);
+                ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_OFFZONE);
+                ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_MEDIATRACKER);
+                ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL);
+                ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY);
+            }
+
+            string MapOnlyOverrideBoolKey(bool value) {
+                return value ? "1" : "0";
+            }
+
+            string GetMapOnlyOverridesFilterKey(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                bool value = false;
+                string key = "";
+                key += "|rw:";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RENDER_WORLD, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += "|oz:";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_OFFZONE, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += "|mt:";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_MEDIATRACKER, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += "|cr:";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += "|cco:";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                return key;
             }
 
             string GetSourceSettingsContextLabel(int context) {
@@ -174,10 +273,53 @@ namespace TriggerVisualizer {
                     SaveCrystalSourceContextsBeforeCustomOnly();
                     S_CrystalCustomItemsAndBlockItemsOnly = true;
                     SetAllCrystalSourceContextsEnabled(false);
-                    return;
+                } else {
+                    S_CrystalCustomItemsAndBlockItemsOnly = false;
+                    RestoreCrystalSourceContextsBeforeCustomOnly();
                 }
-                S_CrystalCustomItemsAndBlockItemsOnly = value;
-                RestoreCrystalSourceContextsBeforeCustomOnly();
+                TriggerVisualizer::Trigger::RefreshCrystalSourceCache();
+            }
+
+            bool IsRenderWorldEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                bool value = false;
+                if (TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RENDER_WORLD, value)) return value;
+                return S_RenderWorld;
+            }
+
+            bool IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
+                bool value = false;
+                if (TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY, value)) return value;
+                return S_CrystalCustomItemsAndBlockItemsOnly;
+            }
+
+            string GetMapOnlySourceOverrideKey(int source) {
+                if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_OFFZONE) return MAP_ONLY_OVERRIDE_SOURCE_OFFZONE;
+                if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER) return MAP_ONLY_OVERRIDE_SOURCE_MEDIATRACKER;
+                if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_CRYSTAL) return MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL;
+                return "";
+            }
+
+            bool TryGetMapOnlySourceEnabled(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                int source,
+                bool &out enabled
+            ) {
+                return TryGetMapOnlyOverride(ctx, GetMapOnlySourceOverrideKey(source), enabled);
+            }
+
+            void SetMapOnlySourceEnabled(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                int source,
+                bool enabled
+            ) {
+                SetMapOnlyOverride(ctx, GetMapOnlySourceOverrideKey(source), enabled);
+            }
+
+            void ClearMapOnlySourceEnabled(
+                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
+                int source
+            ) {
+                ClearMapOnlyOverride(ctx, GetMapOnlySourceOverrideKey(source));
             }
 
             string GetMediaTrackerEnabledSubtypesForContext(int context) {

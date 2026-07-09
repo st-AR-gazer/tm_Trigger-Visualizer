@@ -34,10 +34,10 @@ namespace TriggerVisualizer {
             }
 
             void RenderWorld() {
-                if (!TriggerVisualizer::Trigger::UI::S_RenderWorld) return;
+                auto ctx = GetCurrentRuntimeContext();
+                if (!TriggerVisualizer::Trigger::UI::IsRenderWorldEnabledForRuntime(ctx)) return;
                 if (!TriggerVisualizer::Trigger::UI::S_ShowOutline && !TriggerVisualizer::Trigger::UI::S_ShowFill && !TriggerVisualizer::Trigger::UI::S_ShowLabels && !TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons) return;
 
-                auto ctx = GetCurrentRuntimeContext();
                 auto snapshot = GetCurrentMapSnapshot();
                 if (ctx is null || snapshot is null) return;
                 if (!ctx.HasMap) return;

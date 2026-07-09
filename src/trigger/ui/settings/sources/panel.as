@@ -13,11 +13,23 @@ namespace TriggerVisualizer {
             }
 
             bool IsOffzoneSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-                return ctx !is null && ctx.HasMap && IsOffzoneSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
+                if (ctx is null || !ctx.HasMap) return false;
+
+                bool enabled = false;
+                if (TryGetMapOnlySourceEnabled(ctx, TriggerVisualizer::Trigger::TRIGGER_SOURCE_OFFZONE, enabled)) {
+                    return enabled;
+                }
+                return IsOffzoneSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
             }
 
             bool IsMediaTrackerSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-                return ctx !is null && ctx.HasMap && IsMediaTrackerSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
+                if (ctx is null || !ctx.HasMap) return false;
+
+                bool enabled = false;
+                if (TryGetMapOnlySourceEnabled(ctx, TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER, enabled)) {
+                    return enabled;
+                }
+                return IsMediaTrackerSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
             }
 
             bool IsCrystalSourceSupportedForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -27,8 +39,14 @@ namespace TriggerVisualizer {
             }
 
             bool IsCrystalSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-                return IsCrystalSourceSupportedForRuntime(ctx)
-                    && (S_CrystalCustomItemsAndBlockItemsOnly || IsCrystalSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx)));
+                if (!IsCrystalSourceSupportedForRuntime(ctx)) return false;
+
+                bool enabled = false;
+                if (TryGetMapOnlySourceEnabled(ctx, TriggerVisualizer::Trigger::TRIGGER_SOURCE_CRYSTAL, enabled)) {
+                    return enabled;
+                }
+                return IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(ctx)
+                    || IsCrystalSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
             }
 
             string SettingBoolKey(bool value) {
@@ -120,10 +138,11 @@ namespace TriggerVisualizer {
                 return "src-profile:" + tostring(context)
                     + "|merge:" + SettingBoolKey(S_MergeAdjacentTriggerVolumes)
                     + "|suggest:" + SettingBoolKey(S_RespectMapSuggestOff)
-                    + "|offzone:" + SettingBoolKey(IsOffzoneSourceEnabledForContext(context))
-                    + "|mt:" + SettingBoolKey(IsMediaTrackerSourceEnabledForContext(context))
-                    + "|crystal:" + SettingBoolKey(IsCrystalSourceEnabledForContext(context))
-                    + "|crystal-custom-items:" + SettingBoolKey(S_CrystalCustomItemsAndBlockItemsOnly)
+                    + "|offzone:" + SettingBoolKey(IsOffzoneSourceEnabledForRuntime(ctx))
+                    + "|mt:" + SettingBoolKey(IsMediaTrackerSourceEnabledForRuntime(ctx))
+                    + "|crystal:" + SettingBoolKey(IsCrystalSourceEnabledForRuntime(ctx))
+                    + "|crystal-custom-items:" + SettingBoolKey(IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(ctx))
+                    + "|map-only:" + GetMapOnlyOverridesFilterKey(ctx)
                     + "|mt-types:" + GetMediaTrackerEnabledSubtypesForContext(context);
             }
 
@@ -571,7 +590,6 @@ namespace TriggerVisualizer {
                 if (!S_CrystalCustomItemsAndBlockItemsOnly && crystalNext != crystalValue) {
                     SetCrystalSourceEnabledForContext(context, crystalNext);
                 }
-
                 UI::Indent(18.0f);
                 bool customOnlyNext = UI::Checkbox(
                     "Only scan custom blocks/items##trigger-visualizer-sources-crystal-custom-items",

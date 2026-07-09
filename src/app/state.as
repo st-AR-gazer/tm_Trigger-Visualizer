@@ -34,10 +34,7 @@ namespace TriggerVisualizer {
         }
 
         string MenuIcon() {
-            if (g_MenuIcon.Length == 0) {
-                g_MenuIcon = _Text::StableIconForSeed(PluginNameHash());
-            }
-            return g_MenuIcon;
+            return Icons::Linode;
         }
 
         string MenuTitle() {
