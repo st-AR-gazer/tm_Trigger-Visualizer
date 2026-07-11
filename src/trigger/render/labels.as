@@ -49,6 +49,12 @@ namespace TriggerVisualizer {
                 return label;
             }
 
+            bool IsEffectlessCrystalItemTrigger(const TriggerVolume@ box) {
+                if (box is null || box.Source != TRIGGER_SOURCE_CRYSTAL) return false;
+                if (box.SubtypeKey != CRYSTAL_SUBTYPE_ITEM && box.SubtypeKey != CRYSTAL_SUBTYPE_BLOCK_ITEM) return false;
+                return TriggerTargetListContains(box.TargetKeys, MT_SUBTYPE_UNKNOWN);
+            }
+
             string BuildTriggerVolumeLabelText(uint index, const TriggerRangeRaw@ rawRange, const TriggerVolume@ box) {
                 array<string> parts;
                 if (TriggerVisualizer::Trigger::Ui::S_LabelShowIndex) {
@@ -57,6 +63,8 @@ namespace TriggerVisualizer {
                 string customLabelText = TriggerVisualizer::Trigger::Ui::GetCustomLabelTextForVolume(box);
                 if (customLabelText.Length > 0) {
                     parts.InsertLast(BuildCustomTriggerVolumeLabelName(box, customLabelText));
+                } else if (IsEffectlessCrystalItemTrigger(box)) {
+                    parts.InsertLast(BuildCustomTriggerVolumeLabelName(box, "none"));
                 } else if (box !is null && (box.Source == TRIGGER_SOURCE_MEDIATRACKER || box.IsMergedGroup || TriggerVisualizer::Trigger::Ui::S_LabelUseDetectedTriggerName || TriggerVisualizer::Trigger::Ui::S_LabelShowDetectedTriggerName || TriggerVisualizer::Trigger::Ui::S_LabelShowSourcePrefix)) {
                     parts.InsertLast(box.DisplayLabelWithOptions(TriggerVisualizer::Trigger::Ui::S_LabelShowSourcePrefix, TriggerVisualizer::Trigger::Ui::S_LabelShowIslandIndex, TriggerVisualizer::Trigger::Ui::S_LabelUseDetectedTriggerName, TriggerVisualizer::Trigger::Ui::S_LabelShowDetectedTriggerName, TriggerVisualizer::Trigger::Ui::S_LabelShowJoinedCount));
                 }
@@ -70,7 +78,7 @@ namespace TriggerVisualizer {
                     parts.InsertLast("#" + index);
                 }
 
-                return string::Join(parts, " | ");
+                return Text::Join(parts, " | ");
             }
 
             vec4 GetLabelTextColor(float fade) {

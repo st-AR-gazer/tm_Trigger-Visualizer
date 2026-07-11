@@ -311,6 +311,7 @@ namespace TriggerVisualizer {
                     if (key == MT_SUBTYPE_FADING_TRANSITION) return MEDIATRACKER_TILE_ICON_BASE_PATH + "fading_transition.png";
                     if (key == MT_SUBTYPE_FOG) return MEDIATRACKER_TILE_ICON_BASE_PATH + "fog.png";
                     if (key == MT_SUBTYPE_GHOST) return MEDIATRACKER_TILE_ICON_BASE_PATH + "ghost.png";
+                    if (key == MT_SUBTYPE_GPS) return MEDIATRACKER_TILE_ICON_BASE_PATH + "gps.png";
                     if (key == MT_SUBTYPE_HDR_BLOOM) return MEDIATRACKER_TILE_ICON_BASE_PATH + "hdr_bloom.png";
                     if (key == MT_SUBTYPE_IMAGE) return MEDIATRACKER_TILE_ICON_BASE_PATH + "image.png";
                     if (key == MT_SUBTYPE_MANIALINK_UI) return MEDIATRACKER_TILE_ICON_BASE_PATH + "manialink_ui.png";
@@ -337,6 +338,7 @@ namespace TriggerVisualizer {
 
                 string GetMediaTrackerTileIconTextureKeyFromTargetKeys(const string &in targetKeys) {
                     const string[] priority = {
+                        MT_SUBTYPE_GPS,
                         MT_SUBTYPE_GHOST,
                         MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT,
                         MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1,
@@ -393,6 +395,7 @@ namespace TriggerVisualizer {
                     if (volume.Source != TRIGGER_SOURCE_MEDIATRACKER) return "";
 
                     string textureKey = GetMediaTrackerTileIconTextureKeyForSubtype(volume.SubtypeKey);
+                    if (NormalizeTriggerTargetKey(volume.SubtypeKey) == MT_SUBTYPE_GPS) return textureKey;
                     if (textureKey.Length > 0) return textureKey;
                     textureKey = GetMediaTrackerTileIconTextureKeyFromTargetKeys(volume.TargetKeys);
                     return textureKey;

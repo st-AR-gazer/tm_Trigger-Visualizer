@@ -974,11 +974,11 @@ namespace TriggerVisualizer {
             string TargetDisableSummary() const {
                 string result = "";
                 if (ForceOffTargets.Length > 0) {
-                    result += "force-off: " + string::Join(ForceOffTargets, ", ");
+                    result += "force-off: " + Text::Join(ForceOffTargets, ", ");
                 }
                 if (SuggestOffTargets.Length > 0) {
                     if (result.Length > 0) result += " | ";
-                    result += "suggest-off: " + string::Join(SuggestOffTargets, ", ");
+                    result += "suggest-off: " + Text::Join(SuggestOffTargets, ", ");
                 }
                 return result.Length > 0 ? result : "none";
             }

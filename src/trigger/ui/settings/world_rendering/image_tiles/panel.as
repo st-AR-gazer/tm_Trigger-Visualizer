@@ -356,6 +356,11 @@ namespace TriggerVisualizer {
                         TriggerVisualizer::Trigger::Render::Assets::GetMediaTrackerTileIconPathForSubtype(MT_SUBTYPE_GHOST)
                     );
                     RenderTileIconRow(
+                        "GPS",
+                        MT_SUBTYPE_GPS,
+                        TriggerVisualizer::Trigger::Render::Assets::GetMediaTrackerTileIconPathForSubtype(MT_SUBTYPE_GPS)
+                    );
+                    RenderTileIconRow(
                         "Music Volume",
                         MT_SUBTYPE_MUSIC_VOLUME,
                         TriggerVisualizer::Trigger::Render::Assets::GetMediaTrackerTileIconPathForSubtype(MT_SUBTYPE_MUSIC_VOLUME)

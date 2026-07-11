@@ -3,7 +3,7 @@
 
 # Trigger Visualizer
 
-Displays trigger volumes that appears in the current render context.
+Displays trigger volumes present in the current runtime context.
 
 ## Layout
 
@@ -16,12 +16,12 @@ Core code lives in `src/trigger/`.
 ## Trigger Sources
 
 - Offzone volumes from map offzone data.
-- MediaTracker trigger volumes from the different MT tracks embedded in the map data.
+- MediaTracker trigger volumes from clips embedded in the map data.
 - Crystal trigger shapes from block/item trigger data.
 
-Crystal support includes all triggers in all nadeo blocks/items as well as custom blocks/items (for those pesky hidden trigger volumes that some mappers hide xdd).
+Crystal support discovers trigger shapes exposed by Nadeo and custom blocks/items, including those pesky hidden custom trigger volumes that some mappers use xdd.
 
-*Note, `GateExpandableSpecial*` and `GateExpandableGameplay*` blocks are drawn as approximate rectangles. `GateExpandableFinish*` uses a different method for getting the TriggerShape that is not exposed through the "Special" or "Gameplay" expandables, so it is still correct (the shape of the triggers are the same tho).
+`GateExpandableSpecial*` and `GateExpandableGameplay*` blocks are drawn as approximate rectangles because they do not expose their final connected trigger geometry safely. `GateExpandableFinish*` exposes its actual trigger shape through a different path, so its visualization uses the real bounds and merges connected finish pieces without approximating them.
 
 ## Mapper Commands
 
@@ -42,15 +42,15 @@ Map comments can include Trigger Visualizer commands:
 /uci hide
 ```
 
-`!<blocks>` converts block counts to world units automatically, as an example `/trigger-visualizer suggest-draw-distance-y !2` would set the draw-distance to 32*2 on the x/y axis, and 8\*2 on the y axis.
+`!<blocks>` converts block counts to world units using Trackmania's block dimensions. For example, `/trigger-visualizer suggest-draw-distance-xz !2` suggests 64 world units on the X/Z axes, while `/trigger-visualizer suggest-draw-distance-y !2` suggests 16 world units vertically.
 
-`suggest-off` asks Trigger Visualizer to start matching triggers hidden when the user respects map suggestions.
+`suggest-off` asks Trigger Visualizer to hide matching triggers by default when the user respects map suggestions.
 `force-off` always hides matching triggers.
 Without a trigger type, these commands apply to all world rendering. With a trigger type, they only apply to matching sources, MediaTracker subtypes, Crystal subtypes, or gameplay trigger types.
 
 `/fx hide` and `/uci hide` are established compatibility commands. Either command forces all Trigger Visualizer rendering off and cannot be overridden for that map, equivalent to `/trigger-visualizer force-off`.
 
-An empty target list, `<>`, `*`, `all`, or `everything` is treated as the same as assigning no specification, so all types are affected.
+An empty target list, `<>`, `*`, `all`, or `everything` acts as a wildcard, so all types are affected.
 
 Examples:
 
@@ -63,8 +63,9 @@ Examples:
 /trigger-visualizer crystalgate,checkpoint suggest-off
 /trigger-visualizer * force-off
 ```
-*Note, these are read from the maps 'map comment', to set a map comment go to:
-![Scredriver and Wrench Icon on the bottom most area on the tool bar in the editor](meta/image.png)
+These commands are read from the map comment. To edit it, open Map Options from the bottom toolbar in the editor, then select Edit Map Comment:
+
+![Screwdriver and wrench icon on the bottom toolbar in the editor](meta/image.png)
 
 ![Map Options menu showcasing the Edit Map Comment button](meta/image-1.png)
 

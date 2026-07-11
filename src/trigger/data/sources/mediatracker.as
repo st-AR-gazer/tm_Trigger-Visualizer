@@ -568,13 +568,8 @@ namespace TriggerVisualizer {
                     if (entityBlock !is null) {
                         auto info = InspectMediaTrackerEntityBlock(entityBlock);
                         entityInfo = info.Summary();
-                        if (info.IsGhostEntity) {
-                            subtypeKey = MT_SUBTYPE_GHOST;
-                            detectedLabel = "Ghost";
-                        } else {
-                            subtypeKey = MT_SUBTYPE_UNKNOWN;
-                            detectedLabel = "Entity";
-                        }
+                        subtypeKey = MT_SUBTYPE_GHOST;
+                        detectedLabel = "Ghost";
                         return true;
                     }
 
@@ -697,6 +692,7 @@ namespace TriggerVisualizer {
                         vec3 blockColorSum = vec3();
                         uint blockColorCount = 0;
                         bool trackHasGhost = false;
+                        bool trackHasPlayerCamera = false;
                         for (uint blockIndex = 0; blockIndex < track.Blocks.Length; blockIndex++) {
                             auto block = track.Blocks[blockIndex];
                             blockCount++;
@@ -728,7 +724,7 @@ namespace TriggerVisualizer {
                             } else {
                                 nonGhostBlockCount++;
                                 if (normalizedSubtypeKey == MT_SUBTYPE_PLAYER_CAMERA) {
-                                    hasPlayerCameraTrack = true;
+                                    trackHasPlayerCamera = true;
                                 }
                                 vec4 blockColor = hasSpecificTrackColor ?
                                     specificTrackColor : GetMediaTrackerTrackColorForSubtype(normalizedSubtypeKey);
@@ -765,6 +761,9 @@ namespace TriggerVisualizer {
                                 MT_SUBTYPE_GHOST
                             );
                         }
+                        if (trackHasPlayerCamera) {
+                            hasPlayerCameraTrack = true;
+                        }
                         if (blockColorCount > 0) {
                             trackColorSum += blockColorSum * (1.0f / float(blockColorCount));
                             trackColorCount++;
@@ -791,16 +790,8 @@ namespace TriggerVisualizer {
                         classification.SubtypeLabel = GetMediaTrackerSubtypeDisplayName(MT_SUBTYPE_GPS);
                         classification.DetectedLabel = "GPS";
                         classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
-                            classification.TargetKeys,
+                            "",
                             MT_SUBTYPE_GPS
-                        );
-                        classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
-                            classification.TargetKeys,
-                            MT_SUBTYPE_GHOST
-                        );
-                        classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
-                            classification.TargetKeys,
-                            MT_SUBTYPE_PLAYER_CAMERA
                         );
                         return classification;
                     } else if (hasGhostTrack && nonGhostBlockCount == 0) {
@@ -822,6 +813,10 @@ namespace TriggerVisualizer {
                     classification.SubtypeLabel = GetMediaTrackerSubtypeDisplayName(classification.SubtypeKey);
                     if (mixedSubtypes) {
                         classification.DetectedLabel = classification.SubtypeLabel;
+                        classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(
+                            "",
+                            MT_SUBTYPE_MIXED
+                        );
                     } else if (blockCount == 1 && classification.DetectedLabel.Length == 0) {
                         classification.DetectedLabel = classification.SubtypeLabel;
                     }

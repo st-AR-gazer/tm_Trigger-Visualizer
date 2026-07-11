@@ -125,6 +125,10 @@ namespace TriggerVisualizer {
             bool S_ShowTileIconMediaTrackerGhost = true;
             [Setting hidden name="Trigger: MediaTracker ghost tile icon storage path"]
             string S_TileIconPathMediaTrackerGhost = "";
+            [Setting hidden name="Trigger: Show MediaTracker GPS tile icon"]
+            bool S_ShowTileIconMediaTrackerGps = true;
+            [Setting hidden name="Trigger: MediaTracker GPS tile icon storage path"]
+            string S_TileIconPathMediaTrackerGps = "";
             [Setting hidden name="Trigger: Show MediaTracker music volume tile icon"]
             bool S_ShowTileIconMediaTrackerMusicVolume = true;
             [Setting hidden name="Trigger: MediaTracker music volume tile icon storage path"]
@@ -168,6 +172,7 @@ namespace TriggerVisualizer {
                 if (key == MT_SUBTYPE_FADING_TRANSITION) return S_ShowTileIconMediaTrackerFadingTransition;
                 if (key == MT_SUBTYPE_FOG) return S_ShowTileIconMediaTrackerFog;
                 if (key == MT_SUBTYPE_GHOST) return S_ShowTileIconMediaTrackerGhost;
+                if (key == MT_SUBTYPE_GPS) return S_ShowTileIconMediaTrackerGps;
                 if (key == MT_SUBTYPE_HDR_BLOOM) return S_ShowTileIconMediaTrackerHdrBloom;
                 if (key == MT_SUBTYPE_IMAGE) return S_ShowTileIconMediaTrackerImage;
                 if (key == MT_SUBTYPE_MANIALINK_UI) return S_ShowTileIconMediaTrackerManiaLinkUi;
@@ -226,6 +231,8 @@ namespace TriggerVisualizer {
                     S_ShowTileIconMediaTrackerFog = value;
                 } else if (key == MT_SUBTYPE_GHOST) {
                     S_ShowTileIconMediaTrackerGhost = value;
+                } else if (key == MT_SUBTYPE_GPS) {
+                    S_ShowTileIconMediaTrackerGps = value;
                 } else if (key == MT_SUBTYPE_HDR_BLOOM) {
                     S_ShowTileIconMediaTrackerHdrBloom = value;
                 } else if (key == MT_SUBTYPE_IMAGE) {
@@ -274,6 +281,7 @@ namespace TriggerVisualizer {
                 if (key == MT_SUBTYPE_FADING_TRANSITION) return S_TileIconPathMediaTrackerFadingTransition;
                 if (key == MT_SUBTYPE_FOG) return S_TileIconPathMediaTrackerFog;
                 if (key == MT_SUBTYPE_GHOST) return S_TileIconPathMediaTrackerGhost;
+                if (key == MT_SUBTYPE_GPS) return S_TileIconPathMediaTrackerGps;
                 if (key == MT_SUBTYPE_HDR_BLOOM) return S_TileIconPathMediaTrackerHdrBloom;
                 if (key == MT_SUBTYPE_IMAGE) return S_TileIconPathMediaTrackerImage;
                 if (key == MT_SUBTYPE_MANIALINK_UI) return S_TileIconPathMediaTrackerManiaLinkUi;
@@ -332,6 +340,8 @@ namespace TriggerVisualizer {
                     S_TileIconPathMediaTrackerFog = value;
                 } else if (key == MT_SUBTYPE_GHOST) {
                     S_TileIconPathMediaTrackerGhost = value;
+                } else if (key == MT_SUBTYPE_GPS) {
+                    S_TileIconPathMediaTrackerGps = value;
                 } else if (key == MT_SUBTYPE_HDR_BLOOM) {
                     S_TileIconPathMediaTrackerHdrBloom = value;
                 } else if (key == MT_SUBTYPE_IMAGE) {
@@ -382,6 +392,7 @@ namespace TriggerVisualizer {
                     MT_SUBTYPE_FADING_TRANSITION,
                     MT_SUBTYPE_FOG,
                     MT_SUBTYPE_GHOST,
+                    MT_SUBTYPE_GPS,
                     MT_SUBTYPE_HDR_BLOOM,
                     MT_SUBTYPE_IMAGE,
                     MT_SUBTYPE_MANIALINK_UI,

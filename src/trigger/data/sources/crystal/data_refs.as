@@ -183,7 +183,7 @@ namespace TriggerVisualizer {
                     }
                     warning = "Could not resolve DataRef TriggerShape filename: " + filename;
                     if (attempted.Length > 0) {
-                        warning += " candidates: " + string::Join(attempted, ", ");
+                        warning += " candidates: " + Text::Join(attempted, ", ");
                     }
                     return null;
                 }
