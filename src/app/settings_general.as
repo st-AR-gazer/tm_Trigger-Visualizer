@@ -1,107 +1,107 @@
 namespace TriggerVisualizer {
     namespace App {
         const string RESTORE_DEFAULTS_POPUP_ID = "Restore defaults?##trigger-visualizer-restore-defaults";
-        bool G_ResetDefaultsGeneral = true;
-        bool G_ResetDefaultsWorldDisplay = true;
-        bool G_ResetDefaultsWorldDistance = true;
-        bool G_ResetDefaultsWorldLineSplitting = true;
-        bool G_ResetDefaultsWorldColor = true;
-        bool G_ResetDefaultsWorldImageTiles = true;
-        bool G_ResetDefaultsWorldMapHints = true;
-        bool G_ResetDefaultsPerformance = true;
-        bool G_ResetDefaultsSourcesProfiles = true;
-        bool G_ResetDefaultsLabels = true;
+        bool g_ResetDefaultsGeneral = true;
+        bool g_ResetDefaultsWorldDisplay = true;
+        bool g_ResetDefaultsWorldDistance = true;
+        bool g_ResetDefaultsWorldLineSplitting = true;
+        bool g_ResetDefaultsWorldColor = true;
+        bool g_ResetDefaultsWorldImageTiles = true;
+        bool g_ResetDefaultsWorldMapHints = true;
+        bool g_ResetDefaultsPerformance = true;
+        bool g_ResetDefaultsSourcesProfiles = true;
+        bool g_ResetDefaultsLabels = true;
 
         bool HasWorldRestoreDefaultsSelection() {
-            return G_ResetDefaultsWorldDisplay
-                || G_ResetDefaultsWorldDistance
-                || G_ResetDefaultsWorldLineSplitting
-                || G_ResetDefaultsWorldColor
-                || G_ResetDefaultsWorldImageTiles
-                || G_ResetDefaultsWorldMapHints;
+            return g_ResetDefaultsWorldDisplay
+                || g_ResetDefaultsWorldDistance
+                || g_ResetDefaultsWorldLineSplitting
+                || g_ResetDefaultsWorldColor
+                || g_ResetDefaultsWorldImageTiles
+                || g_ResetDefaultsWorldMapHints;
         }
 
         bool IsWorldRestoreDefaultsFullySelected() {
-            return G_ResetDefaultsWorldDisplay
-                && G_ResetDefaultsWorldDistance
-                && G_ResetDefaultsWorldLineSplitting
-                && G_ResetDefaultsWorldColor
-                && G_ResetDefaultsWorldImageTiles
-                && G_ResetDefaultsWorldMapHints;
+            return g_ResetDefaultsWorldDisplay
+                && g_ResetDefaultsWorldDistance
+                && g_ResetDefaultsWorldLineSplitting
+                && g_ResetDefaultsWorldColor
+                && g_ResetDefaultsWorldImageTiles
+                && g_ResetDefaultsWorldMapHints;
         }
 
         void SetWorldRestoreDefaultsSelection(bool value) {
-            G_ResetDefaultsWorldDisplay = value;
-            G_ResetDefaultsWorldDistance = value;
-            G_ResetDefaultsWorldLineSplitting = value;
-            G_ResetDefaultsWorldColor = value;
-            G_ResetDefaultsWorldImageTiles = value;
-            G_ResetDefaultsWorldMapHints = value;
+            g_ResetDefaultsWorldDisplay = value;
+            g_ResetDefaultsWorldDistance = value;
+            g_ResetDefaultsWorldLineSplitting = value;
+            g_ResetDefaultsWorldColor = value;
+            g_ResetDefaultsWorldImageTiles = value;
+            g_ResetDefaultsWorldMapHints = value;
         }
 
         bool HasSourcesRestoreDefaultsSelection() {
-            return G_ResetDefaultsSourcesProfiles;
+            return g_ResetDefaultsSourcesProfiles;
         }
 
         bool IsSourcesRestoreDefaultsFullySelected() {
-            return G_ResetDefaultsSourcesProfiles;
+            return g_ResetDefaultsSourcesProfiles;
         }
 
         void SetSourcesRestoreDefaultsSelection(bool value) {
-            G_ResetDefaultsSourcesProfiles = value;
+            g_ResetDefaultsSourcesProfiles = value;
         }
 
         void SetRestoreDefaultsSelection(bool value) {
-            G_ResetDefaultsGeneral = value;
+            g_ResetDefaultsGeneral = value;
             SetWorldRestoreDefaultsSelection(value);
-            G_ResetDefaultsPerformance = value;
+            g_ResetDefaultsPerformance = value;
             SetSourcesRestoreDefaultsSelection(value);
-            G_ResetDefaultsLabels = value;
+            g_ResetDefaultsLabels = value;
         }
 
         bool HasRestoreDefaultsSelection() {
-            return G_ResetDefaultsGeneral
+            return g_ResetDefaultsGeneral
                 || HasWorldRestoreDefaultsSelection()
-                || G_ResetDefaultsPerformance
+                || g_ResetDefaultsPerformance
                 || HasSourcesRestoreDefaultsSelection()
-                || G_ResetDefaultsLabels;
+                || g_ResetDefaultsLabels;
         }
 
         void ApplySelectedRestoreDefaults() {
-            if (G_ResetDefaultsGeneral) {
+            if (g_ResetDefaultsGeneral) {
                 ResetGeneralSettingsToDefaults();
-                TriggerVisualizer::Trigger::UI::ResetGeneralTriggerSettingsToDefaults();
+                TriggerVisualizer::Trigger::Ui::ResetGeneralTriggerSettingsToDefaults();
             }
-            if (G_ResetDefaultsWorldDisplay) {
-                TriggerVisualizer::Trigger::UI::ResetWorldDisplaySettingsToDefaults();
+            if (g_ResetDefaultsWorldDisplay) {
+                TriggerVisualizer::Trigger::Ui::ResetWorldDisplaySettingsToDefaults();
             }
-            if (G_ResetDefaultsWorldDistance) {
-                TriggerVisualizer::Trigger::UI::ResetWorldDistanceSettingsToDefaults();
+            if (g_ResetDefaultsWorldDistance) {
+                TriggerVisualizer::Trigger::Ui::ResetWorldDistanceSettingsToDefaults();
             }
-            if (G_ResetDefaultsWorldLineSplitting) {
-                TriggerVisualizer::Trigger::UI::ResetWorldLineSplittingSettingsToDefaults();
+            if (g_ResetDefaultsWorldLineSplitting) {
+                TriggerVisualizer::Trigger::Ui::ResetWorldLineSplittingSettingsToDefaults();
             }
-            if (G_ResetDefaultsWorldColor) {
-                TriggerVisualizer::Trigger::UI::ResetWorldColorSettingsToDefaults();
+            if (g_ResetDefaultsWorldColor) {
+                TriggerVisualizer::Trigger::Ui::ResetWorldColorSettingsToDefaults();
             }
-            if (G_ResetDefaultsWorldImageTiles) {
-                TriggerVisualizer::Trigger::UI::ResetWorldTileIconSettingsToDefaults();
+            if (g_ResetDefaultsWorldImageTiles) {
+                TriggerVisualizer::Trigger::Ui::ResetWorldTileIconSettingsToDefaults();
             }
-            if (G_ResetDefaultsWorldMapHints) {
-                TriggerVisualizer::Trigger::UI::ResetWorldMapHintSettingsToDefaults();
+            if (g_ResetDefaultsWorldMapHints) {
+                TriggerVisualizer::Trigger::Ui::ResetWorldMapHintSettingsToDefaults();
             }
-            if (G_ResetDefaultsPerformance) {
-                TriggerVisualizer::Trigger::UI::ResetPerformanceSettingsToDefaults();
+            if (g_ResetDefaultsPerformance) {
+                TriggerVisualizer::Trigger::Ui::ResetPerformanceSettingsToDefaults();
             }
-            if (G_ResetDefaultsSourcesProfiles) {
-                TriggerVisualizer::Trigger::UI::ResetSourceProfileSettingsToDefaults();
+            if (g_ResetDefaultsSourcesProfiles) {
+                TriggerVisualizer::Trigger::Ui::ResetSourceProfileSettingsToDefaults();
             }
-            if (G_ResetDefaultsLabels) {
-                TriggerVisualizer::Trigger::UI::ResetLabelSettingsToDefaults();
+            if (g_ResetDefaultsLabels) {
+                TriggerVisualizer::Trigger::Ui::ResetLabelSettingsToDefaults();
             }
         }
 
-        void RenderWorldRestoreDefaultsSelectionUI() {
+        void RenderWorldRestoreDefaultsSelectionUi() {
             bool selected = IsWorldRestoreDefaultsFullySelected();
             bool next = UI::Checkbox("World Rendering##trigger-visualizer-restore-defaults-world-rendering", selected);
             if (next != selected) SetWorldRestoreDefaultsSelection(next);
@@ -110,34 +110,34 @@ namespace TriggerVisualizer {
                 UI::TextDisabled("(partial)");
             }
             UI::Indent();
-            G_ResetDefaultsWorldDisplay = UI::Checkbox(
+            g_ResetDefaultsWorldDisplay = UI::Checkbox(
                 "Display##trigger-visualizer-restore-defaults-world-display",
-                G_ResetDefaultsWorldDisplay
+                g_ResetDefaultsWorldDisplay
             );
-            G_ResetDefaultsWorldDistance = UI::Checkbox(
+            g_ResetDefaultsWorldDistance = UI::Checkbox(
                 "Distance##trigger-visualizer-restore-defaults-world-distance",
-                G_ResetDefaultsWorldDistance
+                g_ResetDefaultsWorldDistance
             );
-            G_ResetDefaultsWorldLineSplitting = UI::Checkbox(
+            g_ResetDefaultsWorldLineSplitting = UI::Checkbox(
                 "Line splitting##trigger-visualizer-restore-defaults-world-line-splitting",
-                G_ResetDefaultsWorldLineSplitting
+                g_ResetDefaultsWorldLineSplitting
             );
-            G_ResetDefaultsWorldColor = UI::Checkbox(
+            g_ResetDefaultsWorldColor = UI::Checkbox(
                 "Color##trigger-visualizer-restore-defaults-world-color",
-                G_ResetDefaultsWorldColor
+                g_ResetDefaultsWorldColor
             );
-            G_ResetDefaultsWorldImageTiles = UI::Checkbox(
+            g_ResetDefaultsWorldImageTiles = UI::Checkbox(
                 "Image/Tiles##trigger-visualizer-restore-defaults-world-image-tiles",
-                G_ResetDefaultsWorldImageTiles
+                g_ResetDefaultsWorldImageTiles
             );
-            G_ResetDefaultsWorldMapHints = UI::Checkbox(
+            g_ResetDefaultsWorldMapHints = UI::Checkbox(
                 "Map hints##trigger-visualizer-restore-defaults-world-map-hints",
-                G_ResetDefaultsWorldMapHints
+                g_ResetDefaultsWorldMapHints
             );
             UI::Unindent();
         }
 
-        void RenderSourcesRestoreDefaultsSelectionUI() {
+        void RenderSourcesRestoreDefaultsSelectionUi() {
             bool selected = IsSourcesRestoreDefaultsFullySelected();
             bool next = UI::Checkbox("Sources##trigger-visualizer-restore-defaults-sources", selected);
             if (next != selected) SetSourcesRestoreDefaultsSelection(next);
@@ -146,9 +146,9 @@ namespace TriggerVisualizer {
                 UI::TextDisabled("(partial)");
             }
             UI::Indent();
-            G_ResetDefaultsSourcesProfiles = UI::Checkbox(
+            g_ResetDefaultsSourcesProfiles = UI::Checkbox(
                 "Context visibility profiles##trigger-visualizer-restore-defaults-sources-profiles",
-                G_ResetDefaultsSourcesProfiles
+                g_ResetDefaultsSourcesProfiles
             );
             UI::Unindent();
         }
@@ -157,23 +157,23 @@ namespace TriggerVisualizer {
             if (UI::BeginPopupModal(RESTORE_DEFAULTS_POPUP_ID, UI::WindowFlags::AlwaysAutoResize)) {
                 UI::Text("Restore selected Trigger Visualizer defaults?");
                 UI::Separator();
-                G_ResetDefaultsGeneral = UI::Checkbox(
+                g_ResetDefaultsGeneral = UI::Checkbox(
                     "General##trigger-visualizer-restore-defaults-general",
-                    G_ResetDefaultsGeneral
+                    g_ResetDefaultsGeneral
                 );
                 UI::Separator();
-                RenderWorldRestoreDefaultsSelectionUI();
+                RenderWorldRestoreDefaultsSelectionUi();
                 UI::Separator();
-                G_ResetDefaultsPerformance = UI::Checkbox(
+                g_ResetDefaultsPerformance = UI::Checkbox(
                     "Performance##trigger-visualizer-restore-defaults-performance",
-                    G_ResetDefaultsPerformance
+                    g_ResetDefaultsPerformance
                 );
                 UI::Separator();
-                RenderSourcesRestoreDefaultsSelectionUI();
+                RenderSourcesRestoreDefaultsSelectionUi();
                 UI::Separator();
-                G_ResetDefaultsLabels = UI::Checkbox(
+                g_ResetDefaultsLabels = UI::Checkbox(
                     "Labels##trigger-visualizer-restore-defaults-labels",
-                    G_ResetDefaultsLabels
+                    g_ResetDefaultsLabels
                 );
                 UI::Separator();
                 if (TriggerVisualizer::Shared::StyledButton("Select all##trigger-visualizer-restore-defaults-select-all")) {
@@ -202,23 +202,23 @@ namespace TriggerVisualizer {
             }
         }
 
-        void RenderGeneralSettingsUI() {
+        void RenderGeneralSettingsUi() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-general", vec2(0, 0), false);
             if (open) {
                 S_HideWithGame = UI::Checkbox("Hide with game UI", S_HideWithGame);
                 S_HideWithOP = UI::Checkbox("Hide with Openplanet UI", S_HideWithOP);
                 UI::Separator();
                 UI::Text("Rendering");
-                TriggerVisualizer::Trigger::UI::S_RenderWorld = UI::Checkbox(
+                TriggerVisualizer::Trigger::Ui::S_RenderWorld = UI::Checkbox(
                     "Enable all rendering##trigger-visualizer-settings-general",
-                    TriggerVisualizer::Trigger::UI::S_RenderWorld
+                    TriggerVisualizer::Trigger::Ui::S_RenderWorld
                 );
                 auto snapshot = TriggerVisualizer::Trigger::GetCurrentMapSnapshot();
                 auto hints = snapshot is null ? null : snapshot.RenderHints;
                 bool forceOff = hints !is null && hints.ForceOff;
                 bool suggestOff = hints !is null
                     && hints.SuggestOff
-                    && TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(TriggerVisualizer::Trigger::GetCurrentRuntimeContext());
+                    && TriggerVisualizer::Trigger::Ui::RespectMapSuggestOffForRuntime(TriggerVisualizer::Trigger::GetCurrentRuntimeContext());
                 if (forceOff || suggestOff) {
                     UI::PushStyleColor(UI::Col::Text, vec4(0.72f, 0.72f, 0.72f, 1.0f));
                     UI::TextWrapped(forceOff ? "Rendering is forcibly hidden by the current map's forced-hide command." : "The current map suggests hiding Trigger Visualizer. This is only a suggestion and can be overridden for this map.");

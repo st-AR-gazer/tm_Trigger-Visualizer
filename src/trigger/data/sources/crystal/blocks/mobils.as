@@ -254,21 +254,6 @@ namespace TriggerVisualizer {
                     );
                 }
 
-                bool CrystalVariantHasPublicBlockTriggerSurface(CGameCtnBlockInfoVariant@ variant) {
-                    if (variant is null) return false;
-                    if (variant.WaypointTriggerShape !is null) return true;
-                    if (variant.ScreenInteractionTriggerShape !is null) return true;
-                    if (variant.Gate !is null && variant.Gate.Shape !is null) return true;
-                    if (variant.Teleporter !is null && variant.Teleporter.TriggerShape !is null) return true;
-                    return false;
-                }
-
-                bool CrystalVariantHasDeprecatedTriggerNod(CGameCtnBlockInfoVariant@ variant) {
-                    if (variant is null) return false;
-                    return variant.DeprecWaypointTriggerSolid !is null
-                        || variant.DeprecScreenInteractionTriggerSolid !is null;
-                }
-
                 bool ProbeCrystalBlockMobilPrefab(
                     TriggerSourceSnapshot@ source,
                     CGameCtnBlock@ block,
@@ -303,7 +288,7 @@ namespace TriggerVisualizer {
                     }
 
                     bool found = false;
-                    uint count = CrystalMinUint(prefab.Ents.Length, MAX_CRYSTAL_PREFAB_ENTS);
+                    uint count = MinUint(prefab.Ents.Length, MAX_CRYSTAL_PREFAB_ENTS);
                     for (uint i = 0; i < count; i++) {
                         auto ent = prefab.Ents[i];
                         CMwNod@ entModel = ent.Model;
@@ -420,6 +405,10 @@ namespace TriggerVisualizer {
                         try {
                             @specialSurface = specialTrigger.TriggerShape;
                         } catch {
+                            logging::HandledException(
+                                "ProbeCrystalBlockMobilModel",
+                                "Special trigger surface was not readable."
+                            );
                             @specialSurface = null;
                         }
                         if (specialSurface !is null) {

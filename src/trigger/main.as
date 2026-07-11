@@ -52,7 +52,7 @@ namespace TriggerVisualizer {
 
         void RenderDevPanel() {
             RefreshCurrentState();
-            TriggerVisualizer::Trigger::UI::Dev::RenderDevPanelContent();
+            TriggerVisualizer::Trigger::Ui::Dev::RenderDevPanelContent();
         }
 
         void RefreshCurrentState() {
@@ -89,15 +89,15 @@ namespace TriggerVisualizer {
         }
 
         uint GetMediaTrackerRefreshIntervalMs(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-            return uint(TriggerVisualizer::Trigger::UI::GetMediaTrackerRefreshIntervalMsForRuntime(ctx));
+            return uint(TriggerVisualizer::Trigger::Ui::GetMediaTrackerRefreshIntervalMsForRuntime(ctx));
         }
 
         uint GetOffzoneRefreshIntervalMs(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-            return uint(TriggerVisualizer::Trigger::UI::GetOffzoneRefreshIntervalMsForRuntime(ctx));
+            return uint(TriggerVisualizer::Trigger::Ui::GetOffzoneRefreshIntervalMsForRuntime(ctx));
         }
 
         uint GetCrystalRefreshIntervalMs(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-            return uint(TriggerVisualizer::Trigger::UI::GetCrystalRefreshIntervalMsForRuntime(ctx));
+            return uint(TriggerVisualizer::Trigger::Ui::GetCrystalRefreshIntervalMsForRuntime(ctx));
         }
 
         bool UsesPeriodicOffzoneRefresh(
@@ -142,9 +142,9 @@ namespace TriggerVisualizer {
         bool CanReuseMapSnapshot(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
             if (g_MapSnapshot is null || ctx is null) return false;
 
-            bool offzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
-            bool mediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
-            bool crystalEnabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForRuntime(ctx);
+            bool offzoneEnabled = TriggerVisualizer::Trigger::Ui::IsOffzoneSourceEnabledForRuntime(ctx);
+            bool mediaTrackerEnabled = TriggerVisualizer::Trigger::Ui::IsMediaTrackerSourceEnabledForRuntime(ctx);
+            bool crystalEnabled = TriggerVisualizer::Trigger::Ui::IsCrystalSourceEnabledForRuntime(ctx);
             if (UsesPeriodicOffzoneRefresh(ctx, offzoneEnabled) && IsOffzoneRefreshDue(ctx, g_CachedOffzoneSourceRefreshTime)) {
                 return false;
             }
@@ -157,7 +157,7 @@ namespace TriggerVisualizer {
 
             return ctx.RootMap is g_CachedMapSnapshotRootMap
                 && g_CachedMapSnapshotContextKey == GetMapSnapshotContextKey(ctx)
-                && g_CachedMapSnapshotFilterKey == TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey(ctx)
+                && g_CachedMapSnapshotFilterKey == TriggerVisualizer::Trigger::Ui::GetMapSnapshotFilterSettingsKey(ctx)
                 && g_CachedMapSnapshotOffzoneEnabled == offzoneEnabled
                 && g_CachedMapSnapshotMediaTrackerEnabled == mediaTrackerEnabled
                 && g_CachedMapSnapshotCrystalEnabled == crystalEnabled
@@ -178,10 +178,10 @@ namespace TriggerVisualizer {
 
             @g_CachedMapSnapshotRootMap = ctx.RootMap;
             g_CachedMapSnapshotContextKey = GetMapSnapshotContextKey(ctx);
-            g_CachedMapSnapshotFilterKey = TriggerVisualizer::Trigger::UI::GetMapSnapshotFilterSettingsKey(ctx);
-            g_CachedMapSnapshotOffzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
-            g_CachedMapSnapshotMediaTrackerEnabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
-            g_CachedMapSnapshotCrystalEnabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForRuntime(ctx);
+            g_CachedMapSnapshotFilterKey = TriggerVisualizer::Trigger::Ui::GetMapSnapshotFilterSettingsKey(ctx);
+            g_CachedMapSnapshotOffzoneEnabled = TriggerVisualizer::Trigger::Ui::IsOffzoneSourceEnabledForRuntime(ctx);
+            g_CachedMapSnapshotMediaTrackerEnabled = TriggerVisualizer::Trigger::Ui::IsMediaTrackerSourceEnabledForRuntime(ctx);
+            g_CachedMapSnapshotCrystalEnabled = TriggerVisualizer::Trigger::Ui::IsCrystalSourceEnabledForRuntime(ctx);
             g_CachedMapSnapshotRefreshTime = Time::Now;
         }
 
@@ -194,7 +194,7 @@ namespace TriggerVisualizer {
 
             snapshot.MapComments = TriggerVisualizer::Trigger::Data::ReadMapComments(ctx.RootMap);
             @snapshot.RenderHints = TriggerVisualizer::Trigger::Data::ParseMapRenderHints(snapshot.MapComments);
-            bool offzoneEnabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForRuntime(ctx);
+            bool offzoneEnabled = TriggerVisualizer::Trigger::Ui::IsOffzoneSourceEnabledForRuntime(ctx);
             auto offzoneSource = GetOffzoneTriggerSource(ctx, offzoneEnabled);
             snapshot.RawTriggerSize = offzoneSource.RawTriggerSize;
             snapshot.RawBufferPtr = offzoneSource.RawBufferPtr;
@@ -203,7 +203,7 @@ namespace TriggerVisualizer {
             AddSourceToMapSnapshot(snapshot, offzoneSource, ctx);
             auto mediaTrackerSource = GetMediaTrackerTriggerSource(ctx);
             AddSourceToMapSnapshot(snapshot, mediaTrackerSource, ctx);
-            bool crystalEnabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForRuntime(ctx);
+            bool crystalEnabled = TriggerVisualizer::Trigger::Ui::IsCrystalSourceEnabledForRuntime(ctx);
             auto crystalSource = GetCrystalTriggerSource(ctx, crystalEnabled);
             AddSourceToMapSnapshot(snapshot, crystalSource, ctx);
             TriggerVisualizer::Trigger::Data::BuildMapSnapshotStaticOutlineCache(snapshot);
@@ -220,7 +220,7 @@ namespace TriggerVisualizer {
             if (hints is null || targetKey.Length == 0) return false;
             if (hints.HasForceOffTarget(targetKey)) return true;
             return hints.HasSuggestOffTarget(targetKey)
-                && TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx);
+                && TriggerVisualizer::Trigger::Ui::RespectMapSuggestOffForRuntime(ctx);
         }
 
         bool IsGlobalWorldRenderingDisabledByMapHints(
@@ -230,32 +230,7 @@ namespace TriggerVisualizer {
             if (hints is null) return false;
             if (hints.ForceOff) return true;
             return hints.SuggestOff
-                && TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx);
-        }
-
-        string GetGlobalWorldRenderingMapHintDisableSummary(
-            const MapRenderHints@ hints,
-            const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx
-        ) {
-            if (hints is null) return "";
-            if (hints.ForceOff) return "map-authored forced hide";
-            if (hints.SuggestOff && TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx)) {
-                return "/trigger-visualizer suggest-off";
-            }
-            return "";
-        }
-
-        string GetWorldRenderingHiddenByMapCommentSummary() {
-            auto snapshot = GetCurrentMapSnapshot();
-            if (snapshot is null) return "";
-            return GetGlobalWorldRenderingMapHintDisableSummary(
-                snapshot.RenderHints,
-                GetCurrentRuntimeContext()
-            );
-        }
-
-        bool IsWorldRenderingHiddenByMapComment() {
-            return GetWorldRenderingHiddenByMapCommentSummary().Length > 0;
+                && TriggerVisualizer::Trigger::Ui::RespectMapSuggestOffForRuntime(ctx);
         }
 
         bool IsSourceDisabledByMapHints(
@@ -276,7 +251,7 @@ namespace TriggerVisualizer {
             for (uint i = 0; i < hints.ForceOffTargets.Length; i++) {
                 if (TriggerVolumeMatchesTargetKey(volume, hints.ForceOffTargets[i])) return true;
             }
-            if (!TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx)) return false;
+            if (!TriggerVisualizer::Trigger::Ui::RespectMapSuggestOffForRuntime(ctx)) return false;
             for (uint i = 0; i < hints.SuggestOffTargets.Length; i++) {
                 if (TriggerVolumeMatchesTargetKey(volume, hints.SuggestOffTargets[i])) return true;
             }
@@ -299,21 +274,17 @@ namespace TriggerVisualizer {
             for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
                 auto volume = source.TriggerVolumes[i];
                 if (IsTriggerVolumeDisabledByMapHints(snapshot.RenderHints, volume, ctx)) continue;
-                if (!TriggerVisualizer::Trigger::UI::IsTriggerVolumeEnabledBySubtypeSettings(volume, ctx)) continue;
+                if (!TriggerVisualizer::Trigger::Ui::IsTriggerVolumeEnabledBySubtypeSettings(volume, ctx)) continue;
                 filteredVolumes.InsertLast(volume);
             }
             bool canMergeSource = source.Source != TRIGGER_SOURCE_CRYSTAL;
-            if (canMergeSource && TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes) {
+            if (canMergeSource && TriggerVisualizer::Trigger::Ui::S_MergeAdjacentTriggerVolumes) {
                 auto mergedVolumes = TriggerVisualizer::Trigger::Data::MergeAdjacentTriggerVolumes(filteredVolumes);
-                for (uint i = 0; i < mergedVolumes.Length; i++) {
-                    snapshot.TriggerVolumes.InsertLast(mergedVolumes[i]);
-                }
+                snapshot.TriggerVolumes.InsertAt(snapshot.TriggerVolumes.Length, mergedVolumes);
                 return;
             }
 
-            for (uint i = 0; i < filteredVolumes.Length; i++) {
-                snapshot.TriggerVolumes.InsertLast(filteredVolumes[i]);
-            }
+            snapshot.TriggerVolumes.InsertAt(snapshot.TriggerVolumes.Length, filteredVolumes);
         }
 
         TriggerSourceSnapshot@ GetOffzoneTriggerSource(
@@ -344,6 +315,10 @@ namespace TriggerVisualizer {
             try {
                 return map.Blocks.Length;
             } catch {
+                logging::HandledException(
+                    "GetCrystalMapBlockCount",
+                    "Map.Blocks length was not readable."
+                );
                 return 0;
             }
         }
@@ -353,6 +328,10 @@ namespace TriggerVisualizer {
             try {
                 return map.BakedBlocks.Length;
             } catch {
+                logging::HandledException(
+                    "GetCrystalMapBakedBlockCount",
+                    "Map.BakedBlocks length was not readable."
+                );
                 return 0;
             }
         }
@@ -362,16 +341,20 @@ namespace TriggerVisualizer {
             try {
                 return map.AnchoredObjects.Length;
             } catch {
+                logging::HandledException(
+                    "GetCrystalMapAnchoredObjectCount",
+                    "Map.AnchoredObjects length was not readable."
+                );
                 return 0;
             }
         }
 
         bool GetCrystalCustomItemsAndBlockItemsOnly(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-            return TriggerVisualizer::Trigger::UI::IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(ctx);
+            return TriggerVisualizer::Trigger::Ui::IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(ctx);
         }
 
         bool GetCrystalMergeAdjacentTriggerVolumes() {
-            return TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes;
+            return TriggerVisualizer::Trigger::Ui::S_MergeAdjacentTriggerVolumes;
         }
 
         bool CachedCrystalSourceMatchesBuildIdentity(
@@ -807,7 +790,7 @@ namespace TriggerVisualizer {
         }
 
         TriggerSourceSnapshot@ GetMediaTrackerTriggerSource(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-            bool enabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForRuntime(ctx);
+            bool enabled = TriggerVisualizer::Trigger::Ui::IsMediaTrackerSourceEnabledForRuntime(ctx);
             string contextKey = GetMapSnapshotContextKey(ctx);
 
             if (!enabled) {

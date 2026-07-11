@@ -49,14 +49,14 @@ namespace TriggerVisualizer {
                     try {
                         Dev::SafeReadUInt64(ptr);
                     } catch {
+                        logging::HandledException(
+                            "CanSafelyTouchPointer",
+                            "Pointer probe failed."
+                        );
                         return false;
                     }
 
                     return true;
-                }
-
-                uint MinUint(uint a, uint b) {
-                    return a < b ? a : b;
                 }
 
                 uint SaturatingAddUint(uint a, uint b) {
@@ -196,6 +196,10 @@ namespace TriggerVisualizer {
                         try {
                             coords.InsertLast(Nat3ToInt3(Dev::SafeReadNat3(bufferPtr + i * 0xC)));
                         } catch {
+                            logging::HandledException(
+                                "ReadMediaTrackerTriggerCoords",
+                                "Trigger coordinate read failed."
+                            );
                             break;
                         }
                     }
@@ -213,6 +217,10 @@ namespace TriggerVisualizer {
                         try {
                             coords.InsertLast(Nat3ToInt3(Dev::SafeReadNat3(bufferPtr + i * 0xC)));
                         } catch {
+                            logging::HandledException(
+                                "ReadMediaTrackerTriggerCoordSamples",
+                                "Trigger coordinate sample read failed."
+                            );
                             break;
                         }
                     }
@@ -293,10 +301,6 @@ namespace TriggerVisualizer {
                     }
                 }
 
-                vec3 ColorVec3(const vec4 &in color) {
-                    return vec3(color.x, color.y, color.z);
-                }
-
                 vec4 ColorVec4(const vec3 &in color) {
                     return vec4(
                         Math::Clamp(color.x, 0.0f, 1.0f),
@@ -312,6 +316,10 @@ namespace TriggerVisualizer {
                         auto typeInfo = Reflection::TypeOf(block);
                         return typeInfo is null ? "" : typeInfo.Name;
                     } catch {
+                        logging::HandledException(
+                            "GetMediaTrackerBlockTypeName",
+                            "MediaTracker block type was not readable."
+                        );
                         return "";
                     }
                 }
@@ -328,10 +336,8 @@ namespace TriggerVisualizer {
                     string expectedTypeName = NormalizeMediaTrackerRuntimeTypeName(typeName);
                     if (reflectedTypeName.Length == 0 || expectedTypeName.Length == 0) return false;
                     if (reflectedTypeName == expectedTypeName) return true;
-                    if (reflectedTypeName.Length >= expectedTypeName.Length && reflectedTypeName.SubStr(reflectedTypeName.Length - expectedTypeName.Length) == expectedTypeName) {
-                        return true;
-                    }
-                    return reflectedTypeName.IndexOf(expectedTypeName) >= 0;
+                    if (reflectedTypeName.EndsWith(expectedTypeName)) return true;
+                    return reflectedTypeName.Contains(expectedTypeName);
                 }
 
                 bool TryClassifyMediaTrackerTrackName(
@@ -357,6 +363,10 @@ namespace TriggerVisualizer {
                     try {
                         return Dev::GetOffsetUint64(entityBlock, offset);
                     } catch {
+                        logging::HandledException(
+                            "SafeReadEntityOffsetUint64",
+                            "Entity uint64 offset read failed."
+                        );
                         return 0;
                     }
                 }
@@ -366,6 +376,10 @@ namespace TriggerVisualizer {
                     try {
                         return Dev::GetOffsetUint32(entityBlock, offset);
                     } catch {
+                        logging::HandledException(
+                            "SafeReadEntityOffsetUint32",
+                            "Entity uint32 offset read failed."
+                        );
                         return 0;
                     }
                 }
@@ -375,6 +389,10 @@ namespace TriggerVisualizer {
                     try {
                         return Dev::GetOffsetString(entityBlock, offset);
                     } catch {
+                        logging::HandledException(
+                            "SafeReadEntityOffsetString",
+                            "Entity string offset read failed."
+                        );
                         return "";
                     }
                 }
@@ -400,14 +418,16 @@ namespace TriggerVisualizer {
                         try {
                             vec3 trailColor = Dev::SafeReadVec3(keyPtr + 0x8);
                             float trailIntensity = Dev::SafeReadFloat(keyPtr + 0x14);
-                            float colorLengthSq = trailColor.x * trailColor.x
-                                + trailColor.y * trailColor.y
-                                + trailColor.z * trailColor.z;
+                            float colorLengthSq = trailColor.LengthSquared();
                             if (trailIntensity <= 0.001f || colorLengthSq <= 0.0001f) continue;
 
                             colorSum += trailColor;
                             colorCount++;
                         } catch {
+                            logging::HandledException(
+                                "TryReadMediaTrackerEntityTrailColor",
+                                "Entity trail color key read failed."
+                            );
                             break;
                         }
                     }
@@ -712,7 +732,7 @@ namespace TriggerVisualizer {
                                 }
                                 vec4 blockColor = hasSpecificTrackColor ?
                                     specificTrackColor : GetMediaTrackerTrackColorForSubtype(normalizedSubtypeKey);
-                                blockColorSum += ColorVec3(blockColor);
+                                blockColorSum += blockColor.xyz;
                                 blockColorCount++;
                             }
                             classification.TargetKeys = AddMediaTrackerSubtypeTargetKey(

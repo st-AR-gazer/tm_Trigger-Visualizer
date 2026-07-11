@@ -26,7 +26,7 @@ namespace TriggerVisualizer {
                         source,
                         "Item " + ownerName + " block item edition: triggerShapes " + tostring(blockItem.BlockInfoMobilSkins_TriggerShapes.Length) + ", crystals " + tostring(blockItem.BlockInfoMobilSkins_Crystals.Length) + ", staticObjModels " + tostring(blockItem.BlockInfoMobilSkins_StaticObjModels.Length) + ", spawnLocs " + tostring(blockItem.BlockInfoMobilSkins_SpawnLocTranss.Length)
                     );
-                    uint count = CrystalMinUint(
+                    uint count = MinUint(
                         blockItem.BlockInfoMobilSkins_TriggerShapes.Length,
                         MAX_CRYSTAL_BLOCK_ITEM_TRIGGER_SHAPES
                     );
@@ -294,7 +294,7 @@ namespace TriggerVisualizer {
                         return false;
                     }
 
-                    uint count = CrystalMinUint(
+                    uint count = MinUint(
                         variantCount,
                         MAX_CRYSTAL_ITEM_VARIANTS
                     );
@@ -362,7 +362,7 @@ namespace TriggerVisualizer {
                     }
 
                     bool found = false;
-                    uint count = CrystalMinUint(
+                    uint count = MinUint(
                         prefab.Ents.Length,
                         MAX_CRYSTAL_PREFAB_ENTS
                     );

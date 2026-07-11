@@ -1,6 +1,6 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             const string TILE_ICON_EXPLORER_ID_PREFIX = "trigger-tile-icon-";
 
             string GetTileIconSessionId(const string &in key) {
@@ -19,15 +19,15 @@
             ) {
                 string inputKey = NormalizeTriggerTargetKey(key);
                 string value;
-                if (!G_TileIconPathInputs.Get(inputKey, value)) {
+                if (!g_TileIconPathInputs.Get(inputKey, value)) {
                     value = GetTileIconDisplayPath(defaultPath, storagePath);
-                    G_TileIconPathInputs.Set(inputKey, value);
+                    g_TileIconPathInputs.Set(inputKey, value);
                 }
                 return value;
             }
 
             void SetTileIconPathInputValue(const string &in key, const string &in value) {
-                G_TileIconPathInputs.Set(NormalizeTriggerTargetKey(key), value);
+                g_TileIconPathInputs.Set(NormalizeTriggerTargetKey(key), value);
             }
 
             void SetTileIconStoragePath(const string &in key, bool isOffzone, const string &in storagePath) {
@@ -65,34 +65,34 @@
                 if (trimmedPath.Length == 0 || trimmedPath == defaultPath) {
                     SetTileIconStoragePath(key, isOffzone, "");
                     SetTileIconPathInputValue(key, defaultPath);
-                    G_TileIconImportStatus = "Using default image for " + GetMediaTrackerSubtypeDisplayName(key) + ".";
+                    g_TileIconImportStatus = "Using default image for " + GetMediaTrackerSubtypeDisplayName(key) + ".";
                     return true;
                 }
 
                 if (!TriggerVisualizer::Trigger::Render::Assets::IsSupportedTileIconImagePath(trimmedPath)) {
-                    G_TileIconImportStatus = "Unsupported image type: " + trimmedPath;
-                    NotifyWarning(G_TileIconImportStatus, TriggerVisualizer::PluginMeta.Name, 6000);
+                    g_TileIconImportStatus = "Unsupported image type: " + trimmedPath;
+                    NotifyWarning(g_TileIconImportStatus, TriggerVisualizer::g_PluginMeta.Name, 6000);
                     return false;
                 }
 
                 string storagePath = TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage(trimmedPath);
                 if (storagePath.Length == 0) {
-                    G_TileIconImportStatus = "Could not add image. Make sure the path exists and is a supported image file.";
-                    NotifyWarning(G_TileIconImportStatus, TriggerVisualizer::PluginMeta.Name, 6000);
+                    g_TileIconImportStatus = "Could not add image. Make sure the path exists and is a supported image file.";
+                    NotifyWarning(g_TileIconImportStatus, TriggerVisualizer::g_PluginMeta.Name, 6000);
                     return false;
                 }
 
                 SetTileIconStoragePath(key, isOffzone, storagePath);
                 SetTileIconPathInputValue(key, IO::FromStorageFolder(storagePath));
-                G_TileIconImportStatus = "Added image: " + IO::FromStorageFolder(storagePath);
-                NotifyInfo("Tile icon image added.", TriggerVisualizer::PluginMeta.Name, 5000);
+                g_TileIconImportStatus = "Added image: " + IO::FromStorageFolder(storagePath);
+                NotifyInfo("Tile icon image added.", TriggerVisualizer::g_PluginMeta.Name, 5000);
                 return true;
             }
 
             void ResetTileIconPath(const string &in key, bool isOffzone, const string &in defaultPath) {
                 SetTileIconStoragePath(key, isOffzone, "");
                 SetTileIconPathInputValue(key, defaultPath);
-                G_TileIconImportStatus = "Using default image.";
+                g_TileIconImportStatus = "Using default image.";
             }
 
             void OpenTileIconFileExplorer(const string &in key, const string &in currentPath) {
@@ -178,7 +178,7 @@
                 UI::TableHeadersRow();
             }
 
-            void RenderOffzoneTileIconSettingsUI() {
+            void RenderOffzoneTileIconSettingsUi() {
                 if (UI::BeginTable("trigger-visualizer-offzone-tile-icons", 5, UI::TableFlags::SizingStretchProp | UI::TableFlags::BordersInnerV | UI::TableFlags::RowBg)) {
                     RenderTileIconTableHeader();
                     RenderTileIconRow(
@@ -191,7 +191,7 @@
                 }
             }
 
-            void RenderCameraTileIconSettingsUI() {
+            void RenderCameraTileIconSettingsUi() {
                 if (UI::BeginTable("trigger-visualizer-camera-tile-icons", 5, UI::TableFlags::SizingStretchProp | UI::TableFlags::BordersInnerV | UI::TableFlags::RowBg)) {
                     RenderTileIconTableHeader();
                     RenderTileIconRow(
@@ -258,7 +258,7 @@
                 }
             }
 
-            void RenderVisualTileIconSettingsUI() {
+            void RenderVisualTileIconSettingsUi() {
                 if (UI::BeginTable("trigger-visualizer-visual-tile-icons", 5, UI::TableFlags::SizingStretchProp | UI::TableFlags::BordersInnerV | UI::TableFlags::RowBg)) {
                     RenderTileIconTableHeader();
                     RenderTileIconRow(
@@ -315,7 +315,7 @@
                 }
             }
 
-            void RenderInterfaceTileIconSettingsUI() {
+            void RenderInterfaceTileIconSettingsUi() {
                 if (UI::BeginTable("trigger-visualizer-interface-tile-icons", 5, UI::TableFlags::SizingStretchProp | UI::TableFlags::BordersInnerV | UI::TableFlags::RowBg)) {
                     RenderTileIconTableHeader();
                     RenderTileIconRow(
@@ -347,7 +347,7 @@
                 }
             }
 
-            void RenderOtherTileIconSettingsUI() {
+            void RenderOtherTileIconSettingsUi() {
                 if (UI::BeginTable("trigger-visualizer-other-tile-icons", 5, UI::TableFlags::SizingStretchProp | UI::TableFlags::BordersInnerV | UI::TableFlags::RowBg)) {
                     RenderTileIconTableHeader();
                     RenderTileIconRow(
@@ -379,28 +379,28 @@
                 }
             }
 
-            void RenderMediaTrackerTileIconSettingsUI() {
+            void RenderMediaTrackerTileIconSettingsUi() {
                 UI::BeginTabBar("trigger-visualizer-mediatracker-tile-icon-tabs");
                 if (UI::BeginTabItem("Camera")) {
-                    RenderCameraTileIconSettingsUI();
+                    RenderCameraTileIconSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Visual")) {
-                    RenderVisualTileIconSettingsUI();
+                    RenderVisualTileIconSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Interface/Time")) {
-                    RenderInterfaceTileIconSettingsUI();
+                    RenderInterfaceTileIconSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Audio/Other")) {
-                    RenderOtherTileIconSettingsUI();
+                    RenderOtherTileIconSettingsUi();
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();
             }
 
-            void RenderTileIconGlobalSettingsUI() {
+            void RenderTileIconGlobalSettingsUi() {
                 S_ShowSkullTileIcons = UI::Checkbox(
                     "Show tile icon at tile centers##trigger-visualizer-image-tiles",
                     S_ShowSkullTileIcons
@@ -426,22 +426,22 @@
                     1.0f
                 );
                 UI::TextDisabled("Typed paths are applied with Enter. Browse selections are copied into plugin storage.");
-                if (G_TileIconImportStatus.Length > 0) {
-                    UI::TextWrapped(G_TileIconImportStatus);
+                if (g_TileIconImportStatus.Length > 0) {
+                    UI::TextWrapped(g_TileIconImportStatus);
                 }
                 ClampColorSettings();
             }
 
-            void RenderImageTilesSettingsUI() {
-                RenderTileIconGlobalSettingsUI();
+            void RenderImageTilesSettingsUi() {
+                RenderTileIconGlobalSettingsUi();
                 UI::Separator();
                 UI::BeginTabBar("trigger-visualizer-tile-icon-source-tabs");
                 if (UI::BeginTabItem("Offzone")) {
-                    RenderOffzoneTileIconSettingsUI();
+                    RenderOffzoneTileIconSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("MediaTracker")) {
-                    RenderMediaTrackerTileIconSettingsUI();
+                    RenderMediaTrackerTileIconSettingsUi();
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();

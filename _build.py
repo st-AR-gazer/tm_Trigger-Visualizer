@@ -2,11 +2,10 @@ build_name_overwrite = ""
 # Empty = use the repository folder name.
 
 import argparse
-import os
 import zipfile
 from pathlib import Path
 
-ROOT = Path.cwd()
+ROOT = Path(__file__).resolve().parent
 SRC_DIR = ROOT / "src"
 ADDITIONAL_FILES = ("info.toml", "LICENSE", "README.md")
 
@@ -38,10 +37,8 @@ def archive_name(path):
 
 
 def zip_directory(src_dir, zip_file):
-    for root, _, files in os.walk(src_dir):
-        for file in files:
-            file_path = Path(root) / file
-            zip_file.write(file_path, archive_name(file_path))
+    for file_path in sorted(path for path in src_dir.rglob("*") if path.is_file()):
+        zip_file.write(file_path, archive_name(file_path))
 
 
 def create_op_file():
@@ -50,7 +47,8 @@ def create_op_file():
     op_file_name = normalize_build_name(base_name)
     op_file_name += ".op"
 
-    with zipfile.ZipFile(op_file_name, "w", zipfile.ZIP_DEFLATED) as zipf:
+    output_path = ROOT / op_file_name
+    with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         zip_directory(SRC_DIR, zipf)
 
         for file in ADDITIONAL_FILES:
@@ -58,7 +56,7 @@ def create_op_file():
             if file_path.exists():
                 zipf.write(file_path, archive_name(file_path))
 
-    print(f"Created {op_file_name} successfully.")
+    print(f"Created {output_path} successfully.")
     print("Reminder: set logging::S_showDefaultLogs to the default you want before release builds.")
 
 

@@ -5,14 +5,14 @@ namespace TriggerVisualizer {
             const float FILL_TILE_SPLIT_DISTANCE_FACTOR = 0.75f;
             const uint FILL_TILE_MAX_DEPTH = 8;
             const uint FILL_TILE_MAX_TILES_PER_FACE = 512;
-            const uint FILL_TILE_TRAVERSAL_BUDGET_HARD_MAX = 8192;
+            const int FILL_TILE_FRAME_SAFETY_LIMIT = 65536;
+            const float FILL_TILE_MIN_SIZE = 4.0f;
             const float SCREEN_QUAD_VISIBILITY_MARGIN = 128.0f;
             const float SKULL_TILE_ICON_MIN_SCREEN_SIZE = 2.0f;
             const float SKULL_TILE_ICON_TARGET_PATCH_SCREEN_SIZE = 40.0f;
             const float SKULL_TILE_ICON_TARGET_PATCH_PERSPECTIVE_ERROR = 2.0f;
-            const uint SKULL_TILE_ICON_HARD_MAX_SUBDIVISIONS = 12;
+            const int SKULL_TILE_ICON_MAX_SUBDIVISIONS = 6;
             const uint LINE_FRUSTUM_MAX_DEPTH = 12;
-            const uint WORLD_LINE_SEGMENT_BUDGET_HARD_MAX = 32768;
             const int WORLD_PRIMITIVE_OUTSIDE = 0;
             const int WORLD_PRIMITIVE_MIXED = 1;
             const int WORLD_PRIMITIVE_FRONT = 2;
@@ -34,15 +34,11 @@ namespace TriggerVisualizer {
                 float Aspect = 1.0f;
             }
 
-            uint G_TileIconPatchBudgetRemaining = 1600;
-            uint G_FillTileTraversalBudgetRemaining = 4096;
-            uint G_WorldLineSegmentBudgetRemaining = 1536;
-            uint G_CrystalWorldLineSegmentBudgetRemaining = 768;
-            bool G_SpeedRenderSkipActive = false;
-            WorldFrustumState G_WorldFrustumState;
+            bool g_SpeedRenderSkipActive = false;
+            WorldFrustumState g_WorldFrustumState;
 
             bool IsSpeedRenderSkipRuntimeEligible(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-                return TriggerVisualizer::Trigger::UI::S_FastDrivingPerformanceMode
+                return TriggerVisualizer::Trigger::Ui::S_FastDrivingPerformanceMode
                     && ctx !is null
                     && (ctx.IsPlayableMap || ctx.IsEditorTestMode);
             }
@@ -57,8 +53,8 @@ namespace TriggerVisualizer {
             }
 
             bool SpeedIsPastRenderSkipThreshold(float speedKmh) {
-                return speedKmh >= TriggerVisualizer::Trigger::UI::GetFastDrivingForwardSpeedThresholdKmh()
-                    || speedKmh <= TriggerVisualizer::Trigger::UI::GetFastDrivingReverseSpeedThresholdKmh();
+                return speedKmh >= TriggerVisualizer::Trigger::Ui::GetFastDrivingForwardSpeedThresholdKmh()
+                    || speedKmh <= TriggerVisualizer::Trigger::Ui::GetFastDrivingReverseSpeedThresholdKmh();
             }
 
             bool IsSpeedRenderSkipActiveForSpeed(
@@ -70,24 +66,24 @@ namespace TriggerVisualizer {
             }
 
             bool IsSpeedRenderSkipActive() {
-                return G_SpeedRenderSkipActive;
+                return g_SpeedRenderSkipActive;
             }
 
             bool UpdateSpeedRenderSkipActiveForSpeed(
                 const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
                 const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
-                G_SpeedRenderSkipActive = IsSpeedRenderSkipActiveForSpeed(ctx, proximityState);
-                return G_SpeedRenderSkipActive;
+                g_SpeedRenderSkipActive = IsSpeedRenderSkipActiveForSpeed(ctx, proximityState);
+                return g_SpeedRenderSkipActive;
             }
 
             bool ShouldSkipWorldRenderForSpeed(
                 const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
                 const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
-                return G_SpeedRenderSkipActive
+                return g_SpeedRenderSkipActive
                     && IsSpeedRenderSkipRuntimeEligible(ctx)
-                    && TriggerVisualizer::Trigger::UI::ShouldSpeedRenderSkipHideAllRuntimeSources(ctx);
+                    && TriggerVisualizer::Trigger::Ui::ShouldSpeedRenderSkipHideAllRuntimeSources(ctx);
             }
 
             bool ShouldSkipTriggerVolumeForSpeed(
@@ -96,124 +92,41 @@ namespace TriggerVisualizer {
             ) {
                 return speedRenderSkipActive
                     && volume !is null
-                    && !TriggerVisualizer::Trigger::UI::ShouldSpeedRenderKeepVolume(volume);
+                    && !TriggerVisualizer::Trigger::Ui::ShouldSpeedRenderKeepVolume(volume);
             }
 
-            int GetEffectiveMaxFillTilesPerFrame() {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return 65536;
-                return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxFillTilesPerFrame, 1);
-            }
-
-            int GetEffectiveMaxOutlineSegmentsPerFrame() {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX);
-                return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxOutlineSegmentsPerFrame, 1);
-            }
-
-            int GetEffectiveMaxCrystalOutlineSegmentsPerFrame() {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX);
-                return Math::Clamp(
-                    TriggerVisualizer::Trigger::UI::S_MaxCrystalOutlineSegmentsPerFrame,
-                    0,
-                    int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX)
-                );
-            }
-
-            int GetEffectiveMaxTileIconPatchesPerFrame() {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return 65536;
-                return Math::Max(TriggerVisualizer::Trigger::UI::S_MaxTileIconPatchesPerFrame, 0);
+            int GetFillTileFrameSafetyLimit() {
+                return FILL_TILE_FRAME_SAFETY_LIMIT;
             }
 
             bool ShouldRenderWorldFillNow() {
-                return TriggerVisualizer::Trigger::UI::S_ShowFill;
+                return TriggerVisualizer::Trigger::Ui::S_ShowFill;
             }
 
             bool ShouldRenderWorldLabelsNow() {
-                return TriggerVisualizer::Trigger::UI::S_ShowLabels;
+                return TriggerVisualizer::Trigger::Ui::S_ShowLabels;
             }
 
             bool ShouldRenderWorldTileIconsNow() {
-                return TriggerVisualizer::Trigger::UI::S_ShowSkullTileIcons;
+                return TriggerVisualizer::Trigger::Ui::S_ShowSkullTileIcons;
             }
 
             bool ShouldRepeatTileIconsOnSplitFillTilesNow() {
                 return ShouldRenderWorldTileIconsNow()
-                    && TriggerVisualizer::Trigger::UI::S_RepeatTileIconsOnSplitFillTiles;
+                    && TriggerVisualizer::Trigger::Ui::S_RepeatTileIconsOnSplitFillTiles;
             }
 
             bool ShouldCollectTileIconsSeparatelyNow() {
                 return ShouldRenderWorldTileIconsNow()
-                    && !TriggerVisualizer::Trigger::UI::S_RepeatTileIconsOnSplitFillTiles;
+                    && !TriggerVisualizer::Trigger::Ui::S_RepeatTileIconsOnSplitFillTiles;
             }
 
-            bool ShouldSimplifyGroupedTriggersNow() {
-                return false;
-            }
-
-            void ResetWorldRenderPerformanceBudgets() {
-                int maxFillTiles = GetEffectiveMaxFillTilesPerFrame();
-                int maxOutlineSegments = GetEffectiveMaxOutlineSegmentsPerFrame();
-                int maxCrystalOutlineSegments = GetEffectiveMaxCrystalOutlineSegmentsPerFrame();
-                G_TileIconPatchBudgetRemaining = uint(GetEffectiveMaxTileIconPatchesPerFrame());
-                G_FillTileTraversalBudgetRemaining = maxFillTiles <= 0 ?
-                0 : uint(Math::Clamp(maxFillTiles * 4, 256, int(FILL_TILE_TRAVERSAL_BUDGET_HARD_MAX)));
-                G_WorldLineSegmentBudgetRemaining = maxOutlineSegments <= 0 ?
-                0 : uint(Math::Clamp(maxOutlineSegments, 32, int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX)));
-                G_CrystalWorldLineSegmentBudgetRemaining = uint(Math::Clamp(maxCrystalOutlineSegments, 0, int(WORLD_LINE_SEGMENT_BUDGET_HARD_MAX)));
+            void PrepareWorldRenderFrame() {
                 UpdateWorldFrustumState();
             }
 
-            bool ConsumeWorldFillTileTraversalBudget() {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return true;
-                if (G_FillTileTraversalBudgetRemaining == 0) return false;
-                G_FillTileTraversalBudgetRemaining--;
-                return true;
-            }
-
-            bool ConsumeWorldLineSegmentBudget() {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return true;
-                if (G_WorldLineSegmentBudgetRemaining == 0) return false;
-                G_WorldLineSegmentBudgetRemaining--;
-                return true;
-            }
-
-            bool UsesCrystalOutlineBudget(const TriggerVolume@ box) {
-                return box !is null && box.Source == TRIGGER_SOURCE_CRYSTAL;
-            }
-
-            bool HasWorldLineSegmentBudgetForVolume(const TriggerVolume@ box) {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return true;
-                if (G_WorldLineSegmentBudgetRemaining == 0) return false;
-                return !UsesCrystalOutlineBudget(box) || G_CrystalWorldLineSegmentBudgetRemaining > 0;
-            }
-
-            bool ConsumeWorldLineSegmentBudgetForVolume(const TriggerVolume@ box) {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) return true;
-                if (!HasWorldLineSegmentBudgetForVolume(box)) return false;
-
-                G_WorldLineSegmentBudgetRemaining--;
-                if (UsesCrystalOutlineBudget(box)) {
-                    G_CrystalWorldLineSegmentBudgetRemaining--;
-                }
-                return true;
-            }
-
             bool ShouldSplitTriggerVolumeOutlineEdges(const TriggerVolume@ box) {
-                if (UsesCrystalOutlineBudget(box)) {
-                    return TriggerVisualizer::Trigger::UI::S_SplitCrystalOutlineEdges;
-                }
-                return true;
-            }
-
-            int GetWorldFillTileCoordKey(float value) {
-                return TriggerVisualizer::Trigger::GetTriggerGeometryCoordKey(value);
-            }
-
-            string GetWorldFillTilePointKey(const vec3 &in point) {
-                return TriggerVisualizer::Trigger::GetTriggerGeometryPointKey(point);
-            }
-
-            void SortWorldFillTileCornerKeys(array<string> @keys) {
-                TriggerVisualizer::Trigger::SortTriggerGeometryCornerKeys(keys);
+                return box is null || box.Source != TRIGGER_SOURCE_CRYSTAL;
             }
 
             string GetWorldFillTileGeometryKey(const vec3 &in origin, const vec3 &in uEdge, const vec3 &in vEdge) {
@@ -234,6 +147,7 @@ namespace TriggerVisualizer {
                 string TileIconTextureKey;
                 float TileSeed = 0.0f;
                 float SortDistanceSq = 0.0f;
+                uint SortOrder = 0;
                 bool Occluded = false;
                 bool HasScreenProjection = false;
                 bool AllowTileIcon = true;
@@ -269,6 +183,7 @@ namespace TriggerVisualizer {
                 string TextureKey;
                 string GeometryKey;
                 float SortDistanceSq = 0.0f;
+                uint SortOrder = 0;
                 bool Occluded = false;
 
                 WorldTileIconDrawItem() { }
@@ -292,10 +207,8 @@ namespace TriggerVisualizer {
             class WorldOutlineEdgeDrawItem {
                 vec3 Start;
                 vec3 End;
-                vec4 Color;
                 uint BoxIndex = 0;
                 uint EdgeIndex = 0;
-                float SortDistanceSq = 0.0f;
                 string GeometryKey;
 
                 WorldOutlineEdgeDrawItem() { }
@@ -327,10 +240,6 @@ namespace TriggerVisualizer {
                 return TriggerVisualizer::Trigger::GetTriggerLineGeometryKey(start, end);
             }
 
-            int FindStringIndex(const array<string> @keys, const string &in key) {
-                return TriggerVisualizer::Trigger::FindTriggerGeometryKeyIndex(keys, key);
-            }
-
             void AddGeometryKeyCount(array<string> @keys, array<uint> @counts, const string &in key) {
                 TriggerVisualizer::Trigger::AddTriggerGeometryKeyCount(keys, counts, key);
             }
@@ -340,69 +249,24 @@ namespace TriggerVisualizer {
             }
 
             bool RenderPriorityModeUsesCamera(int mode) {
-                return mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_ONLY
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_VEHICLE
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_ORBITAL
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
+                return mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_ONLY
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_AND_VEHICLE
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_AND_ORBITAL
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
             }
 
             bool RenderPriorityModeUsesVehicle(int mode) {
-                return mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_ONLY
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_VEHICLE
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_AND_ORBITAL
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
+                return mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_VEHICLE_ONLY
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_AND_VEHICLE
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_VEHICLE_AND_ORBITAL
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
             }
 
             bool RenderPriorityModeUsesOrbital(int mode) {
-                return mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_ORBITAL_ONLY
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_ORBITAL
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_AND_ORBITAL
-                    || mode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
-            }
-
-            float GetDistanceSqToWorldLineSegment(const vec3 &in point, const vec3 &in start, const vec3 &in end) {
-                vec3 line = end - start;
-                float lineLengthSq = Math::Distance2(start, end);
-                if (lineLengthSq <= 0.0001f) return Math::Distance2(point, start);
-
-                float t = Math::Dot(point - start, line) / lineLengthSq;
-                t = Math::Clamp(t, 0.0f, 1.0f);
-                return Math::Distance2(point, Math::Lerp(start, end, t));
-            }
-
-            float GetWorldLineRenderPriorityDistanceSq(
-                const vec3 &in start,
-                const vec3 &in end,
-                const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
-                int mode
-            ) {
-                float best = 1e30f;
-                bool hasCandidate = false;
-                if (RenderPriorityModeUsesCamera(mode)) {
-                    best = Math::Min(best, GetDistanceSqToWorldLineSegment(cameraPos, start, end));
-                    hasCandidate = true;
-                }
-                if (RenderPriorityModeUsesVehicle(mode) && proximityState !is null && proximityState.HasVehiclePosition) {
-                    best = Math::Min(best, GetDistanceSqToWorldLineSegment(proximityState.VehiclePosition, start, end));
-                    hasCandidate = true;
-                }
-                if (RenderPriorityModeUsesOrbital(mode) && proximityState !is null && proximityState.HasOrbitalPoint) {
-                    best = Math::Min(best, GetDistanceSqToWorldLineSegment(proximityState.OrbitalPoint, start, end));
-                    hasCandidate = true;
-                }
-
-                return hasCandidate ? best : GetDistanceSqToWorldLineSegment(cameraPos, start, end);
-            }
-
-            float GetWorldLineRenderPriorityDistanceSq(
-                const vec3 &in start,
-                const vec3 &in end,
-                const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
-            ) {
-                int mode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
-                return GetWorldLineRenderPriorityDistanceSq(start, end, cameraPos, proximityState, mode);
+                return mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_ORBITAL_ONLY
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_AND_ORBITAL
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_VEHICLE_AND_ORBITAL
+                    || mode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL;
             }
 
             vec4 LerpColor(const vec4 &in from, const vec4 &in to, float factor) {
@@ -416,44 +280,11 @@ namespace TriggerVisualizer {
                 return value;
             }
 
-            vec3 RgbToHsv(const vec4 &in color) {
-                float maxValue = Math::Max(color.x, Math::Max(color.y, color.z));
-                float minValue = Math::Min(color.x, Math::Min(color.y, color.z));
-                float delta = maxValue - minValue;
-                float hue = 0.0f;
-
-                if (delta > 0.00001f) {
-                    if (maxValue == color.x) {
-                        hue = (color.y - color.z) / delta;
-                        if (hue < 0.0f) hue += 6.0f;
-                    } else if (maxValue == color.y) {
-                        hue = ((color.z - color.x) / delta) + 2.0f;
-                    } else {
-                        hue = ((color.x - color.y) / delta) + 4.0f;
-                    }
-                    hue /= 6.0f;
-                }
-
-                float saturation = maxValue <= 0.00001f ? 0.0f : delta / maxValue;
-                return vec3(hue, saturation, maxValue);
-            }
-
-            vec4 HsvToRgb(float hue, float saturation, float value, float alpha) {
-                hue = Wrap01(hue);
-                saturation = Math::Clamp(saturation, 0.0f, 1.0f);
-                value = Math::Clamp(value, 0.0f, 1.0f);
-                float r = Math::Clamp(Math::Abs(hue * 6.0f - 3.0f) - 1.0f, 0.0f, 1.0f);
-                float g = Math::Clamp(2.0f - Math::Abs(hue * 6.0f - 2.0f), 0.0f, 1.0f);
-                float b = Math::Clamp(2.0f - Math::Abs(hue * 6.0f - 4.0f), 0.0f, 1.0f);
-                r = (1.0f + (r - 1.0f) * saturation) * value;
-                g = (1.0f + (g - 1.0f) * saturation) * value;
-                b = (1.0f + (b - 1.0f) * saturation) * value;
-                return vec4(r, g, b, alpha);
-            }
-
             vec4 ShiftColorHue(const vec4 &in color, float hueShift) {
-                vec3 hsv = RgbToHsv(color);
-                return HsvToRgb(hsv.x + hueShift, hsv.y, hsv.z, color.w);
+                vec3 hsv = UI::ToHSV(color.x, color.y, color.z);
+                vec4 shifted = UI::HSV(Wrap01(hsv.x + hueShift), hsv.y, hsv.z);
+                shifted.w = color.w;
+                return shifted;
             }
 
             float StableRandom01(float seed) {
@@ -465,8 +296,9 @@ namespace TriggerVisualizer {
                 float h = StableRandom01(seed);
                 float s = 0.65f + StableRandom01(seed + 17.0f) * 0.25f;
                 float v = 0.85f + StableRandom01(seed + 31.0f) * 0.15f;
-
-                return HsvToRgb(h, s, v, alpha);
+                vec4 color = UI::HSV(h, s, v);
+                color.w = alpha;
+                return color;
             }
 
             float GetOutlineSegmentColorSeed(uint boxIndex, uint edgeIndex, uint segmentIndex) {
@@ -481,27 +313,23 @@ namespace TriggerVisualizer {
             }
 
             vec4 GetOutlineSegmentColor(const vec4 &in baseColor, uint boxIndex, uint edgeIndex, uint segmentIndex) {
-                if (!TriggerVisualizer::Trigger::UI::S_RandomOutlineSegmentColors) return baseColor;
+                if (!TriggerVisualizer::Trigger::Ui::S_RandomOutlineSegmentColors) return baseColor;
                 return StableRandomColor(GetOutlineSegmentColorSeed(boxIndex, edgeIndex, segmentIndex), baseColor.w);
             }
 
             vec4 GetFillTileColor(const vec4 &in baseColor, float tileSeed) {
-                if (!TriggerVisualizer::Trigger::UI::S_RandomFillTileColors) return baseColor;
+                if (!TriggerVisualizer::Trigger::Ui::S_RandomFillTileColors) return baseColor;
                 return StableRandomColor(tileSeed, baseColor.w);
             }
 
             float GetFillTileMinSize() {
-                return Math::Clamp(
-                    TriggerVisualizer::Trigger::UI::S_FillTileMinSize,
-                    2.0f,
-                    64.0f
-                );
+                return FILL_TILE_MIN_SIZE;
             }
 
             float GetTriggerVolumeLineSplitDensityFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
-                if (!TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting) return 0.0f;
+                if (!TriggerVisualizer::Trigger::Ui::S_AdaptiveLineSplitting) return 0.0f;
 
-                int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitMaxSegmentsPerEdge, 1);
+                int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::Ui::S_LineSplitMaxSegmentsPerEdge, 1);
                 if (maxAllowedSegments <= 1) return 0.0f;
 
                 uint maxEdgeSegments = GetMaxTriggerVolumeOutlineEdgeSegments(box, cameraPos);
@@ -513,11 +341,11 @@ namespace TriggerVisualizer {
             }
 
             int GetTurboRouletteColorPhase() {
-                int yellowMs = Math::Max(TriggerVisualizer::Trigger::UI::S_TurboRouletteYellowDurationMs, 50);
-                int cyanMs = Math::Max(TriggerVisualizer::Trigger::UI::S_TurboRouletteCyanDurationMs, 50);
-                int purpleMs = Math::Max(TriggerVisualizer::Trigger::UI::S_TurboRoulettePurpleDurationMs, 50);
+                int yellowMs = Math::Max(TriggerVisualizer::Trigger::Ui::S_TurboRouletteYellowDurationMs, 50);
+                int cyanMs = Math::Max(TriggerVisualizer::Trigger::Ui::S_TurboRouletteCyanDurationMs, 50);
+                int purpleMs = Math::Max(TriggerVisualizer::Trigger::Ui::S_TurboRoulettePurpleDurationMs, 50);
                 int cycleMs = yellowMs + cyanMs + purpleMs;
-                int phaseMs = int(Time::Now % uint64(cycleMs)) + TriggerVisualizer::Trigger::UI::S_TurboRoulettePhaseOffsetMs;
+                int phaseMs = int(Time::Now % uint64(cycleMs)) + TriggerVisualizer::Trigger::Ui::S_TurboRoulettePhaseOffsetMs;
                 phaseMs %= cycleMs;
                 if (phaseMs < 0) phaseMs += cycleMs;
                 if (phaseMs < yellowMs) return 0;
@@ -533,33 +361,33 @@ namespace TriggerVisualizer {
             }
 
             bool ShouldUseAnimatedTurboRouletteColor(const TriggerVolume@ box) {
-                return TriggerVisualizer::Trigger::UI::S_AnimateTurboRouletteColor
+                return TriggerVisualizer::Trigger::Ui::S_AnimateTurboRouletteColor
                     && TriggerVisualizer::Trigger::TriggerVolumeIsTurboRoulette(box);
             }
 
             vec4 GetColorModeColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
-                vec4 color = TriggerVisualizer::Trigger::UI::S_BaseTriggerColor;
-                int colorSource = TriggerVisualizer::Trigger::UI::S_ColorSource;
-                if (colorSource != TriggerVisualizer::Trigger::UI::COLOR_SOURCE_UNIFORM && box !is null && box.HasTriggerTypeColor) {
+                vec4 color = TriggerVisualizer::Trigger::Ui::S_BaseTriggerColor;
+                int colorSource = TriggerVisualizer::Trigger::Ui::S_ColorSource;
+                if (colorSource != TriggerVisualizer::Trigger::Ui::COLOR_SOURCE_UNIFORM && box !is null && box.HasTriggerTypeColor) {
                     color = box.TriggerTypeColor;
                 }
-                if (colorSource != TriggerVisualizer::Trigger::UI::COLOR_SOURCE_UNIFORM && ShouldUseAnimatedTurboRouletteColor(box)) {
+                if (colorSource != TriggerVisualizer::Trigger::Ui::COLOR_SOURCE_UNIFORM && ShouldUseAnimatedTurboRouletteColor(box)) {
                     color = GetTurboRouletteRenderColor();
                 }
-                if (colorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
+                if (colorSource == TriggerVisualizer::Trigger::Ui::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
                     color = box.MediaTrackerTrackColor;
                 }
-                if (TriggerVisualizer::Trigger::UI::S_EnableDistanceFadeColor) {
+                if (TriggerVisualizer::Trigger::Ui::S_EnableDistanceFadeColor) {
                     color = LerpColor(
                         color,
-                        TriggerVisualizer::Trigger::UI::S_DistanceFadeColor,
+                        TriggerVisualizer::Trigger::Ui::S_DistanceFadeColor,
                         1.0f - Math::Clamp(fade, 0.0f, 1.0f)
                     );
                 }
-                if (TriggerVisualizer::Trigger::UI::S_EnableLineSplitDensityColor) {
+                if (TriggerVisualizer::Trigger::Ui::S_EnableLineSplitDensityColor) {
                     color = LerpColor(
                         color,
-                        TriggerVisualizer::Trigger::UI::S_DenseLineSplitColor,
+                        TriggerVisualizer::Trigger::Ui::S_DenseLineSplitColor,
                         GetTriggerVolumeLineSplitDensityFactor(box, cameraPos)
                     );
                 }
@@ -569,16 +397,16 @@ namespace TriggerVisualizer {
 
             vec4 GetOutlineColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = GetColorModeColor(box, cameraPos, fade);
-                if (TriggerVisualizer::Trigger::UI::S_ColorSource == TriggerVisualizer::Trigger::UI::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
-                    color = ShiftColorHue(color, TriggerVisualizer::Trigger::UI::S_MediaTrackerTrackOutlineHueShift);
+                if (TriggerVisualizer::Trigger::Ui::S_ColorSource == TriggerVisualizer::Trigger::Ui::COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS && box !is null && box.Source == TRIGGER_SOURCE_MEDIATRACKER && box.HasMediaTrackerTrackColor) {
+                    color = ShiftColorHue(color, TriggerVisualizer::Trigger::Ui::S_MediaTrackerTrackOutlineHueShift);
                 }
-                color.w *= TriggerVisualizer::Trigger::UI::S_OutlineAlpha * Math::Clamp(fade, 0.0f, 1.0f);
+                color.w *= TriggerVisualizer::Trigger::Ui::S_OutlineAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return color;
             }
 
             vec4 GetFillColor(const TriggerVolume@ box, const vec3 &in cameraPos, float fade) {
                 vec4 color = GetColorModeColor(box, cameraPos, fade);
-                color.w *= TriggerVisualizer::Trigger::UI::S_FillAlpha * Math::Clamp(fade, 0.0f, 1.0f);
+                color.w *= TriggerVisualizer::Trigger::Ui::S_FillAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return color;
             }
 
@@ -598,7 +426,7 @@ namespace TriggerVisualizer {
 
             float GetDistanceOutsideTriggerVolumeSq(const TriggerVolume@ box, const vec3 &in point) {
                 vec3 outside = GetDistanceOutsideTriggerVolume(box, point);
-                return outside.x * outside.x + outside.y * outside.y + outside.z * outside.z;
+                return outside.LengthSquared();
             }
 
             float GetTriggerVolumeRenderPriorityDistanceSq(
@@ -630,7 +458,7 @@ namespace TriggerVisualizer {
                 const vec3 &in cameraPos,
                 const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
-                int mode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
+                int mode = TriggerVisualizer::Trigger::Ui::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
                 return GetTriggerVolumeRenderPriorityDistanceSq(box, cameraPos, proximityState, mode);
             }
 
@@ -644,12 +472,12 @@ namespace TriggerVisualizer {
                 fadeBand = Math::Min(fadeBand, renderDistance);
                 float fadeStart = Math::Max(renderDistance - fadeBand, 0.0f);
                 if (axisDistance <= fadeStart) return 1.0f;
-                return 1.0f - ((axisDistance - fadeStart) / fadeBand);
+                return 1.0f - Math::InvLerp(fadeStart, renderDistance, axisDistance);
             }
 
             float GetTriggerVolumeFadeFactor(const TriggerVolume@ box, const vec3 &in cameraPos) {
                 vec3 renderDistance = GetEffectiveRenderDistanceWorld();
-                vec3 fadeBand = TriggerVisualizer::Trigger::UI::GetRenderFadeBandWorld();
+                vec3 fadeBand = TriggerVisualizer::Trigger::Ui::GetRenderFadeBandWorld();
                 vec3 outside = GetDistanceOutsideTriggerVolume(box, cameraPos);
                 float fx = GetAxisFadeFactor(outside.x, renderDistance.x, fadeBand.x);
                 float fy = GetAxisFadeFactor(outside.y, renderDistance.y, fadeBand.y);
@@ -659,10 +487,6 @@ namespace TriggerVisualizer {
 
             bool IsVisibleFadeFactor(float fade) {
                 return fade > MIN_VISIBLE_FADE;
-            }
-
-            bool IsTriggerVolumeInRenderRange(const TriggerVolume@ box, const vec3 &in cameraPos) {
-                return IsVisibleFadeFactor(GetTriggerVolumeFadeFactor(box, cameraPos));
             }
 
             float GetVehicleTriggerVolumeFadeFactor(
@@ -688,34 +512,34 @@ namespace TriggerVisualizer {
                 int proximityMode
             ) {
                 float cameraFade = GetTriggerVolumeFadeFactor(box, cameraPos);
-                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_ONLY) {
+                if (proximityMode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_VEHICLE_ONLY) {
                     float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
                     return proximityState !is null && proximityState.HasVehiclePosition ? vehicleFade : cameraFade;
                 }
 
-                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_VEHICLE) {
+                if (proximityMode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_AND_VEHICLE) {
                     float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
                     return Math::Max(cameraFade, vehicleFade);
                 }
 
-                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_ORBITAL_ONLY) {
+                if (proximityMode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_ORBITAL_ONLY) {
                     float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
                     return proximityState !is null && proximityState.HasOrbitalPoint ? orbitalFade : cameraFade;
                 }
 
-                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_AND_ORBITAL) {
+                if (proximityMode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_AND_ORBITAL) {
                     float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
                     return Math::Max(cameraFade, orbitalFade);
                 }
 
-                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_VEHICLE_AND_ORBITAL) {
+                if (proximityMode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_VEHICLE_AND_ORBITAL) {
                     float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
                     float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
                     float combinedFade = Math::Max(vehicleFade, orbitalFade);
                     return(proximityState !is null && (proximityState.HasVehiclePosition || proximityState.HasOrbitalPoint)) ? combinedFade : cameraFade;
                 }
 
-                if (proximityMode == TriggerVisualizer::Trigger::UI::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL) {
+                if (proximityMode == TriggerVisualizer::Trigger::Ui::PROXIMITY_MODE_CAMERA_VEHICLE_AND_ORBITAL) {
                     float vehicleFade = GetVehicleTriggerVolumeFadeFactor(box, proximityState);
                     float orbitalFade = GetOrbitalTriggerVolumeFadeFactor(box, proximityState);
                     return Math::Max(cameraFade, Math::Max(vehicleFade, orbitalFade));
@@ -729,7 +553,7 @@ namespace TriggerVisualizer {
                 const vec3 &in cameraPos,
                 const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
-                int proximityMode = TriggerVisualizer::Trigger::UI::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
+                int proximityMode = TriggerVisualizer::Trigger::Ui::GetRenderProximityModeForRuntime(GetCurrentRuntimeContext());
                 return GetTriggerVolumeRenderFadeFactor(box, cameraPos, proximityState, proximityMode);
             }
 
@@ -739,18 +563,6 @@ namespace TriggerVisualizer {
                 const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
                 return IsVisibleFadeFactor(GetTriggerVolumeRenderFadeFactor(box, cameraPos, proximityState));
-            }
-
-            uint CountTriggerVolumesInRenderRange(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
-                if (boxes is null) return 0;
-
-                uint count = 0;
-                for (uint i = 0; i < boxes.Length; i++) {
-                    if (IsTriggerVolumeInRenderRange(boxes[i], cameraPos)) {
-                        count++;
-                    }
-                }
-                return count;
             }
 
             uint CountTriggerVolumesInRenderRangeForProximity(
@@ -765,18 +577,6 @@ namespace TriggerVisualizer {
                     if (IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, proximityState)) {
                         count++;
                     }
-                }
-                return count;
-            }
-
-            uint CountTriggerVolumesInFadeBand(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
-                if (boxes is null) return 0;
-
-                uint count = 0;
-                for (uint i = 0; i < boxes.Length; i++) {
-                    float fade = GetTriggerVolumeFadeFactor(boxes[i], cameraPos);
-                    if (fade >= 1.0f || !IsVisibleFadeFactor(fade)) continue;
-                    count++;
                 }
                 return count;
             }
@@ -797,22 +597,11 @@ namespace TriggerVisualizer {
                 return count;
             }
 
-            void DrawTriggerVolumeFill(
-                const TriggerVolume@ box,
-                const vec3 &in cameraPos,
-                const vec4 &in color,
-                uint boxIndex
-            ) {
-                auto items = array<WorldFillTileDrawItem@>();
-                CollectTriggerVolumeFillDrawItems(box, cameraPos, color, boxIndex, items);
-                DrawWorldFillTileDrawItems(items);
-            }
-
             bool ShouldRenderTriggerVolumeFillTiles(const TriggerVolume@ box) {
                 if (box is null) return false;
-                return TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting
+                return TriggerVisualizer::Trigger::Ui::S_AdaptiveLineSplitting
                     || ShouldRepeatTileIconsOnSplitFillTilesNow()
-                    || TriggerVisualizer::Trigger::UI::S_RandomFillTileColors;
+                    || TriggerVisualizer::Trigger::Ui::S_RandomFillTileColors;
             }
 
             bool ShouldRenderTriggerVolumeSimpleFill(const TriggerVolume@ box) {
@@ -832,7 +621,7 @@ namespace TriggerVisualizer {
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return 0;
 
-                int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
+                int maxFrameTiles = GetFillTileFrameSafetyLimit();
                 uint drawn = 0;
                 for (uint i = 0; i < TRIGGER_VOLUME_FACE_INDICES.Length; i++) {
                     if (int(items.Length) >= maxFrameTiles) return drawn;
@@ -997,12 +786,6 @@ namespace TriggerVisualizer {
                 if (box.HasCustomOutlineGeometry()) return;
 
                 if (box.HasChildVolumes()) {
-                    if (ShouldSimplifyGroupedTriggersNow()) {
-                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        CollectTriggerVolumeTileIconDrawItems(simplifiedBox, cameraPos, items);
-                        return;
-                    }
-
                     if (box.HasCachedGroupGeometry()) {
                         CollectTriggerVolumeTileIconDrawItemsFiltered(
                             box,
@@ -1052,7 +835,7 @@ namespace TriggerVisualizer {
                 const array<uint> @hiddenFaceCounts
             ) {
                 if (items is null) return;
-                int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
+                int maxFrameTiles = GetFillTileFrameSafetyLimit();
                 if (int(items.Length) >= maxFrameTiles) return;
                 if (box is null) return;
 
@@ -1136,16 +919,10 @@ namespace TriggerVisualizer {
                 array<WorldFillTileDrawItem@> @items
             ) {
                 if (items is null) return;
-                int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
+                int maxFrameTiles = GetFillTileFrameSafetyLimit();
                 if (int(items.Length) >= maxFrameTiles) return;
                 if (box !is null && box.HasCustomOutlineGeometry()) return;
                 if (box !is null && box.HasChildVolumes()) {
-                    if (ShouldSimplifyGroupedTriggersNow()) {
-                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        CollectTriggerVolumeFillDrawItems(simplifiedBox, cameraPos, color, boxIndex, items);
-                        return;
-                    }
-
                     if (box.HasCachedGroupGeometry()) {
                         CollectTriggerVolumeFillDrawItemsFiltered(
                             box,
@@ -1297,161 +1074,6 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void AddWorldOutlineEdgeDrawItem(
-                WorldOutlineEdgeDrawItem@ item,
-                const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
-                int proximityMode,
-                const vec4 &in color,
-                array<WorldOutlineEdgeDrawItem@> @items
-            ) {
-                if (item is null || items is null || color.w <= 0.001f) return;
-
-                item.Color = color;
-                item.SortDistanceSq = GetWorldLineRenderPriorityDistanceSq(
-                    item.Start,
-                    item.End,
-                    cameraPos,
-                    proximityState,
-                    proximityMode
-                );
-                items.InsertLast(item);
-            }
-
-            void PrepareWorldOutlineEdgeDrawItemsForCameraPriority(
-                array<WorldOutlineEdgeDrawItem@> @items,
-                const vec3 &in cameraPos
-            ) {
-                if (items is null) return;
-                for (uint i = 0; i < items.Length; i++) {
-                    if (items[i] is null) continue;
-                    items[i].SortDistanceSq = GetDistanceSqToWorldLineSegment(
-                        cameraPos,
-                        items[i].Start,
-                        items[i].End
-                    );
-                }
-                SortWorldOutlineEdgeDrawItemsByRenderPriority(items);
-            }
-
-            uint GetWorldLineSegmentBudgetRemainingForVolume(const TriggerVolume@ box) {
-                if (!TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled()) {
-                    return WORLD_LINE_SEGMENT_BUDGET_HARD_MAX;
-                }
-
-                uint remaining = G_WorldLineSegmentBudgetRemaining;
-                if (UsesCrystalOutlineBudget(box) && G_CrystalWorldLineSegmentBudgetRemaining<remaining) {
-                    remaining = G_CrystalWorldLineSegmentBudgetRemaining;
-                }
-                return remaining;
-            }
-
-            bool ShouldPrioritizeWorldOutlineEdgesForBudget(const TriggerVolume@ box, uint edgeCount) {
-                if (edgeCount <= 1) return false;
-                uint remaining = GetWorldLineSegmentBudgetRemainingForVolume(box);
-                return remaining> 0 && edgeCount > remaining;
-            }
-
-            void CollectTriggerVolumeOutlineDrawItems(
-                const TriggerVolume@ box,
-                const vec3 &in cameraPos,
-                const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState,
-                int proximityMode,
-                const vec4 &in color,
-                uint boxIndex,
-                array<WorldOutlineEdgeDrawItem@> @items
-            ) {
-                if (box is null || items is null || color.w <= 0.001f) return;
-
-                if (box.HasChildVolumes() && ShouldSimplifyGroupedTriggersNow()) {
-                    auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                    CollectTriggerVolumeOutlineDrawItems(
-                        simplifiedBox,
-                        cameraPos,
-                        proximityState,
-                        proximityMode,
-                        color,
-                        boxIndex,
-                        items
-                    );
-                    return;
-                }
-
-                auto edgeItems = array<WorldOutlineEdgeDrawItem@>();
-                auto edgeKeys = array<string>();
-                auto edgeCounts = array<uint>();
-                CollectTriggerVolumeOutlineEdgeDrawItems(
-                    box,
-                    boxIndex,
-                    edgeItems,
-                    edgeKeys,
-                    edgeCounts
-                );
-
-                for (uint i = 0; i < edgeItems.Length; i++) {
-                    if (edgeItems[i] is null) continue;
-                    if (GetGeometryKeyCount(edgeKeys, edgeCounts, edgeItems[i].GeometryKey) > 1) continue;
-                    AddWorldOutlineEdgeDrawItem(edgeItems[i], cameraPos, proximityState, proximityMode, color, items);
-                }
-            }
-
-            bool ShouldWorldOutlineEdgeSortAfter(
-                const WorldOutlineEdgeDrawItem@ left,
-                const WorldOutlineEdgeDrawItem@ right
-            ) {
-                if (left is null) return false;
-                if (right is null) return true;
-                if (left.SortDistanceSq > right.SortDistanceSq) return true;
-                if (left.SortDistanceSq < right.SortDistanceSq) return false;
-                if (left.BoxIndex > right.BoxIndex) return true;
-                if (left.BoxIndex < right.BoxIndex) return false;
-                return left.EdgeIndex > right.EdgeIndex;
-            }
-
-            void SortWorldOutlineEdgeDrawItemsByRenderPriority(array<WorldOutlineEdgeDrawItem@> @items) {
-                if (items is null || items.Length <= 1) return;
-
-                uint gap = items.Length / 2;
-                while (gap > 0) {
-                    for (uint i = gap; i < items.Length; i++) {
-                        WorldOutlineEdgeDrawItem@ item = items[i];
-                        uint j = i;
-                        while (j >= gap && ShouldWorldOutlineEdgeSortAfter(items[j - gap], item)) {
-                            @items[j] = items[j - gap];
-                            j -= gap;
-                        }
-                        @items[j] = item;
-                    }
-                    gap /= 2;
-                }
-            }
-
-            void DrawWorldOutlineEdgeDrawItems(
-                array<WorldOutlineEdgeDrawItem@> @items,
-                const vec3 &in cameraPos,
-                float strokeWidth
-            ) {
-                if (items is null || items.Length == 0) return;
-                SortWorldOutlineEdgeDrawItemsByRenderPriority(items);
-                nvg::Reset();
-                nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
-
-                for (uint i = 0; i < items.Length; i++) {
-                    if (!HasWorldLineSegmentBudgetForVolume(null)) break;
-                    if (items[i] is null) continue;
-                    DrawWorldLineAdaptiveColoredForVolume(
-                        items[i].Start,
-                        items[i].End,
-                        cameraPos,
-                        items[i].Color,
-                        items[i].BoxIndex,
-                        items[i].EdgeIndex,
-                        null,
-                        true
-                    );
-                }
-            }
-
             void DrawGroupedTriggerVolumeOutline(
                 const TriggerVolume@ box,
                 const vec3 &in cameraPos,
@@ -1471,25 +1093,20 @@ namespace TriggerVisualizer {
                         edgeCounts
                     );
                     if (items.Length == 0) return;
-                    if (ShouldPrioritizeWorldOutlineEdgesForBudget(box, items.Length)) {
-                        PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
-                    }
                     nvg::Reset();
                     nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
                     for (uint i = 0; i < items.Length; i++) {
-                        if (!HasWorldLineSegmentBudgetForVolume(box)) break;
                         if (items[i] is null) continue;
                         if (GetGeometryKeyCount(edgeKeys, edgeCounts, items[i].GeometryKey) > 1) continue;
 
-                        DrawWorldLineAdaptiveColoredForVolume(
+                        DrawWorldLineAdaptiveColored(
                             items[i].Start,
                             items[i].End,
                             cameraPos,
                             color,
                             items[i].BoxIndex,
                             items[i].EdgeIndex,
-                            box,
                             ShouldSplitTriggerVolumeOutlineEdges(box)
                         );
                     }
@@ -1499,57 +1116,19 @@ namespace TriggerVisualizer {
                 uint cachedEdgeCount = box.CachedGroupOutlineEdgeCount();
                 if (cachedEdgeCount == 0) return;
 
-                if (!ShouldPrioritizeWorldOutlineEdgesForBudget(box, cachedEdgeCount)) {
-                    nvg::Reset();
-                    nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
-
-                    for (uint i = 0; i < cachedEdgeCount; i++) {
-                        if (!HasWorldLineSegmentBudgetForVolume(box)) break;
-                        if (IsCachedGroupOutlineEdgeDuplicate(box, i)) continue;
-
-                        DrawWorldLineAdaptiveColoredForVolume(
-                            box.CachedGroupOutlineEdgeStarts[i],
-                            box.CachedGroupOutlineEdgeEnds[i],
-                            cameraPos,
-                            color,
-                            boxIndex + box.CachedGroupOutlineEdgeBoxIndices[i],
-                            box.CachedGroupOutlineEdgeIndices[i],
-                            box,
-                            ShouldSplitTriggerVolumeOutlineEdges(box)
-                        );
-                    }
-                    return;
-                }
-
-                auto items = array<WorldOutlineEdgeDrawItem@>();
-                for (uint i = 0; i < cachedEdgeCount; i++) {
-                    if (IsCachedGroupOutlineEdgeDuplicate(box, i)) continue;
-
-                    WorldOutlineEdgeDrawItem@ item = WorldOutlineEdgeDrawItem();
-                    item.Start = box.CachedGroupOutlineEdgeStarts[i];
-                    item.End = box.CachedGroupOutlineEdgeEnds[i];
-                    item.BoxIndex = boxIndex + box.CachedGroupOutlineEdgeBoxIndices[i];
-                    item.EdgeIndex = box.CachedGroupOutlineEdgeIndices[i];
-                    item.GeometryKey = box.CachedGroupOutlineEdgeKeys[i];
-                    items.InsertLast(item);
-                }
-                if (items.Length == 0) return;
-                PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
 
-                for (uint i = 0; i < items.Length; i++) {
-                    if (!HasWorldLineSegmentBudgetForVolume(box)) break;
-                    if (items[i] is null) continue;
+                for (uint i = 0; i < cachedEdgeCount; i++) {
+                    if (IsCachedGroupOutlineEdgeDuplicate(box, i)) continue;
 
-                    DrawWorldLineAdaptiveColoredForVolume(
-                        items[i].Start,
-                        items[i].End,
+                    DrawWorldLineAdaptiveColored(
+                        box.CachedGroupOutlineEdgeStarts[i],
+                        box.CachedGroupOutlineEdgeEnds[i],
                         cameraPos,
                         color,
-                        items[i].BoxIndex,
-                        items[i].EdgeIndex,
-                        box,
+                        boxIndex + box.CachedGroupOutlineEdgeBoxIndices[i],
+                        box.CachedGroupOutlineEdgeIndices[i],
                         ShouldSplitTriggerVolumeOutlineEdges(box)
                     );
                 }
@@ -1557,7 +1136,7 @@ namespace TriggerVisualizer {
 
             bool CanBatchTriggerVolumeStaticOutline(const TriggerVolume@ box) {
                 if (box is null || !box.HasStaticOutlineCache()) return false;
-                return !TriggerVisualizer::Trigger::UI::S_RandomOutlineSegmentColors;
+                return !TriggerVisualizer::Trigger::Ui::S_RandomOutlineSegmentColors;
             }
 
             void DrawTriggerVolumeStaticOutline(
@@ -1572,18 +1151,6 @@ namespace TriggerVisualizer {
                 uint count = box.CachedStaticOutlineCount();
                 if (count == 0) return;
 
-                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(
-                    box,
-                    count
-                );
-                array<WorldOutlineEdgeDrawItem@> @items = null;
-                if (prioritizeEdges) {
-                    @items = array<WorldOutlineEdgeDrawItem@>();
-                    for (uint i = 0; i < count; i++) {
-                        items.InsertLast(WorldOutlineEdgeDrawItem(box.CachedStaticOutlineStarts[i], box.CachedStaticOutlineEnds[i], boxIndex + box.CachedStaticOutlineBoxIndices[i], box.CachedStaticOutlineEdgeIndices[i]));
-                    }
-                    PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
-                }
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
                 bool allowAdaptiveSplitting = ShouldSplitTriggerVolumeOutlineEdges(box);
@@ -1591,21 +1158,11 @@ namespace TriggerVisualizer {
                     nvg::BeginPath();
                     nvg::StrokeColor(color);
                     bool drewAny = false;
-                    uint drawCount = count;
-                    if (prioritizeEdges) drawCount = items.Length;
-                    for (uint i = 0; i < drawCount; i++) {
-                        if (!HasWorldLineSegmentBudgetForVolume(box)) break;
-                        vec3 start = box.CachedStaticOutlineStarts[i];
-                        vec3 end = box.CachedStaticOutlineEnds[i];
-                        if (prioritizeEdges) {
-                            start = items[i].Start;
-                            end = items[i].End;
-                        }
-                        drewAny = DrawWorldLineAdaptiveToCurrentPathForVolume(
-                            start,
-                            end,
+                    for (uint i = 0; i < count; i++) {
+                        drewAny = DrawWorldLineAdaptiveToCurrentPath(
+                            box.CachedStaticOutlineStarts[i],
+                            box.CachedStaticOutlineEnds[i],
                             cameraPos,
-                            box,
                             allowAdaptiveSplitting
                         ) || drewAny;
                     }
@@ -1616,28 +1173,14 @@ namespace TriggerVisualizer {
                     return;
                 }
 
-                uint drawCount = count;
-                if (prioritizeEdges) drawCount = items.Length;
-                for (uint i = 0; i < drawCount; i++) {
-                    if (!HasWorldLineSegmentBudgetForVolume(box)) break;
-                    vec3 start = box.CachedStaticOutlineStarts[i];
-                    vec3 end = box.CachedStaticOutlineEnds[i];
-                    uint itemBoxIndex = boxIndex + box.CachedStaticOutlineBoxIndices[i];
-                    uint edgeIndex = box.CachedStaticOutlineEdgeIndices[i];
-                    if (prioritizeEdges) {
-                        start = items[i].Start;
-                        end = items[i].End;
-                        itemBoxIndex = items[i].BoxIndex;
-                        edgeIndex = items[i].EdgeIndex;
-                    }
-                    DrawWorldLineAdaptiveColoredForVolume(
-                        start,
-                        end,
+                for (uint i = 0; i < count; i++) {
+                    DrawWorldLineAdaptiveColored(
+                        box.CachedStaticOutlineStarts[i],
+                        box.CachedStaticOutlineEnds[i],
                         cameraPos,
                         color,
-                        itemBoxIndex,
-                        edgeIndex,
-                        box,
+                        boxIndex + box.CachedStaticOutlineBoxIndices[i],
+                        box.CachedStaticOutlineEdgeIndices[i],
                         allowAdaptiveSplitting
                     );
                 }
@@ -1645,7 +1188,7 @@ namespace TriggerVisualizer {
 
             bool CanBatchTriggerVolumeCustomOutline(const TriggerVolume@ box) {
                 if (box is null || !box.HasCustomOutlineGeometry()) return false;
-                return !TriggerVisualizer::Trigger::UI::S_RandomOutlineSegmentColors;
+                return !TriggerVisualizer::Trigger::Ui::S_RandomOutlineSegmentColors;
             }
 
             void DrawTriggerVolumeCustomOutline(
@@ -1661,38 +1204,16 @@ namespace TriggerVisualizer {
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
                 uint outlineLineCount = box.OutlineLineCount();
                 bool allowAdaptiveSplitting = ShouldSplitTriggerVolumeOutlineEdges(box);
-                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(
-                    box,
-                    outlineLineCount
-                );
-                array<WorldOutlineEdgeDrawItem@> @items = null;
-                if (prioritizeEdges) {
-                    @items = array<WorldOutlineEdgeDrawItem@>();
-                    for (uint i = 0; i < outlineLineCount; i++) {
-                        items.InsertLast(WorldOutlineEdgeDrawItem(box.OutlineLineStarts[i], box.OutlineLineEnds[i], boxIndex, i));
-                    }
-                    PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
-                }
 
                 if (CanBatchTriggerVolumeCustomOutline(box)) {
                     nvg::BeginPath();
                     nvg::StrokeColor(color);
                     bool drewAny = false;
-                    uint drawCount = outlineLineCount;
-                    if (prioritizeEdges) drawCount = items.Length;
-                    for (uint i = 0; i < drawCount; i++) {
-                        if (!HasWorldLineSegmentBudgetForVolume(box)) break;
-                        vec3 start = box.OutlineLineStarts[i];
-                        vec3 end = box.OutlineLineEnds[i];
-                        if (prioritizeEdges) {
-                            start = items[i].Start;
-                            end = items[i].End;
-                        }
-                        drewAny = DrawWorldLineAdaptiveToCurrentPathForVolume(
-                            start,
-                            end,
+                    for (uint i = 0; i < outlineLineCount; i++) {
+                        drewAny = DrawWorldLineAdaptiveToCurrentPath(
+                            box.OutlineLineStarts[i],
+                            box.OutlineLineEnds[i],
                             cameraPos,
-                            box,
                             allowAdaptiveSplitting
                         ) || drewAny;
                     }
@@ -1703,26 +1224,14 @@ namespace TriggerVisualizer {
                     return;
                 }
 
-                uint drawCount = outlineLineCount;
-                if (prioritizeEdges) drawCount = items.Length;
-                for (uint i = 0; i < drawCount; i++) {
-                    if (!HasWorldLineSegmentBudgetForVolume(box)) break;
-                    vec3 start = box.OutlineLineStarts[i];
-                    vec3 end = box.OutlineLineEnds[i];
-                    uint edgeIndex = i;
-                    if (prioritizeEdges) {
-                        start = items[i].Start;
-                        end = items[i].End;
-                        edgeIndex = items[i].EdgeIndex;
-                    }
-                    DrawWorldLineAdaptiveColoredForVolume(
-                        start,
-                        end,
+                for (uint i = 0; i < outlineLineCount; i++) {
+                    DrawWorldLineAdaptiveColored(
+                        box.OutlineLineStarts[i],
+                        box.OutlineLineEnds[i],
                         cameraPos,
                         color,
                         boxIndex,
-                        edgeIndex,
-                        box,
+                        i,
                         allowAdaptiveSplitting
                     );
                 }
@@ -1738,12 +1247,6 @@ namespace TriggerVisualizer {
                 if (box is null || color.w <= 0.001f) return;
 
                 if (box !is null && box.HasChildVolumes()) {
-                    if (ShouldSimplifyGroupedTriggersNow()) {
-                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        DrawTriggerVolumeOutline(simplifiedBox, cameraPos, color, strokeWidth, boxIndex);
-                        return;
-                    }
-
                     if (box.HasStaticOutlineCache()) {
                         DrawTriggerVolumeStaticOutline(box, cameraPos, color, strokeWidth, boxIndex);
                         return;
@@ -1766,42 +1269,17 @@ namespace TriggerVisualizer {
                 auto corners = GetTriggerVolumeCorners(box);
                 if (corners.Length != 8) return;
 
-                bool prioritizeEdges = ShouldPrioritizeWorldOutlineEdgesForBudget(
-                    box,
-                    TRIGGER_VOLUME_EDGE_INDICES.Length
-                );
-                array<WorldOutlineEdgeDrawItem@> @items = null;
-                if (prioritizeEdges) {
-                    @items = array<WorldOutlineEdgeDrawItem@>();
-                    for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
-                        auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
-                        items.InsertLast(WorldOutlineEdgeDrawItem(corners[edge[0]], corners[edge[1]], boxIndex, i));
-                    }
-                    PrepareWorldOutlineEdgeDrawItemsForCameraPriority(items, cameraPos);
-                }
                 nvg::Reset();
                 nvg::StrokeWidth(Math::Clamp(strokeWidth, 0.5f, 16.0f));
-                uint drawCount = TRIGGER_VOLUME_EDGE_INDICES.Length;
-                if (prioritizeEdges) drawCount = items.Length;
-                for (uint i = 0; i < drawCount; i++) {
-                    if (!HasWorldLineSegmentBudgetForVolume(box)) break;
+                for (uint i = 0; i < TRIGGER_VOLUME_EDGE_INDICES.Length; i++) {
                     auto edge = TRIGGER_VOLUME_EDGE_INDICES[i];
-                    vec3 start = corners[edge[0]];
-                    vec3 end = corners[edge[1]];
-                    uint edgeIndex = i;
-                    if (prioritizeEdges) {
-                        start = items[i].Start;
-                        end = items[i].End;
-                        edgeIndex = items[i].EdgeIndex;
-                    }
-                    DrawWorldLineAdaptiveColoredForVolume(
-                        start,
-                        end,
+                    DrawWorldLineAdaptiveColored(
+                        corners[edge[0]],
+                        corners[edge[1]],
                         cameraPos,
                         color,
                         boxIndex,
-                        edgeIndex,
-                        box,
+                        i,
                         ShouldSplitTriggerVolumeOutlineEdges(box)
                     );
                 }

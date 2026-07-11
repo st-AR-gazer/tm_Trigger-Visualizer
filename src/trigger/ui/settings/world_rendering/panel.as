@@ -1,7 +1,7 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            void RenderWorldRenderingSettingsUI() {
+        namespace Ui {
+            void RenderWorldRenderingSettingsUi() {
                 S_RenderWorld = UI::Checkbox("Enable world render##trigger-visualizer-settings", S_RenderWorld);
                 S_ShowOutline = UI::Checkbox("Show outlines##trigger-visualizer-settings", S_ShowOutline);
                 S_ShowFill = UI::Checkbox("Show face fill##trigger-visualizer-settings", S_ShowFill);
@@ -9,23 +9,23 @@
                 UI::Separator();
                 UI::BeginTabBar("trigger-visualizer-world-rendering-tabs");
                 if (UI::BeginTabItem("Distance")) {
-                    RenderWorldDistanceSettingsUI();
+                    RenderWorldDistanceSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("LineSplitting")) {
-                    RenderLineSplittingSettingsUI();
+                    RenderLineSplittingSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Color")) {
-                    RenderColorSettingsUI();
+                    RenderColorSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Image/Tiles")) {
-                    RenderImageTilesSettingsUI();
+                    RenderImageTilesSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Map Hints")) {
-                    RenderMapHintsSettingsUI();
+                    RenderMapHintsSettingsUi();
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();

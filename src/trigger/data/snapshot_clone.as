@@ -38,25 +38,16 @@ namespace TriggerVisualizer {
                 copy.RejectedShapeCount = source.RejectedShapeCount;
                 copy.MapSize = source.MapSize;
                 @copy.GridSpec = source.GridSpec;
-
-                for (uint i = 0; i < source.RawRanges.Length; i++) {
-                    copy.RawRanges.InsertLast(source.RawRanges[i]);
-                }
+                copy.RawRanges = source.RawRanges;
                 for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
                     copy.TriggerVolumes.InsertLast(CloneTriggerVolumeForSnapshotCache(source.TriggerVolumes[i]));
                 }
                 for (uint i = 0; i < source.CachedExpandableMergeSourceVolumes.Length; i++) {
                     copy.CachedExpandableMergeSourceVolumes.InsertLast(CloneTriggerVolumeForSnapshotCache(source.CachedExpandableMergeSourceVolumes[i]));
                 }
-                for (uint i = 0; i < source.Diagnostics.Length; i++) {
-                    copy.Diagnostics.InsertLast(source.Diagnostics[i]);
-                }
-                for (uint i = 0; i < source.MediaTrackerClipTriggers.Length; i++) {
-                    copy.MediaTrackerClipTriggers.InsertLast(source.MediaTrackerClipTriggers[i]);
-                }
-                for (uint i = 0; i < source.CrystalTriggerProbes.Length; i++) {
-                    copy.CrystalTriggerProbes.InsertLast(source.CrystalTriggerProbes[i]);
-                }
+                copy.Diagnostics = source.Diagnostics;
+                copy.MediaTrackerClipTriggers = source.MediaTrackerClipTriggers;
+                copy.CrystalTriggerProbes = source.CrystalTriggerProbes;
 
                 return copy;
             }

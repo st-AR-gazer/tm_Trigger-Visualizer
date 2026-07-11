@@ -1,8 +1,6 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            [Setting hidden name="Trigger: Performance budgets enabled"]
-            bool S_PerformanceBudgetsEnabled = false;
+        namespace Ui {
             [Setting hidden name="Trigger: Performance culling enabled"]
             bool S_PerformanceCullingEnabled = true;
             [Setting hidden name="Trigger: Performance refresh enabled"]
@@ -11,22 +9,6 @@ namespace TriggerVisualizer {
             bool S_MergeAdjacentTriggerVolumes = true;
             [Setting hidden name="Trigger: Cull offscreen world tiles"]
             bool S_CullOffscreenWorldTiles = true;
-            [Setting hidden name="Trigger: Fill tile minimum size" min=2 max=64]
-            float S_FillTileMinSize = 4.0f;
-            [Setting hidden name="Trigger: Max visible volumes per frame" min=16 max=4096]
-            int S_MaxVisibleVolumesPerFrame = 512;
-            [Setting hidden name="Trigger: Max fill tiles per frame" min=128 max=65536]
-            int S_MaxFillTilesPerFrame = 4096;
-            [Setting hidden name="Trigger: Max outline segments per frame" min=64 max=65536]
-            int S_MaxOutlineSegmentsPerFrame = 1536;
-            [Setting hidden name="Trigger: Max Crystal outline segments per frame" min=0 max=65536]
-            int S_MaxCrystalOutlineSegmentsPerFrame = 768;
-            [Setting hidden name="Trigger: Split Crystal outline edges"]
-            bool S_SplitCrystalOutlineEdges = false;
-            [Setting hidden name="Trigger: Max tile icon patches per frame" min=0 max=65536]
-            int S_MaxTileIconPatchesPerFrame = 1600;
-            [Setting hidden name="Trigger: Tile icon max subdivisions" min=1 max=12]
-            int S_TileIconMaxSubdivisions = 6;
             [Setting hidden name="Trigger: MediaTracker editor refresh interval ms" min=0 max=60000]
             int S_MediaTrackerEditorRefreshIntervalMs = 500;
             [Setting hidden name="Trigger: Offzone editor refresh interval ms" min=0 max=60000]
@@ -49,53 +31,8 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: Speed render keep target keys"]
             string S_SpeedRenderKeepTargetKeys = DEFAULT_SPEED_RENDER_KEEP_TARGETS;
 
-            bool ArePerformanceBudgetsEnabled() {
-                return false;
-            }
-
-            bool IsPerformanceCullingEnabled() {
-                return S_PerformanceCullingEnabled;
-            }
-
             bool ShouldCullOffscreenWorldTiles() {
                 return S_PerformanceCullingEnabled && S_CullOffscreenWorldTiles;
-            }
-
-            bool IsPerformanceRefreshEnabled() {
-                return S_PerformanceRefreshEnabled;
-            }
-
-            void ApplyPerformanceDrawBudgetValues(
-                float fillTileMinSize,
-                int maxVisibleVolumes,
-                int maxFillTiles,
-                int maxOutlineSegments,
-                int maxCrystalOutlineSegments,
-                bool splitCrystalOutlineEdges,
-                int maxTileIconPatches,
-                int tileIconMaxSubdivisions
-            ) {
-                S_FillTileMinSize = fillTileMinSize;
-                S_MaxVisibleVolumesPerFrame = maxVisibleVolumes;
-                S_MaxFillTilesPerFrame = maxFillTiles;
-                S_MaxOutlineSegmentsPerFrame = maxOutlineSegments;
-                S_MaxCrystalOutlineSegmentsPerFrame = maxCrystalOutlineSegments;
-                S_SplitCrystalOutlineEdges = splitCrystalOutlineEdges;
-                S_MaxTileIconPatchesPerFrame = maxTileIconPatches;
-                S_TileIconMaxSubdivisions = tileIconMaxSubdivisions;
-                ClampPerformanceSettings();
-            }
-
-            void ApplyLowPerformanceDrawBudgetPreset() {
-                ApplyPerformanceDrawBudgetValues(6.0f, 256, 2048, 768, 256, false, 512, 4);
-            }
-
-            void ApplyMediumPerformanceDrawBudgetPreset() {
-                ApplyPerformanceDrawBudgetValues(4.0f, 512, 4096, 1536, 768, false, 1600, 6);
-            }
-
-            void ApplyHighPerformanceDrawBudgetPreset() {
-                ApplyPerformanceDrawBudgetValues(3.0f, 2048, 8192, 8192, 4096, true, 6400, 8);
             }
 
             int NormalizeRefreshIntervalMs(int value) {
@@ -150,18 +87,6 @@ namespace TriggerVisualizer {
                     rawKey,
                     enabled
                 );
-            }
-
-            void SetSpeedRenderKeepTargetKeysEnabled(const array<string> &in keys, bool enabled) {
-                for (uint i = 0; i < keys.Length; i++) {
-                    SetSpeedRenderKeepTargetEnabled(keys[i], enabled);
-                }
-            }
-
-            void FlipSpeedRenderKeepTargetKeys(const array<string> &in keys) {
-                for (uint i = 0; i < keys.Length; i++) {
-                    SetSpeedRenderKeepTargetEnabled(keys[i], !IsSpeedRenderKeepTargetEnabled(keys[i]));
-                }
             }
 
             bool ShouldSpeedRenderKeepVolume(const TriggerVolume@ volume) {

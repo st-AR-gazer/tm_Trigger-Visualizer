@@ -23,46 +23,6 @@ namespace TriggerVisualizer {
                     return path;
                 }
 
-                string CrystalDataRefDirectory(const string &in rawPath) {
-                    string path = CrystalNormalizeGameDataRefPath(rawPath);
-                    int index = path.LastIndexOf("/");
-                    if (index < 0) return "";
-                    return path.SubStr(0, index);
-                }
-
-                string CrystalNodFidPrimaryPath(CMwNod@ nod) {
-                    if (nod is null) return "";
-
-                    CSystemFidFile@ fid = null;
-                    try {
-                        @fid = GetFidFromNod(nod);
-                    } catch {
-                        @fid = null;
-                    }
-                    if (fid is null) return "";
-
-                    string fullName = "";
-                    try {
-                        fullName = string(fid.FullFileName);
-                    } catch {
-                        fullName = "";
-                    }
-                    if (fullName.Length > 0) return fullName;
-
-                    try {
-                        return string(fid.FileName);
-                    } catch {
-                        return "";
-                    }
-                }
-
-                int FindCrystalDataRefSurfaceCacheIndex(const string &in filename) {
-                    for (uint i = 0; i < g_CrystalDataRefSurfaceCacheFilenames.Length; i++) {
-                        if (g_CrystalDataRefSurfaceCacheFilenames[i] == filename) return int(i);
-                    }
-                    return -1;
-                }
-
                 void AddCrystalDataRefSurfaceCacheEntry(
                     const string &in filename,
                     CPlugSurface@ surface,
@@ -83,30 +43,9 @@ namespace TriggerVisualizer {
 
                     string path = CrystalNormalizeDataRefFilename(rawPath);
                     if (path.Length == 0 || path.Length > 512) return false;
-                    for (uint i = 0; i < candidates.Length; i++) {
-                        if (candidates[i] == path) return false;
-                    }
+                    if (candidates.Find(path) >= 0) return false;
                     candidates.InsertLast(path);
                     return true;
-                }
-
-                void AddCrystalSiblingDataRefCandidatePaths(
-                    array<string> @candidates,
-                    CMwNod@ nod,
-                    const string &in siblingFilename
-                ) {
-                    if (candidates is null || nod is null || siblingFilename.Length == 0) return;
-
-                    string primaryPath = CrystalNodFidPrimaryPath(nod);
-                    string directory = CrystalDataRefDirectory(primaryPath);
-                    if (directory.Length == 0) return;
-
-                    AddCrystalDataRefCandidatePath(candidates, directory + "/" + siblingFilename);
-                    if (directory.StartsWith("GameData/")) {
-                        AddCrystalDataRefCandidatePath(candidates, directory.SubStr(9) + "/" + siblingFilename);
-                    } else {
-                        AddCrystalDataRefCandidatePath(candidates, "GameData/" + directory + "/" + siblingFilename);
-                    }
                 }
 
                 CSystemFidFile@ TryGetCrystalDataRefFid(const string &in path, string &out source) {
@@ -116,6 +55,10 @@ namespace TriggerVisualizer {
                     try {
                         @fid = Fids::GetResource(path);
                     } catch {
+                        logging::HandledException(
+                            "TryGetCrystalDataRefFid",
+                            "Resource fid lookup failed."
+                        );
                         @fid = null;
                     }
                     if (fid !is null) {
@@ -126,6 +69,10 @@ namespace TriggerVisualizer {
                     try {
                         @fid = Fids::GetGame(path);
                     } catch {
+                        logging::HandledException(
+                            "TryGetCrystalDataRefFid",
+                            "Game fid lookup failed."
+                        );
                         @fid = null;
                     }
                     if (fid !is null) {
@@ -136,6 +83,10 @@ namespace TriggerVisualizer {
                     try {
                         @fid = Fids::GetUser(path);
                     } catch {
+                        logging::HandledException(
+                            "TryGetCrystalDataRefFid",
+                            "User fid lookup failed."
+                        );
                         @fid = null;
                     }
                     if (fid !is null) {
@@ -146,6 +97,10 @@ namespace TriggerVisualizer {
                     try {
                         @fid = Fids::GetProgramData(path);
                     } catch {
+                        logging::HandledException(
+                            "TryGetCrystalDataRefFid",
+                            "ProgramData fid lookup failed."
+                        );
                         @fid = null;
                     }
                     if (fid !is null) {
@@ -156,6 +111,10 @@ namespace TriggerVisualizer {
                     try {
                         @fid = Fids::GetFake(path);
                     } catch {
+                        logging::HandledException(
+                            "TryGetCrystalDataRefFid",
+                            "Fake fid lookup failed."
+                        );
                         @fid = null;
                     }
                     if (fid !is null) {
@@ -202,6 +161,10 @@ namespace TriggerVisualizer {
                         try {
                             @nod = Fids::Preload(fid);
                         } catch {
+                            logging::HandledException(
+                                "TryPreloadCrystalDataRefSurface",
+                                "DataRef fid preload failed."
+                            );
                             @nod = null;
                         }
                         if (nod is null) {
@@ -220,41 +183,8 @@ namespace TriggerVisualizer {
                     }
                     warning = "Could not resolve DataRef TriggerShape filename: " + filename;
                     if (attempted.Length > 0) {
-                        warning += " candidates: " + Text::Join(attempted, ", ");
+                        warning += " candidates: " + string::Join(attempted, ", ");
                     }
-                    return null;
-                }
-
-                CPlugSurface@ ResolveCrystalSiblingDataRefSurface(
-                    CMwNod@ nod,
-                    const string &in siblingFilename,
-                    string &out detail,
-                    string &out warning
-                ) {
-                    detail = "";
-                    warning = "";
-                    if (nod is null || siblingFilename.Length == 0) return null;
-
-                    auto candidates = array<string>();
-                    AddCrystalSiblingDataRefCandidatePaths(candidates, nod, siblingFilename);
-                    for (uint i = 0; i < candidates.Length; i++) {
-                        string filename = "";
-                        string candidateDetail = "";
-                        string candidateWarning = "";
-                        CPlugSurface@ surface = ResolveCrystalDataRefSurface(
-                            candidates[i],
-                            filename,
-                            candidateDetail,
-                            candidateWarning
-                        );
-                        if (surface !is null) {
-                            detail = "sibling DataRef " + siblingFilename + " from " + CrystalNodFidPrimaryPath(nod);
-                            if (candidateDetail.Length > 0) detail += " | " + candidateDetail;
-                            return surface;
-                        }
-                        warning = candidateWarning;
-                    }
-                    warning = "Could not resolve sibling DataRef " + siblingFilename + " from " + CrystalNodFidPrimaryPath(nod);
                     return null;
                 }
 
@@ -276,7 +206,7 @@ namespace TriggerVisualizer {
                         return null;
                     }
 
-                    int cachedIndex = FindCrystalDataRefSurfaceCacheIndex(filename);
+                    int cachedIndex = g_CrystalDataRefSurfaceCacheFilenames.Find(filename);
                     if (cachedIndex >= 0) {
                         uint index = uint(cachedIndex);
                         detail = "cached DataRef " + filename;
@@ -304,6 +234,10 @@ namespace TriggerVisualizer {
                     try {
                         rawFilename = string(phyModel.TriggerShape.Filename);
                     } catch {
+                        logging::HandledException(
+                            "ResolveCrystalPhyModelTriggerShapeSurface",
+                            "PhyModel TriggerShape filename was not readable."
+                        );
                         warning = "Could not read CGameObjectPhyModel.TriggerShape.Filename.";
                         return null;
                     }

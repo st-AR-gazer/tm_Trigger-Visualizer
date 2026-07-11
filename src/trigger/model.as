@@ -199,24 +199,24 @@ namespace TriggerVisualizer {
             string key = NormalizeTriggerTargetKey(rawKey);
             if (key.Length == 0) return false;
             string preparedTargetKeys = "|" + targetKeys;
-            if (preparedTargetKeys.IndexOf("|" + key + "|") >= 0) return true;
+            if (preparedTargetKeys.Contains("|" + key + "|")) return true;
             return PreparedTriggerTargetListContainsLegacyAlias(preparedTargetKeys, key);
         }
 
         bool PreparedTriggerTargetListContainsLegacyAlias(const string &in preparedTargetKeys, const string &in key) {
             if (key != TRIGGER_TYPE_TURBO_ROULETTE) return false;
-            return preparedTargetKeys.IndexOf("|turborouletteyellow|") >= 0
-                || preparedTargetKeys.IndexOf("|turboroulettecyan|") >= 0
-                || preparedTargetKeys.IndexOf("|turboroulettepurple|") >= 0
-                || preparedTargetKeys.IndexOf("|turborandomyellow|") >= 0
-                || preparedTargetKeys.IndexOf("|turborandomcyan|") >= 0
-                || preparedTargetKeys.IndexOf("|turborandompurple|") >= 0;
+            return preparedTargetKeys.Contains("|turborouletteyellow|")
+                || preparedTargetKeys.Contains("|turboroulettecyan|")
+                || preparedTargetKeys.Contains("|turboroulettepurple|")
+                || preparedTargetKeys.Contains("|turborandomyellow|")
+                || preparedTargetKeys.Contains("|turborandomcyan|")
+                || preparedTargetKeys.Contains("|turborandompurple|");
         }
 
         bool PreparedTriggerTargetListContains(const string &in preparedTargetKeys, const string &in rawKey) {
             string key = NormalizeTriggerTargetKey(rawKey);
             if (key.Length == 0) return false;
-            if (preparedTargetKeys.IndexOf("|" + key + "|") >= 0) return true;
+            if (preparedTargetKeys.Contains("|" + key + "|")) return true;
             return PreparedTriggerTargetListContainsLegacyAlias(preparedTargetKeys, key);
         }
 
@@ -359,10 +359,6 @@ namespace TriggerVisualizer {
             TriggerRangeRaw(const int3 &in start, const int3 &in end) {
                 Start = start;
                 End = end;
-            }
-
-            int3 InclusiveSize() const {
-                return End - Start + int3(1, 1, 1);
             }
         }
 
@@ -564,10 +560,6 @@ namespace TriggerVisualizer {
                 return DisplayLabelWithOptions(true, true, false, false);
             }
 
-            string DisplayLabelWithIsland(bool includeIslandIndex) const {
-                return DisplayLabelWithOptions(true, includeIslandIndex, false, false);
-            }
-
             string DisplayLabelWithOptions(
                 bool includeSourcePrefix,
                 bool includeIslandIndex,
@@ -616,29 +608,13 @@ namespace TriggerVisualizer {
         }
 
         int GetTriggerGeometryCoordKey(float value) {
-            float scaled = value * 1000.0f;
-            if (scaled >= 0.0f) return int(Math::Floor(scaled + 0.5f));
-            return int(Math::Ceil(scaled - 0.5f));
+            return int(Math::Round(value * 1000.0f));
         }
 
         string GetTriggerGeometryPointKey(const vec3 &in point) {
             return tostring(GetTriggerGeometryCoordKey(point.x))
                 + "," + tostring(GetTriggerGeometryCoordKey(point.y))
                 + "," + tostring(GetTriggerGeometryCoordKey(point.z));
-        }
-
-        void SortTriggerGeometryCornerKeys(array<string> @keys) {
-            if (keys is null || keys.Length <= 1) return;
-
-            for (uint i = 1; i < keys.Length; i++) {
-                string key = keys[i];
-                uint j = i;
-                while (j > 0 && keys[j - 1] > key) {
-                    keys[j] = keys[j - 1];
-                    j--;
-                }
-                keys[j] = key;
-            }
         }
 
         string GetTriggerQuadGeometryKey(
@@ -652,7 +628,7 @@ namespace TriggerVisualizer {
             keys.InsertLast(GetTriggerGeometryPointKey(p1));
             keys.InsertLast(GetTriggerGeometryPointKey(p2));
             keys.InsertLast(GetTriggerGeometryPointKey(p3));
-            SortTriggerGeometryCornerKeys(keys);
+            keys.SortAsc();
             return keys[0] + "|" + keys[1] + "|" + keys[2] + "|" + keys[3];
         }
 
@@ -662,18 +638,10 @@ namespace TriggerVisualizer {
             return a < b ? a + "|" + b : b + "|" + a;
         }
 
-        int FindTriggerGeometryKeyIndex(const array<string> @keys, const string &in key) {
-            if (keys is null) return -1;
-            for (uint i = 0; i < keys.Length; i++) {
-                if (keys[i] == key) return int(i);
-            }
-            return -1;
-        }
-
         void AddTriggerGeometryKeyCount(array<string> @keys, array<uint> @counts, const string &in key) {
             if (keys is null || counts is null || key.Length == 0) return;
 
-            int index = FindTriggerGeometryKeyIndex(keys, key);
+            int index = keys.Find(key);
             if (index < 0) {
                 keys.InsertLast(key);
                 counts.InsertLast(1);
@@ -686,7 +654,7 @@ namespace TriggerVisualizer {
         uint GetTriggerGeometryKeyCount(const array<string> @keys, const array<uint> @counts, const string &in key) {
             if (keys is null || counts is null) return 0;
 
-            int index = FindTriggerGeometryKeyIndex(keys, key);
+            int index = keys.Find(key);
             if (index < 0 || uint(index) >= counts.Length) return 0;
             return counts[uint(index)];
         }
@@ -821,15 +789,6 @@ namespace TriggerVisualizer {
             return false;
         }
 
-        bool TryGetTriggerTypeColor(const TriggerVolume@ volume, vec4 &out color) {
-            if (volume is null || volume.Source != TRIGGER_SOURCE_CRYSTAL) return false;
-            if (volume.HasTriggerTypeColor) {
-                color = volume.TriggerTypeColor;
-                return true;
-            }
-            return TryGetTriggerTypeColorForTargetKeys(volume.TargetKeys, color);
-        }
-
         class MediaTrackerClipTriggerSnapshot {
             uint ClipIndex = 0;
             string ClipName;
@@ -878,15 +837,10 @@ namespace TriggerVisualizer {
             uint OwnerIndex = 0;
             string OwnerName;
             string ShapeKind;
-            string SurfaceKind;
             string GmSurfKind;
             string Detail;
-            bool HasSurface = false;
-            bool HasGmSurf = false;
             bool CandidateForRender = false;
             bool HasLocalBounds = false;
-            bool HasWorldBounds = false;
-            bool RenderedVolume = false;
             vec3 LocalMin;
             vec3 LocalMax;
             vec3 WorldMin;
@@ -961,26 +915,6 @@ namespace TriggerVisualizer {
                 RawTriggerSize = nat3(1, 1, 1);
                 @GridSpec = TriggerGridSpec();
             }
-
-            uint RawRangeCount() const {
-                return RawRanges.Length;
-            }
-
-            uint TriggerVolumeCount() const {
-                return TriggerVolumes.Length;
-            }
-
-            uint DiagnosticCount() const {
-                return Diagnostics.Length;
-            }
-
-            uint MediaTrackerClipTriggerCount() const {
-                return MediaTrackerClipTriggers.Length;
-            }
-
-            uint CrystalTriggerProbeCount() const {
-                return CrystalTriggerProbes.Length;
-            }
         }
 
         class TriggerSpatialIndexCell {
@@ -1016,37 +950,6 @@ namespace TriggerVisualizer {
                 @GridSpec = TriggerGridSpec();
                 @RenderHints = MapRenderHints();
             }
-
-            void AddSource(TriggerSourceSnapshot@ source) {
-                if (source is null) return;
-
-                Sources.InsertLast(source);
-                if (!source.Enabled) return;
-
-                for (uint i = 0; i < source.TriggerVolumes.Length; i++) {
-                    TriggerVolumes.InsertLast(source.TriggerVolumes[i]);
-                }
-            }
-
-            uint SourceCount() const {
-                return Sources.Length;
-            }
-
-            uint OffzoneCount() const {
-                return RawRanges.Length;
-            }
-
-            bool HasOffzones() const {
-                return RawRanges.Length > 0;
-            }
-
-            uint TriggerVolumeCount() const {
-                return TriggerVolumes.Length;
-            }
-
-            bool HasTriggerVolumes() const {
-                return TriggerVolumes.Length > 0;
-            }
         }
 
         class MapRenderHints {
@@ -1068,59 +971,32 @@ namespace TriggerVisualizer {
                 return "none";
             }
 
-            string JoinTargets(const array<string> &in targets) const {
-                string result = "";
-                for (uint i = 0; i < targets.Length; i++) {
-                    if (i > 0) result += ", ";
-                    result += targets[i];
-                }
-                return result;
-            }
-
             string TargetDisableSummary() const {
                 string result = "";
                 if (ForceOffTargets.Length > 0) {
-                    result += "force-off: " + JoinTargets(ForceOffTargets);
+                    result += "force-off: " + string::Join(ForceOffTargets, ", ");
                 }
                 if (SuggestOffTargets.Length > 0) {
                     if (result.Length > 0) result += " | ";
-                    result += "suggest-off: " + JoinTargets(SuggestOffTargets);
+                    result += "suggest-off: " + string::Join(SuggestOffTargets, ", ");
                 }
                 return result.Length > 0 ? result : "none";
             }
 
             bool HasSuggestOffTarget(const string &in rawKey) const {
                 string key = NormalizeTriggerTargetKey(rawKey);
-                for (uint i = 0; i < SuggestOffTargets.Length; i++) {
-                    if (SuggestOffTargets[i] == key) return true;
-                }
-                return false;
+                return SuggestOffTargets.Find(key) >= 0;
             }
 
             bool HasForceOffTarget(const string &in rawKey) const {
                 string key = NormalizeTriggerTargetKey(rawKey);
-                for (uint i = 0; i < ForceOffTargets.Length; i++) {
-                    if (ForceOffTargets[i] == key) return true;
-                }
-                return false;
+                return ForceOffTargets.Find(key) >= 0;
             }
 
             string DistanceSummary() const {
                 string xz = HasSuggestedDrawDistanceXZ ? Text::Format("%.0f", SuggestedDrawDistanceXZ) + "m X/Z" : "no X/Z";
                 string y = HasSuggestedDrawDistanceY ? Text::Format("%.0f", SuggestedDrawDistanceY) + "m Y" : "no Y";
                 return xz + ", " + y;
-            }
-        }
-
-        class ActiveZoneState {
-            bool HasContainingZone = false;
-            int ContainingZoneIndex = -1;
-            bool HasNearestZone = false;
-            int NearestZoneIndex = -1;
-            float NearestZoneDistance = 0.0f;
-
-            bool HasAnySelection() const {
-                return HasContainingZone || HasNearestZone;
             }
         }
     }

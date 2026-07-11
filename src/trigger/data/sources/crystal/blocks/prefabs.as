@@ -291,7 +291,7 @@ namespace TriggerVisualizer {
                     }
 
                     bool found = false;
-                    uint count = CrystalMinUint(prefab.Ents.Length, MAX_CRYSTAL_PREFAB_ENTS);
+                    uint count = MinUint(prefab.Ents.Length, MAX_CRYSTAL_PREFAB_ENTS);
                     for (uint i = 0; i < count; i++) {
                         auto ent = prefab.Ents[i];
                         CMwNod@ entModel = ent.Model;
@@ -338,13 +338,6 @@ namespace TriggerVisualizer {
                     }
                     return found;
                 }
-
-                const int CRYSTAL_EXPANDABLE_DIR_NORTH = 0;
-                const int CRYSTAL_EXPANDABLE_DIR_EAST = 1;
-                const int CRYSTAL_EXPANDABLE_DIR_SOUTH = 2;
-                const int CRYSTAL_EXPANDABLE_DIR_WEST = 3;
-                const int CRYSTAL_EXPANDABLE_DIR_TOP = 4;
-                const int CRYSTAL_EXPANDABLE_DIR_BOTTOM = 5;
             }
         }
     }

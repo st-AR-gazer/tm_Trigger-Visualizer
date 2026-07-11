@@ -1,7 +1,7 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            void RenderLineSplittingSettingsUI() {
+        namespace Ui {
+            void RenderLineSplittingSettingsUi() {
                 S_AdaptiveLineSplitting = UI::Checkbox(
                     "Enable adaptive line/face splitting##trigger-visualizer-line-splitting",
                     S_AdaptiveLineSplitting

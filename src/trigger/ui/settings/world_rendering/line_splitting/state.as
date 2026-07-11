@@ -1,6 +1,6 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             const float LINE_SPLIT_MINIMUM_SAFE_LENGTH = 0.001f;
             const float LINE_SPLIT_TARGET_LENGTH_SLIDER_MAX = 64.0f;
             const float LINE_SPLIT_START_DISTANCE_SLIDER_MAX = 2048.0f;

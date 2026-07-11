@@ -7,8 +7,8 @@ namespace TriggerVisualizer {
                 const vec3 &in uEdge,
                 const vec3 &in vEdge
             ) {
-                float uLenSq = Math::Dot(uEdge, uEdge);
-                float vLenSq = Math::Dot(vEdge, vEdge);
+                float uLenSq = uEdge.LengthSquared();
+                float vLenSq = vEdge.LengthSquared();
                 float u = uLenSq <= 0.0001f ? 0.0f : Math::Dot(point - origin, uEdge) / uLenSq;
                 float v = vLenSq <= 0.0001f ? 0.0f : Math::Dot(point - origin, vEdge) / vLenSq;
                 u = Math::Clamp(u, 0.0f, 1.0f);
@@ -62,7 +62,6 @@ namespace TriggerVisualizer {
             ) {
                 if (items is null) return 0;
                 if (budget == 0) return 0;
-                if (!ConsumeWorldFillTileTraversalBudget()) return 0;
 
                 vec3 p0 = origin;
                 vec3 p1 = origin + uEdge;
@@ -71,7 +70,7 @@ namespace TriggerVisualizer {
                 int primitiveClass = ClassifyWorldQuadForFrustum(p0, p1, p2, p3);
                 if (primitiveClass == WORLD_PRIMITIVE_OUTSIDE) return 0;
                 bool isMixed = primitiveClass == WORLD_PRIMITIVE_MIXED;
-                int maxFrameTiles = GetEffectiveMaxFillTilesPerFrame();
+                int maxFrameTiles = GetFillTileFrameSafetyLimit();
                 if (int(items.Length) >= maxFrameTiles) return 0;
 
                 uint remainingFrameBudget = uint(maxFrameTiles - int(items.Length));
@@ -222,27 +221,6 @@ namespace TriggerVisualizer {
                     && Math::Abs(a.w - b.w) <= 0.0001f;
             }
 
-            bool AreAllWorldFillTileColorsEquivalent(array<WorldFillTileDrawItem@> @items) {
-                if (items is null || items.Length <= 1) return true;
-
-                uint firstIndex = 0;
-                while (firstIndex < items.Length && items[firstIndex] is null) {
-                    firstIndex++;
-                }
-                if (firstIndex >= items.Length) return true;
-
-                vec4 color = items[firstIndex].Color;
-                for (uint i = firstIndex + 1; i < items.Length; i++) {
-                    if (items[i] is null) continue;
-                    if (!AreFillTileColorsEquivalent(items[i].Color, color)) return false;
-                }
-                return true;
-            }
-
-            bool ShouldSortWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
-                return items !is null && items.Length > 1;
-            }
-
             bool AddWorldFillTilePath(WorldFillTileDrawItem@ item) {
                 if (item is null) return false;
                 if (item.Occluded) return false;
@@ -292,22 +270,16 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void SortWorldFillTileDrawItemsBackToFront(array<WorldFillTileDrawItem@> @items) {
-                if (items is null || items.Length <= 1) return;
-
-                uint gap = items.Length / 2;
-                while (gap > 0) {
-                    for (uint i = gap; i < items.Length; i++) {
-                        WorldFillTileDrawItem@ item = items[i];
-                        uint j = i;
-                        while (j >= gap && items[j - gap].SortDistanceSq < item.SortDistanceSq) {
-                            @items[j] = items[j - gap];
-                            j -= gap;
-                        }
-                        @items[j] = item;
-                    }
-                    gap /= 2;
+            bool WorldFillTileDrawItemBackToFrontLess(
+                const WorldFillTileDrawItem@ const &in left,
+                const WorldFillTileDrawItem@ const &in right
+            ) {
+                if (left is null) return false;
+                if (right is null) return true;
+                if (left.SortDistanceSq != right.SortDistanceSq) {
+                    return left.SortDistanceSq > right.SortDistanceSq;
                 }
+                return left.SortOrder < right.SortOrder;
             }
 
             void MarkDuplicateWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
@@ -330,9 +302,11 @@ namespace TriggerVisualizer {
             void DrawWorldFillTileDrawItems(array<WorldFillTileDrawItem@> @items) {
                 if (items is null || items.Length == 0) return;
 
-                bool sorted = ShouldSortWorldFillTileDrawItems(items);
-                if (sorted) {
-                    SortWorldFillTileDrawItemsBackToFront(items);
+                if (items.Length > 1) {
+                    for (uint i = 0; i < items.Length; i++) {
+                        if (items[i] !is null) items[i].SortOrder = i;
+                    }
+                    items.Sort(WorldFillTileDrawItemBackToFrontLess);
                 }
                 MarkDuplicateWorldFillTileDrawItems(items);
                 nvg::Reset();
@@ -352,35 +326,16 @@ namespace TriggerVisualizer {
                 }
             }
 
-            bool ShouldSortWorldTileIconDrawItems(array<WorldTileIconDrawItem@> @items) {
-                return items !is null && items.Length > 1;
-            }
-
-            bool ShouldWorldTileIconSortAfter(
-                const WorldTileIconDrawItem@ left,
-                const WorldTileIconDrawItem@ right
+            bool WorldTileIconDrawItemBackToFrontLess(
+                const WorldTileIconDrawItem@ const &in left,
+                const WorldTileIconDrawItem@ const &in right
             ) {
                 if (left is null) return false;
                 if (right is null) return true;
-                return left.SortDistanceSq < right.SortDistanceSq;
-            }
-
-            void SortWorldTileIconDrawItemsBackToFront(array<WorldTileIconDrawItem@> @items) {
-                if (items is null || items.Length <= 1) return;
-
-                uint gap = items.Length / 2;
-                while (gap > 0) {
-                    for (uint i = gap; i < items.Length; i++) {
-                        WorldTileIconDrawItem@ item = items[i];
-                        uint j = i;
-                        while (j >= gap && ShouldWorldTileIconSortAfter(items[j - gap], item)) {
-                            @items[j] = items[j - gap];
-                            j -= gap;
-                        }
-                        @items[j] = item;
-                    }
-                    gap /= 2;
+                if (left.SortDistanceSq != right.SortDistanceSq) {
+                    return left.SortDistanceSq > right.SortDistanceSq;
                 }
+                return left.SortOrder < right.SortOrder;
             }
 
             void MarkDuplicateWorldTileIconDrawItems(array<WorldTileIconDrawItem@> @items) {
@@ -403,13 +358,15 @@ namespace TriggerVisualizer {
             void DrawWorldTileIconDrawItems(array<WorldTileIconDrawItem@> @items) {
                 if (items is null || items.Length == 0 || !ShouldRenderWorldTileIconsNow()) return;
 
-                if (ShouldSortWorldTileIconDrawItems(items)) {
-                    SortWorldTileIconDrawItemsBackToFront(items);
+                if (items.Length > 1) {
+                    for (uint i = 0; i < items.Length; i++) {
+                        if (items[i] !is null) items[i].SortOrder = i;
+                    }
+                    items.Sort(WorldTileIconDrawItemBackToFrontLess);
                 }
                 MarkDuplicateWorldTileIconDrawItems(items);
                 nvg::Reset();
                 for (uint i = 0; i < items.Length; i++) {
-                    if (G_TileIconPatchBudgetRemaining == 0) return;
                     if (items[i] is null || items[i].Occluded || items[i].TextureKey.Length == 0) continue;
                     DrawTileIconOnWorldTile(
                         items[i].Origin,
@@ -542,8 +499,6 @@ namespace TriggerVisualizer {
             ) {
                 if (items is null) return 0;
                 if (corners is null || face is null || face.Length != 4) return 0;
-                if (G_FillTileTraversalBudgetRemaining == 0) return 0;
-
                 vec3 origin = corners[face[0]];
                 vec3 uEdge = corners[face[1]] - origin;
                 vec3 vEdge = corners[face[3]] - origin;
@@ -593,11 +548,6 @@ namespace TriggerVisualizer {
 
             uint CountTriggerVolumeCameraFacingFaces(const TriggerVolume@ box, const vec3 &in cameraPos) {
                 if (box !is null && box.HasChildVolumes()) {
-                    if (ShouldSimplifyGroupedTriggersNow()) {
-                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        return CountTriggerVolumeCameraFacingFaces(simplifiedBox, cameraPos);
-                    }
-
                     uint groupCount = 0;
                     for (uint i = 0; i < box.ChildVolumes.Length; i++) {
                         groupCount += CountTriggerVolumeCameraFacingFaces(box.ChildVolumes[i], cameraPos);
@@ -614,17 +564,6 @@ namespace TriggerVisualizer {
                     if (IsTriggerVolumeFaceCameraFacing(corners, TRIGGER_VOLUME_FACE_INDICES[i], i, cameraPos)) {
                         count++;
                     }
-                }
-                return count;
-            }
-
-            uint CountTriggerVolumesCameraFacingFaces(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
-                if (boxes is null) return 0;
-
-                uint count = 0;
-                for (uint i = 0; i < boxes.Length; i++) {
-                    if (!IsTriggerVolumeInRenderRange(boxes[i], cameraPos)) continue;
-                    count += CountTriggerVolumeCameraFacingFaces(boxes[i], cameraPos);
                 }
                 return count;
             }
@@ -646,11 +585,6 @@ namespace TriggerVisualizer {
 
             uint CountTriggerVolumeFillTiles(const TriggerVolume@ box, const vec3 &in cameraPos) {
                 if (box !is null && box.HasChildVolumes()) {
-                    if (ShouldSimplifyGroupedTriggersNow()) {
-                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        return CountTriggerVolumeFillTiles(simplifiedBox, cameraPos);
-                    }
-
                     uint groupCount = 0;
                     for (uint i = 0; i < box.ChildVolumes.Length; i++) {
                         groupCount += CountTriggerVolumeFillTiles(box.ChildVolumes[i], cameraPos);
@@ -685,7 +619,7 @@ namespace TriggerVisualizer {
                 if (boxes is null) return 0;
 
                 uint count = 0;
-                uint maxFrameTiles = uint(Math::Max(GetEffectiveMaxFillTilesPerFrame(), 0));
+                uint maxFrameTiles = uint(GetFillTileFrameSafetyLimit());
                 for (uint i = 0; i < boxes.Length; i++) {
                     if (count >= maxFrameTiles) return count;
                     if (!IsTriggerVolumeInRenderRangeForProximity(boxes[i], cameraPos, proximityState)) continue;

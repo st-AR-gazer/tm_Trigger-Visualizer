@@ -1,6 +1,6 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             const int TARGET_SELECTION_MODE_SPEED_KEEP = 0;
             const int TARGET_SELECTION_MODE_LABELS = 1;
 
@@ -104,7 +104,7 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void RenderTargetSelectionCategoryUI(
+            void RenderTargetSelectionCategoryUi(
                 int mode,
                 const string &in id,
                 const array<string> &in labels,
@@ -114,7 +114,7 @@ namespace TriggerVisualizer {
                 RenderTargetSelectionTable(mode, id, labels, keys);
             }
 
-            void RenderTargetSelectionSourceTargetsUI(int mode, const string &in idPrefix) {
+            void RenderTargetSelectionSourceTargetsUi(int mode, const string &in idPrefix) {
                 const string[] labels = {
                     "Offzone",
                     "MediaTracker",
@@ -125,10 +125,10 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::TRIGGER_TARGET_MEDIATRACKER,
                     TriggerVisualizer::Trigger::TRIGGER_TARGET_CRYSTAL
                 };
-                RenderTargetSelectionCategoryUI(mode, idPrefix + "-sources", labels, keys);
+                RenderTargetSelectionCategoryUi(mode, idPrefix + "-sources", labels, keys);
             }
 
-            void RenderTargetSelectionGameplayTargetsUI(int mode, const string &in idPrefix) {
+            void RenderTargetSelectionGameplayTargetsUi(int mode, const string &in idPrefix) {
                 const string[] labels = {
                     "Checkpoint",
                     "Finish",
@@ -175,10 +175,10 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::TRIGGER_TYPE_VEHICLE_TRANSFORM_RALLY,
                     TriggerVisualizer::Trigger::TRIGGER_TYPE_VEHICLE_TRANSFORM_DESERT
                 };
-                RenderTargetSelectionCategoryUI(mode, idPrefix + "-gameplay", labels, keys);
+                RenderTargetSelectionCategoryUi(mode, idPrefix + "-gameplay", labels, keys);
             }
 
-            void RenderTargetSelectionMediaTrackerCameraTargetsUI(int mode, const string &in idPrefix) {
+            void RenderTargetSelectionMediaTrackerCameraTargetsUi(int mode, const string &in idPrefix) {
                 const string[] labels = {
                     "Camera (all)",
                     "Custom Camera",
@@ -207,10 +207,10 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR
                 };
-                RenderTargetSelectionCategoryUI(mode, idPrefix + "-mt-camera", labels, keys);
+                RenderTargetSelectionCategoryUi(mode, idPrefix + "-mt-camera", labels, keys);
             }
 
-            void RenderTargetSelectionMediaTrackerVisualTargetsUI(int mode, const string &in idPrefix) {
+            void RenderTargetSelectionMediaTrackerVisualTargetsUi(int mode, const string &in idPrefix) {
                 const string[] labels = {
                     "2D Triangles",
                     "3D Triangles",
@@ -245,10 +245,10 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TONE_MAPPING,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_VEHICLE_LIGHTS
                 };
-                RenderTargetSelectionCategoryUI(mode, idPrefix + "-mt-visual", labels, keys);
+                RenderTargetSelectionCategoryUi(mode, idPrefix + "-mt-visual", labels, keys);
             }
 
-            void RenderTargetSelectionMediaTrackerGameplayUiTargetsUI(int mode, const string &in idPrefix) {
+            void RenderTargetSelectionMediaTrackerGameplayInterfaceTargetsUi(int mode, const string &in idPrefix) {
                 const string[] labels = {
                     "Car Trails",
                     "Ghost",
@@ -275,10 +275,10 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TIME,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TIME_SPEED
                 };
-                RenderTargetSelectionCategoryUI(mode, idPrefix + "-mt-gameplay-ui", labels, keys);
+                RenderTargetSelectionCategoryUi(mode, idPrefix + "-mt-gameplay-ui", labels, keys);
             }
 
-            void RenderTargetSelectionMediaTrackerOtherTargetsUI(int mode, const string &in idPrefix) {
+            void RenderTargetSelectionMediaTrackerOtherTargetsUi(int mode, const string &in idPrefix) {
                 const string[] labels = {
                     "GPS",
                     "Editing Cut",
@@ -293,31 +293,31 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_MIXED,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_UNKNOWN
                 };
-                RenderTargetSelectionCategoryUI(mode, idPrefix + "-mt-other", labels, keys);
+                RenderTargetSelectionCategoryUi(mode, idPrefix + "-mt-other", labels, keys);
             }
 
-            void RenderTargetSelectionMediaTrackerTargetsUI(int mode, const string &in idPrefix) {
+            void RenderTargetSelectionMediaTrackerTargetsUi(int mode, const string &in idPrefix) {
                 UI::BeginTabBar("trigger-visualizer-target-selection-" + idPrefix + "-mt-tabs");
                 if (UI::BeginTabItem("Camera")) {
-                    RenderTargetSelectionMediaTrackerCameraTargetsUI(mode, idPrefix);
+                    RenderTargetSelectionMediaTrackerCameraTargetsUi(mode, idPrefix);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Visual FX")) {
-                    RenderTargetSelectionMediaTrackerVisualTargetsUI(mode, idPrefix);
+                    RenderTargetSelectionMediaTrackerVisualTargetsUi(mode, idPrefix);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Gameplay/UI")) {
-                    RenderTargetSelectionMediaTrackerGameplayUiTargetsUI(mode, idPrefix);
+                    RenderTargetSelectionMediaTrackerGameplayInterfaceTargetsUi(mode, idPrefix);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Other")) {
-                    RenderTargetSelectionMediaTrackerOtherTargetsUI(mode, idPrefix);
+                    RenderTargetSelectionMediaTrackerOtherTargetsUi(mode, idPrefix);
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();
             }
 
-            void RenderTargetSelectionCrystalTargetsUI(int mode, const string &in idPrefix) {
+            void RenderTargetSelectionCrystalTargetsUi(int mode, const string &in idPrefix) {
                 const string[] labels = {
                     "Crystal Block",
                     "Crystal Block Waypoint",
@@ -336,25 +336,25 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::CRYSTAL_SUBTYPE_ITEM,
                     TriggerVisualizer::Trigger::CRYSTAL_SUBTYPE_BLOCK_ITEM
                 };
-                RenderTargetSelectionCategoryUI(mode, idPrefix + "-crystal", labels, keys);
+                RenderTargetSelectionCategoryUi(mode, idPrefix + "-crystal", labels, keys);
             }
 
             void RenderTargetSelectionTabs(int mode, const string &in tabBarId, const string &in idPrefix) {
                 UI::BeginTabBar(tabBarId);
                 if (UI::BeginTabItem("Sources")) {
-                    RenderTargetSelectionSourceTargetsUI(mode, idPrefix);
+                    RenderTargetSelectionSourceTargetsUi(mode, idPrefix);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Gameplay")) {
-                    RenderTargetSelectionGameplayTargetsUI(mode, idPrefix);
+                    RenderTargetSelectionGameplayTargetsUi(mode, idPrefix);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("MediaTracker")) {
-                    RenderTargetSelectionMediaTrackerTargetsUI(mode, idPrefix);
+                    RenderTargetSelectionMediaTrackerTargetsUi(mode, idPrefix);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Crystal")) {
-                    RenderTargetSelectionCrystalTargetsUI(mode, idPrefix);
+                    RenderTargetSelectionCrystalTargetsUi(mode, idPrefix);
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();

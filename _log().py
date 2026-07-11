@@ -4,23 +4,29 @@ import os
 import re
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parent
+
 parser = argparse.ArgumentParser(description="Process log statements in code files.")
 parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output of all log modifications.")
 args = parser.parse_args()
 
-default_params = ['""', "LogLevel::Info", "-1", '""']
+default_params = ['""', "LogLevel::Info", "-1", '""', '""']
 
 function_pattern = re.compile(
-    r"(void|int|uint|int8|uint8|int16|uint16|int64|uint64|float|double|bool|string|wstring|"
-    r"vec2|vec3|vec4|int2|int3|nat2|nat3|iso3|mat3|iso4|mat4|quat|RGBAColor|MemoryBuffer|"
-    r"DataRef|CMwStack|MwId|MwSArray|MwStridedArray|MwFastArray|MwFastBuffer|MwFastBufferCat|"
-    r"MwRefBuffer|MwNodPool|MwVirtualArray|array<[^>]*>|enum\w*|dictionaryValue|dictionary|ref)"
-    r"\s+(\w+)\s*\(([^)]*)\)\s*\{"
+    r"(?m)^[ \t]*(?:(?:private|protected|shared)\s+)*(?:const\s+)?"
+    r"[A-Za-z_][A-Za-z0-9_:]*(?:\s*<[^(){}\r\n]+>)?"
+    r"(?:\s*[@&]\s*|\s+)"
+    r"([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*(?:const\s*)?\{"
 )
+constructor_pattern = re.compile(
+    r"(?m)^[ \t]*([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*\{"
+)
+control_statement_names = {"if", "for", "while", "switch", "catch"}
 namespace_pattern = re.compile(r"\bnamespace\s+(\w+)\b")
 
 skip_files = {
     Path("src/runtime/logging.as").as_posix().lower(),
+    Path("src/toolkit/fileexplorer.as").as_posix().lower(),
     Path("src/toolkit/logging.as").as_posix().lower(),
 }
 
@@ -116,14 +122,21 @@ def get_namespace_path(lines, index):
 
 
 def get_function_name(lines, index):
-    for i in range(index, -1, -1):
-        match = function_pattern.search(lines[i])
-        if match:
-            namespace_path = get_namespace_path(lines, i)
-            function_name = match.group(2)
-            if namespace_path:
-                return "::".join(namespace_path + [function_name])
-            return function_name
+    source = "\n".join(lines[:index + 1])
+    matches = list(function_pattern.finditer(source))
+    matches.extend(
+        match
+        for match in constructor_pattern.finditer(source)
+        if match.group(1) not in control_statement_names
+    )
+    if matches:
+        match = max(matches, key=lambda candidate: candidate.start())
+        declaration_line = source.count("\n", 0, match.start())
+        namespace_path = get_namespace_path(lines, declaration_line)
+        function_name = match.group(1)
+        if namespace_path:
+            return "::".join(namespace_path + [function_name])
+        return function_name
     return "UnknownFunction"
 
 
@@ -391,12 +404,24 @@ def parse_params(log_content):
     return params
 
 
+def get_log_tag(function_name):
+    path = function_name.split("::")[:-1]
+    if path and path[0] == "TriggerVisualizer":
+        path.pop(0)
+    if path and path[0] == "Trigger":
+        path.pop(0)
+    return "::".join(path)
+
+
 def clean_and_update_params(params, line_number, analysis_lines):
-    while len(params) < 4:
+    while len(params) < 5:
         params.append(default_params[len(params)])
 
+    function_name = get_function_name(analysis_lines, line_number - 1)
     params[2] = str(line_number)
-    params[3] = f'"{get_function_name(analysis_lines, line_number - 1)}"'
+    params[3] = f'"{function_name}"'
+    if params[4] == '""':
+        params[4] = f'"{get_log_tag(function_name)}"'
 
     if "LogLevel::" not in params[1]:
         params[1] = "LogLevel::Info"
@@ -461,14 +486,14 @@ def modify_log_statements(file_path, verbose):
     updated_content = "".join(updated_chunks)
 
     if modified:
-        with open(file_path, "w", encoding="utf-8") as file:
+        with open(file_path, "w", encoding="utf-8", newline="\n") as file:
             file.write(updated_content)
 
     return modified
 
 
 def should_skip(file_path):
-    rel_path = Path(os.path.relpath(file_path, Path.cwd())).as_posix().lower()
+    rel_path = Path(file_path).resolve().relative_to(ROOT).as_posix().lower()
     return rel_path in skip_files or Path(file_path).name.lower() in skip_file_names
 
 
@@ -495,4 +520,4 @@ def process_directory(directory, verbose):
 
 
 if __name__ == "__main__":
-    process_directory("./src", args.verbose)
+    process_directory(ROOT / "src", args.verbose)

@@ -1,6 +1,6 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             [Setting hidden name="Trigger: Show labels"]
             bool S_ShowLabels = true;
             [Setting hidden name="Trigger: Label show index"]
@@ -30,17 +30,9 @@
             string S_LabelTargetKeys = DEFAULT_LABEL_TARGET_KEYS;
             [Setting hidden name="Trigger: Label target override texts"]
             string S_LabelTargetOverrideTexts = DEFAULT_LABEL_TARGET_OVERRIDE_TEXTS;
-            dictionary G_LabelTargetOverrideInputs;
-            string G_LabelTargetKeyCacheSource;
-            array<string> G_LabelTargetKeyCache;
-
-            string EncodeLabelTargetOverrideText(const string &in value) {
-                return Net::UrlEncode(value);
-            }
-
-            string DecodeLabelTargetOverrideText(const string &in value) {
-                return Net::UrlDecode(value);
-            }
+            dictionary g_LabelTargetOverrideInputs;
+            string g_LabelTargetKeyCacheSource;
+            array<string> g_LabelTargetKeyCache;
 
             string GetLabelTargetOverrideText(const string &in rawKey) {
                 string key = TriggerVisualizer::Trigger::NormalizeTriggerTargetKey(rawKey);
@@ -53,7 +45,7 @@
                     if (separator <= 0) continue;
                     string entryKey = TriggerVisualizer::Trigger::NormalizeTriggerTargetKey(entry.SubStr(0, separator));
                     if (entryKey != key) continue;
-                    return DecodeLabelTargetOverrideText(entry.SubStr(separator + 1));
+                    return Net::UrlDecode(entry.SubStr(separator + 1));
                 }
                 return "";
             }
@@ -75,7 +67,7 @@
 
                 string trimmedValue = value.Trim();
                 if (trimmedValue.Length > 0) {
-                    next += key + "=" + EncodeLabelTargetOverrideText(trimmedValue) + "|";
+                    next += key + "=" + Net::UrlEncode(trimmedValue) + "|";
                 }
                 S_LabelTargetOverrideTexts = next;
             }
@@ -85,9 +77,9 @@
                 if (key.Length == 0) return "";
 
                 string value;
-                if (!G_LabelTargetOverrideInputs.Get(key, value)) {
+                if (!g_LabelTargetOverrideInputs.Get(key, value)) {
                     value = GetLabelTargetOverrideText(key);
-                    G_LabelTargetOverrideInputs.Set(key, value);
+                    g_LabelTargetOverrideInputs.Set(key, value);
                 }
                 return value;
             }
@@ -95,20 +87,20 @@
             void SetLabelTargetOverrideInputValue(const string &in rawKey, const string &in value) {
                 string key = TriggerVisualizer::Trigger::NormalizeTriggerTargetKey(rawKey);
                 if (key.Length == 0) return;
-                G_LabelTargetOverrideInputs.Set(key, value);
+                g_LabelTargetOverrideInputs.Set(key, value);
                 SetLabelTargetOverrideText(key, value);
             }
 
             void RebuildLabelTargetKeyCacheIfNeeded() {
-                if (G_LabelTargetKeyCacheSource == S_LabelTargetKeys) return;
+                if (g_LabelTargetKeyCacheSource == S_LabelTargetKeys) return;
 
-                G_LabelTargetKeyCacheSource = S_LabelTargetKeys;
-                G_LabelTargetKeyCache.Resize(0);
+                g_LabelTargetKeyCacheSource = S_LabelTargetKeys;
+                g_LabelTargetKeyCache.Resize(0);
                 auto parts = S_LabelTargetKeys.Split("|");
                 for (uint i = 0; i < parts.Length; i++) {
                     string key = TriggerVisualizer::Trigger::NormalizeTriggerTargetKey(parts[i]);
                     if (key.Length == 0 || IsLabelSourceTargetKey(key)) continue;
-                    G_LabelTargetKeyCache.InsertLast(key);
+                    g_LabelTargetKeyCache.InsertLast(key);
                 }
             }
 
@@ -120,18 +112,6 @@
                 S_LabelTargetKeys = SetTargetListKeyEnabled(S_LabelTargetKeys, rawKey, enabled);
             }
 
-            void SetLabelTargetKeysEnabled(const array<string> &in keys, bool enabled) {
-                for (uint i = 0; i < keys.Length; i++) {
-                    SetLabelTargetEnabled(keys[i], enabled);
-                }
-            }
-
-            void FlipLabelTargetKeys(const array<string> &in keys) {
-                for (uint i = 0; i < keys.Length; i++) {
-                    SetLabelTargetEnabled(keys[i], !IsLabelTargetEnabled(keys[i]));
-                }
-            }
-
             bool ShouldShowLabelForVolume(const TriggerVolume@ volume) {
                 if (volume is null) return false;
                 if (S_LabelTargetKeys.Length == 0) return false;
@@ -140,8 +120,8 @@
                 if (sourceKey.Length > 0 && TriggerVisualizer::Trigger::TriggerTargetListContains(S_LabelTargetKeys, sourceKey)) return true;
 
                 RebuildLabelTargetKeyCacheIfNeeded();
-                for (uint i = 0; i < G_LabelTargetKeyCache.Length; i++) {
-                    if (TriggerVisualizer::Trigger::TriggerVolumeMatchesTargetKey(volume, G_LabelTargetKeyCache[i])) return true;
+                for (uint i = 0; i < g_LabelTargetKeyCache.Length; i++) {
+                    if (TriggerVisualizer::Trigger::TriggerVolumeMatchesTargetKey(volume, g_LabelTargetKeyCache[i])) return true;
                 }
                 return false;
             }
@@ -166,7 +146,7 @@
                     if (key.Length == 0) continue;
                     if (!TriggerVisualizer::Trigger::TriggerVolumeMatchesTargetKey(volume, key)) continue;
 
-                    string value = DecodeLabelTargetOverrideText(entry.SubStr(separator + 1));
+                    string value = Net::UrlDecode(entry.SubStr(separator + 1));
                     if (value.Length == 0) continue;
                     if (IsLabelSourceTargetKey(key)) {
                         if (sourceFallback.Length == 0) sourceFallback = value;

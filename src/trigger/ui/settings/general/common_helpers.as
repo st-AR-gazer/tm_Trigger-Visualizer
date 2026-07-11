@@ -1,13 +1,6 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            string GetColorModeLabel(int mode) {
-                if (mode == COLOR_MODE_DISTANCE_FADE) return "Distance fade";
-                if (mode == COLOR_MODE_LINE_SPLIT_DENSITY) return "Line split density";
-                if (mode == COLOR_MODE_MEDIATRACKER_TRACK_COLORS) return "MediaTracker track colors";
-                return "Uniform color";
-            }
-
+        namespace Ui {
             string GetColorSourceLabel(int source) {
                 if (source == COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS) return "MediaTracker track colors";
                 return "Uniform color";
@@ -54,7 +47,6 @@
                 if (!IsEditorProximityMode(S_RenderProximityModeMediaTracker)) {
                     S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                 }
-                S_RenderProximityModeReplayEditor = S_RenderProximityModeMediaTracker;
             }
 
             int GetRenderProximityModeForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
@@ -102,10 +94,6 @@
                 }
                 if (!IsEditorProximityMode(value)) value = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                 return value;
-            }
-
-            void RenderProximitySettingsUI() {
-                RenderWorldDistanceSettingsUI();
             }
         }
     }

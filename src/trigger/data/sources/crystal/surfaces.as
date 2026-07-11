@@ -2,11 +2,6 @@ namespace TriggerVisualizer {
     namespace Trigger {
         namespace Data {
             namespace Sources {
-                string CrystalSurfaceKind(CPlugSurface@ surface) {
-                    string typeName = GetCrystalNodTypeName(surface);
-                    return typeName.Length > 0 ? typeName : "CPlugSurface";
-                }
-
                 string CrystalGmSurfKind(GmSurf@ surf) {
                     if (surf is null) return "";
                     if (cast<GmSurfSphereLocated>(surf) !is null) return "GmSurfSphereLocated";
@@ -82,19 +77,6 @@ namespace TriggerVisualizer {
                     }
 
                     return "";
-                }
-
-                bool CrystalGmSurfHasCandidateBounds(GmSurf@ surf) {
-                    if (surf is null) return false;
-                    return cast<GmSurfSphereLocated>(surf) !is null
-                        || cast<GmSurfBox>(surf) !is null
-                        || cast<GmSurfVCylinder>(surf) !is null
-                        || cast<GmSurfCylinder>(surf) !is null
-                        || cast<GmSurfCapsule>(surf) !is null
-                        || cast<GmSurfMesh>(surf) !is null
-                        || cast<GmSurfCompound>(surf) !is null
-                        || cast<GmSurfCompoundInstance>(surf) !is null
-                        || cast<GmSurfConvexPolyhedron>(surf) !is null;
                 }
 
                 bool TryGetCrystalGmSurfLocalBounds(
@@ -228,7 +210,7 @@ namespace TriggerVisualizer {
                         }
 
                         auto bounds = CrystalBoundsAccumulator();
-                        uint count = CrystalMinUint(
+                        uint count = MinUint(
                             compound.Surfs.Length,
                             MAX_CRYSTAL_COMPOUND_SURFS_FOR_BOUNDS
                         );
@@ -289,7 +271,7 @@ namespace TriggerVisualizer {
                         }
 
                         auto bounds = CrystalBoundsAccumulator();
-                        uint count = CrystalMinUint(
+                        uint count = MinUint(
                             compoundInstance.SurfLocs.Length,
                             MAX_CRYSTAL_COMPOUND_SURFS_FOR_BOUNDS
                         );

@@ -1,5 +1,5 @@
 void Main() {
-    TriggerVisualizer::App::Main();
+
 }
 
 void Render() {

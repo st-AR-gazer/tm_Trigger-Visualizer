@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+*.png binary
+*.op binary
+
+src/toolkit/FileExplorer.as -text
+src/toolkit/logging.as -text
+discoveries/** -text

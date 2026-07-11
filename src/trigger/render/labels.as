@@ -9,10 +9,11 @@ namespace TriggerVisualizer {
             }
 
             bool IsScreenPositionVisible(const vec2 &in pos, float margin = 64.0f) {
+                vec2 displaySize = Display::GetSize();
                 return pos.x >= -margin
                     && pos.y >= -margin
-                    && pos.x <= float(Display::GetWidth()) + margin
-                    && pos.y <= float(Display::GetHeight()) + margin;
+                    && pos.x <= displaySize.x + margin
+                    && pos.y <= displaySize.y + margin;
             }
 
             string FormatRawRangeLabel(const TriggerRangeRaw@ rawRange) {
@@ -36,13 +37,13 @@ namespace TriggerVisualizer {
                 if (box is null || customText.Length == 0) return "";
 
                 string label = customText;
-                if (TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix) {
+                if (TriggerVisualizer::Trigger::Ui::S_LabelShowSourcePrefix) {
                     label = box.SourceIndexLabel() + ": " + label;
                 }
-                if (TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex && box.HasIslandIndex && box.IslandCount > 1) {
+                if (TriggerVisualizer::Trigger::Ui::S_LabelShowIslandIndex && box.HasIslandIndex && box.IslandCount > 1) {
                     label += " island " + tostring(box.IslandIndex + 1) + "/" + tostring(box.IslandCount);
                 }
-                if (TriggerVisualizer::Trigger::UI::S_LabelShowJoinedCount && box.IsMergedGroup && box.MergedVolumeCount > 1) {
+                if (TriggerVisualizer::Trigger::Ui::S_LabelShowJoinedCount && box.IsMergedGroup && box.MergedVolumeCount > 1) {
                     label += " (" + tostring(box.MergedVolumeCount) + " joined)";
                 }
                 return label;
@@ -50,38 +51,38 @@ namespace TriggerVisualizer {
 
             string BuildTriggerVolumeLabelText(uint index, const TriggerRangeRaw@ rawRange, const TriggerVolume@ box) {
                 array<string> parts;
-                if (TriggerVisualizer::Trigger::UI::S_LabelShowIndex) {
+                if (TriggerVisualizer::Trigger::Ui::S_LabelShowIndex) {
                     parts.InsertLast("#" + index);
                 }
-                string customLabelText = TriggerVisualizer::Trigger::UI::GetCustomLabelTextForVolume(box);
+                string customLabelText = TriggerVisualizer::Trigger::Ui::GetCustomLabelTextForVolume(box);
                 if (customLabelText.Length > 0) {
                     parts.InsertLast(BuildCustomTriggerVolumeLabelName(box, customLabelText));
-                } else if (box !is null && (box.Source == TRIGGER_SOURCE_MEDIATRACKER || box.IsMergedGroup || TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName || TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix)) {
-                    parts.InsertLast(box.DisplayLabelWithOptions(TriggerVisualizer::Trigger::UI::S_LabelShowSourcePrefix, TriggerVisualizer::Trigger::UI::S_LabelShowIslandIndex, TriggerVisualizer::Trigger::UI::S_LabelUseDetectedTriggerName, TriggerVisualizer::Trigger::UI::S_LabelShowDetectedTriggerName, TriggerVisualizer::Trigger::UI::S_LabelShowJoinedCount));
+                } else if (box !is null && (box.Source == TRIGGER_SOURCE_MEDIATRACKER || box.IsMergedGroup || TriggerVisualizer::Trigger::Ui::S_LabelUseDetectedTriggerName || TriggerVisualizer::Trigger::Ui::S_LabelShowDetectedTriggerName || TriggerVisualizer::Trigger::Ui::S_LabelShowSourcePrefix)) {
+                    parts.InsertLast(box.DisplayLabelWithOptions(TriggerVisualizer::Trigger::Ui::S_LabelShowSourcePrefix, TriggerVisualizer::Trigger::Ui::S_LabelShowIslandIndex, TriggerVisualizer::Trigger::Ui::S_LabelUseDetectedTriggerName, TriggerVisualizer::Trigger::Ui::S_LabelShowDetectedTriggerName, TriggerVisualizer::Trigger::Ui::S_LabelShowJoinedCount));
                 }
-                if (TriggerVisualizer::Trigger::UI::S_LabelShowRawRange && rawRange !is null) {
+                if (TriggerVisualizer::Trigger::Ui::S_LabelShowRawRange && rawRange !is null) {
                     parts.InsertLast(FormatRawRangeLabel(rawRange));
                 }
-                if (TriggerVisualizer::Trigger::UI::S_LabelShowWorldSize) {
+                if (TriggerVisualizer::Trigger::Ui::S_LabelShowWorldSize) {
                     parts.InsertLast(FormatWorldSizeLabel(box));
                 }
                 if (parts.Length == 0) {
                     parts.InsertLast("#" + index);
                 }
 
-                return Text::Join(parts, " | ");
+                return string::Join(parts, " | ");
             }
 
             vec4 GetLabelTextColor(float fade) {
-                float alpha = TriggerVisualizer::Trigger::UI::S_LabelAlpha * Math::Clamp(fade, 0.0f, 1.0f);
+                float alpha = TriggerVisualizer::Trigger::Ui::S_LabelAlpha * Math::Clamp(fade, 0.0f, 1.0f);
                 return vec4(1.0f, 1.0f, 1.0f, alpha);
             }
 
             bool TryGetTriggerVolumeLabelScreenPosition(const TriggerVolume@ box, vec3 &out screenPos) {
                 screenPos = vec3();
-                if (!TriggerVisualizer::Trigger::UI::S_ShowLabels) return false;
+                if (!TriggerVisualizer::Trigger::Ui::S_ShowLabels) return false;
                 if (box is null) return false;
-                if (!TriggerVisualizer::Trigger::UI::ShouldShowLabelForVolume(box)) return false;
+                if (!TriggerVisualizer::Trigger::Ui::ShouldShowLabelForVolume(box)) return false;
 
                 screenPos = Camera::ToScreen(GetTriggerVolumeLabelPosition(box));
                 return screenPos.z < 0 && IsScreenPositionVisible(screenPos.xy);
@@ -96,7 +97,7 @@ namespace TriggerVisualizer {
                 if (label.Length == 0) return;
 
                 nvg::Reset();
-                nvg::FontSize(TriggerVisualizer::Trigger::UI::S_LabelFontSize);
+                nvg::FontSize(TriggerVisualizer::Trigger::Ui::S_LabelFontSize);
                 nvg::TextAlign(nvg::Align::Left | nvg::Align::Top);
                 vec2 textSize = nvg::TextBounds(label);
                 vec2 textPos = screenPos - vec2(textSize.x * 0.5f, textSize.y + 12.0f);
@@ -123,7 +124,7 @@ namespace TriggerVisualizer {
                 const vec3 &in cameraPos,
                 const TriggerVisualizer::Trigger::Data::ProximityReferenceState@ proximityState
             ) {
-                if (boxes is null || !TriggerVisualizer::Trigger::UI::S_ShowLabels) return 0;
+                if (boxes is null || !TriggerVisualizer::Trigger::Ui::S_ShowLabels) return 0;
 
                 uint count = 0;
                 for (uint i = 0; i < boxes.Length; i++) {

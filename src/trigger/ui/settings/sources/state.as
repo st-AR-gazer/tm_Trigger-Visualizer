@@ -1,14 +1,14 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             const int SOURCE_SETTINGS_PLAYING = 0;
             const int SOURCE_SETTINGS_EDITOR = 1;
             const int SOURCE_SETTINGS_MEDIATRACKER = 2;
-            const int SOURCE_SETTINGS_MESH_MODELLER = 3;
+            const int SOURCE_SETTINGS_MESH_MODELER = 3;
             const string DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING = "camera|customcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|gps|mediatrackerreset|";
             const string DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|2dtriangles|3dtriangles|cartrails|dirtylens|fadingtransition|fog|image|shakecamfx|gps|mediatrackerreset|";
             const string DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|playercamerasubtypecamhelico|playercamerasubtypecamfree|playercamerasubtypecamspectator|2dtriangles|3dtriangles|cartrails|colorsfx|colorgrading|depthoffield|dirtylens|editingcut|fadingtransition|fog|ghost|gps|hdrbloom|image|inertialtrackingcamfx|manialinkui|manialinkurl|musicvolume|opponentvisibility|shakecamfx|stereo3d|soundfx|spectators|text|time|timespeed|tonemapping|vehiclelights|mediatrackerreset|mixed|unknown|";
-            const string DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|2dtriangles|3dtriangles|cartrails|dirtylens|fadingtransition|fog|image|shakecamfx|gps|mediatrackerreset|";
+            const string DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELER = "camera|customcamera|orbitalcamera|pathcamera|playercamera|playercamerasubtypecamdefault|playercamerasubtypecam1|playercamerasubtypecam2|playercamerasubtypecam3|2dtriangles|3dtriangles|cartrails|dirtylens|fadingtransition|fog|image|shakecamfx|gps|mediatrackerreset|";
 
             [Setting hidden name="Trigger: Show offzone source"]
             bool S_ShowOffzoneSource = true;
@@ -51,7 +51,7 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: MediaTracker enabled subtypes mediatracker"]
             string S_MediaTrackerEnabledSubtypesMediaTracker = DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;
             [Setting hidden name="Trigger: MediaTracker enabled subtypes mesh modeler"]
-            string S_MediaTrackerEnabledSubtypesMeshModeler = DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER;
+            string S_MediaTrackerEnabledSubtypesMeshModeler = DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELER;
 
             const string MAP_ONLY_OVERRIDE_RENDER_WORLD = "render-world";
             const string MAP_ONLY_OVERRIDE_SOURCE_OFFZONE = "source-offzone";
@@ -59,13 +59,13 @@ namespace TriggerVisualizer {
             const string MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL = "source-crystal";
             const string MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY = "crystal-custom-only";
             const string MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF = "respect-suggest-off";
-            dictionary G_MapOnlyOverrides;
+            dictionary g_MapOnlyOverrides;
 
             int GetSourceSettingsContextForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 if (ctx is null) return SOURCE_SETTINGS_PLAYING;
                 if (ctx.IsReplayEditor || ctx.IsEditorMediaTracker) return SOURCE_SETTINGS_MEDIATRACKER;
                 if (ctx.IsEditorTestMode || ctx.IsPlayableMap) return SOURCE_SETTINGS_PLAYING;
-                if (ctx.IsMeshModeler) return SOURCE_SETTINGS_MESH_MODELLER;
+                if (ctx.IsMeshModeler) return SOURCE_SETTINGS_MESH_MODELER;
                 if (ctx.IsInEditor) return SOURCE_SETTINGS_EDITOR;
                 return SOURCE_SETTINGS_PLAYING;
             }
@@ -93,17 +93,9 @@ namespace TriggerVisualizer {
                 if (storageKey.Length == 0) return false;
 
                 int raw = 0;
-                if (!G_MapOnlyOverrides.Get(storageKey, raw)) return false;
+                if (!g_MapOnlyOverrides.Get(storageKey, raw)) return false;
                 value = raw != 0;
                 return true;
-            }
-
-            bool HasMapOnlyOverride(
-                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
-                const string &in settingKey
-            ) {
-                string storageKey = GetMapOnlyOverrideStorageKey(ctx, settingKey);
-                return storageKey.Length > 0 && G_MapOnlyOverrides.Exists(storageKey);
             }
 
             void SetMapOnlyOverride(
@@ -115,7 +107,7 @@ namespace TriggerVisualizer {
                 if (storageKey.Length == 0) return;
                 bool previous = false;
                 bool changed = !TryGetMapOnlyOverride(ctx, settingKey, previous) || previous != value;
-                G_MapOnlyOverrides.Set(storageKey, value ? 1 : 0);
+                g_MapOnlyOverrides.Set(storageKey, value ? 1 : 0);
                 if (changed && settingKey == MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY) {
                     TriggerVisualizer::Trigger::RefreshCrystalSourceCache();
                 }
@@ -127,8 +119,8 @@ namespace TriggerVisualizer {
             ) {
                 string storageKey = GetMapOnlyOverrideStorageKey(ctx, settingKey);
                 if (storageKey.Length == 0) return;
-                bool existed = G_MapOnlyOverrides.Exists(storageKey);
-                if (existed) G_MapOnlyOverrides.Delete(storageKey);
+                bool existed = g_MapOnlyOverrides.Exists(storageKey);
+                if (existed) g_MapOnlyOverrides.Delete(storageKey);
                 if (existed && settingKey == MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY) {
                     TriggerVisualizer::Trigger::RefreshCrystalSourceCache();
                 }
@@ -143,7 +135,7 @@ namespace TriggerVisualizer {
                 ClearMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF);
             }
 
-            string MapOnlyOverrideBoolKey(bool value) {
+            string SettingBoolKey(bool value) {
                 return value ? "1" : "0";
             }
 
@@ -151,31 +143,31 @@ namespace TriggerVisualizer {
                 bool value = false;
                 string key = "";
                 key += "|rw:";
-                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RENDER_WORLD, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RENDER_WORLD, value) ? SettingBoolKey(value) : "-";
                 key += "|oz:";
-                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_OFFZONE, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_OFFZONE, value) ? SettingBoolKey(value) : "-";
                 key += "|mt:";
-                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_MEDIATRACKER, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_MEDIATRACKER, value) ? SettingBoolKey(value) : "-";
                 key += "|cr:";
-                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_SOURCE_CRYSTAL, value) ? SettingBoolKey(value) : "-";
                 key += "|cco:";
-                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY, value) ? SettingBoolKey(value) : "-";
                 key += "|rso:";
-                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF, value) ? MapOnlyOverrideBoolKey(value) : "-";
+                key += TryGetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF, value) ? SettingBoolKey(value) : "-";
                 return key;
             }
 
             string GetSourceSettingsContextLabel(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return "Editor";
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return "MediaTracker";
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) return "Mesh Modeller";
+                if (context == SOURCE_SETTINGS_MESH_MODELER) return "Mesh Modeler";
                 return "Playing";
             }
 
             bool IsOffzoneSourceEnabledForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return S_ShowOffzoneSourceEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_ShowOffzoneSourceMediaTracker;
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_ShowOffzoneSourceMeshModeler;
+                if (context == SOURCE_SETTINGS_MESH_MODELER) return S_ShowOffzoneSourceMeshModeler;
                 return S_ShowOffzoneSource;
             }
 
@@ -188,7 +180,7 @@ namespace TriggerVisualizer {
                     S_ShowOffzoneSourceMediaTracker = value;
                     return;
                 }
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) {
+                if (context == SOURCE_SETTINGS_MESH_MODELER) {
                     S_ShowOffzoneSourceMeshModeler = value;
                     return;
                 }
@@ -198,7 +190,7 @@ namespace TriggerVisualizer {
             bool IsMediaTrackerSourceEnabledForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return S_ShowMediaTrackerSourceEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_ShowMediaTrackerSourceMediaTracker;
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_ShowMediaTrackerSourceMeshModeler;
+                if (context == SOURCE_SETTINGS_MESH_MODELER) return S_ShowMediaTrackerSourceMeshModeler;
                 return S_ShowMediaTrackerSource;
             }
 
@@ -211,7 +203,7 @@ namespace TriggerVisualizer {
                     S_ShowMediaTrackerSourceMediaTracker = value;
                     return;
                 }
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) {
+                if (context == SOURCE_SETTINGS_MESH_MODELER) {
                     S_ShowMediaTrackerSourceMeshModeler = value;
                     return;
                 }
@@ -222,7 +214,7 @@ namespace TriggerVisualizer {
                 if (S_CrystalCustomItemsAndBlockItemsOnly) return false;
                 if (context == SOURCE_SETTINGS_EDITOR) return S_ShowCrystalSourceEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_ShowCrystalSourceMediaTracker;
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_ShowCrystalSourceMeshModeler;
+                if (context == SOURCE_SETTINGS_MESH_MODELER) return S_ShowCrystalSourceMeshModeler;
                 return S_ShowCrystalSource;
             }
 
@@ -264,7 +256,7 @@ namespace TriggerVisualizer {
                     S_ShowCrystalSourceMediaTracker = value;
                     return;
                 }
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) {
+                if (context == SOURCE_SETTINGS_MESH_MODELER) {
                     S_ShowCrystalSourceMeshModeler = value;
                     return;
                 }
@@ -298,10 +290,6 @@ namespace TriggerVisualizer {
                 return S_RespectMapSuggestOff;
             }
 
-            bool HasMapSuggestOffOverride(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-                return HasMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF);
-            }
-
             void IgnoreMapSuggestOffForCurrentMap(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 SetMapOnlyOverride(ctx, MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF, false);
             }
@@ -331,25 +319,10 @@ namespace TriggerVisualizer {
                 return TryGetMapOnlyOverride(ctx, GetMapOnlySourceOverrideKey(source), enabled);
             }
 
-            void SetMapOnlySourceEnabled(
-                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
-                int source,
-                bool enabled
-            ) {
-                SetMapOnlyOverride(ctx, GetMapOnlySourceOverrideKey(source), enabled);
-            }
-
-            void ClearMapOnlySourceEnabled(
-                const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
-                int source
-            ) {
-                ClearMapOnlyOverride(ctx, GetMapOnlySourceOverrideKey(source));
-            }
-
             string GetMediaTrackerEnabledSubtypesForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return S_MediaTrackerEnabledSubtypesEditor;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return S_MediaTrackerEnabledSubtypesMediaTracker;
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) return S_MediaTrackerEnabledSubtypesMeshModeler;
+                if (context == SOURCE_SETTINGS_MESH_MODELER) return S_MediaTrackerEnabledSubtypesMeshModeler;
                 return S_MediaTrackerEnabledSubtypesPlaying;
             }
 
@@ -362,7 +335,7 @@ namespace TriggerVisualizer {
                     S_MediaTrackerEnabledSubtypesMediaTracker = value;
                     return;
                 }
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) {
+                if (context == SOURCE_SETTINGS_MESH_MODELER) {
                     S_MediaTrackerEnabledSubtypesMeshModeler = value;
                     return;
                 }
@@ -372,7 +345,7 @@ namespace TriggerVisualizer {
             string GetDefaultMediaTrackerEnabledSubtypesForContext(int context) {
                 if (context == SOURCE_SETTINGS_EDITOR) return DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR;
                 if (context == SOURCE_SETTINGS_MEDIATRACKER) return DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;
-                if (context == SOURCE_SETTINGS_MESH_MODELLER) return DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER;
+                if (context == SOURCE_SETTINGS_MESH_MODELER) return DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELER;
                 return DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
             }
 
@@ -477,11 +450,7 @@ namespace TriggerVisualizer {
                 S_MediaTrackerEnabledSubtypesPlaying = DEFAULT_MEDIATRACKER_SUBTYPES_PLAYING;
                 S_MediaTrackerEnabledSubtypesEditor = DEFAULT_MEDIATRACKER_SUBTYPES_EDITOR;
                 S_MediaTrackerEnabledSubtypesMediaTracker = DEFAULT_MEDIATRACKER_SUBTYPES_MEDIATRACKER;
-                S_MediaTrackerEnabledSubtypesMeshModeler = DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELLER;
-            }
-
-            void ResetSourceSettingsToDefaults() {
-                ResetSourceProfileSettingsToDefaults();
+                S_MediaTrackerEnabledSubtypesMeshModeler = DEFAULT_MEDIATRACKER_SUBTYPES_MESH_MODELER;
             }
         }
     }

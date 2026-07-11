@@ -1,7 +1,7 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            void RenderSpeedRenderSkipTargetsUI() {
+        namespace Ui {
+            void RenderSpeedRenderSkipTargetsUi() {
                 UI::Text("Keep While Fast");
                 UI::TextDisabled("Selected targets stay visible after the speed threshold is reached; everything else is hidden.");
                 RenderTargetSelectionTabs(
@@ -11,7 +11,7 @@ namespace TriggerVisualizer {
                 );
             }
 
-            void RenderPerformanceCullingSettingsUI() {
+            void RenderPerformanceCullingSettingsUi() {
                 S_MergeAdjacentTriggerVolumes = UI::Checkbox(
                     "Merge adjacent compatible trigger volumes##trigger-visualizer-performance",
                     S_MergeAdjacentTriggerVolumes
@@ -44,7 +44,7 @@ namespace TriggerVisualizer {
                 return RenderRefreshIntervalInput(id, value);
             }
 
-            void RenderPerformanceRefreshSettingsUI() {
+            void RenderPerformanceRefreshSettingsUi() {
                 UI::TextDisabled("Intervals are milliseconds; 0 disables periodic refresh.");
                 S_PerformanceRefreshEnabled = UI::Checkbox(
                     "Enable source cache refresh##trigger-visualizer-performance",
@@ -79,7 +79,7 @@ namespace TriggerVisualizer {
                 UI::EndDisabled();
             }
 
-            void RenderPerformanceSpeedSettingsUI() {
+            void RenderPerformanceSpeedSettingsUi() {
                 S_FastDrivingPerformanceMode = UI::Checkbox(
                     "Enable fast driving render skip##trigger-visualizer-performance",
                     S_FastDrivingPerformanceMode
@@ -95,22 +95,22 @@ namespace TriggerVisualizer {
                     "Reverse speed threshold (km/h)##trigger-visualizer-performance",
                     S_FastDrivingReverseSpeedThresholdKmh
                 );
-                RenderSpeedRenderSkipTargetsUI();
+                RenderSpeedRenderSkipTargetsUi();
                 UI::EndDisabled();
             }
 
-            void RenderPerformanceSettingsUI() {
+            void RenderPerformanceSettingsUi() {
                 UI::BeginTabBar("trigger-visualizer-performance-tabs");
                 if (UI::BeginTabItem("Culling")) {
-                    RenderPerformanceCullingSettingsUI();
+                    RenderPerformanceCullingSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Refresh")) {
-                    RenderPerformanceRefreshSettingsUI();
+                    RenderPerformanceRefreshSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Fast Driving")) {
-                    RenderPerformanceSpeedSettingsUI();
+                    RenderPerformanceSpeedSettingsUi();
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();

@@ -1,6 +1,6 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             float SnapWorldDistanceToPreviousBlock(float value, float blockSize) {
                 if (blockSize <= 0.0f) return value;
 
@@ -63,7 +63,6 @@
 
                 if (context == DISTANCE_SETTINGS_MEDIATRACKER) {
                     S_RenderProximityModeMediaTracker = value;
-                    S_RenderProximityModeReplayEditor = value;
                     return;
                 }
 
@@ -78,7 +77,7 @@
                 return RenderProximityComboEditor("Render based on", id, value);
             }
 
-            void RenderDistanceProfileSettingsUI(int context, const string &in id) {
+            void RenderDistanceProfileSettingsUi(int context, const string &in id) {
                 int proximityMode = GetRenderProximityModeForDistanceContext(context);
                 proximityMode = RenderProximityComboForDistanceContext(
                     context,
@@ -141,24 +140,24 @@
                 ClampProximitySettings();
             }
 
-            void RenderWorldDistanceSettingsUI() {
+            void RenderWorldDistanceSettingsUi() {
                 UI::BeginTabBar("trigger-visualizer-distance-profile-tabs");
                 if (UI::BeginTabItem("Playing")) {
-                    RenderDistanceProfileSettingsUI(
+                    RenderDistanceProfileSettingsUi(
                         DISTANCE_SETTINGS_PLAYING,
                         "playing"
                     );
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Editor")) {
-                    RenderDistanceProfileSettingsUI(
+                    RenderDistanceProfileSettingsUi(
                         DISTANCE_SETTINGS_EDITOR,
                         "editor"
                     );
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("MediaTracker")) {
-                    RenderDistanceProfileSettingsUI(
+                    RenderDistanceProfileSettingsUi(
                         DISTANCE_SETTINGS_MEDIATRACKER,
                         "mediatracker"
                     );

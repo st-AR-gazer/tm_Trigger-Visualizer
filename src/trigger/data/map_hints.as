@@ -48,13 +48,6 @@ namespace TriggerVisualizer {
                 return true;
             }
 
-            bool MapHintTargetExists(const array<string> &in targets, const string &in targetKey) {
-                for (uint i = 0; i < targets.Length; i++) {
-                    if (targets[i] == targetKey) return true;
-                }
-                return false;
-            }
-
             bool IsMapHintWildcardTarget(const string &in rawTarget) {
                 string target = rawTarget.Trim().ToLower();
                 return target == "*"
@@ -88,10 +81,10 @@ namespace TriggerVisualizer {
                     if (key.Length == 0) continue;
 
                     if (forceOff) {
-                        if (MapHintTargetExists(hints.ForceOffTargets, key)) continue;
+                        if (hints.ForceOffTargets.Find(key) >= 0) continue;
                         hints.ForceOffTargets.InsertLast(key);
                     } else {
-                        if (MapHintTargetExists(hints.SuggestOffTargets, key)) continue;
+                        if (hints.SuggestOffTargets.Find(key) >= 0) continue;
                         hints.SuggestOffTargets.InsertLast(key);
                     }
                     addedAny = true;

@@ -1,7 +1,7 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            void RenderLabelTargetsUI() {
+        namespace Ui {
+            void RenderLabelTargetsUi() {
                 UI::TextDisabled("Unchecked targets do not draw labels. Blank override text keeps the normal label.");
                 RenderTargetSelectionTabs(
                     TARGET_SELECTION_MODE_LABELS,
@@ -10,7 +10,7 @@ namespace TriggerVisualizer {
                 );
             }
 
-            void RenderLabelRenderingSettingsUI() {
+            void RenderLabelRenderingSettingsUi() {
                 S_ShowLabels = UI::Checkbox("Show labels##trigger-visualizer-labels", S_ShowLabels);
                 UI::Separator();
                 S_LabelShowIndex = UI::Checkbox("Show index##trigger-visualizer-labels", S_LabelShowIndex);
@@ -48,14 +48,14 @@ namespace TriggerVisualizer {
                 S_LabelAlpha = UI::SliderFloat("Text alpha##trigger-visualizer-labels", S_LabelAlpha, 0.0f, 1.0f);
             }
 
-            void RenderLabelsSettingsUI() {
+            void RenderLabelsSettingsUi() {
                 UI::BeginTabBar("trigger-visualizer-labels-tabs");
                 if (UI::BeginTabItem("Rendering")) {
-                    RenderLabelRenderingSettingsUI();
+                    RenderLabelRenderingSettingsUi();
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Targets")) {
-                    RenderLabelTargetsUI();
+                    RenderLabelTargetsUi();
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();

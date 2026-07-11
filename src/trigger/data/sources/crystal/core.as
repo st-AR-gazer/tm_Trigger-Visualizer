@@ -7,15 +7,6 @@ namespace TriggerVisualizer {
                 const uint MAX_CRYSTAL_COMPOUND_SURFS_FOR_BOUNDS = 512;
                 const uint MAX_CRYSTAL_BLOCK_ITEM_TRIGGER_SHAPES = 512;
                 const uint MAX_CRYSTAL_BLOCK_MOBIL_TRIGGER_SURFACES = 512;
-                const uint MAX_CRYSTAL_EXPANDABLE_BLOCK_UNITS = 8192;
-                const uint MAX_CRYSTAL_EXPANDABLE_BLOCK_COMPONENTS = 512;
-                const uint MAX_CRYSTAL_EXPANDABLE_COMPONENT_RECTANGLES = 2048;
-                const uint MAX_CRYSTAL_EXPANDABLE_EVIDENCE_UNITS_PER_BLOCK = 64;
-                const uint MAX_CRYSTAL_EXPANDABLE_EVIDENCE_CLIPS_PER_UNIT = 64;
-                const uint CRYSTAL_EXPANDABLE_PICKED_BLOCK_STICKY_MS = 15000;
-                const uint MAX_CRYSTAL_EXPANDABLE_EDITOR_SCRIPT_CLIP_SEEDS = 512;
-                const uint MAX_CRYSTAL_EXPANDABLE_EDITOR_SCRIPT_CLIP_BLOCKS = 1024;
-                const uint MAX_CRYSTAL_EXPANDABLE_EDITOR_SCRIPT_CLIPS_PER_BLOCK = 128;
                 const uint MAX_CRYSTAL_PREFAB_ENTS = 128;
                 const uint MAX_CRYSTAL_PREFAB_RECURSION = 4;
                 const uint MAX_CRYSTAL_ITEM_VARIANTS = 64;
@@ -32,16 +23,16 @@ namespace TriggerVisualizer {
                 const float CRYSTAL_MAX_ABS_WORLD_COORD = 100000.0f;
                 const float CRYSTAL_EXPANDABLE_TRIGGER_THICKNESS = 0.125f;
 
-                uint CrystalMinUint(uint a, uint b) {
-                    return a < b ? a : b;
-                }
-
                 string GetCrystalNodTypeName(CMwNod@ nod) {
                     if (nod is null) return "";
                     try {
                         auto typeInfo = Reflection::TypeOf(nod);
                         return typeInfo is null ? "" : typeInfo.Name;
                     } catch {
+                        logging::HandledException(
+                            "GetCrystalNodTypeName",
+                            "Node type was not readable."
+                        );
                         return "";
                     }
                 }
@@ -111,16 +102,15 @@ namespace TriggerVisualizer {
                 }
 
                 vec3 CrystalDegToRadVec3(const vec3 &in value) {
-                    float scale = Math::PI / 180.0f;
                     return vec3(
-                        value.x * scale,
-                        value.y * scale,
-                        value.z * scale
+                        Math::ToRad(value.x),
+                        Math::ToRad(value.y),
+                        Math::ToRad(value.z)
                     );
                 }
 
                 float CrystalCardinalDirectionToYaw(int dir) {
-                    return -Math::PI * 0.5f * float(dir) + (dir >= 2 ? Math::PI * 2.0f : 0.0f);
+                    return -Math::PI * 0.5f * float(dir) + (dir >= 2 ? Math::PI2 : 0.0f);
                 }
 
                 mat4 CrystalEulerToMat(const vec3 &in euler) {
@@ -252,15 +242,6 @@ namespace TriggerVisualizer {
                     return true;
                 }
 
-                vec3 CrystalTransformPoint(const mat4 &in transform, const vec3 &in point) {
-                    vec4 transformed = transform * vec4(point, 1.0f);
-                    return vec3(
-                        transformed.x,
-                        transformed.y,
-                        transformed.z
-                    );
-                }
-
                 bool CrystalTransformBounds(
                     const mat4 &in transform,
                     const vec3 &in localMin,
@@ -271,14 +252,14 @@ namespace TriggerVisualizer {
                 ) {
                     warning = "";
                     auto bounds = CrystalBoundsAccumulator();
-                    bounds.Expand(CrystalTransformPoint(transform, vec3(localMin.x, localMin.y, localMin.z)));
-                    bounds.Expand(CrystalTransformPoint(transform, vec3(localMax.x, localMin.y, localMin.z)));
-                    bounds.Expand(CrystalTransformPoint(transform, vec3(localMax.x, localMax.y, localMin.z)));
-                    bounds.Expand(CrystalTransformPoint(transform, vec3(localMin.x, localMax.y, localMin.z)));
-                    bounds.Expand(CrystalTransformPoint(transform, vec3(localMin.x, localMin.y, localMax.z)));
-                    bounds.Expand(CrystalTransformPoint(transform, vec3(localMax.x, localMin.y, localMax.z)));
-                    bounds.Expand(CrystalTransformPoint(transform, vec3(localMax.x, localMax.y, localMax.z)));
-                    bounds.Expand(CrystalTransformPoint(transform, vec3(localMin.x, localMax.y, localMax.z)));
+                    bounds.Expand((transform * vec3(localMin.x, localMin.y, localMin.z)).xyz);
+                    bounds.Expand((transform * vec3(localMax.x, localMin.y, localMin.z)).xyz);
+                    bounds.Expand((transform * vec3(localMax.x, localMax.y, localMin.z)).xyz);
+                    bounds.Expand((transform * vec3(localMin.x, localMax.y, localMin.z)).xyz);
+                    bounds.Expand((transform * vec3(localMin.x, localMin.y, localMax.z)).xyz);
+                    bounds.Expand((transform * vec3(localMax.x, localMin.y, localMax.z)).xyz);
+                    bounds.Expand((transform * vec3(localMax.x, localMax.y, localMax.z)).xyz);
+                    bounds.Expand((transform * vec3(localMin.x, localMax.y, localMax.z)).xyz);
 
                     if (!bounds.Initialized) {
                         warning = "No bounds corners were transformed.";

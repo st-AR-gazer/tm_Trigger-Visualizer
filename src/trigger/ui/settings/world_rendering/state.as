@@ -1,6 +1,6 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             [Setting hidden name="Trigger: Show face fill"]
             bool S_ShowFill = true;
             [Setting hidden name="Trigger: Show outline"]

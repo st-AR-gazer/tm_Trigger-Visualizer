@@ -1,81 +1,51 @@
 namespace TriggerVisualizer {
     namespace App {
-        void RenderWorldRenderingSettingsUI() {
+        void RenderWorldRenderingSettingsUi() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-world-rendering", vec2(0, 0), false);
             if (open) {
-                PushPluginButtonStyleUI();
-                TriggerVisualizer::Trigger::UI::RenderWorldRenderingSettingsUI();
-                PopPluginButtonStyleUI();
+                TriggerVisualizer::Shared::PushStyledButtonUi();
+                TriggerVisualizer::Trigger::Ui::RenderWorldRenderingSettingsUi();
+                TriggerVisualizer::Shared::PopStyledButtonUi();
             }
             UI::EndChild();
         }
 
-        void RenderLineSplittingSettingsUI() {
-            bool open = UI::BeginChild("##trigger-visualizer-settings-line-splitting", vec2(0, 0), false);
-            if (open) {
-                PushPluginButtonStyleUI();
-                TriggerVisualizer::Trigger::UI::RenderLineSplittingSettingsUI();
-                PopPluginButtonStyleUI();
-            }
-            UI::EndChild();
-        }
-
-        void RenderPerformanceSettingsUI() {
+        void RenderPerformanceSettingsUi() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-performance", vec2(0, 0), false);
             if (open) {
-                PushPluginButtonStyleUI();
-                TriggerVisualizer::Trigger::UI::RenderPerformanceSettingsUI();
-                PopPluginButtonStyleUI();
+                TriggerVisualizer::Shared::PushStyledButtonUi();
+                TriggerVisualizer::Trigger::Ui::RenderPerformanceSettingsUi();
+                TriggerVisualizer::Shared::PopStyledButtonUi();
             }
             UI::EndChild();
         }
 
-        void RenderColorSettingsUI() {
-            bool open = UI::BeginChild("##trigger-visualizer-settings-color", vec2(0, 0), false);
-            if (open) {
-                PushPluginButtonStyleUI();
-                TriggerVisualizer::Trigger::UI::RenderColorSettingsUI();
-                PopPluginButtonStyleUI();
-            }
-            UI::EndChild();
-        }
-
-        void RenderProximitySettingsUI() {
-            bool open = UI::BeginChild("##trigger-visualizer-settings-proximity", vec2(0, 0), false);
-            if (open) {
-                PushPluginButtonStyleUI();
-                TriggerVisualizer::Trigger::UI::RenderProximitySettingsUI();
-                PopPluginButtonStyleUI();
-            }
-            UI::EndChild();
-        }
-
-        void RenderLabelsSettingsUI() {
+        void RenderLabelsSettingsUi() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-labels", vec2(0, 0), false);
             if (open) {
-                PushPluginButtonStyleUI();
-                TriggerVisualizer::Trigger::UI::RenderLabelsSettingsUI();
-                PopPluginButtonStyleUI();
+                TriggerVisualizer::Shared::PushStyledButtonUi();
+                TriggerVisualizer::Trigger::Ui::RenderLabelsSettingsUi();
+                TriggerVisualizer::Shared::PopStyledButtonUi();
             }
             UI::EndChild();
         }
 
-        void RenderSourcesSettingsUI() {
+        void RenderSourcesSettingsUi() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-sources", vec2(0, 0), false);
             if (open) {
-                PushPluginButtonStyleUI();
-                TriggerVisualizer::Trigger::UI::RenderSourcesSettingsUI();
-                PopPluginButtonStyleUI();
+                TriggerVisualizer::Shared::PushStyledButtonUi();
+                TriggerVisualizer::Trigger::Ui::RenderSourcesSettingsUi();
+                TriggerVisualizer::Shared::PopStyledButtonUi();
             }
             UI::EndChild();
         }
 
-        void RenderLoggingSettingsUI() {
+        void RenderLoggingSettingsUi() {
             bool open = UI::BeginChild("##trigger-visualizer-settings-logging", vec2(0, 0), false);
             if (open) {
-                PushPluginButtonStyleUI();
+                TriggerVisualizer::Shared::PushStyledButtonUi();
                 logging::RenderSettingsUI("trigger-visualizer-logging");
-                PopPluginButtonStyleUI();
+                TriggerVisualizer::Shared::PopStyledButtonUi();
             }
             UI::EndChild();
         }

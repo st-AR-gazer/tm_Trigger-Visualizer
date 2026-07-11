@@ -1,6 +1,6 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             [Setting hidden name="Trigger: Show skull tile icons"]
             bool S_ShowSkullTileIcons = false;
             [Setting hidden name="Trigger: Skull tile icon scale" min=0.05 max=1]
@@ -13,349 +13,347 @@ namespace TriggerVisualizer {
             string S_CustomTileIconStoragePath = "";
             [Setting hidden name="Trigger: Show offzone tile icon"]
             bool S_ShowOffzoneTileIcon = true;
-            [Setting hidden name="Trigger: Show MT camera tile icon"]
-            bool S_ShowTileIconMtCamera = true;
-            [Setting hidden name="Trigger: MT camera tile icon storage path"]
-            string S_TileIconPathMtCamera = "";
-            [Setting hidden name="Trigger: Show MT custom camera tile icon"]
-            bool S_ShowTileIconMtCustomCamera = true;
-            [Setting hidden name="Trigger: MT custom camera tile icon storage path"]
-            string S_TileIconPathMtCustomCamera = "";
-            [Setting hidden name="Trigger: Show MT orbital camera tile icon"]
-            bool S_ShowTileIconMtOrbitalCamera = true;
-            [Setting hidden name="Trigger: MT orbital camera tile icon storage path"]
-            string S_TileIconPathMtOrbitalCamera = "";
-            [Setting hidden name="Trigger: Show MT path camera tile icon"]
-            bool S_ShowTileIconMtPathCamera = true;
-            [Setting hidden name="Trigger: MT path camera tile icon storage path"]
-            string S_TileIconPathMtPathCamera = "";
-            [Setting hidden name="Trigger: Show MT player camera tile icon"]
-            bool S_ShowTileIconMtPlayerCamera = true;
-            [Setting hidden name="Trigger: MT player camera tile icon storage path"]
-            string S_TileIconPathMtPlayerCamera = "";
-            [Setting hidden name="Trigger: Show MT cam default tile icon"]
-            bool S_ShowTileIconMtCamDefault = true;
-            [Setting hidden name="Trigger: MT cam default tile icon storage path"]
-            string S_TileIconPathMtCamDefault = "";
-            [Setting hidden name="Trigger: Show MT cam 1 tile icon"]
-            bool S_ShowTileIconMtCam1 = true;
-            [Setting hidden name="Trigger: MT cam 1 tile icon storage path"]
-            string S_TileIconPathMtCam1 = "";
-            [Setting hidden name="Trigger: Show MT cam 2 tile icon"]
-            bool S_ShowTileIconMtCam2 = true;
-            [Setting hidden name="Trigger: MT cam 2 tile icon storage path"]
-            string S_TileIconPathMtCam2 = "";
-            [Setting hidden name="Trigger: Show MT cam 3 tile icon"]
-            bool S_ShowTileIconMtCam3 = true;
-            [Setting hidden name="Trigger: MT cam 3 tile icon storage path"]
-            string S_TileIconPathMtCam3 = "";
-            [Setting hidden name="Trigger: Show MT cam helico tile icon"]
-            bool S_ShowTileIconMtCamHelico = true;
-            [Setting hidden name="Trigger: MT cam helico tile icon storage path"]
-            string S_TileIconPathMtCamHelico = "";
-            [Setting hidden name="Trigger: Show MT cam free tile icon"]
-            bool S_ShowTileIconMtCamFree = true;
-            [Setting hidden name="Trigger: MT cam free tile icon storage path"]
-            string S_TileIconPathMtCamFree = "";
-            [Setting hidden name="Trigger: Show MT cam spectator tile icon"]
-            bool S_ShowTileIconMtCamSpectator = true;
-            [Setting hidden name="Trigger: MT cam spectator tile icon storage path"]
-            string S_TileIconPathMtCamSpectator = "";
-            [Setting hidden name="Trigger: Show MT 2D triangles tile icon"]
-            bool S_ShowTileIconMt2DTriangles = true;
-            [Setting hidden name="Trigger: MT 2D triangles tile icon storage path"]
-            string S_TileIconPathMt2DTriangles = "";
-            [Setting hidden name="Trigger: Show MT 3D triangles tile icon"]
-            bool S_ShowTileIconMt3DTriangles = true;
-            [Setting hidden name="Trigger: MT 3D triangles tile icon storage path"]
-            string S_TileIconPathMt3DTriangles = "";
-            [Setting hidden name="Trigger: Show MT colors FX tile icon"]
-            bool S_ShowTileIconMtColorsFx = true;
-            [Setting hidden name="Trigger: MT colors FX tile icon storage path"]
-            string S_TileIconPathMtColorsFx = "";
-            [Setting hidden name="Trigger: Show MT color grading tile icon"]
-            bool S_ShowTileIconMtColorGrading = true;
-            [Setting hidden name="Trigger: MT color grading tile icon storage path"]
-            string S_TileIconPathMtColorGrading = "";
-            [Setting hidden name="Trigger: Show MT depth of field tile icon"]
-            bool S_ShowTileIconMtDepthOfField = true;
-            [Setting hidden name="Trigger: MT depth of field tile icon storage path"]
-            string S_TileIconPathMtDepthOfField = "";
-            [Setting hidden name="Trigger: Show MT dirty lens tile icon"]
-            bool S_ShowTileIconMtDirtyLens = true;
-            [Setting hidden name="Trigger: MT dirty lens tile icon storage path"]
-            string S_TileIconPathMtDirtyLens = "";
-            [Setting hidden name="Trigger: Show MT fading transition tile icon"]
-            bool S_ShowTileIconMtFadingTransition = true;
-            [Setting hidden name="Trigger: MT fading transition tile icon storage path"]
-            string S_TileIconPathMtFadingTransition = "";
-            [Setting hidden name="Trigger: Show MT fog tile icon"]
-            bool S_ShowTileIconMtFog = true;
-            [Setting hidden name="Trigger: MT fog tile icon storage path"]
-            string S_TileIconPathMtFog = "";
-            [Setting hidden name="Trigger: Show MT HDR bloom tile icon"]
-            bool S_ShowTileIconMtHdrBloom = true;
-            [Setting hidden name="Trigger: MT HDR bloom tile icon storage path"]
-            string S_TileIconPathMtHdrBloom = "";
-            [Setting hidden name="Trigger: Show MT image tile icon"]
-            bool S_ShowTileIconMtImage = true;
-            [Setting hidden name="Trigger: MT image tile icon storage path"]
-            string S_TileIconPathMtImage = "";
-            [Setting hidden name="Trigger: Show MT ManiaLink UI tile icon"]
-            bool S_ShowTileIconMtManiaLinkUi = true;
-            [Setting hidden name="Trigger: MT ManiaLink UI tile icon storage path"]
-            string S_TileIconPathMtManiaLinkUi = "";
-            [Setting hidden name="Trigger: Show MT ManiaLink URL tile icon"]
-            bool S_ShowTileIconMtManiaLinkUrl = true;
-            [Setting hidden name="Trigger: MT ManiaLink URL tile icon storage path"]
-            string S_TileIconPathMtManiaLinkUrl = "";
-            [Setting hidden name="Trigger: Show MT text tile icon"]
-            bool S_ShowTileIconMtText = true;
-            [Setting hidden name="Trigger: MT text tile icon storage path"]
-            string S_TileIconPathMtText = "";
-            [Setting hidden name="Trigger: Show MT time tile icon"]
-            bool S_ShowTileIconMtTime = true;
-            [Setting hidden name="Trigger: MT time tile icon storage path"]
-            string S_TileIconPathMtTime = "";
-            [Setting hidden name="Trigger: Show MT time speed tile icon"]
-            bool S_ShowTileIconMtTimeSpeed = true;
-            [Setting hidden name="Trigger: MT time speed tile icon storage path"]
-            string S_TileIconPathMtTimeSpeed = "";
-            [Setting hidden name="Trigger: Show MT ghost tile icon"]
-            bool S_ShowTileIconMtGhost = true;
-            [Setting hidden name="Trigger: MT ghost tile icon storage path"]
-            string S_TileIconPathMtGhost = "";
-            [Setting hidden name="Trigger: Show MT music volume tile icon"]
-            bool S_ShowTileIconMtMusicVolume = true;
-            [Setting hidden name="Trigger: MT music volume tile icon storage path"]
-            string S_TileIconPathMtMusicVolume = "";
-            [Setting hidden name="Trigger: Show MT reset tile icon"]
-            bool S_ShowTileIconMtReset = true;
-            [Setting hidden name="Trigger: MT reset tile icon storage path"]
-            string S_TileIconPathMtReset = "";
-            [Setting hidden name="Trigger: Show MT sound FX tile icon"]
-            bool S_ShowTileIconMtSoundFx = true;
-            [Setting hidden name="Trigger: MT sound FX tile icon storage path"]
-            string S_TileIconPathMtSoundFx = "";
-            [Setting hidden name="Trigger: Show MT spectators tile icon"]
-            bool S_ShowTileIconMtSpectators = true;
-            [Setting hidden name="Trigger: MT spectators tile icon storage path"]
-            string S_TileIconPathMtSpectators = "";
+            [Setting hidden name="Trigger: Show MediaTracker camera tile icon"]
+            bool S_ShowTileIconMediaTrackerCamera = true;
+            [Setting hidden name="Trigger: MediaTracker camera tile icon storage path"]
+            string S_TileIconPathMediaTrackerCamera = "";
+            [Setting hidden name="Trigger: Show MediaTracker custom camera tile icon"]
+            bool S_ShowTileIconMediaTrackerCustomCamera = true;
+            [Setting hidden name="Trigger: MediaTracker custom camera tile icon storage path"]
+            string S_TileIconPathMediaTrackerCustomCamera = "";
+            [Setting hidden name="Trigger: Show MediaTracker orbital camera tile icon"]
+            bool S_ShowTileIconMediaTrackerOrbitalCamera = true;
+            [Setting hidden name="Trigger: MediaTracker orbital camera tile icon storage path"]
+            string S_TileIconPathMediaTrackerOrbitalCamera = "";
+            [Setting hidden name="Trigger: Show MediaTracker path camera tile icon"]
+            bool S_ShowTileIconMediaTrackerPathCamera = true;
+            [Setting hidden name="Trigger: MediaTracker path camera tile icon storage path"]
+            string S_TileIconPathMediaTrackerPathCamera = "";
+            [Setting hidden name="Trigger: Show MediaTracker player camera tile icon"]
+            bool S_ShowTileIconMediaTrackerPlayerCamera = true;
+            [Setting hidden name="Trigger: MediaTracker player camera tile icon storage path"]
+            string S_TileIconPathMediaTrackerPlayerCamera = "";
+            [Setting hidden name="Trigger: Show MediaTracker cam default tile icon"]
+            bool S_ShowTileIconMediaTrackerCamDefault = true;
+            [Setting hidden name="Trigger: MediaTracker cam default tile icon storage path"]
+            string S_TileIconPathMediaTrackerCamDefault = "";
+            [Setting hidden name="Trigger: Show MediaTracker cam 1 tile icon"]
+            bool S_ShowTileIconMediaTrackerCam1 = true;
+            [Setting hidden name="Trigger: MediaTracker cam 1 tile icon storage path"]
+            string S_TileIconPathMediaTrackerCam1 = "";
+            [Setting hidden name="Trigger: Show MediaTracker cam 2 tile icon"]
+            bool S_ShowTileIconMediaTrackerCam2 = true;
+            [Setting hidden name="Trigger: MediaTracker cam 2 tile icon storage path"]
+            string S_TileIconPathMediaTrackerCam2 = "";
+            [Setting hidden name="Trigger: Show MediaTracker cam 3 tile icon"]
+            bool S_ShowTileIconMediaTrackerCam3 = true;
+            [Setting hidden name="Trigger: MediaTracker cam 3 tile icon storage path"]
+            string S_TileIconPathMediaTrackerCam3 = "";
+            [Setting hidden name="Trigger: Show MediaTracker cam helico tile icon"]
+            bool S_ShowTileIconMediaTrackerCamHelico = true;
+            [Setting hidden name="Trigger: MediaTracker cam helico tile icon storage path"]
+            string S_TileIconPathMediaTrackerCamHelico = "";
+            [Setting hidden name="Trigger: Show MediaTracker cam free tile icon"]
+            bool S_ShowTileIconMediaTrackerCamFree = true;
+            [Setting hidden name="Trigger: MediaTracker cam free tile icon storage path"]
+            string S_TileIconPathMediaTrackerCamFree = "";
+            [Setting hidden name="Trigger: Show MediaTracker cam spectator tile icon"]
+            bool S_ShowTileIconMediaTrackerCamSpectator = true;
+            [Setting hidden name="Trigger: MediaTracker cam spectator tile icon storage path"]
+            string S_TileIconPathMediaTrackerCamSpectator = "";
+            [Setting hidden name="Trigger: Show MediaTracker 2D triangles tile icon"]
+            bool S_ShowTileIconMediaTracker2DTriangles = true;
+            [Setting hidden name="Trigger: MediaTracker 2D triangles tile icon storage path"]
+            string S_TileIconPathMediaTracker2DTriangles = "";
+            [Setting hidden name="Trigger: Show MediaTracker 3D triangles tile icon"]
+            bool S_ShowTileIconMediaTracker3DTriangles = true;
+            [Setting hidden name="Trigger: MediaTracker 3D triangles tile icon storage path"]
+            string S_TileIconPathMediaTracker3DTriangles = "";
+            [Setting hidden name="Trigger: Show MediaTracker colors FX tile icon"]
+            bool S_ShowTileIconMediaTrackerColorsFx = true;
+            [Setting hidden name="Trigger: MediaTracker colors FX tile icon storage path"]
+            string S_TileIconPathMediaTrackerColorsFx = "";
+            [Setting hidden name="Trigger: Show MediaTracker color grading tile icon"]
+            bool S_ShowTileIconMediaTrackerColorGrading = true;
+            [Setting hidden name="Trigger: MediaTracker color grading tile icon storage path"]
+            string S_TileIconPathMediaTrackerColorGrading = "";
+            [Setting hidden name="Trigger: Show MediaTracker depth of field tile icon"]
+            bool S_ShowTileIconMediaTrackerDepthOfField = true;
+            [Setting hidden name="Trigger: MediaTracker depth of field tile icon storage path"]
+            string S_TileIconPathMediaTrackerDepthOfField = "";
+            [Setting hidden name="Trigger: Show MediaTracker dirty lens tile icon"]
+            bool S_ShowTileIconMediaTrackerDirtyLens = true;
+            [Setting hidden name="Trigger: MediaTracker dirty lens tile icon storage path"]
+            string S_TileIconPathMediaTrackerDirtyLens = "";
+            [Setting hidden name="Trigger: Show MediaTracker fading transition tile icon"]
+            bool S_ShowTileIconMediaTrackerFadingTransition = true;
+            [Setting hidden name="Trigger: MediaTracker fading transition tile icon storage path"]
+            string S_TileIconPathMediaTrackerFadingTransition = "";
+            [Setting hidden name="Trigger: Show MediaTracker fog tile icon"]
+            bool S_ShowTileIconMediaTrackerFog = true;
+            [Setting hidden name="Trigger: MediaTracker fog tile icon storage path"]
+            string S_TileIconPathMediaTrackerFog = "";
+            [Setting hidden name="Trigger: Show MediaTracker HDR bloom tile icon"]
+            bool S_ShowTileIconMediaTrackerHdrBloom = true;
+            [Setting hidden name="Trigger: MediaTracker HDR bloom tile icon storage path"]
+            string S_TileIconPathMediaTrackerHdrBloom = "";
+            [Setting hidden name="Trigger: Show MediaTracker image tile icon"]
+            bool S_ShowTileIconMediaTrackerImage = true;
+            [Setting hidden name="Trigger: MediaTracker image tile icon storage path"]
+            string S_TileIconPathMediaTrackerImage = "";
+            [Setting hidden name="Trigger: Show MediaTracker ManiaLink UI tile icon"]
+            bool S_ShowTileIconMediaTrackerManiaLinkUi = true;
+            [Setting hidden name="Trigger: MediaTracker ManiaLink UI tile icon storage path"]
+            string S_TileIconPathMediaTrackerManiaLinkUi = "";
+            [Setting hidden name="Trigger: Show MediaTracker ManiaLink URL tile icon"]
+            bool S_ShowTileIconMediaTrackerManiaLinkUrl = true;
+            [Setting hidden name="Trigger: MediaTracker ManiaLink URL tile icon storage path"]
+            string S_TileIconPathMediaTrackerManiaLinkUrl = "";
+            [Setting hidden name="Trigger: Show MediaTracker text tile icon"]
+            bool S_ShowTileIconMediaTrackerText = true;
+            [Setting hidden name="Trigger: MediaTracker text tile icon storage path"]
+            string S_TileIconPathMediaTrackerText = "";
+            [Setting hidden name="Trigger: Show MediaTracker time tile icon"]
+            bool S_ShowTileIconMediaTrackerTime = true;
+            [Setting hidden name="Trigger: MediaTracker time tile icon storage path"]
+            string S_TileIconPathMediaTrackerTime = "";
+            [Setting hidden name="Trigger: Show MediaTracker time speed tile icon"]
+            bool S_ShowTileIconMediaTrackerTimeSpeed = true;
+            [Setting hidden name="Trigger: MediaTracker time speed tile icon storage path"]
+            string S_TileIconPathMediaTrackerTimeSpeed = "";
+            [Setting hidden name="Trigger: Show MediaTracker ghost tile icon"]
+            bool S_ShowTileIconMediaTrackerGhost = true;
+            [Setting hidden name="Trigger: MediaTracker ghost tile icon storage path"]
+            string S_TileIconPathMediaTrackerGhost = "";
+            [Setting hidden name="Trigger: Show MediaTracker music volume tile icon"]
+            bool S_ShowTileIconMediaTrackerMusicVolume = true;
+            [Setting hidden name="Trigger: MediaTracker music volume tile icon storage path"]
+            string S_TileIconPathMediaTrackerMusicVolume = "";
+            [Setting hidden name="Trigger: Show MediaTracker reset tile icon"]
+            bool S_ShowTileIconMediaTrackerReset = true;
+            [Setting hidden name="Trigger: MediaTracker reset tile icon storage path"]
+            string S_TileIconPathMediaTrackerReset = "";
+            [Setting hidden name="Trigger: Show MediaTracker sound FX tile icon"]
+            bool S_ShowTileIconMediaTrackerSoundFx = true;
+            [Setting hidden name="Trigger: MediaTracker sound FX tile icon storage path"]
+            string S_TileIconPathMediaTrackerSoundFx = "";
+            [Setting hidden name="Trigger: Show MediaTracker spectators tile icon"]
+            bool S_ShowTileIconMediaTrackerSpectators = true;
+            [Setting hidden name="Trigger: MediaTracker spectators tile icon storage path"]
+            string S_TileIconPathMediaTrackerSpectators = "";
 
-            string G_PendingTileIconSourcePath = "";
-            string G_TileIconImportStatus = "";
-            string G_ActiveTileIconExplorerKey = "";
-            dictionary G_TileIconPathInputs;
+            string g_TileIconImportStatus = "";
+            dictionary g_TileIconPathInputs;
 
             bool IsTileIconEnabledForSubtype(const string &in rawKey) {
                 string key = NormalizeTriggerTargetKey(rawKey);
-                if (key == MT_SUBTYPE_CAMERA) return S_ShowTileIconMtCamera;
-                if (key == MT_SUBTYPE_CUSTOM_CAMERA) return S_ShowTileIconMtCustomCamera;
-                if (key == MT_SUBTYPE_ORBITAL_CAMERA) return S_ShowTileIconMtOrbitalCamera;
-                if (key == MT_SUBTYPE_PATH_CAMERA) return S_ShowTileIconMtPathCamera;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA) return S_ShowTileIconMtPlayerCamera;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) return S_ShowTileIconMtCamDefault;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) return S_ShowTileIconMtCam1;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) return S_ShowTileIconMtCam2;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) return S_ShowTileIconMtCam3;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) return S_ShowTileIconMtCamHelico;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) return S_ShowTileIconMtCamFree;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) return S_ShowTileIconMtCamSpectator;
-                if (key == MT_SUBTYPE_2D_TRIANGLES) return S_ShowTileIconMt2DTriangles;
-                if (key == MT_SUBTYPE_3D_TRIANGLES) return S_ShowTileIconMt3DTriangles;
-                if (key == MT_SUBTYPE_COLORS_FX) return S_ShowTileIconMtColorsFx;
-                if (key == MT_SUBTYPE_COLOR_GRADING) return S_ShowTileIconMtColorGrading;
-                if (key == MT_SUBTYPE_DEPTH_OF_FIELD) return S_ShowTileIconMtDepthOfField;
-                if (key == MT_SUBTYPE_DIRTY_LENS) return S_ShowTileIconMtDirtyLens;
-                if (key == MT_SUBTYPE_FADING_TRANSITION) return S_ShowTileIconMtFadingTransition;
-                if (key == MT_SUBTYPE_FOG) return S_ShowTileIconMtFog;
-                if (key == MT_SUBTYPE_GHOST) return S_ShowTileIconMtGhost;
-                if (key == MT_SUBTYPE_HDR_BLOOM) return S_ShowTileIconMtHdrBloom;
-                if (key == MT_SUBTYPE_IMAGE) return S_ShowTileIconMtImage;
-                if (key == MT_SUBTYPE_MANIALINK_UI) return S_ShowTileIconMtManiaLinkUi;
-                if (key == MT_SUBTYPE_MANIALINK_URL) return S_ShowTileIconMtManiaLinkUrl;
-                if (key == MT_SUBTYPE_MUSIC_VOLUME) return S_ShowTileIconMtMusicVolume;
-                if (key == MT_SUBTYPE_SOUND_FX) return S_ShowTileIconMtSoundFx;
-                if (key == MT_SUBTYPE_SPECTATORS) return S_ShowTileIconMtSpectators;
-                if (key == MT_SUBTYPE_TEXT) return S_ShowTileIconMtText;
-                if (key == MT_SUBTYPE_TIME) return S_ShowTileIconMtTime;
-                if (key == MT_SUBTYPE_TIME_SPEED) return S_ShowTileIconMtTimeSpeed;
-                if (key == MT_SUBTYPE_RESET) return S_ShowTileIconMtReset;
+                if (key == MT_SUBTYPE_CAMERA) return S_ShowTileIconMediaTrackerCamera;
+                if (key == MT_SUBTYPE_CUSTOM_CAMERA) return S_ShowTileIconMediaTrackerCustomCamera;
+                if (key == MT_SUBTYPE_ORBITAL_CAMERA) return S_ShowTileIconMediaTrackerOrbitalCamera;
+                if (key == MT_SUBTYPE_PATH_CAMERA) return S_ShowTileIconMediaTrackerPathCamera;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA) return S_ShowTileIconMediaTrackerPlayerCamera;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) return S_ShowTileIconMediaTrackerCamDefault;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) return S_ShowTileIconMediaTrackerCam1;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) return S_ShowTileIconMediaTrackerCam2;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) return S_ShowTileIconMediaTrackerCam3;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) return S_ShowTileIconMediaTrackerCamHelico;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) return S_ShowTileIconMediaTrackerCamFree;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) return S_ShowTileIconMediaTrackerCamSpectator;
+                if (key == MT_SUBTYPE_2D_TRIANGLES) return S_ShowTileIconMediaTracker2DTriangles;
+                if (key == MT_SUBTYPE_3D_TRIANGLES) return S_ShowTileIconMediaTracker3DTriangles;
+                if (key == MT_SUBTYPE_COLORS_FX) return S_ShowTileIconMediaTrackerColorsFx;
+                if (key == MT_SUBTYPE_COLOR_GRADING) return S_ShowTileIconMediaTrackerColorGrading;
+                if (key == MT_SUBTYPE_DEPTH_OF_FIELD) return S_ShowTileIconMediaTrackerDepthOfField;
+                if (key == MT_SUBTYPE_DIRTY_LENS) return S_ShowTileIconMediaTrackerDirtyLens;
+                if (key == MT_SUBTYPE_FADING_TRANSITION) return S_ShowTileIconMediaTrackerFadingTransition;
+                if (key == MT_SUBTYPE_FOG) return S_ShowTileIconMediaTrackerFog;
+                if (key == MT_SUBTYPE_GHOST) return S_ShowTileIconMediaTrackerGhost;
+                if (key == MT_SUBTYPE_HDR_BLOOM) return S_ShowTileIconMediaTrackerHdrBloom;
+                if (key == MT_SUBTYPE_IMAGE) return S_ShowTileIconMediaTrackerImage;
+                if (key == MT_SUBTYPE_MANIALINK_UI) return S_ShowTileIconMediaTrackerManiaLinkUi;
+                if (key == MT_SUBTYPE_MANIALINK_URL) return S_ShowTileIconMediaTrackerManiaLinkUrl;
+                if (key == MT_SUBTYPE_MUSIC_VOLUME) return S_ShowTileIconMediaTrackerMusicVolume;
+                if (key == MT_SUBTYPE_SOUND_FX) return S_ShowTileIconMediaTrackerSoundFx;
+                if (key == MT_SUBTYPE_SPECTATORS) return S_ShowTileIconMediaTrackerSpectators;
+                if (key == MT_SUBTYPE_TEXT) return S_ShowTileIconMediaTrackerText;
+                if (key == MT_SUBTYPE_TIME) return S_ShowTileIconMediaTrackerTime;
+                if (key == MT_SUBTYPE_TIME_SPEED) return S_ShowTileIconMediaTrackerTimeSpeed;
+                if (key == MT_SUBTYPE_RESET) return S_ShowTileIconMediaTrackerReset;
                 return true;
             }
 
             void SetTileIconEnabledForSubtype(const string &in rawKey, bool value) {
                 string key = NormalizeTriggerTargetKey(rawKey);
                 if (key == MT_SUBTYPE_CAMERA) {
-                    S_ShowTileIconMtCamera = value;
+                    S_ShowTileIconMediaTrackerCamera = value;
                 } else if (key == MT_SUBTYPE_CUSTOM_CAMERA) {
-                    S_ShowTileIconMtCustomCamera = value;
+                    S_ShowTileIconMediaTrackerCustomCamera = value;
                 } else if (key == MT_SUBTYPE_ORBITAL_CAMERA) {
-                    S_ShowTileIconMtOrbitalCamera = value;
+                    S_ShowTileIconMediaTrackerOrbitalCamera = value;
                 } else if (key == MT_SUBTYPE_PATH_CAMERA) {
-                    S_ShowTileIconMtPathCamera = value;
+                    S_ShowTileIconMediaTrackerPathCamera = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA) {
-                    S_ShowTileIconMtPlayerCamera = value;
+                    S_ShowTileIconMediaTrackerPlayerCamera = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) {
-                    S_ShowTileIconMtCamDefault = value;
+                    S_ShowTileIconMediaTrackerCamDefault = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) {
-                    S_ShowTileIconMtCam1 = value;
+                    S_ShowTileIconMediaTrackerCam1 = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) {
-                    S_ShowTileIconMtCam2 = value;
+                    S_ShowTileIconMediaTrackerCam2 = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) {
-                    S_ShowTileIconMtCam3 = value;
+                    S_ShowTileIconMediaTrackerCam3 = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) {
-                    S_ShowTileIconMtCamHelico = value;
+                    S_ShowTileIconMediaTrackerCamHelico = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) {
-                    S_ShowTileIconMtCamFree = value;
+                    S_ShowTileIconMediaTrackerCamFree = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) {
-                    S_ShowTileIconMtCamSpectator = value;
+                    S_ShowTileIconMediaTrackerCamSpectator = value;
                 } else if (key == MT_SUBTYPE_2D_TRIANGLES) {
-                    S_ShowTileIconMt2DTriangles = value;
+                    S_ShowTileIconMediaTracker2DTriangles = value;
                 } else if (key == MT_SUBTYPE_3D_TRIANGLES) {
-                    S_ShowTileIconMt3DTriangles = value;
+                    S_ShowTileIconMediaTracker3DTriangles = value;
                 } else if (key == MT_SUBTYPE_COLORS_FX) {
-                    S_ShowTileIconMtColorsFx = value;
+                    S_ShowTileIconMediaTrackerColorsFx = value;
                 } else if (key == MT_SUBTYPE_COLOR_GRADING) {
-                    S_ShowTileIconMtColorGrading = value;
+                    S_ShowTileIconMediaTrackerColorGrading = value;
                 } else if (key == MT_SUBTYPE_DEPTH_OF_FIELD) {
-                    S_ShowTileIconMtDepthOfField = value;
+                    S_ShowTileIconMediaTrackerDepthOfField = value;
                 } else if (key == MT_SUBTYPE_DIRTY_LENS) {
-                    S_ShowTileIconMtDirtyLens = value;
+                    S_ShowTileIconMediaTrackerDirtyLens = value;
                 } else if (key == MT_SUBTYPE_FADING_TRANSITION) {
-                    S_ShowTileIconMtFadingTransition = value;
+                    S_ShowTileIconMediaTrackerFadingTransition = value;
                 } else if (key == MT_SUBTYPE_FOG) {
-                    S_ShowTileIconMtFog = value;
+                    S_ShowTileIconMediaTrackerFog = value;
                 } else if (key == MT_SUBTYPE_GHOST) {
-                    S_ShowTileIconMtGhost = value;
+                    S_ShowTileIconMediaTrackerGhost = value;
                 } else if (key == MT_SUBTYPE_HDR_BLOOM) {
-                    S_ShowTileIconMtHdrBloom = value;
+                    S_ShowTileIconMediaTrackerHdrBloom = value;
                 } else if (key == MT_SUBTYPE_IMAGE) {
-                    S_ShowTileIconMtImage = value;
+                    S_ShowTileIconMediaTrackerImage = value;
                 } else if (key == MT_SUBTYPE_MANIALINK_UI) {
-                    S_ShowTileIconMtManiaLinkUi = value;
+                    S_ShowTileIconMediaTrackerManiaLinkUi = value;
                 } else if (key == MT_SUBTYPE_MANIALINK_URL) {
-                    S_ShowTileIconMtManiaLinkUrl = value;
+                    S_ShowTileIconMediaTrackerManiaLinkUrl = value;
                 } else if (key == MT_SUBTYPE_MUSIC_VOLUME) {
-                    S_ShowTileIconMtMusicVolume = value;
+                    S_ShowTileIconMediaTrackerMusicVolume = value;
                 } else if (key == MT_SUBTYPE_SOUND_FX) {
-                    S_ShowTileIconMtSoundFx = value;
+                    S_ShowTileIconMediaTrackerSoundFx = value;
                 } else if (key == MT_SUBTYPE_SPECTATORS) {
-                    S_ShowTileIconMtSpectators = value;
+                    S_ShowTileIconMediaTrackerSpectators = value;
                 } else if (key == MT_SUBTYPE_TEXT) {
-                    S_ShowTileIconMtText = value;
+                    S_ShowTileIconMediaTrackerText = value;
                 } else if (key == MT_SUBTYPE_TIME) {
-                    S_ShowTileIconMtTime = value;
+                    S_ShowTileIconMediaTrackerTime = value;
                 } else if (key == MT_SUBTYPE_TIME_SPEED) {
-                    S_ShowTileIconMtTimeSpeed = value;
+                    S_ShowTileIconMediaTrackerTimeSpeed = value;
                 } else if (key == MT_SUBTYPE_RESET) {
-                    S_ShowTileIconMtReset = value;
+                    S_ShowTileIconMediaTrackerReset = value;
                 }
             }
 
             string GetTileIconCustomStoragePathForSubtype(const string &in rawKey) {
                 string key = NormalizeTriggerTargetKey(rawKey);
-                if (key == MT_SUBTYPE_CAMERA) return S_TileIconPathMtCamera;
-                if (key == MT_SUBTYPE_CUSTOM_CAMERA) return S_TileIconPathMtCustomCamera;
-                if (key == MT_SUBTYPE_ORBITAL_CAMERA) return S_TileIconPathMtOrbitalCamera;
-                if (key == MT_SUBTYPE_PATH_CAMERA) return S_TileIconPathMtPathCamera;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA) return S_TileIconPathMtPlayerCamera;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) return S_TileIconPathMtCamDefault;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) return S_TileIconPathMtCam1;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) return S_TileIconPathMtCam2;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) return S_TileIconPathMtCam3;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) return S_TileIconPathMtCamHelico;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) return S_TileIconPathMtCamFree;
-                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) return S_TileIconPathMtCamSpectator;
-                if (key == MT_SUBTYPE_2D_TRIANGLES) return S_TileIconPathMt2DTriangles;
-                if (key == MT_SUBTYPE_3D_TRIANGLES) return S_TileIconPathMt3DTriangles;
-                if (key == MT_SUBTYPE_COLORS_FX) return S_TileIconPathMtColorsFx;
-                if (key == MT_SUBTYPE_COLOR_GRADING) return S_TileIconPathMtColorGrading;
-                if (key == MT_SUBTYPE_DEPTH_OF_FIELD) return S_TileIconPathMtDepthOfField;
-                if (key == MT_SUBTYPE_DIRTY_LENS) return S_TileIconPathMtDirtyLens;
-                if (key == MT_SUBTYPE_FADING_TRANSITION) return S_TileIconPathMtFadingTransition;
-                if (key == MT_SUBTYPE_FOG) return S_TileIconPathMtFog;
-                if (key == MT_SUBTYPE_GHOST) return S_TileIconPathMtGhost;
-                if (key == MT_SUBTYPE_HDR_BLOOM) return S_TileIconPathMtHdrBloom;
-                if (key == MT_SUBTYPE_IMAGE) return S_TileIconPathMtImage;
-                if (key == MT_SUBTYPE_MANIALINK_UI) return S_TileIconPathMtManiaLinkUi;
-                if (key == MT_SUBTYPE_MANIALINK_URL) return S_TileIconPathMtManiaLinkUrl;
-                if (key == MT_SUBTYPE_MUSIC_VOLUME) return S_TileIconPathMtMusicVolume;
-                if (key == MT_SUBTYPE_SOUND_FX) return S_TileIconPathMtSoundFx;
-                if (key == MT_SUBTYPE_SPECTATORS) return S_TileIconPathMtSpectators;
-                if (key == MT_SUBTYPE_TEXT) return S_TileIconPathMtText;
-                if (key == MT_SUBTYPE_TIME) return S_TileIconPathMtTime;
-                if (key == MT_SUBTYPE_TIME_SPEED) return S_TileIconPathMtTimeSpeed;
-                if (key == MT_SUBTYPE_RESET) return S_TileIconPathMtReset;
+                if (key == MT_SUBTYPE_CAMERA) return S_TileIconPathMediaTrackerCamera;
+                if (key == MT_SUBTYPE_CUSTOM_CAMERA) return S_TileIconPathMediaTrackerCustomCamera;
+                if (key == MT_SUBTYPE_ORBITAL_CAMERA) return S_TileIconPathMediaTrackerOrbitalCamera;
+                if (key == MT_SUBTYPE_PATH_CAMERA) return S_TileIconPathMediaTrackerPathCamera;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA) return S_TileIconPathMediaTrackerPlayerCamera;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) return S_TileIconPathMediaTrackerCamDefault;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) return S_TileIconPathMediaTrackerCam1;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) return S_TileIconPathMediaTrackerCam2;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) return S_TileIconPathMediaTrackerCam3;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) return S_TileIconPathMediaTrackerCamHelico;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) return S_TileIconPathMediaTrackerCamFree;
+                if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) return S_TileIconPathMediaTrackerCamSpectator;
+                if (key == MT_SUBTYPE_2D_TRIANGLES) return S_TileIconPathMediaTracker2DTriangles;
+                if (key == MT_SUBTYPE_3D_TRIANGLES) return S_TileIconPathMediaTracker3DTriangles;
+                if (key == MT_SUBTYPE_COLORS_FX) return S_TileIconPathMediaTrackerColorsFx;
+                if (key == MT_SUBTYPE_COLOR_GRADING) return S_TileIconPathMediaTrackerColorGrading;
+                if (key == MT_SUBTYPE_DEPTH_OF_FIELD) return S_TileIconPathMediaTrackerDepthOfField;
+                if (key == MT_SUBTYPE_DIRTY_LENS) return S_TileIconPathMediaTrackerDirtyLens;
+                if (key == MT_SUBTYPE_FADING_TRANSITION) return S_TileIconPathMediaTrackerFadingTransition;
+                if (key == MT_SUBTYPE_FOG) return S_TileIconPathMediaTrackerFog;
+                if (key == MT_SUBTYPE_GHOST) return S_TileIconPathMediaTrackerGhost;
+                if (key == MT_SUBTYPE_HDR_BLOOM) return S_TileIconPathMediaTrackerHdrBloom;
+                if (key == MT_SUBTYPE_IMAGE) return S_TileIconPathMediaTrackerImage;
+                if (key == MT_SUBTYPE_MANIALINK_UI) return S_TileIconPathMediaTrackerManiaLinkUi;
+                if (key == MT_SUBTYPE_MANIALINK_URL) return S_TileIconPathMediaTrackerManiaLinkUrl;
+                if (key == MT_SUBTYPE_MUSIC_VOLUME) return S_TileIconPathMediaTrackerMusicVolume;
+                if (key == MT_SUBTYPE_SOUND_FX) return S_TileIconPathMediaTrackerSoundFx;
+                if (key == MT_SUBTYPE_SPECTATORS) return S_TileIconPathMediaTrackerSpectators;
+                if (key == MT_SUBTYPE_TEXT) return S_TileIconPathMediaTrackerText;
+                if (key == MT_SUBTYPE_TIME) return S_TileIconPathMediaTrackerTime;
+                if (key == MT_SUBTYPE_TIME_SPEED) return S_TileIconPathMediaTrackerTimeSpeed;
+                if (key == MT_SUBTYPE_RESET) return S_TileIconPathMediaTrackerReset;
                 return "";
             }
 
             void SetTileIconCustomStoragePathForSubtype(const string &in rawKey, const string &in value) {
                 string key = NormalizeTriggerTargetKey(rawKey);
                 if (key == MT_SUBTYPE_CAMERA) {
-                    S_TileIconPathMtCamera = value;
+                    S_TileIconPathMediaTrackerCamera = value;
                 } else if (key == MT_SUBTYPE_CUSTOM_CAMERA) {
-                    S_TileIconPathMtCustomCamera = value;
+                    S_TileIconPathMediaTrackerCustomCamera = value;
                 } else if (key == MT_SUBTYPE_ORBITAL_CAMERA) {
-                    S_TileIconPathMtOrbitalCamera = value;
+                    S_TileIconPathMediaTrackerOrbitalCamera = value;
                 } else if (key == MT_SUBTYPE_PATH_CAMERA) {
-                    S_TileIconPathMtPathCamera = value;
+                    S_TileIconPathMediaTrackerPathCamera = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA) {
-                    S_TileIconPathMtPlayerCamera = value;
+                    S_TileIconPathMediaTrackerPlayerCamera = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT) {
-                    S_TileIconPathMtCamDefault = value;
+                    S_TileIconPathMediaTrackerCamDefault = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1) {
-                    S_TileIconPathMtCam1 = value;
+                    S_TileIconPathMediaTrackerCam1 = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2) {
-                    S_TileIconPathMtCam2 = value;
+                    S_TileIconPathMediaTrackerCam2 = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3) {
-                    S_TileIconPathMtCam3 = value;
+                    S_TileIconPathMediaTrackerCam3 = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO) {
-                    S_TileIconPathMtCamHelico = value;
+                    S_TileIconPathMediaTrackerCamHelico = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE) {
-                    S_TileIconPathMtCamFree = value;
+                    S_TileIconPathMediaTrackerCamFree = value;
                 } else if (key == MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR) {
-                    S_TileIconPathMtCamSpectator = value;
+                    S_TileIconPathMediaTrackerCamSpectator = value;
                 } else if (key == MT_SUBTYPE_2D_TRIANGLES) {
-                    S_TileIconPathMt2DTriangles = value;
+                    S_TileIconPathMediaTracker2DTriangles = value;
                 } else if (key == MT_SUBTYPE_3D_TRIANGLES) {
-                    S_TileIconPathMt3DTriangles = value;
+                    S_TileIconPathMediaTracker3DTriangles = value;
                 } else if (key == MT_SUBTYPE_COLORS_FX) {
-                    S_TileIconPathMtColorsFx = value;
+                    S_TileIconPathMediaTrackerColorsFx = value;
                 } else if (key == MT_SUBTYPE_COLOR_GRADING) {
-                    S_TileIconPathMtColorGrading = value;
+                    S_TileIconPathMediaTrackerColorGrading = value;
                 } else if (key == MT_SUBTYPE_DEPTH_OF_FIELD) {
-                    S_TileIconPathMtDepthOfField = value;
+                    S_TileIconPathMediaTrackerDepthOfField = value;
                 } else if (key == MT_SUBTYPE_DIRTY_LENS) {
-                    S_TileIconPathMtDirtyLens = value;
+                    S_TileIconPathMediaTrackerDirtyLens = value;
                 } else if (key == MT_SUBTYPE_FADING_TRANSITION) {
-                    S_TileIconPathMtFadingTransition = value;
+                    S_TileIconPathMediaTrackerFadingTransition = value;
                 } else if (key == MT_SUBTYPE_FOG) {
-                    S_TileIconPathMtFog = value;
+                    S_TileIconPathMediaTrackerFog = value;
                 } else if (key == MT_SUBTYPE_GHOST) {
-                    S_TileIconPathMtGhost = value;
+                    S_TileIconPathMediaTrackerGhost = value;
                 } else if (key == MT_SUBTYPE_HDR_BLOOM) {
-                    S_TileIconPathMtHdrBloom = value;
+                    S_TileIconPathMediaTrackerHdrBloom = value;
                 } else if (key == MT_SUBTYPE_IMAGE) {
-                    S_TileIconPathMtImage = value;
+                    S_TileIconPathMediaTrackerImage = value;
                 } else if (key == MT_SUBTYPE_MANIALINK_UI) {
-                    S_TileIconPathMtManiaLinkUi = value;
+                    S_TileIconPathMediaTrackerManiaLinkUi = value;
                 } else if (key == MT_SUBTYPE_MANIALINK_URL) {
-                    S_TileIconPathMtManiaLinkUrl = value;
+                    S_TileIconPathMediaTrackerManiaLinkUrl = value;
                 } else if (key == MT_SUBTYPE_MUSIC_VOLUME) {
-                    S_TileIconPathMtMusicVolume = value;
+                    S_TileIconPathMediaTrackerMusicVolume = value;
                 } else if (key == MT_SUBTYPE_SOUND_FX) {
-                    S_TileIconPathMtSoundFx = value;
+                    S_TileIconPathMediaTrackerSoundFx = value;
                 } else if (key == MT_SUBTYPE_SPECTATORS) {
-                    S_TileIconPathMtSpectators = value;
+                    S_TileIconPathMediaTrackerSpectators = value;
                 } else if (key == MT_SUBTYPE_TEXT) {
-                    S_TileIconPathMtText = value;
+                    S_TileIconPathMediaTrackerText = value;
                 } else if (key == MT_SUBTYPE_TIME) {
-                    S_TileIconPathMtTime = value;
+                    S_TileIconPathMediaTrackerTime = value;
                 } else if (key == MT_SUBTYPE_TIME_SPEED) {
-                    S_TileIconPathMtTimeSpeed = value;
+                    S_TileIconPathMediaTrackerTimeSpeed = value;
                 } else if (key == MT_SUBTYPE_RESET) {
-                    S_TileIconPathMtReset = value;
+                    S_TileIconPathMediaTrackerReset = value;
                 }
             }
 
@@ -400,8 +398,7 @@ namespace TriggerVisualizer {
                     SetTileIconEnabledForSubtype(keys[i], true);
                     SetTileIconCustomStoragePathForSubtype(keys[i], "");
                 }
-                G_TileIconPathInputs.DeleteAll();
-                G_ActiveTileIconExplorerKey = "";
+                g_TileIconPathInputs.DeleteAll();
             }
         }
     }

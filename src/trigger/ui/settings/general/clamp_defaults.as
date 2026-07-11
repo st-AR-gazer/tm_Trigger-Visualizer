@@ -1,6 +1,6 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             void ClampWorldRenderingSettings() {
                 S_RenderDistanceXZ = Math::Clamp(S_RenderDistanceXZ, 0.0f, WORLD_RENDER_SETTING_MAX);
                 S_RenderDistanceY = Math::Clamp(S_RenderDistanceY, 0.0f, WORLD_RENDER_SETTING_MAX);
@@ -50,13 +50,6 @@
             }
 
             void ClampPerformanceSettings() {
-                S_FillTileMinSize = Math::Clamp(S_FillTileMinSize, 2.0f, 64.0f);
-                S_MaxVisibleVolumesPerFrame = Math::Clamp(S_MaxVisibleVolumesPerFrame, 16, 4096);
-                S_MaxFillTilesPerFrame = Math::Clamp(S_MaxFillTilesPerFrame, 128, 65536);
-                S_MaxOutlineSegmentsPerFrame = Math::Clamp(S_MaxOutlineSegmentsPerFrame, 64, 65536);
-                S_MaxCrystalOutlineSegmentsPerFrame = Math::Clamp(S_MaxCrystalOutlineSegmentsPerFrame, 0, 65536);
-                S_MaxTileIconPatchesPerFrame = Math::Clamp(S_MaxTileIconPatchesPerFrame, 0, 65536);
-                S_TileIconMaxSubdivisions = Math::Clamp(S_TileIconMaxSubdivisions, 1, 12);
                 S_MediaTrackerEditorRefreshIntervalMs = NormalizeRefreshIntervalMs(S_MediaTrackerEditorRefreshIntervalMs);
                 S_OffzoneEditorRefreshIntervalMs = NormalizeRefreshIntervalMs(S_OffzoneEditorRefreshIntervalMs);
                 S_CrystalMeshModelerRefreshIntervalMs = NormalizeRefreshIntervalMs(S_CrystalMeshModelerRefreshIntervalMs);
@@ -128,7 +121,7 @@
                 S_LabelShowDetectedTriggerName = false;
                 S_LabelTargetKeys = DEFAULT_LABEL_TARGET_KEYS;
                 S_LabelTargetOverrideTexts = DEFAULT_LABEL_TARGET_OVERRIDE_TEXTS;
-                G_LabelTargetOverrideInputs.DeleteAll();
+                g_LabelTargetOverrideInputs.DeleteAll();
             }
 
             void ResetLabelAppearanceSettingsToDefaults() {
@@ -169,7 +162,6 @@
                 S_RenderProximityMode = PROXIMITY_MODE_CAMERA_AND_VEHICLE;
                 S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                 S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
-                S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
                 ClampWorldRenderingSettings();
                 ClampProximitySettings();
             }
@@ -198,9 +190,9 @@
                 S_DenseLineSplitColor = vec4(0.10f, 0.85f, 1.0f, 1.0f);
                 S_MediaTrackerTrackOutlineHueShift = 0.06f;
                 S_AnimateTurboRouletteColor = true;
-                S_TurboRouletteYellowDurationMs = 1000;
-                S_TurboRouletteCyanDurationMs = 1000;
-                S_TurboRoulettePurpleDurationMs = 1000;
+                S_TurboRouletteYellowDurationMs = DEFAULT_TURBO_ROULETTE_YELLOW_DURATION_MS;
+                S_TurboRouletteCyanDurationMs = DEFAULT_TURBO_ROULETTE_CYAN_DURATION_MS;
+                S_TurboRoulettePurpleDurationMs = DEFAULT_TURBO_ROULETTE_PURPLE_DURATION_MS;
                 S_TurboRoulettePhaseOffsetMs = 0;
                 S_OutlineAlpha = 0.20f;
                 S_FillAlpha = 0.03f;
@@ -217,35 +209,13 @@
                 S_SkullTileIconAlpha = 0.85f;
                 S_RepeatTileIconsOnSplitFillTiles = false;
                 ResetTileIconSettingsToDefaults();
-                G_TileIconImportStatus = "";
+                g_TileIconImportStatus = "";
                 TriggerVisualizer::Trigger::Render::Assets::InvalidateSkullTileIconTexture();
                 ClampColorSettings();
             }
 
             void ResetWorldMapHintSettingsToDefaults() {
                 S_RespectMapSuggestOff = true;
-            }
-
-            void ResetWorldRenderingSettingsToDefaults() {
-                ResetWorldDisplaySettingsToDefaults();
-                ResetWorldDistanceSettingsToDefaults();
-                ResetWorldLineSplittingSettingsToDefaults();
-                ResetWorldColorSettingsToDefaults();
-                ResetWorldTileIconSettingsToDefaults();
-                ResetWorldMapHintSettingsToDefaults();
-            }
-
-            void ResetPerformanceBudgetSettingsToDefaults() {
-                S_PerformanceBudgetsEnabled = false;
-                S_FillTileMinSize = 4.0f;
-                S_MaxVisibleVolumesPerFrame = 512;
-                S_MaxFillTilesPerFrame = 4096;
-                S_MaxOutlineSegmentsPerFrame = 1536;
-                S_MaxCrystalOutlineSegmentsPerFrame = 768;
-                S_SplitCrystalOutlineEdges = false;
-                S_MaxTileIconPatchesPerFrame = 1600;
-                S_TileIconMaxSubdivisions = 6;
-                ClampPerformanceSettings();
             }
 
             void ResetPerformanceCullingSettingsToDefaults() {
@@ -271,18 +241,9 @@
             }
 
             void ResetPerformanceSettingsToDefaults() {
-                ResetPerformanceBudgetSettingsToDefaults();
                 ResetPerformanceCullingSettingsToDefaults();
                 ResetPerformanceRefreshSettingsToDefaults();
                 ResetPerformanceSpeedRenderSkipSettingsToDefaults();
-            }
-
-            void ResetSettingsToDefaults() {
-                ResetGeneralTriggerSettingsToDefaults();
-                ResetWorldRenderingSettingsToDefaults();
-                ResetPerformanceSettingsToDefaults();
-                ResetSourceSettingsToDefaults();
-                ResetLabelSettingsToDefaults();
             }
         }
     }

@@ -97,7 +97,7 @@ namespace TriggerVisualizer {
                     }
 
                     mat4 compoundTransform = mat4(variant.CompoundLoc);
-                    vec3 compoundOrigin = CrystalTransformPoint(compoundTransform, vec3(0.0f, 0.0f, 0.0f));
+                    vec3 compoundOrigin = (compoundTransform * vec3()).xyz;
                     if (!CrystalIsFiniteVec3(compoundOrigin)) {
                         warning = "Variant CompoundLoc origin is not finite.";
                         return false;
@@ -385,7 +385,7 @@ namespace TriggerVisualizer {
                         * mat4::Translate(triggerCenter * -1.0f);
                     transform = baseTransform * localTransform;
                     detail = "wall checkpoint local trigger recenter/axis rotation " + orientation
-                        + " angleDeg " + Text::Format("%.1f", angle * 180.0f / Math::PI)
+                        + " angleDeg " + Text::Format("%.1f", Math::ToDeg(angle))
                         + " axis " + CrystalVec3Label(axis)
                         + (selectedMobilDetail.Length > 0 ? " | " + selectedMobilDetail : "")
                         + (surfaceMobilDetail.Length > 0 ? " | " + surfaceMobilDetail : "")
@@ -411,7 +411,7 @@ namespace TriggerVisualizer {
                     if (variant is null) return "";
 
                     string detail = "";
-                    uint count = CrystalMinUint(variant.BlockUnitModels.Length, 4);
+                    uint count = MinUint(variant.BlockUnitModels.Length, 4);
                     for (uint i = 0; i < count; i++) {
                         auto unit = variant.BlockUnitModels[i];
                         if (unit is null) {
@@ -491,7 +491,6 @@ namespace TriggerVisualizer {
                 const string CRYSTAL_SHAPE_SPACE_PREFAB_CHILD = "prefab-child";
                 const string CRYSTAL_SHAPE_SPACE_MOBIL_CHILD = "mobil-child";
                 const string CRYSTAL_SHAPE_SPACE_CENTERED_BLOCK_LOCAL = "centered-block-local";
-                const string CRYSTAL_SHAPE_SPACE_HELPER_TEMPLATE = "helper-template";
 
                 class CrystalShapeTransformResult {
                     bool CanRender = true;
@@ -851,6 +850,10 @@ namespace TriggerVisualizer {
                     try {
                         pivot = Dev::GetOffsetVec3(anchoredObject, O_CRYSTAL_ANCHOREDOBJECT_PIVOT_POS);
                     } catch {
+                        logging::HandledException(
+                            "TryReadCrystalPlacedItemPivot",
+                            "Placed item private pivot read failed."
+                        );
                         warning = "private placed item pivot unavailable: read failed";
                         return false;
                     }
@@ -932,7 +935,7 @@ namespace TriggerVisualizer {
                     bool usesAbsolutePlacement = true;
                     if (anchoredObject.IsLocationInitialised) {
                         mat4 locationTransform = mat4(anchoredObject.BlockLocation) * mat4(anchoredObject.LocationInBlock);
-                        vec3 locationOrigin = CrystalTransformPoint(locationTransform, vec3(0.0f, 0.0f, 0.0f));
+                        vec3 locationOrigin = (locationTransform * vec3()).xyz;
                         vec3 absLocationOrigin = CrystalAbsVec3(locationOrigin);
                         bool hasFiniteAbsolutePosition = CrystalIsFiniteVec3(anchoredObject.AbsolutePositionInMap);
                         bool locationOriginLooksPlaceholder = hasFiniteAbsolutePosition
@@ -1034,7 +1037,6 @@ namespace TriggerVisualizer {
                     }
 
                     CrystalNormalizeBounds(worldMin, worldMax, probe.WorldMin, probe.WorldMax);
-                    probe.HasWorldBounds = true;
                     uint sourceIndex = source.TriggerVolumes.Length;
                     auto volume = TriggerVolume(
                         probe.WorldMin,
@@ -1074,7 +1076,6 @@ namespace TriggerVisualizer {
                     }
                     source.TriggerVolumes.InsertLast(volume);
                     source.RenderedShapeCount++;
-                    probe.RenderedVolume = true;
                     return true;
                 }
 
@@ -1115,6 +1116,10 @@ namespace TriggerVisualizer {
                         pos = Dev::GetOffsetVec3(block, O_CRYSTAL_FREE_BLOCK_POS);
                         ypr = Dev::GetOffsetVec3(block, O_CRYSTAL_FREE_BLOCK_ROT_YPR);
                     } catch {
+                        logging::HandledException(
+                            "TryGetCrystalFreeBlockTransform",
+                            "Free block private transform read failed."
+                        );
                         warning = "Free block private position/rotation read failed.";
                         return false;
                     }

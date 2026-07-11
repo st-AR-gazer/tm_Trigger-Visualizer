@@ -1,24 +1,5 @@
 namespace TriggerVisualizer {
     namespace App {
-        void PushPluginButtonStyleUI() {
-            UI::PushStyleColor(UI::Col::Button, vec4(0.16f, 0.30f, 0.36f, 0.78f));
-            UI::PushStyleColor(UI::Col::ButtonHovered, vec4(0.20f, 0.39f, 0.46f, 0.92f));
-            UI::PushStyleColor(UI::Col::ButtonActive, vec4(0.24f, 0.46f, 0.54f, 1.00f));
-        }
-
-        void PopPluginButtonStyleUI() {
-            UI::PopStyleColor(3);
-        }
-
-        void Main() {
-            log(
-                "Loaded " + TriggerVisualizer::PluginMeta.Name + " v" + TriggerVisualizer::PluginMeta.Version,
-                LogLevel::Debug,
-                14,
-                "TriggerVisualizer::App::Main"
-            );
-        }
-
         void Render() {
             if (!ShouldRenderWorld()) return;
             TriggerVisualizer::Trigger::RenderWorld();
@@ -36,9 +17,9 @@ namespace TriggerVisualizer {
         }
 
         bool ShouldSkipWorldRenderForFastViewedCar(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-            if (!TriggerVisualizer::Trigger::UI::S_FastDrivingPerformanceMode) return false;
+            if (!TriggerVisualizer::Trigger::Ui::S_FastDrivingPerformanceMode) return false;
             if (ctx is null || (!ctx.IsPlayableMap && !ctx.IsEditorTestMode)) return false;
-            if (!TriggerVisualizer::Trigger::UI::ShouldSpeedRenderSkipHideAllRuntimeSources(ctx)) return false;
+            if (!TriggerVisualizer::Trigger::Ui::ShouldSpeedRenderSkipHideAllRuntimeSources(ctx)) return false;
 
             auto proximityState = TriggerVisualizer::Trigger::Data::GetProximityReferenceState(ctx);
             TriggerVisualizer::Trigger::Render::UpdateSpeedRenderSkipActiveForSpeed(ctx, proximityState);
@@ -47,7 +28,7 @@ namespace TriggerVisualizer {
 
         bool ShouldRenderWorld() {
             auto ctx = TriggerVisualizer::Trigger::Data::GetRuntimeContext();
-            if (!TriggerVisualizer::Trigger::UI::IsRenderWorldEnabledForRuntime(ctx)) return false;
+            if (!TriggerVisualizer::Trigger::Ui::IsRenderWorldEnabledForRuntime(ctx)) return false;
             if (!ShouldRenderWithUiVisibility(ctx)) return false;
             if (ShouldSkipWorldRenderForFastViewedCar(ctx)) return false;
             return true;
@@ -58,18 +39,18 @@ namespace TriggerVisualizer {
         }
 
         void RenderInterface() {
-            PushPluginButtonStyleUI();
+            TriggerVisualizer::Shared::PushStyledButtonUi();
             FILE_EXPLORER_BASE_RENDERER();
-            PopPluginButtonStyleUI();
+            TriggerVisualizer::Shared::PopStyledButtonUi();
             if (!ShouldRenderWindow()) return;
 
             bool devPanelOpen = S_DevPanelOpen;
-            PushPluginButtonStyleUI();
-            if (UI::Begin(MenuTitle() + "###dev-panel-" + TriggerVisualizer::PluginMeta.ID, devPanelOpen, UI::WindowFlags::None)) {
+            TriggerVisualizer::Shared::PushStyledButtonUi();
+            if (UI::Begin(MenuTitle() + "###dev-panel-" + TriggerVisualizer::g_PluginMeta.ID, devPanelOpen, UI::WindowFlags::None)) {
                 RenderWindow();
             }
             UI::End();
-            PopPluginButtonStyleUI();
+            TriggerVisualizer::Shared::PopStyledButtonUi();
             S_DevPanelOpen = devPanelOpen;
         }
 
@@ -98,24 +79,24 @@ namespace TriggerVisualizer {
             const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
             int source
         ) {
-            int context = TriggerVisualizer::Trigger::UI::GetSourceSettingsContextForRuntime(ctx);
+            int context = TriggerVisualizer::Trigger::Ui::GetSourceSettingsContextForRuntime(ctx);
             bool enabled = false;
             if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_OFFZONE) {
-                enabled = TriggerVisualizer::Trigger::UI::IsOffzoneSourceEnabledForContext(context);
+                enabled = TriggerVisualizer::Trigger::Ui::IsOffzoneSourceEnabledForContext(context);
             } else if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER) {
-                enabled = TriggerVisualizer::Trigger::UI::IsMediaTrackerSourceEnabledForContext(context);
+                enabled = TriggerVisualizer::Trigger::Ui::IsMediaTrackerSourceEnabledForContext(context);
             } else if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_CRYSTAL) {
-                enabled = TriggerVisualizer::Trigger::UI::IsCrystalSourceEnabledForContext(context);
+                enabled = TriggerVisualizer::Trigger::Ui::IsCrystalSourceEnabledForContext(context);
             }
             if (!RenderSubmenuSelectable(label, enabled)) return false;
 
             bool next = !enabled;
             if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_OFFZONE) {
-                TriggerVisualizer::Trigger::UI::SetOffzoneSourceEnabledForContext(context, next);
+                TriggerVisualizer::Trigger::Ui::SetOffzoneSourceEnabledForContext(context, next);
             } else if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER) {
-                TriggerVisualizer::Trigger::UI::SetMediaTrackerSourceEnabledForContext(context, next);
+                TriggerVisualizer::Trigger::Ui::SetMediaTrackerSourceEnabledForContext(context, next);
             } else if (source == TriggerVisualizer::Trigger::TRIGGER_SOURCE_CRYSTAL) {
-                TriggerVisualizer::Trigger::UI::SetCrystalSourceEnabledForContext(context, next);
+                TriggerVisualizer::Trigger::Ui::SetCrystalSourceEnabledForContext(context, next);
             }
             return true;
         }
@@ -125,7 +106,7 @@ namespace TriggerVisualizer {
             const string &in key
         ) {
             bool value = false;
-            if (!TriggerVisualizer::Trigger::UI::TryGetMapOnlyOverride(ctx, key, value)) {
+            if (!TriggerVisualizer::Trigger::Ui::TryGetMapOnlyOverride(ctx, key, value)) {
                 return "\\$888 (global)\\$z";
             }
             return value ? "\\$8f8 (show)\\$z" : "\\$f88 (hide)\\$z";
@@ -136,9 +117,9 @@ namespace TriggerVisualizer {
             const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx,
             const string &in key
         ) {
-            bool canUseMap = TriggerVisualizer::Trigger::UI::GetMapOnlyOverrideMapKey(ctx).Length > 0;
+            bool canUseMap = TriggerVisualizer::Trigger::Ui::GetMapOnlyOverrideMapKey(ctx).Length > 0;
             bool value = false;
-            bool hasOverride = TriggerVisualizer::Trigger::UI::TryGetMapOnlyOverride(
+            bool hasOverride = TriggerVisualizer::Trigger::Ui::TryGetMapOnlyOverride(
                 ctx,
                 key,
                 value
@@ -147,13 +128,13 @@ namespace TriggerVisualizer {
             if (!canUseMap) UI::BeginDisabled();
             if (UI::BeginMenu(menuLabel + "###trigger-visualizer-map-override-" + key)) {
                 if (RenderSubmenuSelectable("Use global setting", !hasOverride)) {
-                    TriggerVisualizer::Trigger::UI::ClearMapOnlyOverride(ctx, key);
+                    TriggerVisualizer::Trigger::Ui::ClearMapOnlyOverride(ctx, key);
                 }
                 if (RenderSubmenuSelectable("Show on this map", hasOverride && value)) {
-                    TriggerVisualizer::Trigger::UI::SetMapOnlyOverride(ctx, key, true);
+                    TriggerVisualizer::Trigger::Ui::SetMapOnlyOverride(ctx, key, true);
                 }
                 if (RenderSubmenuSelectable("Hide on this map", hasOverride && !value)) {
-                    TriggerVisualizer::Trigger::UI::SetMapOnlyOverride(ctx, key, false);
+                    TriggerVisualizer::Trigger::Ui::SetMapOnlyOverride(ctx, key, false);
                 }
                 UI::EndMenu();
             }
@@ -168,31 +149,31 @@ namespace TriggerVisualizer {
             RenderMapOnlyOverrideMenu(
                 label,
                 ctx,
-                TriggerVisualizer::Trigger::UI::GetMapOnlySourceOverrideKey(source)
+                TriggerVisualizer::Trigger::Ui::GetMapOnlySourceOverrideKey(source)
             );
         }
 
         void RenderGlobalRenderMenuOptions(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-            int context = TriggerVisualizer::Trigger::UI::GetSourceSettingsContextForRuntime(ctx);
-            string contextLabel = TriggerVisualizer::Trigger::UI::GetSourceSettingsContextLabel(context);
+            int context = TriggerVisualizer::Trigger::Ui::GetSourceSettingsContextForRuntime(ctx);
+            string contextLabel = TriggerVisualizer::Trigger::Ui::GetSourceSettingsContextLabel(context);
             UI::TextDisabled("Global");
-            if (RenderSubmenuSelectable("Trigger rendering", TriggerVisualizer::Trigger::UI::S_RenderWorld)) {
-                TriggerVisualizer::Trigger::UI::S_RenderWorld = !TriggerVisualizer::Trigger::UI::S_RenderWorld;
+            if (RenderSubmenuSelectable("Trigger rendering", TriggerVisualizer::Trigger::Ui::S_RenderWorld)) {
+                TriggerVisualizer::Trigger::Ui::S_RenderWorld = !TriggerVisualizer::Trigger::Ui::S_RenderWorld;
             }
             UI::Separator();
             UI::TextDisabled("Sources (" + contextLabel + ")");
             RenderGlobalSourceMenuItem("Offzone", ctx, TriggerVisualizer::Trigger::TRIGGER_SOURCE_OFFZONE);
             RenderGlobalSourceMenuItem("MediaTracker", ctx, TriggerVisualizer::Trigger::TRIGGER_SOURCE_MEDIATRACKER);
-            UI::BeginDisabled(TriggerVisualizer::Trigger::UI::S_CrystalCustomItemsAndBlockItemsOnly);
+            UI::BeginDisabled(TriggerVisualizer::Trigger::Ui::S_CrystalCustomItemsAndBlockItemsOnly);
             RenderGlobalSourceMenuItem("Crystal", ctx, TriggerVisualizer::Trigger::TRIGGER_SOURCE_CRYSTAL);
             UI::EndDisabled();
-            if (RenderSubmenuSelectable("Crystal (only custom)", TriggerVisualizer::Trigger::UI::S_CrystalCustomItemsAndBlockItemsOnly)) {
-                TriggerVisualizer::Trigger::UI::SetCrystalCustomItemsAndBlockItemsOnly(!TriggerVisualizer::Trigger::UI::S_CrystalCustomItemsAndBlockItemsOnly);
+            if (RenderSubmenuSelectable("Crystal (only custom)", TriggerVisualizer::Trigger::Ui::S_CrystalCustomItemsAndBlockItemsOnly)) {
+                TriggerVisualizer::Trigger::Ui::SetCrystalCustomItemsAndBlockItemsOnly(!TriggerVisualizer::Trigger::Ui::S_CrystalCustomItemsAndBlockItemsOnly);
             }
         }
 
         void RenderMapOnlyRenderMenuOptions(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-            bool canUseMap = TriggerVisualizer::Trigger::UI::GetMapOnlyOverrideMapKey(ctx).Length > 0;
+            bool canUseMap = TriggerVisualizer::Trigger::Ui::GetMapOnlyOverrideMapKey(ctx).Length > 0;
             UI::TextDisabled("This map");
             if (!canUseMap) {
                 UI::TextDisabled("No MapUid available.");
@@ -202,7 +183,7 @@ namespace TriggerVisualizer {
             RenderMapOnlyOverrideMenu(
                 "Trigger rendering",
                 ctx,
-                TriggerVisualizer::Trigger::UI::MAP_ONLY_OVERRIDE_RENDER_WORLD
+                TriggerVisualizer::Trigger::Ui::MAP_ONLY_OVERRIDE_RENDER_WORLD
             );
             UI::Separator();
             RenderMapOnlySourceOverrideMenu(
@@ -223,11 +204,11 @@ namespace TriggerVisualizer {
             RenderMapOnlyOverrideMenu(
                 "Crystal (only custom)",
                 ctx,
-                TriggerVisualizer::Trigger::UI::MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY
+                TriggerVisualizer::Trigger::Ui::MAP_ONLY_OVERRIDE_CRYSTAL_CUSTOM_ONLY
             );
             UI::Separator();
             if (RenderSubmenuSelectable("Clear map overrides")) {
-                TriggerVisualizer::Trigger::UI::ClearCurrentMapOnlyOverrides(ctx);
+                TriggerVisualizer::Trigger::Ui::ClearCurrentMapOnlyOverrides(ctx);
             }
         }
 
@@ -244,17 +225,17 @@ namespace TriggerVisualizer {
 
             UI::TextDisabled("Map hint: suggestion only");
             bool overrideValue = true;
-            bool hasOverride = TriggerVisualizer::Trigger::UI::TryGetMapOnlyOverride(
+            bool hasOverride = TriggerVisualizer::Trigger::Ui::TryGetMapOnlyOverride(
                 ctx,
-                TriggerVisualizer::Trigger::UI::MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF,
+                TriggerVisualizer::Trigger::Ui::MAP_ONLY_OVERRIDE_RESPECT_SUGGEST_OFF,
                 overrideValue
             );
             bool ignoresSuggestion = hasOverride && !overrideValue;
             if (RenderSubmenuSelectable("Show despite this map's suggestion", ignoresSuggestion)) {
                 if (ignoresSuggestion) {
-                    TriggerVisualizer::Trigger::UI::ClearMapSuggestOffOverride(ctx);
+                    TriggerVisualizer::Trigger::Ui::ClearMapSuggestOffOverride(ctx);
                 } else {
-                    TriggerVisualizer::Trigger::UI::IgnoreMapSuggestOffForCurrentMap(ctx);
+                    TriggerVisualizer::Trigger::Ui::IgnoreMapSuggestOffForCurrentMap(ctx);
                 }
             }
             return true;
@@ -269,7 +250,7 @@ namespace TriggerVisualizer {
             RenderMapOnlyRenderMenuOptions(ctx);
             UI::Separator();
             if (RenderSubmenuSelectable("Open settings")) {
-                Meta::OpenSettings(TriggerVisualizer::PluginMeta);
+                Meta::OpenSettings(TriggerVisualizer::g_PluginMeta);
             }
         }
 
@@ -279,12 +260,12 @@ namespace TriggerVisualizer {
             bool respectSuggestion
         ) {
             if (forceOff) {
-                return "\\$888" + MenuIcon() + " " + TriggerVisualizer::PluginMeta.Name
+                return "\\$888" + MenuIcon() + " " + TriggerVisualizer::g_PluginMeta.Name
                     + " (hidden by map)\\$z";
             }
             if (suggestOff) {
                 string status = respectSuggestion ? " (map suggests hiding)" : " (map hide suggestion ignored)";
-                return "\\$fc8" + MenuIcon() + " " + TriggerVisualizer::PluginMeta.Name
+                return "\\$fc8" + MenuIcon() + " " + TriggerVisualizer::g_PluginMeta.Name
                     + status + "\\$z";
             }
             return MenuTitle();
@@ -295,7 +276,7 @@ namespace TriggerVisualizer {
             const vec4 &in rowRect,
             float contentRight
         ) {
-            if (!TriggerVisualizer::Trigger::UI::S_RenderWorld) return;
+            if (!TriggerVisualizer::Trigger::Ui::S_RenderWorld) return;
 
             vec2 checkSize = UI::MeasureString(Icons::Check);
             float arrowWidth = UI::GetTextLineHeight();
@@ -318,7 +299,7 @@ namespace TriggerVisualizer {
             bool suggestOff = snapshot !is null
                 && snapshot.RenderHints !is null
                 && snapshot.RenderHints.SuggestOff;
-            bool respectSuggestion = TriggerVisualizer::Trigger::UI::RespectMapSuggestOffForRuntime(ctx);
+            bool respectSuggestion = TriggerVisualizer::Trigger::Ui::RespectMapSuggestOffForRuntime(ctx);
             vec2 rowStart = UI::GetCursorScreenPos();
             float contentRight = rowStart.x + UI::GetContentRegionAvail().x;
             UI::DrawList@ parentDrawList = UI::GetWindowDrawList();
@@ -335,11 +316,11 @@ namespace TriggerVisualizer {
                 UI::SetItemTooltip(tooltip);
             }
             if (settingsClicked) {
-                Meta::OpenSettings(TriggerVisualizer::PluginMeta);
+                Meta::OpenSettings(TriggerVisualizer::g_PluginMeta);
             }
             bool closeRenderMenu = toggleClicked && !IsRenderMenuShiftHeld();
             if (toggleClicked) {
-                TriggerVisualizer::Trigger::UI::S_RenderWorld = !TriggerVisualizer::Trigger::UI::S_RenderWorld;
+                TriggerVisualizer::Trigger::Ui::S_RenderWorld = !TriggerVisualizer::Trigger::Ui::S_RenderWorld;
             }
             RenderMenuRootCheck(parentDrawList, rowRect, contentRight);
             if (menuOpen) {
@@ -352,7 +333,7 @@ namespace TriggerVisualizer {
         }
 
         void RenderWindow() {
-            UI::Text(TriggerVisualizer::PluginMeta.Name + " " + TriggerVisualizer::PluginMeta.Version);
+            UI::Text(TriggerVisualizer::g_PluginMeta.Name + " " + TriggerVisualizer::g_PluginMeta.Version);
             UI::Separator();
             TriggerVisualizer::Trigger::RenderDevPanel();
         }

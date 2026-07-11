@@ -33,14 +33,6 @@ namespace TriggerVisualizer {
                     }
                 }
 
-                vec3 CrystalCrossVec3(const vec3 &in a, const vec3 &in b) {
-                    return vec3(
-                        a.y * b.z - a.z * b.y,
-                        a.z * b.x - a.x * b.z,
-                        a.x * b.y - a.y * b.x
-                    );
-                }
-
                 vec3 CrystalNormalizeOr(const vec3 &in value, const vec3 &in fallback) {
                     if (!CrystalIsFiniteVec3(value)) return fallback;
                     float lengthSq = value.LengthSquared();
@@ -51,8 +43,8 @@ namespace TriggerVisualizer {
                 void CrystalBuildPerpendicularBasis(const vec3 &in dir, vec3 &out u, vec3 &out v) {
                     vec3 axis = CrystalNormalizeOr(dir, vec3(0.0f, 1.0f, 0.0f));
                     vec3 seed = Math::Abs(axis.y) < 0.9f ? vec3(0.0f, 1.0f, 0.0f) : vec3(1.0f, 0.0f, 0.0f);
-                    u = CrystalNormalizeOr(CrystalCrossVec3(axis, seed), vec3(1.0f, 0.0f, 0.0f));
-                    v = CrystalNormalizeOr(CrystalCrossVec3(axis, u), vec3(0.0f, 0.0f, 1.0f));
+                    u = CrystalNormalizeOr(Math::Cross(axis, seed), vec3(1.0f, 0.0f, 0.0f));
+                    v = CrystalNormalizeOr(Math::Cross(axis, u), vec3(0.0f, 0.0f, 1.0f));
                 }
 
                 bool CrystalValidateOutlinePoint(const vec3 &in point, bool worldSpace, string &out warning) {
@@ -169,7 +161,7 @@ namespace TriggerVisualizer {
                     CrystalOutlineWarningSink@ warnings
                 ) {
                     uint before = lines.Count();
-                    float step = Math::PI * 2.0f / float(CRYSTAL_OUTLINE_CIRCLE_SEGMENTS);
+                    float step = Math::PI2 / float(CRYSTAL_OUTLINE_CIRCLE_SEGMENTS);
                     for (uint i = 0; i < CRYSTAL_OUTLINE_CIRCLE_SEGMENTS; i++) {
                         float a0 = float(i) * step;
                         float a1 = float(i + 1) * step;
@@ -376,8 +368,8 @@ namespace TriggerVisualizer {
                     uint before = target.Count();
                     uint count = source.Count();
                     for (uint i = 0; i < count; i++) {
-                        vec3 start = CrystalTransformPoint(transform, source.Starts[i]);
-                        vec3 end = CrystalTransformPoint(transform, source.Ends[i]);
+                        vec3 start = (transform * source.Starts[i]).xyz;
+                        vec3 end = (transform * source.Ends[i]).xyz;
                         if (!CrystalAddOutlineLineBestEffort(target, start, end, worldSpace, warnings)) {
                             if (target.Count() >= MAX_CRYSTAL_OUTLINE_LINES) break;
                         }
@@ -393,7 +385,7 @@ namespace TriggerVisualizer {
                     if (mesh is null || mesh.m_Verts.Length == 0 || mesh.m_Tris.Length == 0) return false;
 
                     uint before = lines.Count();
-                    uint count = CrystalMinUint(
+                    uint count = MinUint(
                         mesh.m_Tris.Length,
                         MAX_CRYSTAL_MESH_OUTLINE_TRIS
                     );
@@ -532,7 +524,7 @@ namespace TriggerVisualizer {
 
                     auto compound = cast<GmSurfCompound>(surf);
                     if (compound !is null) {
-                        uint count = CrystalMinUint(
+                        uint count = MinUint(
                             compound.Surfs.Length,
                             MAX_CRYSTAL_COMPOUND_SURFS_FOR_BOUNDS
                         );
@@ -579,7 +571,7 @@ namespace TriggerVisualizer {
                             return lines.Count() > before;
                         }
 
-                        uint count = CrystalMinUint(
+                        uint count = MinUint(
                             compoundInstance.SurfLocs.Length,
                             MAX_CRYSTAL_COMPOUND_SURFS_FOR_BOUNDS
                         );

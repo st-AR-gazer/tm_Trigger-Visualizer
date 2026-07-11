@@ -2,30 +2,30 @@ namespace TriggerVisualizer {
     namespace Trigger {
         namespace Render {
             const uint SPATIAL_CANDIDATE_MAX_QUERY_CELLS_PER_POINT = 8192;
-            array<uint> G_SpatialCandidateVisitStamps;
-            uint G_SpatialCandidateVisitSerial = 1;
+            array<uint> g_SpatialCandidateVisitStamps;
+            uint g_SpatialCandidateVisitSerial = 1;
 
             void PrepareSpatialCandidateVisitStamps(uint volumeCount) {
-                if (G_SpatialCandidateVisitStamps.Length != volumeCount) {
-                    G_SpatialCandidateVisitStamps.Resize(volumeCount);
-                    for (uint i = 0; i < G_SpatialCandidateVisitStamps.Length; i++) {
-                        G_SpatialCandidateVisitStamps[i] = 0;
+                if (g_SpatialCandidateVisitStamps.Length != volumeCount) {
+                    g_SpatialCandidateVisitStamps.Resize(volumeCount);
+                    for (uint i = 0; i < g_SpatialCandidateVisitStamps.Length; i++) {
+                        g_SpatialCandidateVisitStamps[i] = 0;
                     }
                 }
-                G_SpatialCandidateVisitSerial++;
-                if (G_SpatialCandidateVisitSerial == 0) {
-                    G_SpatialCandidateVisitSerial = 1;
-                    for (uint i = 0; i < G_SpatialCandidateVisitStamps.Length; i++) {
-                        G_SpatialCandidateVisitStamps[i] = 0;
+                g_SpatialCandidateVisitSerial++;
+                if (g_SpatialCandidateVisitSerial == 0) {
+                    g_SpatialCandidateVisitSerial = 1;
+                    for (uint i = 0; i < g_SpatialCandidateVisitStamps.Length; i++) {
+                        g_SpatialCandidateVisitStamps[i] = 0;
                     }
                 }
             }
 
             void AddSpatialCandidateVolumeIndex(array<uint> @candidateIndices, uint volumeIndex) {
-                if (candidateIndices is null || volumeIndex >= G_SpatialCandidateVisitStamps.Length) return;
-                if (G_SpatialCandidateVisitStamps[volumeIndex] == G_SpatialCandidateVisitSerial) return;
+                if (candidateIndices is null || volumeIndex >= g_SpatialCandidateVisitStamps.Length) return;
+                if (g_SpatialCandidateVisitStamps[volumeIndex] == g_SpatialCandidateVisitSerial) return;
 
-                G_SpatialCandidateVisitStamps[volumeIndex] = G_SpatialCandidateVisitSerial;
+                g_SpatialCandidateVisitStamps[volumeIndex] = g_SpatialCandidateVisitSerial;
                 candidateIndices.InsertLast(volumeIndex);
             }
 

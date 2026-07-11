@@ -1,5 +1,5 @@
 namespace TriggerVisualizer {
-    Meta::Plugin@ PluginMeta = Meta::ExecutingPlugin();
+    Meta::Plugin@ g_PluginMeta = Meta::ExecutingPlugin();
 
     namespace App {
         [Setting hidden name="Dev panel open"]
@@ -8,8 +8,6 @@ namespace TriggerVisualizer {
         bool S_HideWithGame = true;
         [Setting hidden name="Hide with Openplanet UI"]
         bool S_HideWithOP = false;
-
-        string g_MenuIcon = "";
 
         void ResetGeneralVisibilitySettingsToDefaults() {
             S_HideWithGame = true;
@@ -25,21 +23,13 @@ namespace TriggerVisualizer {
             ResetGeneralDeveloperSettingsToDefaults();
         }
 
-        void ResetSettingsToDefaults() {
-            ResetGeneralSettingsToDefaults();
-        }
-
-        string PluginNameHash() {
-            return Crypto::MD5(TriggerVisualizer::PluginMeta.Name);
-        }
-
         string MenuIcon() {
             return Icons::Linode;
         }
 
         string MenuTitle() {
-            string hash = PluginNameHash();
-            return "\\$" + hash.SubStr(0, 3) + MenuIcon() + "\\$z " + TriggerVisualizer::PluginMeta.Name;
+            string hash = Crypto::MD5(TriggerVisualizer::g_PluginMeta.Name);
+            return "\\$" + hash.SubStr(0, 3) + MenuIcon() + "\\$z " + TriggerVisualizer::g_PluginMeta.Name;
         }
     }
 }

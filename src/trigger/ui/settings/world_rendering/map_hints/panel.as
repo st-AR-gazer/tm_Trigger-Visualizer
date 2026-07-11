@@ -1,7 +1,7 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            void RenderCurrentMapSuggestOffOverrideUI() {
+        namespace Ui {
+            void RenderCurrentMapSuggestOffOverrideUi() {
                 auto ctx = TriggerVisualizer::Trigger::Data::GetRuntimeContext();
                 auto snapshot = TriggerVisualizer::Trigger::GetCurrentMapSnapshot();
                 if (ctx is null || snapshot is null || snapshot.RenderHints is null) return;
@@ -37,12 +37,12 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void RenderMapHintsSettingsUI() {
+            void RenderMapHintsSettingsUi() {
                 S_RespectMapSuggestOff = UI::Checkbox(
                     "Respect map suggest-off##trigger-visualizer-settings",
                     S_RespectMapSuggestOff
                 );
-                RenderCurrentMapSuggestOffOverrideUI();
+                RenderCurrentMapSuggestOffOverrideUi();
                 ClampWorldRenderingSettings();
             }
         }

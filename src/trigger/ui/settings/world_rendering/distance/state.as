@@ -1,6 +1,6 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             const int PROXIMITY_MODE_CAMERA_ONLY = 0;
             const int PROXIMITY_MODE_VEHICLE_ONLY = 1;
             const int PROXIMITY_MODE_CAMERA_AND_VEHICLE = 2;
@@ -61,8 +61,6 @@
             int S_RenderProximityModeEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
             [Setting hidden name="Trigger: Render MediaTracker proximity mode" min=0 max=6]
             int S_RenderProximityModeMediaTracker = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
-            [Setting hidden name="Trigger: Render replay editor proximity mode" min=0 max=6]
-            int S_RenderProximityModeReplayEditor = PROXIMITY_MODE_CAMERA_AND_ORBITAL;
 
             int GetDistanceSettingsContextForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 if (ctx is null) return DISTANCE_SETTINGS_PLAYING;
@@ -194,10 +192,6 @@
 
             vec3 GetRenderDistanceWorldForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 return GetRenderDistanceWorldForContext(GetDistanceSettingsContextForRuntime(ctx));
-            }
-
-            vec3 GetRenderDistanceWorld() {
-                return GetRenderDistanceWorldForRuntime(TriggerVisualizer::Trigger::GetCurrentRuntimeContext());
             }
 
             vec3 GetRenderFadeBandWorldForContext(int context) {

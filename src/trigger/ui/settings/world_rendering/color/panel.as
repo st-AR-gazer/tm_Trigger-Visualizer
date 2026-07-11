@@ -1,7 +1,7 @@
-﻿namespace TriggerVisualizer {
+namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            void RenderColorSettingsUI() {
+        namespace Ui {
+            void RenderColorSettingsUi() {
                 if (UI::BeginCombo("Base color source##trigger-visualizer-color", GetColorSourceLabel(S_ColorSource))) {
                     RenderColorSourceOption(COLOR_SOURCE_UNIFORM);
                     RenderColorSourceOption(COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS);

@@ -1,17 +1,6 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
-            string GetRuntimeSourceContextLabel(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
-                if (ctx is null || !ctx.HasMap) return "No RootMap";
-                if (ctx.IsReplayEditor) return "Replay Editor";
-                if (ctx.IsEditorMediaTracker) return "Editor MediaTracker";
-                if (ctx.IsEditorTestMode) return "Editor Test Mode";
-                if (ctx.IsMeshModeler) return "Mesh Modeller";
-                if (ctx.IsInEditor) return "Editor";
-                if (ctx.IsPlayableMap) return "Playable Map";
-                return "Loaded RootMap";
-            }
-
+        namespace Ui {
             bool IsOffzoneSourceEnabledForRuntime(const TriggerVisualizer::Trigger::Data::RuntimeContext@ ctx) {
                 if (ctx is null || !ctx.HasMap) return false;
 
@@ -47,10 +36,6 @@ namespace TriggerVisualizer {
                 }
                 return IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(ctx)
                     || IsCrystalSourceEnabledForContext(GetSourceSettingsContextForRuntime(ctx));
-            }
-
-            string SettingBoolKey(bool value) {
-                return value ? "1" : "0";
             }
 
             bool IsMediaTrackerKnownSubtypeDisabledForContext(
@@ -150,15 +135,15 @@ namespace TriggerVisualizer {
                 return GetMapSnapshotFilterSettingsKey(TriggerVisualizer::Trigger::GetCurrentRuntimeContext());
             }
 
-            bool RenderSourceProfileToggleUI(const string &in label, const string &in id, bool value) {
+            bool RenderSourceProfileToggleUi(const string &in label, const string &in id, bool value) {
                 return UI::Checkbox(label + "##trigger-visualizer-sources-" + id, value);
             }
 
-            bool RenderSourceActionButtonUI(const string &in label) {
+            bool RenderSourceActionButtonUi(const string &in label) {
                 return TriggerVisualizer::Shared::StyledButton(label);
             }
 
-            void RenderMediaTrackerSubtypeToggleUI(int context, const string &in label, const string &in key) {
+            void RenderMediaTrackerSubtypeToggleUi(int context, const string &in label, const string &in key) {
                 bool value = IsMediaTrackerSubtypeEnabledForContext(context, key);
                 bool next = UI::Checkbox(
                     label + "##trigger-visualizer-sources-mediatracker-subtype-" + tostring(context) + "-" + key,
@@ -169,23 +154,23 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void RenderMediaTrackerSubtypeToolbarUI(int context, const array<string> &in keys, const string &in id) {
+            void RenderMediaTrackerSubtypeToolbarUi(int context, const array<string> &in keys, const string &in id) {
                 string suffix = "##trigger-visualizer-sources-mediatracker-" + tostring(context) + "-" + id;
-                if (RenderSourceActionButtonUI("Flip all" + suffix + "-flip")) {
+                if (RenderSourceActionButtonUi("Flip all" + suffix + "-flip")) {
                     FlipMediaTrackerSubtypeKeysForContext(context, keys);
                 }
                 UI::SameLine();
-                if (RenderSourceActionButtonUI("Show all" + suffix + "-show-all")) {
+                if (RenderSourceActionButtonUi("Show all" + suffix + "-show-all")) {
                     SetMediaTrackerSubtypeKeysForContext(context, keys, true);
                 }
                 UI::SameLine();
-                if (RenderSourceActionButtonUI("Hide all" + suffix + "-hide-all")) {
+                if (RenderSourceActionButtonUi("Hide all" + suffix + "-hide-all")) {
                     SetMediaTrackerSubtypeKeysForContext(context, keys, false);
                 }
                 UI::Separator();
             }
 
-            void RenderMediaTrackerSubtypeCategoryCamerasUI(int context) {
+            void RenderMediaTrackerSubtypeCategoryCamerasUi(int context) {
                 const string[] keys = {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CAMERA,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CUSTOM_CAMERA,
@@ -200,64 +185,64 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR
                 };
-                RenderMediaTrackerSubtypeToolbarUI(context, keys, "cameras");
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToolbarUi(context, keys, "cameras");
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Camera (all)",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CAMERA
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Custom Camera",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CUSTOM_CAMERA
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Orbital Camera",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_ORBITAL_CAMERA
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Path Camera",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PATH_CAMERA
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Player Camera",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA
                 );
                 UI::Indent();
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show CamDefault",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_DEFAULT
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Cam1",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_1
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Cam2",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_2
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Cam3",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_3
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show CamHelico",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_HELICO
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show CamFree",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_FREE
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show CamSpectator",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_PLAYER_CAMERA_SUBTYPE_CAM_SPECTATOR
@@ -265,7 +250,7 @@ namespace TriggerVisualizer {
                 UI::Unindent();
             }
 
-            void RenderMediaTrackerSubtypeCategoryVisualFxUI(int context) {
+            void RenderMediaTrackerSubtypeCategoryVisualFxUi(int context) {
                 const string[] keys = {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_2D_TRIANGLES,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_3D_TRIANGLES,
@@ -283,85 +268,85 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TONE_MAPPING,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_VEHICLE_LIGHTS
                 };
-                RenderMediaTrackerSubtypeToolbarUI(context, keys, "visual-fx");
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToolbarUi(context, keys, "visual-fx");
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show 2D Triangles / 2dTriangles",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_2D_TRIANGLES
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show 3D Triangles / 3dTriangles",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_3D_TRIANGLES
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Colors FX",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_COLORS_FX
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Color Grading",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_COLOR_GRADING
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Depth of Field",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_DEPTH_OF_FIELD
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Dirty Lens",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_DIRTY_LENS
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Fading Transition",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_FADING_TRANSITION
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Fog",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_FOG
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show HDR Bloom",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_HDR_BLOOM
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Image",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_IMAGE
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Inertial Tracking CamFX",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_INERTIAL_TRACKING_CAM_FX
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Shake Cam FX",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_SHAKE_CAM_FX
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Stereo 3D",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_STEREO_3D
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show ToneMapping",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TONE_MAPPING
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Vehicle Lights",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_VEHICLE_LIGHTS
                 );
             }
 
-            void RenderMediaTrackerSubtypeCategoryGameplayUiUI(int context) {
+            void RenderMediaTrackerSubtypeCategoryGameplayInterfaceUi(int context) {
                 const string[] keys = {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CAR_TRAILS,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_GHOST,
@@ -375,65 +360,65 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TIME,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TIME_SPEED
                 };
-                RenderMediaTrackerSubtypeToolbarUI(context, keys, "gameplay-ui");
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToolbarUi(context, keys, "gameplay-ui");
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Car Trails",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CAR_TRAILS
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Ghost",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_GHOST
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show ManiaLink UI",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_MANIALINK_UI
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show ManiaLink URL",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_MANIALINK_URL
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Music Volume",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_MUSIC_VOLUME
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Opponent Visibility",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_OPPONENT_VISIBILITY
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Sound FX",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_SOUND_FX
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Spectators",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_SPECTATORS
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Text",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TEXT
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Time",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TIME
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Time Speed",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_TIME_SPEED
                 );
             }
 
-            void RenderMediaTrackerSubtypeCategoryOtherUI(int context) {
+            void RenderMediaTrackerSubtypeCategoryOtherUi(int context) {
                 const string[] keys = {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_GPS,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_EDITING_CUT,
@@ -441,35 +426,35 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_MIXED,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_UNKNOWN
                 };
-                RenderMediaTrackerSubtypeToolbarUI(context, keys, "other");
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToolbarUi(context, keys, "other");
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show GPS",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_GPS
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Editing Cut",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_EDITING_CUT
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Reset / empty clips",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_RESET
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Mixed",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_MIXED
                 );
-                RenderMediaTrackerSubtypeToggleUI(
+                RenderMediaTrackerSubtypeToggleUi(
                     context,
                     "Show Unknown",
                     TriggerVisualizer::Trigger::MT_SUBTYPE_UNKNOWN
                 );
             }
 
-            void RenderAllMediaTrackerSubtypeToolbarUI(int context) {
+            void RenderAllMediaTrackerSubtypeToolbarUi(int context) {
                 const string[] keys = {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CAMERA,
                     TriggerVisualizer::Trigger::MT_SUBTYPE_CUSTOM_CAMERA,
@@ -516,19 +501,19 @@ namespace TriggerVisualizer {
                     TriggerVisualizer::Trigger::MT_SUBTYPE_UNKNOWN
                 };
                 string suffix = "##trigger-visualizer-sources-mediatracker-profile-" + tostring(context);
-                if (RenderSourceActionButtonUI("Flip all MediaTracker types" + suffix + "-flip")) {
+                if (RenderSourceActionButtonUi("Flip all MediaTracker types" + suffix + "-flip")) {
                     FlipMediaTrackerSubtypeKeysForContext(context, keys);
                 }
                 UI::SameLine();
-                if (RenderSourceActionButtonUI("Show all" + suffix + "-show-all")) {
+                if (RenderSourceActionButtonUi("Show all" + suffix + "-show-all")) {
                     SetMediaTrackerSubtypeKeysForContext(context, keys, true);
                 }
                 UI::SameLine();
-                if (RenderSourceActionButtonUI("Hide all" + suffix + "-hide-all")) {
+                if (RenderSourceActionButtonUi("Hide all" + suffix + "-hide-all")) {
                     SetMediaTrackerSubtypeKeysForContext(context, keys, false);
                 }
                 UI::SameLine();
-                if (RenderSourceActionButtonUI("Reset profile" + suffix + "-reset")) {
+                if (RenderSourceActionButtonUi("Reset profile" + suffix + "-reset")) {
                     SetMediaTrackerEnabledSubtypesForContext(
                         context,
                         GetDefaultMediaTrackerEnabledSubtypesForContext(context)
@@ -536,32 +521,32 @@ namespace TriggerVisualizer {
                 }
             }
 
-            void RenderMediaTrackerSubtypeSettingsUI(int context) {
-                RenderAllMediaTrackerSubtypeToolbarUI(context);
+            void RenderMediaTrackerSubtypeSettingsUi(int context) {
+                RenderAllMediaTrackerSubtypeToolbarUi(context);
                 UI::Separator();
                 UI::BeginTabBar("trigger-visualizer-mediatracker-subtype-tabs-" + tostring(context));
                 if (UI::BeginTabItem("Cameras")) {
-                    RenderMediaTrackerSubtypeCategoryCamerasUI(context);
+                    RenderMediaTrackerSubtypeCategoryCamerasUi(context);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Visual FX")) {
-                    RenderMediaTrackerSubtypeCategoryVisualFxUI(context);
+                    RenderMediaTrackerSubtypeCategoryVisualFxUi(context);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Gameplay/UI")) {
-                    RenderMediaTrackerSubtypeCategoryGameplayUiUI(context);
+                    RenderMediaTrackerSubtypeCategoryGameplayInterfaceUi(context);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Other")) {
-                    RenderMediaTrackerSubtypeCategoryOtherUI(context);
+                    RenderMediaTrackerSubtypeCategoryOtherUi(context);
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();
             }
 
-            void RenderSourceProfileSettingsUI(int context) {
+            void RenderSourceProfileSettingsUi(int context) {
                 bool offzoneValue = IsOffzoneSourceEnabledForContext(context);
-                bool offzoneNext = RenderSourceProfileToggleUI(
+                bool offzoneNext = RenderSourceProfileToggleUi(
                     "Show Offzone",
                     "offzone-profile-" + tostring(context),
                     offzoneValue
@@ -569,7 +554,7 @@ namespace TriggerVisualizer {
                 if (offzoneNext != offzoneValue) SetOffzoneSourceEnabledForContext(context, offzoneNext);
 
                 bool mediaTrackerValue = IsMediaTrackerSourceEnabledForContext(context);
-                bool mediaTrackerNext = RenderSourceProfileToggleUI(
+                bool mediaTrackerNext = RenderSourceProfileToggleUi(
                     "Show MediaTracker",
                     "mediatracker-profile-" + tostring(context),
                     mediaTrackerValue
@@ -581,7 +566,7 @@ namespace TriggerVisualizer {
 
                 bool crystalValue = IsCrystalSourceEnabledForContext(context);
                 UI::BeginDisabled(S_CrystalCustomItemsAndBlockItemsOnly);
-                bool crystalNext = RenderSourceProfileToggleUI(
+                bool crystalNext = RenderSourceProfileToggleUi(
                     "Show Crystal",
                     "crystal-profile-" + tostring(context),
                     crystalValue
@@ -602,26 +587,26 @@ namespace TriggerVisualizer {
                 if (IsMediaTrackerSourceEnabledForContext(context)) {
                     UI::Separator();
                     UI::Text("MediaTracker Types");
-                    RenderMediaTrackerSubtypeSettingsUI(context);
+                    RenderMediaTrackerSubtypeSettingsUi(context);
                 }
             }
 
-            void RenderSourcesSettingsUI() {
+            void RenderSourcesSettingsUi() {
                 UI::BeginTabBar("trigger-visualizer-source-major-tabs");
                 if (UI::BeginTabItem("Playing")) {
-                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_PLAYING);
+                    RenderSourceProfileSettingsUi(SOURCE_SETTINGS_PLAYING);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("Editor")) {
-                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_EDITOR);
+                    RenderSourceProfileSettingsUi(SOURCE_SETTINGS_EDITOR);
                     UI::EndTabItem();
                 }
-                if (UI::BeginTabItem("Mesh Modeller")) {
-                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_MESH_MODELLER);
+                if (UI::BeginTabItem("Mesh Modeler")) {
+                    RenderSourceProfileSettingsUi(SOURCE_SETTINGS_MESH_MODELER);
                     UI::EndTabItem();
                 }
                 if (UI::BeginTabItem("MediaTracker")) {
-                    RenderSourceProfileSettingsUI(SOURCE_SETTINGS_MEDIATRACKER);
+                    RenderSourceProfileSettingsUi(SOURCE_SETTINGS_MEDIATRACKER);
                     UI::EndTabItem();
                 }
                 UI::EndTabBar();

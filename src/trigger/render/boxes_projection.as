@@ -1,19 +1,9 @@
 namespace TriggerVisualizer {
     namespace Trigger {
         namespace Render {
-            float GetScreenDistance(const vec2 &in start, const vec2 &in end) {
-                vec2 delta = end - start;
-                return Math::Sqrt(delta.x * delta.x + delta.y * delta.y);
-            }
-
             vec2 NormalizeScreenVector(const vec2 &in value) {
-                float length = Math::Sqrt(value.x * value.x + value.y * value.y);
-                if (length <= 0.001f) return vec2();
-                return value * (1.0f / length);
-            }
-
-            float DotScreen(const vec2 &in a, const vec2 &in b) {
-                return a.x * b.x + a.y * b.y;
+                if (value.LengthSquared() <= 0.000001f) return vec2();
+                return value.Normalized();
             }
 
             bool IsProjectedQuadPotentiallyVisible(
@@ -24,39 +14,37 @@ namespace TriggerVisualizer {
                 float margin
             ) {
                 if (s0.z >= 0 || s1.z >= 0 || s2.z >= 0 || s3.z >= 0) return false;
-                if (!TriggerVisualizer::Trigger::UI::ShouldCullOffscreenWorldTiles()) return true;
+                if (!TriggerVisualizer::Trigger::Ui::ShouldCullOffscreenWorldTiles()) return true;
 
-                int displayWidth = Display::GetWidth();
-                int displayHeight = Display::GetHeight();
-                if (displayWidth <= 0 || displayHeight <= 0) return true;
+                vec2 displaySize = Display::GetSize();
+                if (displaySize.x <= 0.0f || displaySize.y <= 0.0f) return true;
 
                 float minX = Math::Min(Math::Min(s0.x, s1.x), Math::Min(s2.x, s3.x));
                 float maxX = Math::Max(Math::Max(s0.x, s1.x), Math::Max(s2.x, s3.x));
                 float minY = Math::Min(Math::Min(s0.y, s1.y), Math::Min(s2.y, s3.y));
                 float maxY = Math::Max(Math::Max(s0.y, s1.y), Math::Max(s2.y, s3.y));
                 if (maxX < -margin) return false;
-                if (minX > float(displayWidth) + margin) return false;
+                if (minX > displaySize.x + margin) return false;
                 if (maxY < -margin) return false;
-                if (minY > float(displayHeight) + margin) return false;
+                if (minY > displaySize.y + margin) return false;
                 return true;
             }
 
             bool IsProjectedLinePotentiallyVisible(const vec3 &in s0, const vec3 &in s1, float margin) {
                 if (s0.z >= 0 || s1.z >= 0) return false;
-                if (!TriggerVisualizer::Trigger::UI::ShouldCullOffscreenWorldTiles()) return true;
+                if (!TriggerVisualizer::Trigger::Ui::ShouldCullOffscreenWorldTiles()) return true;
 
-                int displayWidth = Display::GetWidth();
-                int displayHeight = Display::GetHeight();
-                if (displayWidth <= 0 || displayHeight <= 0) return true;
+                vec2 displaySize = Display::GetSize();
+                if (displaySize.x <= 0.0f || displaySize.y <= 0.0f) return true;
 
                 float minX = Math::Min(s0.x, s1.x);
                 float maxX = Math::Max(s0.x, s1.x);
                 float minY = Math::Min(s0.y, s1.y);
                 float maxY = Math::Max(s0.y, s1.y);
                 if (maxX < -margin) return false;
-                if (minX > float(displayWidth) + margin) return false;
+                if (minX > displaySize.x + margin) return false;
                 if (maxY < -margin) return false;
-                if (minY > float(displayHeight) + margin) return false;
+                if (minY > displaySize.y + margin) return false;
                 return true;
             }
 
@@ -99,8 +87,8 @@ namespace TriggerVisualizer {
                 const vec3 &in s3
             ) {
                 return Math::Max(
-                    Math::Max(GetScreenDistance(s0.xy, s1.xy), GetScreenDistance(s1.xy, s2.xy)),
-                    Math::Max(GetScreenDistance(s2.xy, s3.xy), GetScreenDistance(s3.xy, s0.xy))
+                    Math::Max(Math::Distance(s0.xy, s1.xy), Math::Distance(s1.xy, s2.xy)),
+                    Math::Max(Math::Distance(s2.xy, s3.xy), Math::Distance(s3.xy, s0.xy))
                 );
             }
 
@@ -110,7 +98,7 @@ namespace TriggerVisualizer {
                 const vec3 &in s2,
                 const vec3 &in s3
             ) {
-                return GetScreenDistance(s2.xy, s1.xy + (s3.xy - s0.xy));
+                return Math::Distance(s2.xy, s1.xy + (s3.xy - s0.xy));
             }
 
             uint GetTexturedWorldQuadSubdivisionCount(
@@ -128,12 +116,7 @@ namespace TriggerVisualizer {
                 int screenSizeSplits = int(Math::Ceil(GetProjectedQuadMaxScreenEdge(s0, s1, s2, s3) / SKULL_TILE_ICON_TARGET_PATCH_SCREEN_SIZE));
                 int perspectiveSplits = int(Math::Ceil(GetProjectedQuadPerspectiveError(s0, s1, s2, s3) / SKULL_TILE_ICON_TARGET_PATCH_PERSPECTIVE_ERROR));
                 int subdivisions = Math::Max(1, Math::Max(screenSizeSplits, perspectiveSplits));
-                int maxSubdivisions = Math::Clamp(
-                    TriggerVisualizer::Trigger::UI::S_TileIconMaxSubdivisions,
-                    1,
-                    int(SKULL_TILE_ICON_HARD_MAX_SUBDIVISIONS)
-                );
-                return uint(Math::Clamp(subdivisions, 1, maxSubdivisions));
+                return uint(Math::Clamp(subdivisions, 1, SKULL_TILE_ICON_MAX_SUBDIVISIONS));
             }
 
             bool DrawAffineTexturedWorldQuadPatch(
@@ -162,17 +145,17 @@ namespace TriggerVisualizer {
                 vec2 xAxis = NormalizeScreenVector(xEdge);
                 if (xAxis.x == 0.0f && xAxis.y == 0.0f) return false;
 
-                float xLen = GetScreenDistance(s0.xy, s1.xy);
+                float xLen = Math::Distance(s0.xy, s1.xy);
                 if (xLen < SKULL_TILE_ICON_MIN_SCREEN_SIZE) return false;
 
                 vec2 yAxis = vec2(-xAxis.y, xAxis.x);
-                float yParallel = DotScreen(yEdge, xAxis);
-                float yPerpendicular = DotScreen(yEdge, yAxis);
+                float yParallel = Math::Dot(yEdge, xAxis);
+                float yPerpendicular = Math::Dot(yEdge, yAxis);
                 if (Math::Abs(yPerpendicular) < SKULL_TILE_ICON_MIN_SCREEN_SIZE) return false;
 
                 vec2 p2Delta = s2.xy - s0.xy;
-                float p2LocalY = DotScreen(p2Delta, yAxis) / yPerpendicular;
-                float p2LocalX = (DotScreen(p2Delta, xAxis) - yParallel * p2LocalY) / xLen;
+                float p2LocalY = Math::Dot(p2Delta, yAxis) / yPerpendicular;
+                float p2LocalX = (Math::Dot(p2Delta, xAxis) - yParallel * p2LocalY) / xLen;
                 vec2 patternOrigin = vec2(-uvMin.x / uvSize.x, -uvMin.y / uvSize.y);
                 vec2 patternSize = vec2(1.0f / uvSize.x, 1.0f / uvSize.y);
                 nvg::Save();
@@ -204,18 +187,6 @@ namespace TriggerVisualizer {
 
                 uint subdivisions = GetTexturedWorldQuadSubdivisionCount(p0, p1, p2, p3);
                 if (subdivisions == 0) return false;
-                bool budgetsEnabled = TriggerVisualizer::Trigger::UI::ArePerformanceBudgetsEnabled();
-                if (budgetsEnabled && G_TileIconPatchBudgetRemaining == 0) return false;
-
-                uint patchCount = subdivisions * subdivisions;
-                if (budgetsEnabled && patchCount > G_TileIconPatchBudgetRemaining) {
-                    uint budgetedSubdivisions = uint(Math::Floor(Math::Sqrt(float(G_TileIconPatchBudgetRemaining))));
-                    if (budgetedSubdivisions == 0) return false;
-                    if (subdivisions > budgetedSubdivisions) {
-                        subdivisions = budgetedSubdivisions;
-                    }
-                    patchCount = subdivisions * subdivisions;
-                }
 
                 bool drewAny = false;
                 vec3 rightEdge = p1 - p0;
@@ -243,21 +214,12 @@ namespace TriggerVisualizer {
                         ) || drewAny;
                     }
                 }
-                if (budgetsEnabled) {
-                    if (patchCount >= G_TileIconPatchBudgetRemaining) {
-                        G_TileIconPatchBudgetRemaining = 0;
-                    } else {
-                        G_TileIconPatchBudgetRemaining -= patchCount;
-                    }
-                }
-
                 return drewAny;
             }
 
             vec3 NormalizeWorldVector(const vec3 &in value) {
-                float length = Math::Sqrt(Math::Dot(value, value));
-                if (length <= 0.0001f) return vec3();
-                return value * (1.0f / length);
+                if (value.LengthSquared() <= 0.00000001f) return vec3();
+                return value.Normalized();
             }
 
             vec3 GetPositiveWorldDirection(const vec3 &in direction) {
@@ -274,12 +236,11 @@ namespace TriggerVisualizer {
                 nvg::Texture@ texture
             ) {
                 if (!ShouldRenderWorldTileIconsNow()) return false;
-                if (G_TileIconPatchBudgetRemaining == 0) return false;
                 if (texture is null) return false;
 
-                float uLen = Math::Distance(origin, origin + uEdge);
-                float vLen = Math::Distance(origin, origin + vEdge);
-                float iconSize = Math::Min(uLen, vLen) * TriggerVisualizer::Trigger::UI::S_SkullTileIconScale;
+                float uLen = uEdge.Length();
+                float vLen = vEdge.Length();
+                float iconSize = Math::Min(uLen, vLen) * TriggerVisualizer::Trigger::Ui::S_SkullTileIconScale;
                 if (iconSize <= 0.001f) return false;
 
                 vec3 center = origin + (uEdge + vEdge) * 0.5f;
@@ -313,37 +274,8 @@ namespace TriggerVisualizer {
                     p2,
                     p3,
                     texture,
-                    TriggerVisualizer::Trigger::UI::S_SkullTileIconAlpha
+                    TriggerVisualizer::Trigger::Ui::S_SkullTileIconAlpha
                 );
-            }
-
-            bool DrawProjectedQuad(
-                const vec3 &in p0,
-                const vec3 &in p1,
-                const vec3 &in p2,
-                const vec3 &in p3,
-                const vec4 &in color
-            ) {
-                vec3 s0 = Camera::ToScreen(p0);
-                vec3 s1 = Camera::ToScreen(p1);
-                vec3 s2 = Camera::ToScreen(p2);
-                vec3 s3 = Camera::ToScreen(p3);
-                if (!IsProjectedQuadPotentiallyVisible(s0, s1, s2, s3, SCREEN_QUAD_VISIBILITY_MARGIN)) return false;
-
-                bool drewFill = false;
-                if (color.w > 0.001f) {
-                    nvg::BeginPath();
-                    nvg::FillColor(color);
-                    nvg::MoveTo(s0.xy);
-                    nvg::LineTo(s1.xy);
-                    nvg::LineTo(s2.xy);
-                    nvg::LineTo(s3.xy);
-                    nvg::ClosePath();
-                    nvg::Fill();
-                    drewFill = true;
-                }
-
-                return drewFill;
             }
         }
     }

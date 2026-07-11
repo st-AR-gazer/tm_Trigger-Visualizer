@@ -1,12 +1,15 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             const int COLOR_MODE_STATIC = 0;
             const int COLOR_MODE_DISTANCE_FADE = 1;
             const int COLOR_MODE_LINE_SPLIT_DENSITY = 2;
             const int COLOR_MODE_MEDIATRACKER_TRACK_COLORS = 3;
             const int COLOR_SOURCE_UNIFORM = 0;
             const int COLOR_SOURCE_MEDIATRACKER_TRACK_COLORS = 1;
+            const int DEFAULT_TURBO_ROULETTE_YELLOW_DURATION_MS = 800;
+            const int DEFAULT_TURBO_ROULETTE_CYAN_DURATION_MS = 350;
+            const int DEFAULT_TURBO_ROULETTE_PURPLE_DURATION_MS = 350;
 
             [Setting hidden name="Trigger: Color mode" min=0 max=3]
             int S_ColorMode = COLOR_MODE_MEDIATRACKER_TRACK_COLORS;
@@ -29,11 +32,11 @@ namespace TriggerVisualizer {
             [Setting hidden name="Trigger: Animate turbo roulette color"]
             bool S_AnimateTurboRouletteColor = true;
             [Setting hidden name="Trigger: Turbo roulette yellow duration ms" min=50 max=5000]
-            int S_TurboRouletteYellowDurationMs = 800;
+            int S_TurboRouletteYellowDurationMs = DEFAULT_TURBO_ROULETTE_YELLOW_DURATION_MS;
             [Setting hidden name="Trigger: Turbo roulette cyan duration ms" min=50 max=5000]
-            int S_TurboRouletteCyanDurationMs = 350;
+            int S_TurboRouletteCyanDurationMs = DEFAULT_TURBO_ROULETTE_CYAN_DURATION_MS;
             [Setting hidden name="Trigger: Turbo roulette purple duration ms" min=50 max=5000]
-            int S_TurboRoulettePurpleDurationMs = 350;
+            int S_TurboRoulettePurpleDurationMs = DEFAULT_TURBO_ROULETTE_PURPLE_DURATION_MS;
             [Setting hidden name="Trigger: Turbo roulette phase offset ms" min=-10000 max=10000]
             int S_TurboRoulettePhaseOffsetMs = 0;
             [Setting hidden name="Trigger: Outline alpha" min=0 max=1]

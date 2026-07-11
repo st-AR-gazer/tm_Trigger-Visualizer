@@ -1,6 +1,16 @@
 namespace TriggerVisualizer {
     namespace Trigger {
         namespace Render {
+            float GetDistanceSqToWorldLineSegment(const vec3 &in point, const vec3 &in start, const vec3 &in end) {
+                vec3 line = end - start;
+                float lineLengthSq = Math::Distance2(start, end);
+                if (lineLengthSq <= 0.0001f) return Math::Distance2(point, start);
+
+                float t = Math::Dot(point - start, line) / lineLengthSq;
+                t = Math::Clamp(t, 0.0f, 1.0f);
+                return Math::Distance2(point, Math::Lerp(start, end, t));
+            }
+
             float GetDistanceToWorldLineSegment(const vec3 &in point, const vec3 &in start, const vec3 &in end) {
                 return Math::Sqrt(GetDistanceSqToWorldLineSegment(point, start, end));
             }
@@ -22,16 +32,16 @@ namespace TriggerVisualizer {
                 const vec3 &in cameraPos,
                 bool allowAdaptiveSplitting = true
             ) {
-                if (!allowAdaptiveSplitting || !TriggerVisualizer::Trigger::UI::S_AdaptiveLineSplitting) return 1;
+                if (!allowAdaptiveSplitting || !TriggerVisualizer::Trigger::Ui::S_AdaptiveLineSplitting) return 1;
 
                 float lineLength = Math::Distance(start, end);
                 if (lineLength <= 0.001f) return 1;
 
                 float minSegmentLength = Math::Max(
-                    TriggerVisualizer::Trigger::UI::S_LineSplitTargetSegmentLength,
-                    TriggerVisualizer::Trigger::UI::LINE_SPLIT_MINIMUM_SAFE_LENGTH
+                    TriggerVisualizer::Trigger::Ui::S_LineSplitTargetSegmentLength,
+                    TriggerVisualizer::Trigger::Ui::LINE_SPLIT_MINIMUM_SAFE_LENGTH
                 );
-                int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitMaxSegmentsPerEdge, 1);
+                int maxAllowedSegments = Math::Max(TriggerVisualizer::Trigger::Ui::S_LineSplitMaxSegmentsPerEdge, 1);
                 int maxSegments = Math::Max(
                     1,
                     Math::Min(int(Math::Floor(lineLength / minSegmentLength)), maxAllowedSegments)
@@ -39,33 +49,27 @@ namespace TriggerVisualizer {
                 if (maxSegments <= 1) return 1;
 
                 float startDistance = ClampLineSplitDistanceToUserRange(
-                    lineLength * Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitStartDistanceFactor, 0.0f),
-                    TriggerVisualizer::Trigger::UI::S_LineSplitMinStartDistance,
-                    TriggerVisualizer::Trigger::UI::S_LineSplitMaxStartDistance
+                    lineLength * Math::Max(TriggerVisualizer::Trigger::Ui::S_LineSplitStartDistanceFactor, 0.0f),
+                    TriggerVisualizer::Trigger::Ui::S_LineSplitMinStartDistance,
+                    TriggerVisualizer::Trigger::Ui::S_LineSplitMaxStartDistance
                 );
                 float fullDistance = ClampLineSplitDistanceToUserRange(
-                    lineLength * Math::Max(TriggerVisualizer::Trigger::UI::S_LineSplitFullDistanceFactor, 0.0f),
-                    TriggerVisualizer::Trigger::UI::S_LineSplitMinFullDistance,
-                    TriggerVisualizer::Trigger::UI::S_LineSplitMaxFullDistance
+                    lineLength * Math::Max(TriggerVisualizer::Trigger::Ui::S_LineSplitFullDistanceFactor, 0.0f),
+                    TriggerVisualizer::Trigger::Ui::S_LineSplitMinFullDistance,
+                    TriggerVisualizer::Trigger::Ui::S_LineSplitMaxFullDistance
                 );
                 fullDistance = Math::Min(fullDistance, Math::Max(startDistance - 0.001f, 0.0f));
                 float cameraDistance = GetDistanceToWorldLineSegment(cameraPos, start, end);
                 if (cameraDistance >= startDistance) return 1;
                 if (cameraDistance <= fullDistance) return uint(maxSegments);
 
-                float range = Math::Max(startDistance - fullDistance, 0.001f);
-                float proximity = SmoothStep01((startDistance - cameraDistance) / range);
+                float proximity = SmoothStep01(Math::InvLerp(startDistance, fullDistance, cameraDistance));
                 int segmentCount = 1 + int(Math::Ceil(float(maxSegments - 1) * proximity));
                 return uint(Math::Clamp(segmentCount, 1, maxSegments));
             }
 
             uint CountTriggerVolumeOutlineSegments(const TriggerVolume@ box, const vec3 &in cameraPos) {
                 if (box !is null && box.HasChildVolumes()) {
-                    if (ShouldSimplifyGroupedTriggersNow()) {
-                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        return CountTriggerVolumeOutlineSegments(simplifiedBox, cameraPos);
-                    }
-
                     if (box.HasStaticOutlineCache()) {
                         uint groupCount = 0;
                         uint cachedCount = box.CachedStaticOutlineCount();
@@ -157,23 +161,8 @@ namespace TriggerVisualizer {
                 return count;
             }
 
-            uint CountTriggerVolumesOutlineSegments(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
-                if (boxes is null) return 0;
-
-                uint count = 0;
-                for (uint i = 0; i < boxes.Length; i++) {
-                    count += CountTriggerVolumeOutlineSegments(boxes[i], cameraPos);
-                }
-                return count;
-            }
-
             uint GetMaxTriggerVolumeOutlineEdgeSegments(const TriggerVolume@ box, const vec3 &in cameraPos) {
                 if (box !is null && box.HasChildVolumes()) {
-                    if (ShouldSimplifyGroupedTriggersNow()) {
-                        auto simplifiedBox = TriggerVisualizer::Trigger::Data::CloneTriggerVolumeForMerge(box);
-                        return GetMaxTriggerVolumeOutlineEdgeSegments(simplifiedBox, cameraPos);
-                    }
-
                     if (box.HasStaticOutlineCache()) {
                         uint groupMaxSegments = 0;
                         uint cachedCount = box.CachedStaticOutlineCount();
@@ -253,34 +242,10 @@ namespace TriggerVisualizer {
                 return maxSegments;
             }
 
-            uint GetMaxTriggerVolumesOutlineEdgeSegments(const array<TriggerVolume@> @boxes, const vec3 &in cameraPos) {
-                if (boxes is null) return 0;
-
-                uint maxSegments = 0;
-                for (uint i = 0; i < boxes.Length; i++) {
-                    maxSegments = Math::Max(
-                        maxSegments,
-                        GetMaxTriggerVolumeOutlineEdgeSegments(boxes[i], cameraPos)
-                    );
-                }
-                return maxSegments;
-            }
-
-            bool DrawProjectedLineSegment(const vec3 &in start, const vec3 &in end) {
-                vec3 startScreenPos = Camera::ToScreen(start);
-                vec3 endScreenPos = Camera::ToScreen(end);
-                if (startScreenPos.z >= 0 || endScreenPos.z >= 0) return false;
-                if (!IsProjectedLinePotentiallyVisible(startScreenPos, endScreenPos, SCREEN_QUAD_VISIBILITY_MARGIN)) return false;
-
-                nvg::MoveTo(startScreenPos.xy);
-                nvg::LineTo(endScreenPos.xy);
-                return true;
-            }
-
             float GetLineFrustumResolveMinLength() {
                 return Math::Max(
-                    TriggerVisualizer::Trigger::UI::S_LineSplitTargetSegmentLength,
-                    TriggerVisualizer::Trigger::UI::LINE_SPLIT_MINIMUM_SAFE_LENGTH
+                    TriggerVisualizer::Trigger::Ui::S_LineSplitTargetSegmentLength,
+                    TriggerVisualizer::Trigger::Ui::LINE_SPLIT_MINIMUM_SAFE_LENGTH
                 );
             }
 
@@ -302,7 +267,7 @@ namespace TriggerVisualizer {
 
                 bool anyScreenFront = startScreenPos.z < 0 || endScreenPos.z < 0;
                 int primitiveClass = WORLD_PRIMITIVE_OUTSIDE;
-                if (!G_WorldFrustumState.Valid) {
+                if (!g_WorldFrustumState.Valid) {
                     primitiveClass = anyScreenFront ? WORLD_PRIMITIVE_MIXED : WORLD_PRIMITIVE_OUTSIDE;
                 } else {
                     primitiveClass = ClassifyCameraLineForFrustum(
@@ -323,34 +288,17 @@ namespace TriggerVisualizer {
                 return drewStart || drewEnd;
             }
 
-            void DrawWorldLineSegmentImmediate(const vec3 &in start, const vec3 &in end, const vec4 &in color) {
-                if (G_WorldLineSegmentBudgetRemaining == 0) return;
-
-                nvg::BeginPath();
-                nvg::StrokeColor(color);
-                if (DrawProjectedLineSegmentFrustumSafe(start, end, 0)) {
-                    if (ConsumeWorldLineSegmentBudget()) {
-                        nvg::Stroke();
-                    }
-                }
-                nvg::ClosePath();
-            }
-
-            bool DrawWorldLineSegmentToCurrentPathForVolume(
+            bool DrawWorldLineSegmentToCurrentPath(
                 const vec3 &in start,
-                const vec3 &in end,
-                const TriggerVolume@ budgetVolume
+                const vec3 &in end
             ) {
-                if (!HasWorldLineSegmentBudgetForVolume(budgetVolume)) return false;
-                if (!DrawProjectedLineSegmentFrustumSafe(start, end, 0)) return false;
-                return ConsumeWorldLineSegmentBudgetForVolume(budgetVolume);
+                return DrawProjectedLineSegmentFrustumSafe(start, end, 0);
             }
 
-            bool DrawWorldLineAdaptiveToCurrentPathForVolume(
+            bool DrawWorldLineAdaptiveToCurrentPath(
                 const vec3 &in start,
                 const vec3 &in end,
                 const vec3 &in cameraPos,
-                const TriggerVolume@ budgetVolume,
                 bool allowAdaptiveSplitting
             ) {
                 uint segmentCount = GetAdaptiveLineSegmentCount(
@@ -360,82 +308,33 @@ namespace TriggerVisualizer {
                     allowAdaptiveSplitting
                 );
                 if (segmentCount <= 1) {
-                    return DrawWorldLineSegmentToCurrentPathForVolume(start, end, budgetVolume);
+                    return DrawWorldLineSegmentToCurrentPath(start, end);
                 }
 
                 bool drewAny = false;
                 float invSegments = 1.0f / float(segmentCount);
                 for (uint i = 0; i < segmentCount; i++) {
-                    if (!HasWorldLineSegmentBudgetForVolume(budgetVolume)) break;
-
                     float t0 = float(i) * invSegments;
                     float t1 = float(i + 1) * invSegments;
-                    drewAny = DrawWorldLineSegmentToCurrentPathForVolume(
+                    drewAny = DrawWorldLineSegmentToCurrentPath(
                         Math::Lerp(start, end, t0),
-                        Math::Lerp(start, end, t1),
-                        budgetVolume
+                        Math::Lerp(start, end, t1)
                     ) || drewAny;
                 }
                 return drewAny;
             }
 
-            void DrawWorldLineSegmentImmediateForVolume(
+            void DrawWorldLineSegmentImmediate(
                 const vec3 &in start,
                 const vec3 &in end,
-                const vec4 &in color,
-                const TriggerVolume@ budgetVolume
+                const vec4 &in color
             ) {
-                if (!HasWorldLineSegmentBudgetForVolume(budgetVolume)) return;
-
                 nvg::BeginPath();
                 nvg::StrokeColor(color);
                 if (DrawProjectedLineSegmentFrustumSafe(start, end, 0)) {
-                    if (ConsumeWorldLineSegmentBudgetForVolume(budgetVolume)) {
-                        nvg::Stroke();
-                    }
+                    nvg::Stroke();
                 }
                 nvg::ClosePath();
-            }
-
-            void DrawWorldLineAdaptiveColoredForVolume(
-                const vec3 &in start,
-                const vec3 &in end,
-                const vec3 &in cameraPos,
-                const vec4 &in baseColor,
-                uint boxIndex,
-                uint edgeIndex,
-                const TriggerVolume@ budgetVolume,
-                bool allowAdaptiveSplitting
-            ) {
-                uint segmentCount = GetAdaptiveLineSegmentCount(
-                    start,
-                    end,
-                    cameraPos,
-                    allowAdaptiveSplitting
-                );
-                if (segmentCount <= 1) {
-                    DrawWorldLineSegmentImmediateForVolume(
-                        start,
-                        end,
-                        GetOutlineSegmentColor(baseColor, boxIndex, edgeIndex, 0),
-                        budgetVolume
-                    );
-                    return;
-                }
-
-                float invSegments = 1.0f / float(segmentCount);
-                for (uint i = 0; i < segmentCount; i++) {
-                    if (!HasWorldLineSegmentBudgetForVolume(budgetVolume)) break;
-
-                    float t0 = float(i) * invSegments;
-                    float t1 = float(i + 1) * invSegments;
-                    DrawWorldLineSegmentImmediateForVolume(
-                        Math::Lerp(start, end, t0),
-                        Math::Lerp(start, end, t1),
-                        GetOutlineSegmentColor(baseColor, boxIndex, edgeIndex, i),
-                        budgetVolume
-                    );
-                }
             }
 
             void DrawWorldLineAdaptiveColored(
@@ -444,18 +343,34 @@ namespace TriggerVisualizer {
                 const vec3 &in cameraPos,
                 const vec4 &in baseColor,
                 uint boxIndex,
-                uint edgeIndex
+                uint edgeIndex,
+                bool allowAdaptiveSplitting
             ) {
-                DrawWorldLineAdaptiveColoredForVolume(
+                uint segmentCount = GetAdaptiveLineSegmentCount(
                     start,
                     end,
                     cameraPos,
-                    baseColor,
-                    boxIndex,
-                    edgeIndex,
-                    null,
-                    true
+                    allowAdaptiveSplitting
                 );
+                if (segmentCount <= 1) {
+                    DrawWorldLineSegmentImmediate(
+                        start,
+                        end,
+                        GetOutlineSegmentColor(baseColor, boxIndex, edgeIndex, 0)
+                    );
+                    return;
+                }
+
+                float invSegments = 1.0f / float(segmentCount);
+                for (uint i = 0; i < segmentCount; i++) {
+                    float t0 = float(i) * invSegments;
+                    float t1 = float(i + 1) * invSegments;
+                    DrawWorldLineSegmentImmediate(
+                        Math::Lerp(start, end, t0),
+                        Math::Lerp(start, end, t1),
+                        GetOutlineSegmentColor(baseColor, boxIndex, edgeIndex, i)
+                    );
+                }
             }
         }
     }

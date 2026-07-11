@@ -28,21 +28,10 @@ namespace TriggerVisualizer {
                     return ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".webp";
                 }
 
-                string GetTileIconStorageFolderPath() {
-                    return IO::FromStorageFolder(TILE_ICON_STORAGE_DIR);
-                }
-
                 string GetConfiguredSkullTileIconTexturePath() {
-                    string storagePath = TriggerVisualizer::Trigger::UI::S_CustomTileIconStoragePath;
+                    string storagePath = TriggerVisualizer::Trigger::Ui::S_CustomTileIconStoragePath;
                     if (storagePath.Length == 0) return DEFAULT_SKULL_TILE_ICON_PATH;
                     if (storagePath == MISSING_TILE_ICON_STORAGE_PATH) return DEFAULT_MISSING_TILE_ICON_PATH;
-                    return IO::FromStorageFolder(storagePath);
-                }
-
-                string GetCurrentTileIconDisplayPath() {
-                    string storagePath = TriggerVisualizer::Trigger::UI::S_CustomTileIconStoragePath;
-                    if (storagePath == MISSING_TILE_ICON_STORAGE_PATH) return DEFAULT_MISSING_TILE_ICON_PATH + " (missing fallback)";
-                    if (storagePath.Length == 0) return DEFAULT_SKULL_TILE_ICON_PATH + " (default)";
                     return IO::FromStorageFolder(storagePath);
                 }
 
@@ -50,20 +39,6 @@ namespace TriggerVisualizer {
                     @g_SkullTileIconTexture = null;
                     g_TriedLoadSkullTileIconTexture = false;
                     g_LoadedSkullTileIconPath = "";
-                }
-
-                int FindBuiltInTileIconTextureCacheIndex(const string &in path) {
-                    for (uint i = 0; i < g_BuiltInTileIconTexturePaths.Length; i++) {
-                        if (g_BuiltInTileIconTexturePaths[i] == path) return int(i);
-                    }
-                    return -1;
-                }
-
-                int FindStorageTileIconTextureCacheIndex(const string &in storagePath) {
-                    for (uint i = 0; i < g_StorageTileIconTexturePaths.Length; i++) {
-                        if (g_StorageTileIconTexturePaths[i] == storagePath) return int(i);
-                    }
-                    return -1;
                 }
 
                 string BuildStoredTileIconPath(const string &in sourcePath) {
@@ -88,8 +63,9 @@ namespace TriggerVisualizer {
                         log(
                             "Cannot import tile icon because the source file does not exist: " + sourcePath,
                             LogLevel::Warning,
-                            88,
-                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                            63,
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage",
+                            "Render::Assets"
                         );
                         return "";
                     }
@@ -98,13 +74,14 @@ namespace TriggerVisualizer {
                         log(
                             "Cannot import tile icon because the file type is not supported: " + sourcePath,
                             LogLevel::Warning,
-                            98,
-                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                            74,
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage",
+                            "Render::Assets"
                         );
                         return "";
                     }
 
-                    string storageFolder = GetTileIconStorageFolderPath();
+                    string storageFolder = IO::FromStorageFolder(TILE_ICON_STORAGE_DIR);
                     if (!IO::FolderExists(storageFolder)) {
                         IO::CreateFolder(storageFolder, true);
                     }
@@ -118,8 +95,9 @@ namespace TriggerVisualizer {
                         log(
                             "Failed to copy tile icon image to storage: " + sourcePath + " -> " + targetPath,
                             LogLevel::Error,
-                            118,
-                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                            95,
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage",
+                            "Render::Assets"
                         );
                         return "";
                     }
@@ -128,8 +106,9 @@ namespace TriggerVisualizer {
                         log(
                             "Tile icon copy did not create the expected storage file: " + targetPath,
                             LogLevel::Error,
-                            128,
-                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                            106,
+                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage",
+                            "Render::Assets"
                         );
                         return "";
                     }
@@ -157,8 +136,9 @@ namespace TriggerVisualizer {
                         log(
                             "Failed to read tile icon image file: " + path,
                             LogLevel::Warning,
-                            157,
-                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                            136,
+                            "TriggerVisualizer::Trigger::Render::Assets::ReadFileToBuffer",
+                            "Render::Assets"
                         );
                     }
                     file.Close();
@@ -179,8 +159,9 @@ namespace TriggerVisualizer {
                         log(
                             "Failed to load tile icon texture: " + path,
                             LogLevel::Warning,
-                            179,
-                            "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                            159,
+                            "TriggerVisualizer::Trigger::Render::Assets::LoadTileIconTexture",
+                            "Render::Assets"
                         );
                     }
 
@@ -195,8 +176,9 @@ namespace TriggerVisualizer {
                             log(
                                 "Failed to load missing tile icon texture: " + DEFAULT_MISSING_TILE_ICON_PATH,
                                 LogLevel::Warning,
-                                195,
-                                "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                                176,
+                                "TriggerVisualizer::Trigger::Render::Assets::GetMissingTileIconTexture",
+                                "Render::Assets"
                             );
                         }
                     }
@@ -207,7 +189,7 @@ namespace TriggerVisualizer {
                     if (path.Length == 0) return null;
                     if (path == DEFAULT_MISSING_TILE_ICON_PATH) return GetMissingTileIconTexture();
 
-                    int cacheIndex = FindBuiltInTileIconTextureCacheIndex(path);
+                    int cacheIndex = g_BuiltInTileIconTexturePaths.Find(path);
                     if (cacheIndex < 0) {
                         g_BuiltInTileIconTexturePaths.InsertLast(path);
                         g_TriedLoadBuiltInTileIconTextures.InsertLast(false);
@@ -223,8 +205,9 @@ namespace TriggerVisualizer {
                             log(
                                 "Failed to load built-in tile icon texture: " + path,
                                 LogLevel::Warning,
-                                223,
-                                "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                                205,
+                                "TriggerVisualizer::Trigger::Render::Assets::GetBuiltInTileIconTexture",
+                                "Render::Assets"
                             );
                             @g_BuiltInTileIconTextures[index] = GetMissingTileIconTexture();
                         }
@@ -237,7 +220,7 @@ namespace TriggerVisualizer {
                     if (storagePath.Length == 0) return null;
                     if (storagePath == MISSING_TILE_ICON_STORAGE_PATH) return GetMissingTileIconTexture();
 
-                    int cacheIndex = FindStorageTileIconTextureCacheIndex(storagePath);
+                    int cacheIndex = g_StorageTileIconTexturePaths.Find(storagePath);
                     if (cacheIndex < 0) {
                         g_StorageTileIconTexturePaths.InsertLast(storagePath);
                         g_TriedLoadStorageTileIconTextures.InsertLast(false);
@@ -254,8 +237,9 @@ namespace TriggerVisualizer {
                             log(
                                 "Failed to load custom tile icon texture: " + path,
                                 LogLevel::Warning,
-                                254,
-                                "TriggerVisualizer::Trigger::Render::Assets::CopyTileIconImageToStorage"
+                                237,
+                                "TriggerVisualizer::Trigger::Render::Assets::GetStorageTileIconTexture",
+                                "Render::Assets"
                             );
                             @g_StorageTileIconTextures[index] = GetMissingTileIconTexture();
                         }
@@ -280,8 +264,8 @@ namespace TriggerVisualizer {
                 }
 
                 nvg::Texture@ GetSkullTileIconTexture() {
-                    bool useCustomImage = TriggerVisualizer::Trigger::UI::S_CustomTileIconStoragePath.Length > 0
-                        && TriggerVisualizer::Trigger::UI::S_CustomTileIconStoragePath != MISSING_TILE_ICON_STORAGE_PATH;
+                    bool useCustomImage = TriggerVisualizer::Trigger::Ui::S_CustomTileIconStoragePath.Length > 0
+                        && TriggerVisualizer::Trigger::Ui::S_CustomTileIconStoragePath != MISSING_TILE_ICON_STORAGE_PATH;
                     string path = GetConfiguredSkullTileIconTexturePath();
 
                     if (!g_TriedLoadSkullTileIconTexture || g_LoadedSkullTileIconPath != path) {
@@ -292,8 +276,9 @@ namespace TriggerVisualizer {
                             log(
                                 "Failed to load configured tile icon texture: " + path,
                                 LogLevel::Warning,
-                                292,
-                                "TriggerVisualizer::Trigger::Render::Assets::GetCustomTileIconStoragePathFromKey"
+                                276,
+                                "TriggerVisualizer::Trigger::Render::Assets::GetSkullTileIconTexture",
+                                "Render::Assets"
                             );
                             @g_SkullTileIconTexture = GetMissingTileIconTexture();
                             g_LoadedSkullTileIconPath = DEFAULT_MISSING_TILE_ICON_PATH;
@@ -301,10 +286,6 @@ namespace TriggerVisualizer {
                     }
 
                     return g_SkullTileIconTexture;
-                }
-
-                bool HasSkullTileIconTexture() {
-                    return GetSkullTileIconTexture() !is null;
                 }
 
                 string GetMediaTrackerTileIconPathForSubtype(const string &in rawKey) {
@@ -347,9 +328,9 @@ namespace TriggerVisualizer {
 
                 string GetMediaTrackerTileIconTextureKeyForSubtype(const string &in rawKey) {
                     string key = NormalizeTriggerTargetKey(rawKey);
-                    if (!TriggerVisualizer::Trigger::UI::IsTileIconEnabledForSubtype(key)) return "";
+                    if (!TriggerVisualizer::Trigger::Ui::IsTileIconEnabledForSubtype(key)) return "";
 
-                    string customStoragePath = TriggerVisualizer::Trigger::UI::GetTileIconCustomStoragePathForSubtype(key);
+                    string customStoragePath = TriggerVisualizer::Trigger::Ui::GetTileIconCustomStoragePathForSubtype(key);
                     if (customStoragePath.Length > 0) return GetCustomTileIconTextureKey(customStoragePath);
                     return GetMediaTrackerTileIconPathForSubtype(key);
                 }
@@ -403,10 +384,10 @@ namespace TriggerVisualizer {
                 string GetTileIconTextureKeyForVolume(const TriggerVolume@ volume) {
                     if (volume is null) return "";
                     if (volume.Source == TRIGGER_SOURCE_OFFZONE) {
-                        return TriggerVisualizer::Trigger::UI::S_ShowOffzoneTileIcon ? OFFZONE_TILE_ICON_TEXTURE_KEY : "";
+                        return TriggerVisualizer::Trigger::Ui::S_ShowOffzoneTileIcon ? OFFZONE_TILE_ICON_TEXTURE_KEY : "";
                     }
                     if (TriggerTargetListContains(volume.TargetKeys, MT_SUBTYPE_UNKNOWN)) {
-                        return TriggerVisualizer::Trigger::UI::IsTileIconEnabledForSubtype(MT_SUBTYPE_UNKNOWN) ?
+                        return TriggerVisualizer::Trigger::Ui::IsTileIconEnabledForSubtype(MT_SUBTYPE_UNKNOWN) ?
                             MISSING_TILE_ICON_TEXTURE_KEY : "";
                     }
                     if (volume.Source != TRIGGER_SOURCE_MEDIATRACKER) return "";

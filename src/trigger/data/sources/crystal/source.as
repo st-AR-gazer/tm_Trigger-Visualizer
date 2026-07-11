@@ -376,10 +376,7 @@ namespace TriggerVisualizer {
                     uint mergedCount = mergedFinish.Length;
                     if (mergedCount == 0) return;
 
-                    source.TriggerVolumes.Resize(0);
-                    for (uint i = 0; i < passthrough.Length; i++) {
-                        source.TriggerVolumes.InsertLast(passthrough[i]);
-                    }
+                    source.TriggerVolumes = passthrough;
                     for (uint i = 0; i < mergedFinish.Length; i++) {
                         if (mergedFinish[i] is null) continue;
                         mergedFinish[i].SourceIndex = source.TriggerVolumes.Length;
@@ -400,7 +397,7 @@ namespace TriggerVisualizer {
                 void AddCrystalFinalCountsDiagnostic(TriggerSourceSnapshot@ source) {
                     if (source is null) return;
                     uint expandableVolumeCount = CountCrystalExpandableVolumes(source);
-                    string countsDiagnostic = "Counts: blocks " + tostring(source.RawBlockCount) + ", baked blocks " + tostring(source.RawBakedBlockCount) + ", anchored objects " + tostring(source.RawAnchoredObjectCount) + ", candidate shapes " + tostring(source.CandidateShapeCount) + ", readable shapes " + tostring(source.ReadableShapeCount) + ", unsupported/null shapes " + tostring(source.UnsupportedShapeCount) + ", rendered shapes " + tostring(source.RenderedShapeCount) + ", rejected shapes " + tostring(source.RejectedShapeCount) + ", trigger volumes " + tostring(source.TriggerVolumeCount()) + ", expandable volumes " + tostring(expandableVolumeCount);
+                    string countsDiagnostic = "Counts: blocks " + tostring(source.RawBlockCount) + ", baked blocks " + tostring(source.RawBakedBlockCount) + ", anchored objects " + tostring(source.RawAnchoredObjectCount) + ", candidate shapes " + tostring(source.CandidateShapeCount) + ", readable shapes " + tostring(source.ReadableShapeCount) + ", unsupported/null shapes " + tostring(source.UnsupportedShapeCount) + ", rendered shapes " + tostring(source.RenderedShapeCount) + ", rejected shapes " + tostring(source.RejectedShapeCount) + ", trigger volumes " + tostring(source.TriggerVolumes.Length) + ", expandable volumes " + tostring(expandableVolumeCount);
                     AddCrystalDiagnostic(
                         source,
                         countsDiagnostic
@@ -529,7 +526,7 @@ namespace TriggerVisualizer {
                     if (ctx is null || !ctx.HasMap || ctx.RootMap is null || !enabled) return source;
 
                     uint frameStart = Time::Now;
-                    bool customOnly = TriggerVisualizer::Trigger::UI::IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(ctx);
+                    bool customOnly = TriggerVisualizer::Trigger::Ui::IsCrystalCustomItemsAndBlockItemsOnlyForRuntime(ctx);
                     ProbeCrystalAnchoredObjects(source, ctx.RootMap, customOnly);
                     frameStart = CrystalSourceBuildCheckpoint(frameStart);
                     if (customOnly) {
@@ -543,7 +540,7 @@ namespace TriggerVisualizer {
                         ProbeCrystalExpandableBlockUnitTriggers(
                             source,
                             ctx.RootMap,
-                            TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes
+                            TriggerVisualizer::Trigger::Ui::S_MergeAdjacentTriggerVolumes
                         );
                         frameStart = CrystalSourceBuildCheckpoint(frameStart);
                         ProbeCrystalBlocks(source, ctx.RootMap);
@@ -551,7 +548,7 @@ namespace TriggerVisualizer {
                     }
                     MergeCrystalExpandableFinishWaypointVolumes(
                         source,
-                        TriggerVisualizer::Trigger::UI::S_MergeAdjacentTriggerVolumes
+                        TriggerVisualizer::Trigger::Ui::S_MergeAdjacentTriggerVolumes
                     );
                     frameStart = CrystalSourceBuildCheckpoint(frameStart);
                     AddCrystalFinalCountsDiagnostic(source);

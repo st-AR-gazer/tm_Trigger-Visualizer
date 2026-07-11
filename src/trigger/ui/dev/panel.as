@@ -1,6 +1,6 @@
 namespace TriggerVisualizer {
     namespace Trigger {
-        namespace UI {
+        namespace Ui {
             namespace Dev {
                 string OnOff(bool value) {
                     return value ? "On" : "Off";
@@ -11,9 +11,9 @@ namespace TriggerVisualizer {
                 }
 
                 void RenderSourceDiagnostics(const TriggerSourceSnapshot@ source, uint sourceIndex) {
-                    if (source is null || source.DiagnosticCount() == 0) return;
+                    if (source is null || source.Diagnostics.Length == 0) return;
 
-                    if (UI::TreeNode("Diagnostics (" + source.DiagnosticCount() + ")##trigger-source-diags-" + sourceIndex)) {
+                    if (UI::TreeNode("Diagnostics (" + source.Diagnostics.Length + ")##trigger-source-diags-" + sourceIndex)) {
                         for (uint i = 0; i < source.Diagnostics.Length; i++) {
                             UI::TextWrapped(source.Diagnostics[i]);
                         }
@@ -33,8 +33,8 @@ namespace TriggerVisualizer {
                         UI::Text("    world y anchor " + Text::Format("%.2f", source.GridSpec.WorldYAnchor));
                         UI::Text("    anchor source " + source.GridSpec.WorldYAnchorSource);
                     }
-                    if (source.MediaTrackerClipTriggerCount() == 0) return;
-                    if (!UI::TreeNode("MediaTracker Clip Triggers (" + source.MediaTrackerClipTriggerCount() + ")##trigger-source-mt-clips-" + sourceIndex)) return;
+                    if (source.MediaTrackerClipTriggers.Length == 0) return;
+                    if (!UI::TreeNode("MediaTracker Clip Triggers (" + source.MediaTrackerClipTriggers.Length + ")##trigger-source-mt-clips-" + sourceIndex)) return;
 
                     for (uint i = 0; i < source.MediaTrackerClipTriggers.Length; i++) {
                         auto trigger = source.MediaTrackerClipTriggers[i];
@@ -98,57 +98,57 @@ namespace TriggerVisualizer {
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Map UID", ctx.HasMapUid() ? ctx.MapUid : "<none>"));
                     UI::Separator();
                     UI::Text("Render Settings");
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("World Render", OnOff(UI::S_RenderWorld)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline", OnOff(UI::S_ShowOutline)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill", OnOff(UI::S_ShowFill)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Labels", OnOff(UI::S_ShowLabels)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Distance Profile", UI::GetDistanceSettingsContextLabel(UI::GetDistanceSettingsContextForRuntime(ctx))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Render Distance", UI::GetRenderDistanceWorldForRuntime(ctx).ToString() + " m"));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("World Render", OnOff(TriggerVisualizer::Trigger::Ui::S_RenderWorld)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline", OnOff(TriggerVisualizer::Trigger::Ui::S_ShowOutline)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill", OnOff(TriggerVisualizer::Trigger::Ui::S_ShowFill)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Labels", OnOff(TriggerVisualizer::Trigger::Ui::S_ShowLabels)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Distance Profile", TriggerVisualizer::Trigger::Ui::GetDistanceSettingsContextLabel(TriggerVisualizer::Trigger::Ui::GetDistanceSettingsContextForRuntime(ctx))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Render Distance", TriggerVisualizer::Trigger::Ui::GetRenderDistanceWorldForRuntime(ctx).ToString() + " m"));
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Effective Distance", TriggerVisualizer::Trigger::Render::GetEffectiveRenderDistanceWorld().ToString() + " m"));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fade Band", UI::GetRenderFadeBandWorldForRuntime(ctx).ToString() + " m"));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Area", UI::GetRuntimeAreaLabel(ctx)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Source", UI::GetRenderProximityModeLabel(UI::GetRenderProximityModeForRuntime(ctx))));
-                    int sourceContext = UI::GetSourceSettingsContextForRuntime(ctx);
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Source Profile", UI::GetSourceSettingsContextLabel(sourceContext)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Source", OnOff(UI::IsOffzoneSourceEnabledForContext(sourceContext))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Effective", OnOff(UI::IsOffzoneSourceEnabledForRuntime(ctx))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Source", OnOff(UI::IsMediaTrackerSourceEnabledForContext(sourceContext))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Effective", OnOff(UI::IsMediaTrackerSourceEnabledForRuntime(ctx))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Crystal Source", OnOff(UI::IsCrystalSourceEnabledForContext(sourceContext))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Crystal Effective", OnOff(UI::IsCrystalSourceEnabledForRuntime(ctx))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fade Band", TriggerVisualizer::Trigger::Ui::GetRenderFadeBandWorldForRuntime(ctx).ToString() + " m"));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Area", TriggerVisualizer::Trigger::Ui::GetRuntimeAreaLabel(ctx)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Proximity Source", TriggerVisualizer::Trigger::Ui::GetRenderProximityModeLabel(TriggerVisualizer::Trigger::Ui::GetRenderProximityModeForRuntime(ctx))));
+                    int sourceContext = TriggerVisualizer::Trigger::Ui::GetSourceSettingsContextForRuntime(ctx);
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Source Profile", TriggerVisualizer::Trigger::Ui::GetSourceSettingsContextLabel(sourceContext)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Source", OnOff(TriggerVisualizer::Trigger::Ui::IsOffzoneSourceEnabledForContext(sourceContext))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Effective", OnOff(TriggerVisualizer::Trigger::Ui::IsOffzoneSourceEnabledForRuntime(ctx))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Source", OnOff(TriggerVisualizer::Trigger::Ui::IsMediaTrackerSourceEnabledForContext(sourceContext))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Effective", OnOff(TriggerVisualizer::Trigger::Ui::IsMediaTrackerSourceEnabledForRuntime(ctx))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Crystal Source", OnOff(TriggerVisualizer::Trigger::Ui::IsCrystalSourceEnabledForContext(sourceContext))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Crystal Effective", OnOff(TriggerVisualizer::Trigger::Ui::IsCrystalSourceEnabledForRuntime(ctx))));
                     if (TriggerVisualizer::Shared::StyledButton("Refresh Crystal Cache##trigger-dev-refresh-crystal")) {
                         TriggerVisualizer::Trigger::RefreshCrystalSourceCache();
                     }
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Use Map Distance", OnOff(UI::UseMapSuggestedDrawDistanceForRuntime(ctx))));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Respect Suggest Off", OnOff(UI::S_RespectMapSuggestOff)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Color Source", UI::GetColorSourceLabel(UI::S_ColorSource)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Base Color", UI::S_BaseTriggerColor.ToString()));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Distance Tint", OnOff(UI::S_EnableDistanceFadeColor) + " " + UI::S_DistanceFadeColor.ToString()));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Split Tint", OnOff(UI::S_EnableLineSplitDensityColor) + " " + UI::S_DenseLineSplitColor.ToString()));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Segment Colors", OnOff(UI::S_RandomOutlineSegmentColors)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Tile Colors", OnOff(UI::S_RandomFillTileColors)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Tile Icons", OnOff(UI::S_ShowSkullTileIcons)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Skull Icon Scale", Text::Format("%.2f", UI::S_SkullTileIconScale)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culling System", OnOff(UI::S_PerformanceCullingEnabled)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offscreen Tile Culling", OnOff(UI::ShouldCullOffscreenWorldTiles())));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Refresh System", OnOff(UI::S_PerformanceRefreshEnabled)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Editor Refresh", tostring(UI::S_OffzoneEditorRefreshIntervalMs) + " ms"));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MT Editor Refresh", tostring(UI::S_MediaTrackerEditorRefreshIntervalMs) + " ms"));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Render Skip", OnOff(UI::S_FastDrivingPerformanceMode)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Skip Forward", Text::Format("%.1f km/h", UI::GetFastDrivingForwardSpeedThresholdKmh())));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Skip Reverse", Text::Format("%.1f km/h", UI::GetFastDrivingReverseSpeedThresholdKmh())));
-                    UI::TextWrapped("Speed Kept Targets: " + (UI::S_SpeedRenderKeepTargetKeys.Length > 0 ? UI::S_SpeedRenderKeepTargetKeys : "<none>"));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Alpha", Text::Format("%.2f", UI::S_OutlineAlpha)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Alpha", Text::Format("%.2f", UI::S_FillAlpha)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Width", Text::Format("%.1f px", UI::S_OutlineWidth)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Index", OnOff(UI::S_LabelShowIndex)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Raw Range", OnOff(UI::S_LabelShowRawRange)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label World Size", OnOff(UI::S_LabelShowWorldSize)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Island", OnOff(UI::S_LabelShowIslandIndex)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Source Prefix", OnOff(UI::S_LabelShowSourcePrefix)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Detected Overwrite", OnOff(UI::S_LabelUseDetectedTriggerName)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Detected Extra", OnOff(UI::S_LabelShowDetectedTriggerName)));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Font Size", Text::Format("%.1f", UI::S_LabelFontSize)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Use Map Distance", OnOff(TriggerVisualizer::Trigger::Ui::UseMapSuggestedDrawDistanceForRuntime(ctx))));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Respect Suggest Off", OnOff(TriggerVisualizer::Trigger::Ui::S_RespectMapSuggestOff)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Color Source", TriggerVisualizer::Trigger::Ui::GetColorSourceLabel(TriggerVisualizer::Trigger::Ui::S_ColorSource)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Base Color", TriggerVisualizer::Trigger::Ui::S_BaseTriggerColor.ToString()));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Distance Tint", OnOff(TriggerVisualizer::Trigger::Ui::S_EnableDistanceFadeColor) + " " + TriggerVisualizer::Trigger::Ui::S_DistanceFadeColor.ToString()));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Split Tint", OnOff(TriggerVisualizer::Trigger::Ui::S_EnableLineSplitDensityColor) + " " + TriggerVisualizer::Trigger::Ui::S_DenseLineSplitColor.ToString()));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Segment Colors", OnOff(TriggerVisualizer::Trigger::Ui::S_RandomOutlineSegmentColors)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Random Tile Colors", OnOff(TriggerVisualizer::Trigger::Ui::S_RandomFillTileColors)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Tile Icons", OnOff(TriggerVisualizer::Trigger::Ui::S_ShowSkullTileIcons)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Skull Icon Scale", Text::Format("%.2f", TriggerVisualizer::Trigger::Ui::S_SkullTileIconScale)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Culling System", OnOff(TriggerVisualizer::Trigger::Ui::S_PerformanceCullingEnabled)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offscreen Tile Culling", OnOff(TriggerVisualizer::Trigger::Ui::ShouldCullOffscreenWorldTiles())));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Refresh System", OnOff(TriggerVisualizer::Trigger::Ui::S_PerformanceRefreshEnabled)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Editor Refresh", tostring(TriggerVisualizer::Trigger::Ui::S_OffzoneEditorRefreshIntervalMs) + " ms"));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("MediaTracker Editor Refresh", tostring(TriggerVisualizer::Trigger::Ui::S_MediaTrackerEditorRefreshIntervalMs) + " ms"));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Render Skip", OnOff(TriggerVisualizer::Trigger::Ui::S_FastDrivingPerformanceMode)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Skip Forward", Text::Format("%.1f km/h", TriggerVisualizer::Trigger::Ui::GetFastDrivingForwardSpeedThresholdKmh())));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Speed Skip Reverse", Text::Format("%.1f km/h", TriggerVisualizer::Trigger::Ui::GetFastDrivingReverseSpeedThresholdKmh())));
+                    UI::TextWrapped("Speed Kept Targets: " + (TriggerVisualizer::Trigger::Ui::S_SpeedRenderKeepTargetKeys.Length > 0 ? TriggerVisualizer::Trigger::Ui::S_SpeedRenderKeepTargetKeys : "<none>"));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Alpha", Text::Format("%.2f", TriggerVisualizer::Trigger::Ui::S_OutlineAlpha)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Alpha", Text::Format("%.2f", TriggerVisualizer::Trigger::Ui::S_FillAlpha)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Width", Text::Format("%.1f px", TriggerVisualizer::Trigger::Ui::S_OutlineWidth)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Index", OnOff(TriggerVisualizer::Trigger::Ui::S_LabelShowIndex)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Raw Range", OnOff(TriggerVisualizer::Trigger::Ui::S_LabelShowRawRange)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label World Size", OnOff(TriggerVisualizer::Trigger::Ui::S_LabelShowWorldSize)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Island", OnOff(TriggerVisualizer::Trigger::Ui::S_LabelShowIslandIndex)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Source Prefix", OnOff(TriggerVisualizer::Trigger::Ui::S_LabelShowSourcePrefix)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Detected Overwrite", OnOff(TriggerVisualizer::Trigger::Ui::S_LabelUseDetectedTriggerName)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Detected Extra", OnOff(TriggerVisualizer::Trigger::Ui::S_LabelShowDetectedTriggerName)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Label Font Size", Text::Format("%.1f", TriggerVisualizer::Trigger::Ui::S_LabelFontSize)));
                     if (ctx.HasMap) {
                         vec3 cameraPos = Camera::GetCurrentPosition();
                         auto proximityState = TriggerVisualizer::Trigger::Data::GetProximityReferenceState(ctx);
@@ -213,7 +213,7 @@ namespace TriggerVisualizer {
                             UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Faces", tostring(fillFaceCount)));
                             UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Fill Tiles", tostring(fillTileCount)));
                             UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Visible Labels", tostring(labelCount)));
-                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Adaptive Splitting", OnOff(UI::S_AdaptiveLineSplitting)));
+                            UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Adaptive Splitting", OnOff(TriggerVisualizer::Trigger::Ui::S_AdaptiveLineSplitting)));
                             UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Outline Segments", tostring(outlineSegmentCount)));
                             UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Max Edge Segments", tostring(maxEdgeSegments)));
 
@@ -276,16 +276,16 @@ namespace TriggerVisualizer {
                         }
                     }
                     UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Trigger Size", snapshot.RawTriggerSize.ToString()));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Source Count", tostring(snapshot.SourceCount())));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Raw Count", tostring(snapshot.OffzoneCount())));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Trigger Volume Count", tostring(snapshot.TriggerVolumeCount())));
-                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Buffer Ptr", Text::Format("0x%08x", snapshot.RawBufferPtr)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Source Count", tostring(snapshot.Sources.Length)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Offzone Raw Count", tostring(snapshot.RawRanges.Length)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Trigger Volume Count", tostring(snapshot.TriggerVolumes.Length)));
+                    UI::Text(TriggerVisualizer::Shared::FormatStatusLine("Buffer Ptr", Text::FormatPointer(snapshot.RawBufferPtr)));
                     if (snapshot.Sources.Length > 0 && UI::TreeNode("Trigger Sources (" + snapshot.Sources.Length + ")##trigger-sources")) {
                         for (uint i = 0; i < snapshot.Sources.Length; i++) {
                             auto source = snapshot.Sources[i];
                             if (source is null) continue;
                             UI::Text(source.Name + ": " + OnOff(source.Enabled));
-                            UI::Text("    raw ranges " + source.RawRangeCount() + " | volumes " + source.TriggerVolumeCount());
+                            UI::Text("    raw ranges " + source.RawRanges.Length + " | volumes " + source.TriggerVolumes.Length);
                             RenderMediaTrackerClipTriggerProbe(source, i);
                             RenderSourceDiagnostics(source, i);
                         }

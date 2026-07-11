@@ -25,14 +25,11 @@ namespace TriggerVisualizer {
                     probe.OwnerName = ownerName;
                     probe.ShapeKind = shapeKind;
                     probe.Detail = detail;
-                    probe.HasSurface = true;
-                    probe.SurfaceKind = CrystalSurfaceKind(surface);
                     string gameplayDetail = CrystalSurfaceGameplayDetail(surface);
                     if (gameplayDetail.Length > 0) {
                         probe.Detail = probe.Detail.Length > 0 ? probe.Detail + " | " + gameplayDetail : gameplayDetail;
                     }
                     GmSurf@ surf = surface.m_GmSurf;
-                    probe.HasGmSurf = surf !is null;
                     if (surf is null) {
                         probe.Warning = "CPlugSurface has no m_GmSurf.";
                         source.UnsupportedShapeCount++;
@@ -308,6 +305,10 @@ namespace TriggerVisualizer {
                     try {
                         @fid = GetFidFromNod(nod);
                     } catch {
+                        logging::HandledException(
+                            "CrystalNodFidText",
+                            "Node fid was not readable."
+                        );
                         @fid = null;
                     }
                     return CrystalFidFileText(fid);
@@ -366,7 +367,7 @@ namespace TriggerVisualizer {
                     if (folder is null) return "";
 
                     string text = CrystalFidsFolderNameText(folder);
-                    uint leafCount = CrystalMinUint(
+                    uint leafCount = MinUint(
                         folder.Leaves.Length,
                         MAX_CRYSTAL_MATERIAL_MODIFIER_FOLDER_LEAVES
                     );
@@ -490,6 +491,10 @@ namespace TriggerVisualizer {
                     try {
                         gameplayId = int(Dev::GetOffsetUint8(material, O_CRYSTAL_MATERIAL_GAMEPLAY_ID));
                     } catch {
+                        logging::HandledException(
+                            "TryReadCrystalMaterialGameplayId",
+                            "Material gameplay id offset read failed."
+                        );
                         gameplayId = CRYSTAL_GAMEPLAY_ID_NONE;
                         return false;
                     }
@@ -512,7 +517,7 @@ namespace TriggerVisualizer {
                     if (surface is null) return "";
 
                     string detail = "";
-                    uint materialIdCount = CrystalMinUint(
+                    uint materialIdCount = MinUint(
                         surface.MaterialIds.Length,
                         MAX_CRYSTAL_SURFACE_MATERIAL_IDS_FOR_TYPE
                     );
@@ -527,7 +532,7 @@ namespace TriggerVisualizer {
                         }
                     }
 
-                    uint materialCount = CrystalMinUint(
+                    uint materialCount = MinUint(
                         surface.Materials.Length,
                         MAX_CRYSTAL_SURFACE_MATERIAL_IDS_FOR_TYPE
                     );
@@ -572,7 +577,7 @@ namespace TriggerVisualizer {
 
                     auto mesh = cast<GmSurfMesh>(surf);
                     if (mesh !is null) {
-                        uint triCount = CrystalMinUint(mesh.m_Tris.Length, 512);
+                        uint triCount = MinUint(mesh.m_Tris.Length, 512);
                         for (uint i = 0; i < triCount; i++) {
                             next = AddCrystalGameplayIdTargetKey(next, mesh.m_Tris[i].SurfaceIds_GameplayId);
                         }
@@ -580,7 +585,7 @@ namespace TriggerVisualizer {
 
                     auto compound = cast<GmSurfCompound>(surf);
                     if (compound !is null) {
-                        uint count = CrystalMinUint(compound.Surfs.Length, MAX_CRYSTAL_COMPOUND_SURFS_FOR_BOUNDS);
+                        uint count = MinUint(compound.Surfs.Length, MAX_CRYSTAL_COMPOUND_SURFS_FOR_BOUNDS);
                         for (uint i = 0; i < count; i++) {
                             next = AddCrystalGmSurfGameplayTargetKeys(next, compound.Surfs[i], depth + 1);
                         }
@@ -597,14 +602,14 @@ namespace TriggerVisualizer {
                 string AddCrystalSurfaceGameplayTargetKeys(const string &in keys, CPlugSurface@ surface) {
                     if (surface is null) return keys;
                     string next = keys;
-                    uint materialIdCount = CrystalMinUint(
+                    uint materialIdCount = MinUint(
                         surface.MaterialIds.Length,
                         MAX_CRYSTAL_SURFACE_MATERIAL_IDS_FOR_TYPE
                     );
                     for (uint i = 0; i < materialIdCount; i++) {
                         next = AddCrystalGameplayIdTargetKey(next, surface.MaterialIds[i].GameplayId);
                     }
-                    uint materialCount = CrystalMinUint(
+                    uint materialCount = MinUint(
                         surface.Materials.Length,
                         MAX_CRYSTAL_SURFACE_MATERIAL_IDS_FOR_TYPE
                     );
